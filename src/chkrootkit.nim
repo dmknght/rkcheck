@@ -17,42 +17,46 @@ proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: po
 
 
 
-proc scanFile(scanner: ptr YR_SCANNER, compiler: ptr YR_COMPILER, fileName: string, user_data: ptr CALLBACK_ARGS, file_count, dir_count, err_count: var int) =
+proc scanFile(scanner: ptr YR_SCANNER, fileName: string, user_data: ptr CALLBACK_ARGS, file_count, err_count: var int) =
   if not fileExists(fileName):
     return
   else:
     user_data.file_path = fileName
     file_count += 1
-    discard yr_compiler_define_string_variable(compiler, "filename", fileName)
+    discard yr_rules_define_string_variable(scanner.rules, "filename", fileName)
+
+    # Print value of extenal variables in rules
+    # echo "Extern-var: ", scanner.rules.externals_list_head.identifier, " value: ", scanner.rules.externals_list_head.value.s
+
     let scan_result = yr_scanner_scan_file(scanner, fileName)
     if scan_result != ERROR_SUCCESS:
       err_count += 1
 
 
-proc scanDir(scanner: ptr YR_SCANNER, compiler: ptr YR_COMPILER, dirName: string, user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int) =
+proc scanDir(scanner: ptr YR_SCANNER, dirName: string, user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int) =
   if not dirExists(dirName):
     return
   else:
     dir_count += 1
     for path in walkDirRec(dirName):
-      scanFile(scanner, compiler, path, user_data, file_count, dir_count, err_count)
+      scanFile(scanner, path, user_data, file_count, err_count)
 
 
-proc scanDirs(scanner: ptr YR_SCANNER, compiler: ptr YR_COMPILER, dirNames: seq[string], user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int) =
+proc scanDirs(scanner: ptr YR_SCANNER, dirNames: seq[string], user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int) =
   for dir in dirNames:
-    scanDir(scanner, compiler, dir, user_data, file_count, dir_count, err_count)
+    scanDir(scanner, dir, user_data, file_count, dir_count, err_count)
 
 
-proc handle_scan(scanner: ptr YR_SCANNER, compiler: ptr YR_COMPILER, fileOrDirName: string, user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int, mode: int) =
+proc handle_scan(scanner: ptr YR_SCANNER, fileOrDirName: string, user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int, mode: int) =
   if mode == 0:
-    scanFile(scanner, compiler, fileOrDirName, user_data, file_count, dir_count, err_count)
+    scanFile(scanner, fileOrDirName, user_data, file_count, err_count)
   elif mode == 1:
-    scanDir(scanner, compiler, fileOrDirName, user_data, file_count, dir_count, err_count)
+    scanDir(scanner, fileOrDirName, user_data, file_count, dir_count, err_count)
 
 
-proc handle_scan(scanner: ptr YR_SCANNER, compiler: ptr YR_COMPILER, fileOrDirName: seq[string], user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int, mode: int) =
+proc handle_scan(scanner: ptr YR_SCANNER, fileOrDirName: seq[string], user_data: ptr CallbackArgs, file_count, dir_count, err_count: var int, mode: int) =
   if mode == 3:
-    scanDirs(scanner, compiler, fileOrDirName, user_data, file_count, dir_count, err_count)
+    scanDirs(scanner, fileOrDirName, user_data, file_count, dir_count, err_count)
 
 
 proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastScan: bool = false, mode=0): int =
@@ -118,7 +122,7 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
 
   yr_scanner_set_callback(scanner, callback_scan, addr(user_data))
 
-  handle_scan(scanner, compiler, fileOrDirName, addr(user_data), file_count, dir_count, err_count, mode)
+  handle_scan(scanner, fileOrDirName, addr(user_data), file_count, dir_count, err_count, mode)
 
   echo "Signatures: ", rules.num_rules
   echo "Dir scanned: ", dir_count
@@ -135,4 +139,4 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   discard yr_finalize()
 
 
-discard createScan("/tmp/sig.db", "/tmp", mode=1)
+discard createScan("/tmp/sig.db", "/tmp/testfile", mode=0)
