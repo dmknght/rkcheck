@@ -23,7 +23,12 @@ proc scanFile(scanner: ptr YR_SCANNER, fileName: string, user_data: ptr CALLBACK
   else:
     user_data.file_path = fileName
     file_count += 1
-    discard yr_rules_define_string_variable(scanner.rules, "filename", fileName)
+    let meta_file_name = splitFile(fileName)
+
+    discard yr_rules_define_string_variable(scanner.rules, "file_path", fileName)
+    discard yr_rules_define_string_variable(scanner.rules, "file_name", meta_file_name.name)
+    discard yr_rules_define_string_variable(scanner.rules, "file_dir", meta_file_name.dir)
+    discard yr_rules_define_string_variable(scanner.rules, "file_ext", meta_file_name.ext)
 
     # Print value of extenal variables in rules
     # echo "Extern-var: ", scanner.rules.externals_list_head.identifier, " value: ", scanner.rules.externals_list_head.value.s
