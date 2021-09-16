@@ -12,7 +12,7 @@ proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: po
   if message == CALLBACK_MSG_RULE_MATCHING:
     let rule = cast[ptr YR_RULE](message_data)
     cast[ptr CALLBACK_ARGS](user_data).current_count += 1
-    echo "Detected:\n  ", rule.identifier, "\n  ", cast[ptr CALLBACK_ARGS](user_data).file_path
+    echo "Detected:\n  Rule: ", rule.identifier, "\n  Path: ", cast[ptr CALLBACK_ARGS](user_data).file_path
   return CALLBACK_CONTINUE
 
 
