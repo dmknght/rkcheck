@@ -33,6 +33,43 @@ rule Metasploit_Payload_Staged {
     )
 }
 
+rule Linux_Mirai_1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
+    )
+}
+
+rule Linux_Mirai_2 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Detect some Mirai's variants (named by ClamAV) using section hash"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1"
+    )
+}
+
+rule Linux_Mirai_3 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
+    )
+}
+
 rule HiDrootkit {
   meta:
     author = "Nong Hoang Tu"
