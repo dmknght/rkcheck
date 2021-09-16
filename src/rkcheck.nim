@@ -8,6 +8,9 @@ type
     current_count*: int
 
 
+const MAX_FILE_SIZE = 1024 * 1024 * 10 # 10 mb?
+
+
 proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   if message == CALLBACK_MSG_RULE_MATCHING:
     let rule = cast[ptr YR_RULE](message_data)
@@ -20,6 +23,9 @@ proc scanFile(rules: ptr YR_RULES, fileName: string, user_data: ptr CALLBACK_ARG
   if not fileExists(fileName):
     return
   else:
+    # Don't scan if file is too big
+    if getFileSize(fileName) > MAX_FILE_SIZE:
+      return
     user_data.file_path = fileName
     file_count += 1
     let meta_file_name = splitFile(fileName)
@@ -122,4 +128,4 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   discard yr_finalize()
 
 
-discard createScan("/tmp/sig.db", "/tmp/testfile", mode=0)
+discard createScan("/tmp/sig.db", "/tmp/", mode=1)
