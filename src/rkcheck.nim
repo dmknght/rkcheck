@@ -31,7 +31,7 @@ proc scanFile(rules: ptr YR_RULES, fileName: string, user_data: ptr CALLBACK_ARG
     discard yr_rules_define_string_variable(rules, "file_ext", meta_file_name.ext)
 
     # Print value of extenal variables in rules
-    echo "Extern-var: ", rules.externals_list_head.identifier, " value: ", rules.externals_list_head.value.s
+    # echo "Extern-var: ", rules.externals_list_head.identifier, " value: ", rules.externals_list_head.value.s
 
     let scan_result = yr_rules_scan_file(rules, fileName, 0, callback_scan, user_data, 1000000)
     if scan_result != ERROR_SUCCESS:
