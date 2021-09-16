@@ -66,6 +66,7 @@ proc handle_scan(rules: ptr YR_RULES, fileOrDirName: seq[string], user_data: ptr
     scanDirs(rules, fileOrDirName, user_data, file_count, dir_count, err_count)
 
 
+# FIXME the fileOrDirName seems doesn't work for the seq. Need to fix later
 proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastScan: bool = false, mode=0): int =
   #[
     Scan mode:
@@ -128,4 +129,4 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   discard yr_finalize()
 
 
-discard createScan("/tmp/sig.db", "/tmp/", mode=1)
+discard createScan("database/quick_signatures.ydb", "/tmp/", mode=1)
