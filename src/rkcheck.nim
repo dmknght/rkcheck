@@ -16,7 +16,6 @@ proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: po
   return CALLBACK_CONTINUE
 
 
-
 proc scanFile(rules: ptr YR_RULES, fileName: string, user_data: ptr CALLBACK_ARGS, file_count, err_count: var int) =
   if not fileExists(fileName):
     return
@@ -29,9 +28,6 @@ proc scanFile(rules: ptr YR_RULES, fileName: string, user_data: ptr CALLBACK_ARG
     discard yr_rules_define_string_variable(rules, "file_name", meta_file_name.name)
     discard yr_rules_define_string_variable(rules, "file_dir", meta_file_name.dir)
     discard yr_rules_define_string_variable(rules, "file_ext", meta_file_name.ext)
-
-    # Print value of extenal variables in rules
-    # echo "Extern-var: ", rules.externals_list_head.identifier, " value: ", rules.externals_list_head.value.s
 
     let scan_result = yr_rules_scan_file(rules, fileName, 0, callback_scan, user_data, 1000000)
     if scan_result != ERROR_SUCCESS:
@@ -72,23 +68,17 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
       2. Dirs
   ]#
   var
-    # compiler: ptr YR_COMPILER
     rules: ptr YR_RULES
-    # scanner: ptr YR_SCANNER
     user_data = CALLBACK_ARGS(filePath: fileORDirName, current_count: 0)
     file_count, dir_count, err_count = 0
   let
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
-    # timeout = 1000000
-    # flags = 0
 
   result = yr_initialize()
 
   if result != ERROR_SUCCESS:
     return result
-  # if yr_compiler_create(addr(compiler)) != ERROR_SUCCESS:
-  #   return -1
 
   # LOAD DB FROM COMPILED DB. (yr_scanner_create is for text file rules so we don't use it)
   result = yr_rules_load(dbPath, addr(rules))
@@ -115,17 +105,9 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   discard yr_set_configuration(YR_CONFIG_STACK_SIZE, unsafeAddr(stack_size))
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, unsafeAddr(max_strings_per_rule))
 
-  # INIT SCANNER
-  # result = yr_scanner_create(rules, addr(scanner))
-
-  # yr_scanner_set_flags(scanner, cast[cint](flags))
-  # yr_scanner_set_timeout(scanner, cast[cint](timeout))
-
   if result != ERROR_SUCCESS:
     echo "create_scanner_error"
     return -7
-
-  # yr_scanner_set_callback(scanner, callback_scan, addr(user_data))
 
   handle_scan(rules, fileOrDirName, addr(user_data), file_count, dir_count, err_count, mode)
 
@@ -135,10 +117,6 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   echo "Error: ", err_count
   echo "Infected: ", user_data.current_count
 
-  # if scanner != nil:
-  #   yr_scanner_destroy(scanner)
-  # if compiler != nil:
-  #   yr_compiler_destroy(compiler)
   if rules != nil:
     discard yr_rules_destroy(rules)
   discard yr_finalize()
