@@ -3,6 +3,9 @@ Generate yara rules from ossec config file
 https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf
 NOTE: This script doesn't handle syntax problem in file name which converts to rules.
 Developer must edit rule names manually
+Usage:
+  1. Put python file to same folder of ossec rule
+  2. Change file name to config file (in python code) and run with python3
 """
 
 import json
