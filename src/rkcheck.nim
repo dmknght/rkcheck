@@ -9,6 +9,18 @@ type
 
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10 # 10 mb?
+const collection_path = "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/"
+
+
+proc on_detected(file_path: string) =
+  #[
+    Move file to other place
+    This is for debugging only
+  ]#
+  let file_name = splitPath(file_path).tail
+  if not dirExists(collection_path):
+    createDir(collection_path)
+  moveFile(file_path, collection_path & file_name)
 
 
 proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -16,6 +28,7 @@ proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: po
     let rule = cast[ptr YR_RULE](message_data)
     cast[ptr CALLBACK_ARGS](user_data).current_count += 1
     echo "Detected:\n  Rule: ", rule.identifier, "\n  Path: ", cast[ptr CALLBACK_ARGS](user_data).file_path
+    # on_detected(cast[ptr CALLBACK_ARGS](user_data).file_path)
   return CALLBACK_CONTINUE
 
 
@@ -129,4 +142,4 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   discard yr_finalize()
 
 
-discard createScan("database/quick_signatures.ydb", "/tmp/", mode=1)
+discard createScan("database/quick_signatures.ydb", "/home/dmknght/Desktop/MalwareLab/Linux-Malware-Samples/", mode=1)
