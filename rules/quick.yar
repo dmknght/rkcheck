@@ -670,10 +670,31 @@ rule coin_miner_1
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Unknow malware signature. Detected Multios.Coinminer.Miner-6781728-2 (ClamAV)"
+    description = "Detected Multios.Coinminer.Miner-6781728-2 (ClamAV)"
+    /*
+      There are some interesting strings in section .rodata Maybe write it as other signatures?
+        $1 = "/dev/null"
+        $2 = "/proc/self/exe"
+        $3 = "/bin/sh"
+        $4 = "/dev/urandom"
+    */
   condition:
-    uint32(0) == 0x464c457f and
+    is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "d2c0aaec378884e0d4eef2d3bb1db8fc"
+    )
+}
+
+
+rule Linux_trojan_golang_1
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux Trojan written in Golang. https://www.virustotal.com/gui/file/751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "dfd54f22d3a3bb072d34c424aa554500"
     )
 }
