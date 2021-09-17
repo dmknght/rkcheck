@@ -450,7 +450,7 @@ rule lion_worm {
     file_path == "/dev/.lib" or file_path == "/dev/.lib/1iOn.sh" or file_path == "/bin/mjy" or file_path == "/bin/in.telnetd" or file_path == "/usr/info/torn"
 }
 
-rule suspicious_file {
+rule suspicious_files {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -611,11 +611,16 @@ rule monkit_found {
 }
 
 rule t0rn_rootkit {
+  /*
+    TODO add more signatures using analysis url and chkrootkit version
+    THIS KIT WILL REPLACE SYSTEM FILES WITH TROJANIZED VERSION. NEED TO VERIFY THEM AS WELL
+  */
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Automation Yara rule generated from ossec-rootkit.conf"
     url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
+    analysis_url = "https://www.f-secure.com/v-descs/torn.shtml"
   condition:
     file_path == "/usr/src/.puta" or file_path == "/usr/info/.t0rn" or file_path == "/lib/ldlib.tk" or file_path == "/etc/ttyhash" or file_path == "/sbin/xlogin"
 }
@@ -658,4 +663,17 @@ rule reptile_rootkit {
     url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
   condition:
     file_path == "/reptile/reptile_cmd" or file_path == "/lib/udev/reptile"
+}
+
+rule coin_miner_1
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Unknow malware signature. Detected Multios.Coinminer.Miner-6781728-2 (ClamAV)"
+  condition:
+    uint32(0) == 0x464c457f and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "d2c0aaec378884e0d4eef2d3bb1db8fc"
+    )
 }
