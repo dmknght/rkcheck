@@ -742,3 +742,16 @@ rule Trojan_Python_1
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "196b7c3bdcb1a697395053b23b25abce"
     )
 }
+
+rule Coin_Miner_3
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "XMRMiner"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "15c48a37f52d016088f1bef13996d4cf"
+    )
+}
