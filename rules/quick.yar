@@ -665,7 +665,7 @@ rule reptile_rootkit {
     file_path == "/reptile/reptile_cmd" or file_path == "/lib/udev/reptile"
 }
 
-rule coin_miner_1
+rule Coin_miner_1
 {
   meta:
     author = "Nong Hoang Tu"
@@ -686,7 +686,7 @@ rule coin_miner_1
 }
 
 
-rule Linux_trojan_golang_1
+rule Trojan_golang_1
 {
   meta:
     author = "Nong Hoang Tu"
@@ -696,5 +696,19 @@ rule Linux_trojan_golang_1
     is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "dfd54f22d3a3bb072d34c424aa554500"
+    )
+}
+
+
+rule Coin_miner_2
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux coin miner https://www.virustotal.com/gui/file/0b1c49ec2d53c4af21a51a34d9aa91e76195ceb442480468685418ba8ece1ba6"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "639b1b0a43f34ed06028d6fd9214135a"
     )
 }
