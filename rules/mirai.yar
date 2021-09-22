@@ -3,7 +3,7 @@ import "hash"
 include "commons.yar"
 
 
-rule Linux_Mirai_1 {
+rule Botnet_Mirai_1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -15,7 +15,7 @@ rule Linux_Mirai_1 {
     )
 }
 
-rule Linux_Mirai_2 {
+rule Botnet_Mirai_2 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -27,7 +27,7 @@ rule Linux_Mirai_2 {
     )
 }
 
-rule Linux_Mirai_3 {
+rule Botnet_Mirai_Variant_Gafgyt {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -40,7 +40,7 @@ rule Linux_Mirai_3 {
     )
 }
 
-rule Linux_Mirai_Variant_Tsunami
+rule Botnet_Mirai_Variant_Tsunami
 {
   meta:
     author = "Nong Hoang Tu"
