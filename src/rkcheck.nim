@@ -28,6 +28,8 @@ proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: po
     let rule = cast[ptr YR_RULE](message_data)
     cast[ptr CALLBACK_ARGS](user_data).current_count += 1
     echo "Detected:\n  Rule: ", rule.identifier, "\n  Path: ", cast[ptr CALLBACK_ARGS](user_data).file_path
+    # Skip if rules are matched
+    return CALLBACK_ABORT
     # on_detected(cast[ptr CALLBACK_ARGS](user_data).file_path)
   return CALLBACK_CONTINUE
 
