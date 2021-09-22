@@ -48,4 +48,7 @@ proc compile_rules(src, dst: string) =
 if not dirExists("database"):
   createDir("database")
 
-compile_rules("rules/quick.yar", "database/quick_signatures.ydb")
+compile_rules("rules/rootkit.yar", "database/rootkit.ydb")
+compile_rules("rules/trojan.yar", "database/trojan.ydb")
+compile_rules("rules/coin_miner.yar", "database/coin_miner.ydb")
+compile_rules("rules/botnet.yar", "database/botnet.ydb")
