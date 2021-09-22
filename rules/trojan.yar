@@ -3,16 +3,28 @@ import "hash"
 include "commons.yar"
 
 
-rule Trojan_3
+// rule Trojan_3
+// {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Linux Trojan. Some AV vendors can't detect. https://www.virustotal.com/gui/file/6469fcee5ede17375b74557cdd18ef6335c517a4cccfff86288f07ff1761eaa7"
+//   condition:
+//     is_elf and
+//     for any i in (0 .. elf.number_of_sections - 1): (
+//       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "bbe7d25b87e2b810db57b6d532b10d09"
+//     )
+// }
+
+rule Heur_Shellcode_Executor
 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Linux Trojan. Some AV vendors can't detect. https://www.virustotal.com/gui/file/6469fcee5ede17375b74557cdd18ef6335c517a4cccfff86288f07ff1761eaa7"
+    description = "Try to detect shellcode executor by exported \"shellcode\" string"
   condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "bbe7d25b87e2b810db57b6d532b10d09"
+    is_elf and for any i in (0 .. elf.symtab_entries - 1): (
+      elf.symtab[i].name == "shellcode" and elf.symtab[i].type == elf.STT_OBJECT
     )
 }
 
