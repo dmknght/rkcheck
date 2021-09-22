@@ -1,6 +1,7 @@
 import "elf"
 import "hash"
-include "commons.yar"
+include "rules/commons.yar"
+
 
 rule bash_door {
   meta:

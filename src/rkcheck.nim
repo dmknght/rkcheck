@@ -29,7 +29,7 @@ proc callback_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: po
     cast[ptr CALLBACK_ARGS](user_data).current_count += 1
     echo "Detected:\n  Rule: ", rule.identifier, "\n  Path: ", cast[ptr CALLBACK_ARGS](user_data).file_path
     # Skip if rules are matched
-    on_detected(cast[ptr CALLBACK_ARGS](user_data).file_path)
+    # on_detected(cast[ptr CALLBACK_ARGS](user_data).file_path)
     return CALLBACK_ABORT
 
   return CALLBACK_CONTINUE
@@ -105,10 +105,7 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
 
   # LOAD DB FROM COMPILED DB. (yr_scanner_create is for text file rules so we don't use it)
   # result = yr_rules_load(dbPath, addr(rules))
-  result = yr_rules_load(dbPath & "botnet.ydb", addr(rules))
-  result = yr_rules_load(dbPath & "rootkit.ydb", addr(rules))
-  result = yr_rules_load(dbPath & "coin_miner.ydb", addr(rules))
-  result = yr_rules_load(dbPath & "trojan.ydb", addr(rules))
+  result = yr_rules_load(dbPath & "signatures.ydb", addr(rules))
 
   case result
   of ERROR_COULD_NOT_OPEN_FILE:
@@ -149,4 +146,4 @@ proc createScan*(dbPath: string, fileOrDirName: (string | seq[string]), isFastSc
   discard yr_finalize()
 
 
-discard createScan("database/", "/home/dmknght/Desktop/MalwareLab/Linux-Malware-Samples/", mode=1)
+discard createScan("database/", "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/", mode=1)

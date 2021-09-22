@@ -1,6 +1,6 @@
 import "elf"
 import "hash"
-include "commons.yar"
+include "rules/commons.yar"
 
 
 rule Coin_Miner_1

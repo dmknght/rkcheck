@@ -1,6 +1,6 @@
 import "elf"
 import "hash"
-include "commons.yar"
+include "rules/commons.yar"
 
 
 // rule Trojan_3
