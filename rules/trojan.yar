@@ -34,7 +34,7 @@ rule Trojan_Python_IRCBot
     )
 }
 
-rule Trojan_golang_1
+rule Trojan_GoLang_EzuriLoader
 {
   meta:
     author = "Nong Hoang Tu"

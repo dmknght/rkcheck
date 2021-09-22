@@ -17,21 +17,7 @@ rule Coin_miner_1
 }
 
 
-// rule Coin_miner_2
-// {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Linux coin miner https://www.virustotal.com/gui/file/0b1c49ec2d53c4af21a51a34d9aa91e76195ceb442480468685418ba8ece1ba6"
-//   condition:
-//     is_elf and
-//     for any i in (0 .. elf.number_of_sections - 1): (
-//       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "639b1b0a43f34ed06028d6fd9214135a"
-//     )
-// }
-
-
-rule Coin_Miner_3
+rule Coin_Miner_2
 {
   meta:
     author = "Nong Hoang Tu"
