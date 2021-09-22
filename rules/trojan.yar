@@ -77,3 +77,24 @@ rule custom_ssh_backdoor_server {
 	condition:
 		filesize < 10KB and 5 of them
 }
+
+rule Suspicious_ELF_NoSection {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Suspicious ELF files. File has no section and file size < 1KB. Usually see by Metasploit's stageless payloads"
+  condition:
+    elf_no_sections and filesize < 1KB
+}
+
+rule Metasploit_Payload_Staged {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Scan Metasploit's Linux staged payload by checking section hash"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
+    )
+}
