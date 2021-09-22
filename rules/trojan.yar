@@ -24,7 +24,7 @@ rule Heur_Shellcode_Executor
     description = "Try to detect shellcode executor by exported \"shellcode\" string"
   condition:
     is_elf and for any i in (0 .. elf.symtab_entries - 1): (
-      elf.symtab[i].name == "shellcode" and elf.symtab[i].type == elf.STT_OBJECT
+      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code") and elf.symtab[i].type == elf.STT_OBJECT
     )
 }
 
