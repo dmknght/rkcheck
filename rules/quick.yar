@@ -1,16 +1,6 @@
 import "elf"
 import "hash"
-
-
-private rule is_elf {
-  condition:
-    uint32(0) == 0x464c457f
-}
-
-private rule elf_no_sections {
-  condition:
-    is_elf and elf.number_of_sections == 0
-}
+include "commons.yar"
 
 rule Suspicious_ELF_NoSection {
   meta:
@@ -30,43 +20,6 @@ rule Metasploit_Payload_Staged {
     is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
-    )
-}
-
-rule Linux_Mirai_1 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
-    )
-}
-
-rule Linux_Mirai_2 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detect some Mirai's variants (named by ClamAV) using section hash"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1"
-    )
-}
-
-rule Linux_Mirai_3 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
     )
 }
 
@@ -665,109 +618,7 @@ rule reptile_rootkit {
     file_path == "/reptile/reptile_cmd" or file_path == "/lib/udev/reptile"
 }
 
-rule Coin_miner_1
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detected Multios.Coinminer.Miner-6781728-2 (ClamAV)"
-    /*
-      There are some interesting strings in section .rodata Maybe write it as other signatures?
-        $1 = "/dev/null"
-        $2 = "/proc/self/exe"
-        $3 = "/bin/sh"
-        $4 = "/dev/urandom"
-    */
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "d2c0aaec378884e0d4eef2d3bb1db8fc"
-    )
-}
 
-
-rule Trojan_golang_1
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Linux Trojan written in Golang. https://www.virustotal.com/gui/file/751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "dfd54f22d3a3bb072d34c424aa554500"
-    )
-}
-
-
-rule Coin_miner_2
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Linux coin miner https://www.virustotal.com/gui/file/0b1c49ec2d53c4af21a51a34d9aa91e76195ceb442480468685418ba8ece1ba6"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "639b1b0a43f34ed06028d6fd9214135a"
-    )
-}
-
-rule Trojan_2
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Gafgyt-Jm (Avast named) or Tsunami Botnet (FireEye and other), 1 backdoor and 1 used for Dirtycow exploit"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a7b6569072c6f43a2072b8ef906a2bf9"
-    )
-}
-
-rule Trojan_Python_1
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Python IRCBot, Unknown Trojan malware. Likely compiled from Python scripts"
-    /*
-      Hash of .shstrtab 98c978a3d9f51f870ec65edc9a224bf8 matches as well but i don't know if all files compiled from python is detected
-      as wrong behavior
-    */
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "196b7c3bdcb1a697395053b23b25abce"
-    )
-}
-
-rule Coin_Miner_3
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "XMRMiner"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "15c48a37f52d016088f1bef13996d4cf"
-    )
-}
-
-rule Trojan_3
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Linux Trojan. Some AV vendors can't detect. https://www.virustotal.com/gui/file/6469fcee5ede17375b74557cdd18ef6335c517a4cccfff86288f07ff1761eaa7"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "bbe7d25b87e2b810db57b6d532b10d09"
-    )
-}
 
 /*
 rule Android_adware
