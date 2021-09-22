@@ -2,27 +2,6 @@ import "elf"
 import "hash"
 include "commons.yar"
 
-rule Suspicious_ELF_NoSection {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Suspicious ELF files. File has no section and file size < 1KB. Usually see by Metasploit's stageless payloads"
-  condition:
-    elf_no_sections and filesize < 1KB
-}
-
-rule Metasploit_Payload_Staged {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Scan Metasploit's Linux staged payload by checking section hash"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
-    )
-}
-
 rule bash_door {
   meta:
     author = "Nong Hoang Tu"
@@ -616,47 +595,4 @@ rule reptile_rootkit {
     url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
   condition:
     file_path == "/reptile/reptile_cmd" or file_path == "/lib/udev/reptile"
-}
-
-
-
-/*
-rule Android_adware
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Linux Trojan / AdWare Android https://www.virustotal.com/gui/file/6469fcee5ede17375b74557cdd18ef6335c517a4cccfff86288f07ff1761eaa7"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b97b739a1d67923e8e302a00d0684609"
-    )
-}
-*/
-
-rule Coin_Miner_4
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Generic Coin miner"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "853dd334799573dd41e80091e65fb960"
-    )
-}
-
-rule Coin_Miner_5
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Generic Coin Miner"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "ea5f61d48cc64bcba47ed3d75ccc3e59"
-    )
 }
