@@ -88,3 +88,19 @@ rule Heur_Coin_Miner_2
   condition:
     is_elf and all of them
 }
+
+rule Heur_Coin_Miner_3
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+  strings:
+    $1 = "connecticoin.org"
+    $2 = "Connecticoin-Qt"
+  condition:
+    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+      elf.sections[i].name == ".rodata" and
+        $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+        $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
+    )
+}
