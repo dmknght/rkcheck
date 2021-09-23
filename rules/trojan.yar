@@ -16,6 +16,43 @@ include "rules/commons.yar"
 //     )
 // }
 
+rule Trojan_Agent_1
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "4b060ab45f7acc1b2959dd5969f97a45d6fecd06f311763afbb864eaea4161e4"
+    vrt_report = "https://www.virustotal.com/gui/file/4b060ab45f7acc1b2959dd5969f97a45d6fecd06f311763afbb864eaea4161e4"
+    /*
+      Uncommon imports: fexecve, syscall, getpid)
+      Uncommon strings: "pid,%d", "no_elf",
+      Code (function main):
+        uVar1 = getpid();
+        printf("pid,%d", uVar1);
+        uVar1 = syscall(0x13f, "no_elf", 1);
+        write(uVar1, 0x400988, 0x100);
+        fexecve(uVar1, &var_20h, &var_10h);
+    */
+  strings:
+    // .rodata
+    $str1 = "pid,%d"
+    $str2 = "no_elf"
+    // .dynstr
+    $import1 = "fexecve"
+    $import2 = "getpid"
+    $import3 = "syscall"
+  condition:
+    is_elf and
+      // Check import in .dynstr
+      $import1 in (elf.sections[6].offset .. elf.sections[7].offset) and
+      $import2 in (elf.sections[6].offset .. elf.sections[7].offset) and
+      $import3 in (elf.sections[6].offset .. elf.sections[7].offset)
+    and
+      // Check .rodata
+      $str1 in (elf.sections[16].offset .. elf.sections[17].offset) and
+      $str2 in (elf.sections[16].offset .. elf.sections[17].offset)
+}
+
 rule Heur_Shellcode_Executor
 {
   meta:
