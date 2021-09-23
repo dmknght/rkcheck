@@ -69,7 +69,12 @@ rule Heur_Coin_Miner
     $2 = "cryptonight/0"
     $3 = "cryptonight-monerov7"
   condition:
-    all of them
+    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+      elf.sections[i].name == ".rodata" and
+        $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+        $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+        $3 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
+    )
 }
 
 rule Heur_Coin_Miner_2
@@ -81,5 +86,5 @@ rule Heur_Coin_Miner_2
     $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes"
     $2 = "Block %.4u [%3u]: %016lx"
   condition:
-    all of them
+    is_elf and all of them
 }
