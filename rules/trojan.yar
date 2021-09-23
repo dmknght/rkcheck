@@ -53,6 +53,16 @@ rule Trojan_Agent_1
       $str2 in (elf.sections[16].offset .. elf.sections[17].offset)
 }
 
+rule Trojan_Agent_2
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    vrt_report = "https://www.virustotal.com/gui/file/edbee3b92100cc9a6a8a3c1a5fc00212627560c5e36d29569d497613ea3e3c16"
+  condition:
+    is_elf and hash.md5(elf.sections[16].offset, elf.sections[16].size) == "f3a96941a385fc9062269babdb5cbc02"
+}
+
 rule Heur_Shellcode_Executor
 {
   meta:
@@ -61,7 +71,7 @@ rule Heur_Shellcode_Executor
     description = "Try to detect shellcode executor by exported \"shellcode\" string"
   condition:
     is_elf and for any i in (0 .. elf.symtab_entries - 1): (
-      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code") and elf.symtab[i].type == elf.STT_OBJECT
+      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code" or elf.symtab[i].name == "buf") and elf.symtab[i].type == elf.STT_OBJECT
     )
 }
 
