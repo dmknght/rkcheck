@@ -1,8 +1,7 @@
 #include "clamav.h"
 #include "yara.h"
 #include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h> 
+
 
 YR_RULES* rules = NULL;
 char *yr_db_path = "/home/dmknght/ParrotProjects/rkcheck/database/signatures.ydb";
