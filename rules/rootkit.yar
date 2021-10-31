@@ -89,7 +89,7 @@ rule rootkit_umbreon_TrendMicro {
 		$ = "rkit" ascii fullword
 
 	condition:
-		is_elf == 0x464c457f // Generic ELF header
+		is_elf // Generic ELF header
 		and uint8(16) == 0x0003 // Shared object file
 		and all of them
 }
