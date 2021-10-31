@@ -1,599 +1,135 @@
-import "elf"
-import "hash"
 include "rules/commons.yar"
 
 
-rule bash_door {
+rule rootkit_hcrootkit_1_LaceworkLabs {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
+    description = "Detects Linux HCRootkit, as reported by Avast"
+    hash1 = "2daa5503b7f068ac471330869ccfb1ae617538fecaea69fd6c488d57929f8279"
+    hash2 = "10c7e04d12647107e7abf29ae612c1d0e76a79447e03393fa8a44f8a164b723d"
+    hash3 = "602c435834d796943b1e547316c18a9a64c68f032985e7a5a763339d82598915"
+    author = "Lacework Labs"
+    ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
+  strings:
+    $a1 = "172.96.231."
+    $a2 = "/tmp/.tmp_XXXXXX"
+    $s1 = "/proc/net/tcp"
+    $s2 = "/proc/.inl"
+    $s3 = "rootkit"
   condition:
-    file_path == "/tmp/mcliZokhb" or file_path == "/tmp/mclzaKmfa"
+    is_elf and 
+      ((any of ($a*)) and (any of ($s*)))
 }
 
-rule slapper_installed {
+rule rootkit_hcrootkit_2_LaceworkLabs {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
+    description = "Detects Linux HCRootkit Wide, unpacked"
+    hash1 = "2daa5503b7f068ac471330869ccfb1ae617538fecaea69fd6c488d57929f8279"
+    hash2 = "10c7e04d12647107e7abf29ae612c1d0e76a79447e03393fa8a44f8a164b723d"
+    author = "Lacework Labs"
+    ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
+  strings:
+    $s1 = "s_hide_pids"
+    $s2 = "handler_kallsyms_lookup_name"
+    $s3 = "s_proc_ino"
+    $s4 = "n_filldir"
+    $s5 = "s_is_proc_ino"
+    $s6 = "n_tcp4_seq_show"
+    $s7 = "r_tcp4_seq_show"
+    $s8 = "s_hide_tcp4_ports"
+    $s9 = "s_proc_open"
+    $s10 = "s_proc_show"
+    $s11 = "s_passwd_buf"
+    $s12 = "s_passwd_buf_len"
+    $s13 = "r_sys_write"
+    $s14 = "r_sys_mmap"
+    $s15 = "r_sys_munmap"
+    $s16 = "s_hide_strs"
+    $s17 = "s_proc_write"
+    $s18 = "s_proc_inl_operations"
+    $s19 = "s_inl_entry"
+    $s20 = "kp_kallsyms_lookup_name"
+    $s21 = "s_sys_call_table"
+    $s22 = "kp_do_exit"
+    $s23 = "r_sys_getdents"
+    $s24 = "s_hook_remote_ip"
+    $s25= "s_hook_remote_port"
+    $s26 = "s_hook_local_port"
+    $s27 = "s_hook_local_ip"
+    $s28 = "nf_hook_pre_routing"
   condition:
-    file_path == "/tmp/.bugtraq" or file_path == "/tmp/.bugtraq.c" or file_path == "/tmp/.cinik" or file_path == "/tmp/.b" or file_path == "/tmp/httpd" or file_path == "/tmp./update" or file_path == "/tmp/.unlock" or file_path == "/tmp/.font-unix/.cinik" or file_path == "/tmp/.cinik"
+    is_elf and 10 of them
 }
 
-rule mithras_rootkit {
+rule rootkit_suterusu_LaceworkLabs {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
+    description = "Detects open source rootkit named suterusu"
+    hash1 = "7e5b97135e9a68000fd3efee51dc5822f623b3183aecc69b42bde6d4b666cfe1"
+    hash2 = "7b48feabd0ffc72833043b14f9e0976511cfde39fd0174a40d1edb5310768db3"
+    author = "Lacework Labs"
+    ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
+  strings:
+    $a1 = "suterusu"
+    $a3 = "srcversion="
+    $a4 = "Hiding PID"
+    $a5 = "/proc/net/tcp"
   condition:
-    file_path == "/usr/lib/locale/uboot"
+    is_elf and all of them
 }
 
-rule omega_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/chr"
+rule rootkit_umbreon_TrendMicro {
+	meta:
+		description = "Catches Umbreon rootkit"
+		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
+		author = "Fernando Merces, FTR, Trend Micro"
+		date = "2016-08"
+	
+	strings:
+		$ = { 75 6e 66 75 63 6b 5f 6c 69 6e 6b 6d 61 70 }
+		$ = "unhide.rb" ascii fullword
+		$ = "rkit" ascii fullword
+
+	condition:
+		is_elf == 0x464c457f // Generic ELF header
+		and uint8(16) == 0x0003 // Shared object file
+		and all of them
 }
 
-rule kenga3_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/include/. ."
+rule rootkit_umbreon_strace_TrendMicro {
+	meta:
+		description = "Catches Umbreon strace rootkit component"
+		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
+		author = "Fernando Merces, FTR, Trend Micro"
+		date = "2016-08"
+	
+	strings:
+		$ = "LD_PRELOAD" fullword
+		$ = /ld\.so\.[a-zA-Z0-9]{7}/ fullword
+		$ = "\"/etc/ld.so.preload\"" fullword
+		$ = "fputs_unlocked" fullword
+
+	condition:
+		is_elf // Generic ELF header
+		and uint8(16) == 0x0003 // Shared object file
+		and all of them
 }
 
-rule sadmind_iis_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/cuc"
-}
+rule rootkit_umbreon_espeon_TrendMicro {
+	meta:
+		description = "Catches Umbreon strace rootkit component"
+		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
+		author = "Fernando Merces, FTR, Trend Micro"
+		date = "2016-08"
 
-rule rsha {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/bin/kr4p" or file_path == "/usr/bin/n3tstat" or file_path == "/usr/bin/chsh2" or file_path == "/usr/bin/slice2" or file_path == "/etc/rc.d/rsha"
-}
+	strings:
+		$ = "Usage: %s [interface]" fullword
+		$ = "Options:" fullword
+		$ = "    interface    Listen on <interface> for packets." fullword
+		$ = "/bin/espeon-shell %s %hu"
+		$ = { 66 75 63 6b 20 6f 66 66 20 63 75 6e 74 }
+		$ = "error: unrecognized command-line options" fullword
 
-rule old_rootkits {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/include/rpc/ ../kit" or file_path == "/usr/include/rpc/ ../kit2" or file_path == "/usr/doc/.sl" or file_path == "/usr/doc/.sp" or file_path == "/usr/doc/.statnet" or file_path == "/usr/doc/.logdsys" or file_path == "/usr/doc/.dpct" or file_path == "/usr/doc/.gifnocfi" or file_path == "/usr/doc/.dnif" or file_path == "/usr/doc/.nigol"
-}
-
-rule telekit_trojan {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/hda06" or file_path == "/usr/info/libc1.so"
-}
-
-rule tc2_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/info/.tc2k" or file_path == "/usr/bin/util" or file_path == "/usr/sbin/initcheck" or file_path == "/usr/sbin/ldb"
-}
-
-rule shitc {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/bin/home" or file_path == "/sbin/home" or file_path == "/usr/sbin/in.slogind"
-}
-
-rule rh_sharpe {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/bin/.ps" or file_path == "/usr/bin/cleaner" or file_path == "/usr/bin/slice" or file_path == "/usr/bin/vadim" or file_path == "/usr/bin/.ps" or file_path == "/bin/.lpstree" or file_path == "/usr/bin/.lpstree" or file_path == "/usr/bin/lnetstat" or file_path == "/bin/lnetstat" or file_path == "/usr/bin/ldu" or file_path == "/bin/ldu" or file_path == "/usr/bin/lkillall" or file_path == "/bin/lkillall" or file_path == "/usr/include/rpcsvc/du"
-}
-
-rule showtee_romanian_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/include/addr.h" or file_path == "/usr/include/file.h" or file_path == "/usr/include/syslogs.h" or file_path == "/usr/include/proc.h"
-}
-
-rule lrk_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/ida/.inet"
-}
-
-rule zk_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/share/.zk" or file_path == "/usr/share/.zk/zk" or file_path == "/etc/1ssue.net" or file_path == "/usr/X11R6/.zk" or file_path == "/usr/X11R6/.zk/xfs" or file_path == "/usr/X11R6/.zk/echo" or file_path == "/etc/sysconfig/console/load.zk"
-}
-
-rule ramen_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/lib/ldlibps.so" or file_path == "/usr/lib/ldlibns.so" or file_path == "/usr/lib/ldliblogin.so" or file_path == "/usr/src/.poop" or file_path == "/tmp/ramen.tgz" or file_path == "/etc/xinetd.d/asp"
-}
-
-rule maniac_rk {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/bin/mailrc"
-}
-
-rule bmbl_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/etc/.bmbl" or file_path == "/etc/.bmbl/sk"
-}
-
-rule suckit_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/lib/.x" or file_path == "/lib/sk"
-}
-
-rule adore_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/etc/bin/ava" or file_path == "/etc/sbin/ava"
-}
-
-rule ldp_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/.kork" or file_path == "/bin/.login" or file_path == "/bin/.ps"
-}
-
-rule romanian_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/sbin/initdl" or file_path == "/usr/sbin/xntps"
-}
-
-rule illogic_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/lib/security/.config" or file_path == "/usr/bin/sia" or file_path == "/etc/ld.so.hash"
-}
-
-rule bobkit_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/include/.../" or file_path == "/usr/lib/.../" or file_path == "/usr/sbin/.../" or file_path == "/usr/bin/ntpsx" or file_path == "/tmp/.bkp" or file_path == "/usr/lib/.bkit-"
-}
-
-rule monkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/lib/defs"
-}
-
-rule override_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/grid-hide-pid-" or file_path == "/dev/grid-unhide-pid-" or file_path == "/dev/grid-show-pids" or file_path == "/dev/grid-hide-port-" or file_path == "/dev/grid-unhide-port-"
-}
-
-rule madalin_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/include/icekey.h" or file_path == "/usr/include/iceconf.h" or file_path == "/usr/include/iceseed.h"
-}
-
-rule solaris_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/var/adm/.profile" or file_path == "/var/spool/lp/.profile" or file_path == "/var/adm/sa/.adm" or file_path == "/var/spool/lp/admins/.lp"
-}
-
-rule phalanx_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/share/.home*" or file_path == "/usr/share/.home*/tty" or file_path == "/etc/host.ph1" or file_path == "/bin/host.ph1"
-}
-
-rule ark_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/ptyxx"
-}
-
-rule tribe_bot {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/wd4"
-}
-
-rule cback_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/tmp/cback" or file_path == "/tmp/derfiq"
-}
-
-rule optickit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/bin/xchk" or file_path == "/usr/bin/xsf" or file_path == "/usr/bin/xsf" or file_path == "/usr/bin/xchk"
-}
-
-rule anonoiyng_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/sbin/mech" or file_path == "/usr/sbin/kswapd"
-}
-
-rule loc_rookit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/tmp/xp" or file_path == "/tmp/kidd0.c" or file_path == "/tmp/kidd0"
-}
-
-rule showtee {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/lib/.egcs" or file_path == "/usr/lib/.wormie" or file_path == "/usr/lib/.kinetic" or file_path == "/usr/lib/liblog.o" or file_path == "/usr/include/cron.h" or file_path == "/usr/include/chk.h"
-}
-
-rule zarwt_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/bin/imin" or file_path == "/bin/imout"
-}
-
-rule lion_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/.lib" or file_path == "/dev/.lib/1iOn.sh" or file_path == "/bin/mjy" or file_path == "/bin/in.telnetd" or file_path == "/usr/info/torn"
-}
-
-rule suspicious_files {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/etc/rc.d/init.d/rc.modules" or file_path == "/lib/ldd.so" or file_path == "/usr/man/muie" or file_path == "/usr/X11R6/include/pain" or file_path == "/usr/bin/sourcemask" or file_path == "/usr/bin/ras2xm" or file_path == "/usr/bin/ddc" or file_path == "/usr/bin/jdc" or file_path == "/usr/sbin/in.telnet" or file_path == "/sbin/vobiscum" or file_path == "/usr/sbin/jcd" or file_path == "/usr/sbin/atd2" or file_path == "/usr/bin/ishit" or file_path == "/usr/bin/.etc" or file_path == "/usr/bin/xstat" or file_path == "/var/run/.tmp" or file_path == "/usr/man/man1/lib/.lib" or file_path == "/usr/man/man2/.man8" or file_path == "/var/run/.pid" or file_path == "/lib/.so" or file_path == "/lib/.fx" or file_path == "/lib/lblip.tk" or file_path == "/usr/lib/.fx" or file_path == "/var/local/.lpd" or file_path == "/dev/rd/cdb" or file_path == "/dev/.rd/" or file_path == "/usr/lib/pt07" or file_path == "/usr/bin/atm" or file_path == "/tmp/.cheese" or file_path == "/dev/.arctic" or file_path == "/dev/.xman" or file_path == "/dev/.golf" or file_path == "/dev/srd0" or file_path == "/dev/ptyzx" or file_path == "/dev/ptyzg" or file_path == "/dev/xdf1" or file_path == "/dev/ttyop" or file_path == "/dev/ttyof" or file_path == "/dev/hd7" or file_path == "/dev/hdx1" or file_path == "/dev/hdx2" or file_path == "/dev/xdf2" or file_path == "/dev/ptyp" or file_path == "/dev/ptyr" or file_path == "/sbin/pback" or file_path == "/usr/man/man3/psid" or file_path == "/proc/kset" or file_path == "/usr/bin/gib" or file_path == "/usr/bin/snick" or file_path == "/usr/bin/kfl" or file_path == "/tmp/.dump" or file_path == "/var/.x" or file_path == "/var/.x/psotnic"
-}
-
-rule apa_kit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/share/.aPa"
-}
-
-rule enye_sec_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/etc/.enyelkmHIDE^IT.ko"
-}
-
-rule rk17 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/bin/rtty" or file_path == "/bin/squit" or file_path == "/sbin/pback" or file_path == "/proc/kset" or file_path == "/usr/src/linux/modules/autod.o" or file_path == "/usr/src/linux/modules/soundx.o"
-}
-
-rule trk_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/bin/soucemask" or file_path == "/usr/bin/sourcemask"
-}
-
-rule scalper_installed {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/tmp/.uua" or file_path == "/tmp/.a"
-}
-
-rule hidr00tkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/var/lib/games/.k"
-}
-
-rule beastkit_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/local/bin/bin" or file_path == "/usr/man/.man10" or file_path == "/usr/sbin/arobia" or file_path == "/usr/lib/elm/arobia" or file_path == "/usr/local/bin/.../bktd"
-}
-
-rule shv5_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/lib/libsh.so" or file_path == "/usr/lib/libsh"
-}
-
-rule esrk_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/lib/tcl5.3"
-}
-
-rule shkit_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/lib/security/.config" or file_path == "/etc/ld.so.hash"
-}
-
-rule knark_installed {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/proc/knark" or file_path == "/dev/.pizda" or file_path == "/dev/.pula" or file_path == "/dev/.pula"
-}
-
-rule volc_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/lib/volc" or file_path == "/usr/bin/volc"
-}
-
-rule fu_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/sbin/xc" or file_path == "/usr/include/ivtype.h" or file_path == "/bin/.lib"
-}
-
-rule ajakit_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/lib/.ligh.gh" or file_path == "/lib/.libgh.gh" or file_path == "/lib/.libgh-gh" or file_path == "/dev/tux" or file_path == "/dev/tux/.proc" or file_path == "/dev/tux/.file"
-}
-
-rule monkit_found {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/usr/lib/libpikapp.a"
-}
-
-rule t0rn_rootkit {
-  /*
-    TODO add more signatures using analysis url and chkrootkit version
-    THIS KIT WILL REPLACE SYSTEM FILES WITH TROJANIZED VERSION. NEED TO VERIFY THEM AS WELL
-  */
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-    analysis_url = "https://www.f-secure.com/v-descs/torn.shtml"
-  condition:
-    file_path == "/usr/src/.puta" or file_path == "/usr/info/.t0rn" or file_path == "/lib/ldlib.tk" or file_path == "/etc/ttyhash" or file_path == "/sbin/xlogin"
-}
-
-rule adore_worm {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/.shit/red.tgz" or file_path == "/usr/lib/libt" or file_path == "/usr/bin/adore"
-}
-
-rule a_worm_55808 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/tmp/.../a" or file_path == "/tmp/.../r"
-}
-
-rule tuxkit_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/dev/tux" or file_path == "/usr/bin/xsf" or file_path == "/usr/bin/xchk"
-}
-
-rule reptile_rootkit {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Automation Yara rule generated from ossec-rootkit.conf"
-    url = "https://github.com/osquery/osquery/blob/master/packs/ossec-rootkit.conf"
-  condition:
-    file_path == "/reptile/reptile_cmd" or file_path == "/lib/udev/reptile"
+	condition:
+		is_elf // Generic ELF header
+		and uint8(16) == 0x0002 // Executable file
+		and all of them
 }
