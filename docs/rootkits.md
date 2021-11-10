@@ -1,0 +1,1 @@
+Use chkrootkit's tactic + ossec's rules to detect file path

@@ -64,6 +64,7 @@ defineEnum(bytecode_mode)
 defineEnum(cl_msg)
 const
   CL_SUCCESS* = (0).cl_error_t
+  CL_CLEAN* = (0).cl_error_t
   CL_VIRUS* = (CL_SUCCESS + 1).cl_error_t
   CL_ENULLARG* = (CL_VIRUS + 1).cl_error_t
   CL_EARG* = (CL_ENULLARG + 1).cl_error_t

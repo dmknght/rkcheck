@@ -1,5 +1,6 @@
 import "elf"
 import "hash"
+import "pe"
 include "rules/commons.yar"
 
 
@@ -143,5 +144,18 @@ rule Metasploit_Payload_Staged {
     is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
+    )
+}
+
+rule Metasploit_Win64_stagged {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Scan Metasploit's Windows64 staged payload by checking section hash"
+  // a4a5deae25708a9e05f50bcad7075c86
+  condition:
+    pe.is_pe and
+  for any i in (0 .. pe.number_of_sections - 1): (
+      hash.md5(pe.sections[i].raw_data_offset, pe.sections[i].raw_data_size) == "a4a5deae25708a9e05f50bcad7075c86"
     )
 }
