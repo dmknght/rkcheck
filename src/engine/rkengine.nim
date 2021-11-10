@@ -64,7 +64,7 @@ proc rkeng_init_clam_db(engine: var RkEngine): cl_error_t =
     sig_count: cuint = 0
   result = cl_load(engine.cl_db_path, engine.CL_Eng, unsafeAddr(sig_count), CL_DB_STDOPT)
   if result == CL_SUCCESS:
-    echo "Loaded ", sig_count, " ClamAV's signatures"
+    echo "Loaded ", sig_count, " ClamAV signatures"
   return result
 
 
