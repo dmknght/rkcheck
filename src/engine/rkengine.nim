@@ -2,12 +2,14 @@ import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
 import strutils
 import os
+import bitops
 
 type
   RkEngine* = object
     CL_Eng*: ptr cl_engine
     YR_Eng*: ptr YR_RULES
     cl_db_path*: string
+    cl_scan_opts*: cl_scan_options
     yara_db_path*: string
     enable_clam_debug*: bool
   YR_User_Data* = object
@@ -48,6 +50,11 @@ proc rkeng_init_clam_eng(engine: var RkEngine): cl_error_t =
   result = cl_init(CL_INIT_DEFAULT)
   if result == CL_SUCCESS:
     engine.CL_Eng = cl_engine_new()
+    engine.cl_scan_opts.parse = bitnot(bitor(engine.cl_scan_opts.parse, 0))
+    engine.cl_scan_opts.general = bitor(engine.cl_scan_opts.general, CL_SCAN_GENERAL_HEURISTICS)
+    engine.cl_scan_opts.heuristic = bitor(engine.cl_scan_opts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
+    engine.cl_scan_opts.heuristic = bitor(engine.cl_scan_opts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
+    engine.cl_scan_opts.heuristic = bitor(engine.cl_scan_opts.heuristic, CL_SCAN_HEURISTIC_MACROS)
     cl_engine_set_clcb_pre_scan(engine.CL_Eng, cb_clam_prescan)
     if engine.enable_clam_debug:
       cl_debug()
