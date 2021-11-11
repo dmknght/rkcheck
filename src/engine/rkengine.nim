@@ -1,7 +1,5 @@
 import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
-import strutils
-import os
 import bitops
 
 type
@@ -13,7 +11,9 @@ type
     yara_db_path*: string
     enable_clam_debug*: bool
   YR_User_Data* = object
-    scanning_object*: string
+    scan_object*: string
+    scan_result*: cl_error_t
+    virus_name*: cstring
 
 
 var
@@ -23,10 +23,19 @@ var
 
 proc cb_yr_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   if message == CALLBACK_MSG_RULE_MATCHING:
-    let rule = cast[ptr YR_RULE](message_data)
-    echo "Detected ", rule.identifier, " ", cast[ptr YR_User_Data](user_data).scanning_object
+    cast[ptr YR_User_Data](user_data).scan_result = CL_VIRUS
+    cast[ptr YR_User_Data](user_data).virus_name = cast[ptr YR_RULE](message_data).identifier
     return CALLBACK_ABORT
-  return CALLBACK_CONTINUE
+  else:
+    cast[ptr YR_User_Data](user_data).scan_result = CL_CLEAN
+    cast[ptr YR_User_Data](user_data).virus_name = ""
+    return CALLBACK_CONTINUE
+
+
+proc cb_clam_virus_found(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+  let
+    virus_name = if user_data.virus_name != "": user_data.virus_name else: virname
+  echo virus_name, " ", user_data.scan_object
 
 
 proc cb_clam_prescan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -34,12 +43,8 @@ proc cb_clam_prescan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {
     yr_scan_flags: cint = SCAN_FLAGS_FAST_MODE
     yr_scan_timeout: cint = 1000000
   
-  let
-    link_fd = "/proc/self/fd/" & intToStr(fd)
-  
-  user_data.scanning_object = expandFilename(link_fd) # TODO get full path of inside files
   discard yr_rules_scan_fd(engine.YR_Eng, fd, yr_scan_flags, cb_yr_scan, addr(user_data), yr_scan_timeout)
-  return CL_CLEAN
+  return user_data.scan_result
 
 
 proc rkeng_init_clam_eng(engine: var RkEngine): cl_error_t =
@@ -56,6 +61,7 @@ proc rkeng_init_clam_eng(engine: var RkEngine): cl_error_t =
     engine.cl_scan_opts.heuristic = bitor(engine.cl_scan_opts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.cl_scan_opts.heuristic = bitor(engine.cl_scan_opts.heuristic, CL_SCAN_HEURISTIC_MACROS)
     cl_engine_set_clcb_pre_scan(engine.CL_Eng, cb_clam_prescan)
+    cl_engine_set_clcb_virus_found(engine.CL_Eng, cb_clam_virus_found)
     if engine.enable_clam_debug:
       cl_debug()
   return result
@@ -130,7 +136,7 @@ proc rkeng_start_yara(engine: var RkEngine): int =
     return result
 
 
-proc start_engine*(engine: var RkEngine): cl_error_t =
+proc rkcheck_start_engine*(engine: var RkEngine): cl_error_t =
   result = rkeng_start_clam(engine)
   if result == CL_SUCCESS:
     result = cl_engine_compile(engine.CL_Eng)
@@ -142,6 +148,14 @@ proc start_engine*(engine: var RkEngine): cl_error_t =
   return result
 
 
-proc stop_engine*(engine: var RkEngine) =
+proc rkcheck_stop_engine*(engine: var RkEngine) =
   rkeng_finit_clam(engine)
   rkeng_finit_yara(engine)
+
+
+proc rkcheck_scan_file*(file_path: string) =
+  var
+    virname: cstring
+    scanned: culong = 0
+  user_data.scan_object = file_path
+  discard cl_scanfile(file_path, addr(virname), addr(scanned), engine.CL_Eng, addr(engine.cl_scan_opts))
