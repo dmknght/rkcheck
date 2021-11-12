@@ -204,3 +204,25 @@ rule Execdoor {
   condition:
     $s3 or $s4 or ($s1 and $s2 and $s5)
 }
+
+rule EkoBackdoor {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux Execdoor"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/74d29efbdf7df9bb7e51fad039e0e40455795056ec643610b38853c602a4357c"
+    target = "File, memory"
+  strings:
+    $s1 = "Backdoor instalado! - Have a nice hack ;)"
+    $s2 = "< Coded by ca0s / Ezkracho Team >"
+    $s3 = ">> EkoBackdoor v1.1 by ca0s <<"
+    $s4 = "stream tcp nowait root /bin/sh sh -i"
+    $s5 = "Uso: ./ekobdoor [opcion] [argumento]"
+    $s6 = "ekorulez"
+    $s7 = ":/:/bin/sh"
+    $s8 = "cp /bin/sh /tmp/sh"
+    $s9 = "chmod 4711 /tmp/sh"
+  condition:
+    3 of them
+}
