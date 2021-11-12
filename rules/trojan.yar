@@ -292,5 +292,5 @@ rule Gbkdoor {
     $2 = "as if you are root, but the file to trojanize must be suidroot!"
     $3 = "now, you can easily use the backdoor installed so:"
   condition:
-    all of them
+    $1 or ($2 and $3)
 }
