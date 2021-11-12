@@ -209,7 +209,7 @@ rule EkoBackdoor {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Linux Execdoor"
+    description = "Linux EkoBackdoor"
     date = "12/11/1996"
     refrence = "https://otx.alienvault.com/indicator/file/74d29efbdf7df9bb7e51fad039e0e40455795056ec643610b38853c602a4357c"
     target = "File, memory"
@@ -231,7 +231,7 @@ rule Explodor {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Linux Execdoor"
+    description = "Linux Explodor"
     date = "12/11/1996"
     refrence = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
     target = "File, memory"
@@ -248,13 +248,33 @@ rule Homeunix {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Linux Execdoor"
+    description = "Linux Homeunix"
     date = "12/11/1996"
     refrence = "https://otx.alienvault.com/indicator/file/ced749fecb0f9dde9355ee29007ea8a20de277d39ebcb5dda61cd290cd5dbc02"
     target = "File, memory"
   strings:
     $s1 = "unixforce::0:0:unixforce:/root:/bin/bash"
     $s2 = "/etc/passwd"
+  condition:
+    all of them
+}
+
+rule Fysbis {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux Fysbis"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/ab6f39f913a925cf4e9fa7717db0e3eb38b5ae61e057a2e76043b539f3c0dc91"
+    target = "File, memory"
+    /*
+    From result of string analysis, there are generated files at /usr/lib/systemd/system/, and startup file at find ~/.config/ -name autostart 
+    */
+  strings:
+    $1 = "ls /etc | egrep -e\"fedora*|debian*|gentoo*|mandriva*|mandrake*|meego*|redhat*|lsb-*|sun-*|SUSE*|release\""
+    $2 = "mkdir /usr/lib/sys-defender"
+    $3 = "pgrep -l \"gnome|kde|mate|cinnamon|lxde|xfce|jwm\""
+    $4 = "rm -f /usr/lib/systemd/system/"
   condition:
     all of them
 }
