@@ -82,15 +82,15 @@ rule OSCommand_WgetAndCurl_Downloader {
     all of them
 }
 
-// rule generic_remove_syslogs {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Bash command to remove everything in /var/log/"
-//     date = "12/11/1996"
-//     refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
-//   strings:
-//     $ = "rm -rf /var/log/*"
-//   condition:
-//     all of them
-// }
+rule OSCommand_Syslog_Removal {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Bash command to remove everything in /var/log/"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
+  strings:
+    $ = /rm(\/var\/log[\S\/ \-]+|\-rf|[ ])+/
+  condition:
+    all of them
+}
