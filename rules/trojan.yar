@@ -294,3 +294,17 @@ rule Gbkdoor {
   condition:
     $1 or ($2 and $3)
 }
+
+rule Gummo {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux Gummo"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/67b9ddd4a21a78ff1a4adbf4b2fb70d279c79494d34e6e2e12673eed134f0d5f"
+    target = "File, memory"
+  strings:
+    $ = "echo rewt::0:0::/:/bin/sh>>/etc/passwd;"
+  condition:
+    all of them
+}
