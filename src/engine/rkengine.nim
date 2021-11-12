@@ -24,7 +24,7 @@ var
 proc cb_yr_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   if message == CALLBACK_MSG_RULE_MATCHING:
     cast[ptr YR_User_Data](user_data).scan_result = CL_VIRUS
-    cast[ptr YR_User_Data](user_data).virus_name = cast[ptr YR_RULE](message_data).identifier
+    cast[ptr YR_User_Data](user_data).virus_name = $cast[ptr YR_RULE](message_data).ns.name & "." & $cast[ptr YR_RULE](message_data).identifier
     return CALLBACK_ABORT
   else:
     cast[ptr YR_User_Data](user_data).scan_result = CL_CLEAN
