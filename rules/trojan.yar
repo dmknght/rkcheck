@@ -147,15 +147,28 @@ rule Metasploit_Payload_Staged {
     )
 }
 
-rule downloader_generic {
+rule downloader_generic_wget {
   meta:
-    description = "Detect malwares use bash command to download malicious file using wget and chmod and execute downloaded binary"
+    description = "Bash commands to download and execute binaries using wget"
     reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
     author = "Nong Hoang Tu"
     date = "12/11/2021"
     target = "File, process's cmd, memory"
   strings:
-    $re1 = /wget([ \S])+;[ ]+chmod([ \S])+\+x([ \S])+;[ ]+.\/(\S)+/
+    $re1 = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
+  condition:
+    all of them
+}
+
+rule downloader_generic_curl {
+  meta:
+    description = "Bash commands to download and execute binaries using CURL"
+    refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
+    author = "Nong Hoang Tu"
+    date = "12/11/2021"
+    target = "File, process's cmd, memory"
+  strings:
+    $re1 = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
   condition:
     all of them
 }
