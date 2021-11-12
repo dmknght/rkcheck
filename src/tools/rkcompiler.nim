@@ -2,7 +2,7 @@
   Compile rules using yr_compiler. Should be similar to yarac and user can use any (libyara must be the same)
 ]#
 
-import libyara / nimyara
+import .. / libs / libyara / nim_yara
 import os
 import strformat
 
@@ -33,10 +33,10 @@ proc compile_rules(dst: string) =
 
   # Load yara rules
 
-  discard yr_compiler_define_string_variable(compiler, "file_path", "")
-  discard yr_compiler_define_string_variable(compiler, "file_name", "")
-  discard yr_compiler_define_string_variable(compiler, "file_dir", "")
-  discard yr_compiler_define_string_variable(compiler, "file_ext", "")
+  # discard yr_compiler_define_string_variable(compiler, "file_path", "")
+  # discard yr_compiler_define_string_variable(compiler, "file_name", "")
+  # discard yr_compiler_define_string_variable(compiler, "file_dir", "")
+  # discard yr_compiler_define_string_variable(compiler, "file_ext", ""
 
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, unsafeAddr(setting_max_string))
   yr_compiler_set_callback(compiler, report_error, unsafeAddr(compiler_result))
