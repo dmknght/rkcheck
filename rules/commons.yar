@@ -25,7 +25,7 @@ private rule elf_no_sections {
 //     all of them
 // }
 
-rule downloader_generic_wget {
+rule downloader_wget {
   meta:
     description = "Bash commands to download and execute binaries using wget"
     reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
@@ -38,7 +38,7 @@ rule downloader_generic_wget {
     all of them
 }
 
-rule downloader_generic_curl {
+rule downloader_curl {
   meta:
     description = "Bash commands to download and execute binaries using CURL"
     refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
