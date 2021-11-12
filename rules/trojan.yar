@@ -248,3 +248,20 @@ rule Gummo {
   condition:
     all of them
 }
+
+rule KBD {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux KBD"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/3aba59e8bbaecf065d05b7a74655668484bb16fdec589b8e7d169e4adf65d840"
+    target = "File, memory"
+  strings:
+    $1 = "Your Kung-Fu is good."
+    $2 = "orig_stat"
+    $3 = "bd_getuid"
+    $4 = "orig_getuid"
+  condition:
+    all of them
+}

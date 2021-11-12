@@ -77,7 +77,7 @@ rule OSCommand_WgetAndCurl_Downloader {
     date = "12/11/2021"
     target = "File, process's cmd, memory"
   strings:
-    $re1 = /wget([ \S])+[ ]+||[ ]+curl([ \S])+\-O([ \S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+sh([ \S\*])+;/
+    $re1 = /wget([ \S])+[ ]+||[ ]+curl([ \S])+\-O([ \S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+/
   condition:
     all of them
 }
