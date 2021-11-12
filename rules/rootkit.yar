@@ -1,7 +1,7 @@
 include "rules/commons.yar"
 
 
-rule rootkit_hcrootkit_1_LaceworkLabs {
+rule hcrootkit_1_LaceworkLabs {
   meta:
     description = "Detects Linux HCRootkit, as reported by Avast"
     hash1 = "2daa5503b7f068ac471330869ccfb1ae617538fecaea69fd6c488d57929f8279"
@@ -20,7 +20,7 @@ rule rootkit_hcrootkit_1_LaceworkLabs {
       ((any of ($a*)) and (any of ($s*)))
 }
 
-rule rootkit_hcrootkit_2_LaceworkLabs {
+rule hcrootkit_2_LaceworkLabs {
   meta:
     description = "Detects Linux HCRootkit Wide, unpacked"
     hash1 = "2daa5503b7f068ac471330869ccfb1ae617538fecaea69fd6c488d57929f8279"
@@ -60,7 +60,7 @@ rule rootkit_hcrootkit_2_LaceworkLabs {
     is_elf and 10 of them
 }
 
-rule rootkit_suterusu_LaceworkLabs {
+rule suterusu_LaceworkLabs {
   meta:
     description = "Detects open source rootkit named suterusu"
     hash1 = "7e5b97135e9a68000fd3efee51dc5822f623b3183aecc69b42bde6d4b666cfe1"
@@ -76,7 +76,7 @@ rule rootkit_suterusu_LaceworkLabs {
     is_elf and all of them
 }
 
-rule rootkit_umbreon_TrendMicro {
+rule umbreon_TrendMicro {
 	meta:
 		description = "Catches Umbreon rootkit"
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
@@ -94,7 +94,7 @@ rule rootkit_umbreon_TrendMicro {
 		and all of them
 }
 
-rule rootkit_umbreon_strace_TrendMicro {
+rule umbreon_strace_TrendMicro {
 	meta:
 		description = "Catches Umbreon strace rootkit component"
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
@@ -113,7 +113,7 @@ rule rootkit_umbreon_strace_TrendMicro {
 		and all of them
 }
 
-rule rootkit_umbreon_espeon_TrendMicro {
+rule umbreon_espeon_TrendMicro {
 	meta:
 		description = "Catches Umbreon strace rootkit component"
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"

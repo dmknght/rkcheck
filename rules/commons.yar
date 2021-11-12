@@ -50,3 +50,24 @@ rule downloader_curl {
   condition:
     all of them
 }
+
+rule Shellcode_Executor
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Try to detect shellcode executor by exported \"shellcode\" string"
+  condition:
+    is_elf and for any i in (0 .. elf.symtab_entries - 1): (
+      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code" or elf.symtab[i].name == "buf") and elf.symtab[i].type == elf.STT_OBJECT
+    )
+}
+
+rule ELF_NoSections {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Suspicious ELF files. File has no section and file size < 1KB. Usually see by Metasploit's stageless payloads"
+  condition:
+    elf_no_sections and filesize < 1KB
+}

@@ -17,7 +17,7 @@ include "rules/commons.yar"
 //     )
 // }
 
-rule Trojan_Agent_1
+rule Agent_1
 {
   meta:
     author = "Nong Hoang Tu"
@@ -54,7 +54,7 @@ rule Trojan_Agent_1
       $str2 in (elf.sections[16].offset .. elf.sections[17].offset)
 }
 
-rule Trojan_Agent_2
+rule Agent_2
 {
   meta:
     author = "Nong Hoang Tu"
@@ -64,20 +64,8 @@ rule Trojan_Agent_2
     is_elf and hash.md5(elf.sections[16].offset, elf.sections[16].size) == "f3a96941a385fc9062269babdb5cbc02"
 }
 
-rule Heur_Shellcode_Executor
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Try to detect shellcode executor by exported \"shellcode\" string"
-  condition:
-    is_elf and for any i in (0 .. elf.symtab_entries - 1): (
-      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code" or elf.symtab[i].name == "buf") and elf.symtab[i].type == elf.STT_OBJECT
-    )
-}
 
-
-rule Trojan_Python_IRCBot
+rule Python_IRCBot
 {
   meta:
     author = "Nong Hoang Tu"
@@ -94,7 +82,7 @@ rule Trojan_Python_IRCBot
     )
 }
 
-rule Trojan_GoLang_EzuriLoader
+rule GoLang_EzuriLoader
 {
   meta:
     author = "Nong Hoang Tu"
@@ -126,16 +114,8 @@ rule custom_ssh_backdoor_server {
 		filesize < 10KB and 5 of them
 }
 
-rule Suspicious_ELF_NoSection {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Suspicious ELF files. File has no section and file size < 1KB. Usually see by Metasploit's stageless payloads"
-  condition:
-    elf_no_sections and filesize < 1KB
-}
 
-rule Metasploit_Payload_Staged {
+rule Metasploit_Staged {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
