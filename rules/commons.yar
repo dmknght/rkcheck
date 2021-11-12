@@ -71,3 +71,15 @@ rule ELF_NoSections {
   condition:
     elf_no_sections and filesize < 1KB
 }
+
+rule OSCommand_Add_user {
+  meta:
+    description = "Bash commands to add new user to passwd"
+    author = "Nong Hoang Tu"
+    date = "12/11/2021"
+    target = "File, process's cmd, memory"
+  strings:
+    $1 = /echo[ "]+[\w\d_]+::0:0::\/:\/bin\/[\w"]+[ >]+\/etc\/passwd/
+  condition:
+    all of them
+}
