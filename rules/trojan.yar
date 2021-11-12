@@ -147,15 +147,15 @@ rule Metasploit_Payload_Staged {
     )
 }
 
-rule Metasploit_Win64_stagged {
+rule downloader_generic {
   meta:
+    description = "Detect malwares use bash command to download malicious file using wget and chmod and execute downloaded binary"
+    reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
     author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Scan Metasploit's Windows64 staged payload by checking section hash"
-  // a4a5deae25708a9e05f50bcad7075c86
+    date = "12/11/2021"
+    target = "File, process's cmd, memory"
+  strings:
+    $re1 = /wget([ \S])+;[ ]+chmod([ \S])+\+x([ \S])+;[ ]+.\/(\S)+/
   condition:
-    pe.is_pe and
-  for any i in (0 .. pe.number_of_sections - 1): (
-      hash.md5(pe.sections[i].raw_data_offset, pe.sections[i].raw_data_size) == "a4a5deae25708a9e05f50bcad7075c86"
-    )
+    all of them
 }
