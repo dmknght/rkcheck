@@ -70,6 +70,18 @@ rule OSCommand_Curl_Downloader {
     all of them
 }
 
+rule OSCommand_WgetAndCurl_Downloader {
+  meta:
+    description = "Bash commands to download and execute binaries using CURL || Wget"
+    author = "Nong Hoang Tu"
+    date = "12/11/2021"
+    target = "File, process's cmd, memory"
+  strings:
+    $re1 = /wget([ \S])+[ ]+||[ ]+curl([ \S])+\-O([ \S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+sh([ \S\*])+;/
+  condition:
+    all of them
+}
+
 // rule generic_remove_syslogs {
 //   meta:
 //     author = "Nong Hoang Tu"
