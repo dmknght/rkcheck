@@ -227,7 +227,7 @@ rule EkoBackdoor {
     3 of them
 }
 
-rule Explodor{
+rule Explodor {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -240,6 +240,21 @@ rule Explodor{
     $2 = "/proc/self/exe"
     $3 = "/proc/sys/kernel/osrelease"
     $s4 = "keld@dkuug.dk"
+  condition:
+    all of them
+}
+
+rule Homeunix {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Linux Execdoor"
+    date = "12/11/1996"
+    refrence = "https://otx.alienvault.com/indicator/file/ced749fecb0f9dde9355ee29007ea8a20de277d39ebcb5dda61cd290cd5dbc02"
+    target = "File, memory"
+  strings:
+    $s1 = "unixforce::0:0:unixforce:/root:/bin/bash"
+    $s2 = "/etc/passwd"
   condition:
     all of them
 }
