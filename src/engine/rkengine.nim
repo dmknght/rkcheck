@@ -1,5 +1,6 @@
 import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
+import os
 import bitops
 
 type
@@ -159,3 +160,8 @@ proc rkcheck_scan_file*(file_path: string) =
     scanned: culong = 0
   user_data.scan_object = file_path
   discard cl_scanfile(file_path, addr(virname), addr(scanned), engine.CL_Eng, addr(engine.cl_scan_opts))
+
+
+proc rkcheck_scan_dir*(dir_path: string) =
+  for file_path in walkDirRec(dir_path):
+    rkcheck_scan_file(file_path)
