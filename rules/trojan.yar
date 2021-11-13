@@ -314,3 +314,16 @@ rule BashDoor {
   condition:
     any of them
 }
+
+rule MushDoor {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "13/11/2021"
+    target = "File, memory"
+  strings:
+    $1 = "mushd00r"
+    $2 = "username to hide  & processes"
+  condition:
+    all of them
+}
