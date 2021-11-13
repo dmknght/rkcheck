@@ -105,6 +105,21 @@ rule Shellshock {
   condition:
     any of them
 }
+
+rule Tsunami_1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Tsunami"
+    reference = "https://www.virustotal.com/gui/file/305901aa920493695729132cfd20cbddc9db2cf861071450a646c6a07b4a50f3"
+    date = "13/11/2021"
+    target = "File, memory"
+  strings:
+    $ = "WHO %s"
+    $ = "PONG %s"
+  condition:
+    all of them
+}
 // 
 // rule KokainKit { TODO: the script generates multiple scripts. I have to work to search match all of files.
 //   meta:
