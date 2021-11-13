@@ -282,3 +282,20 @@ rule Sckit {
   condition:
     2 of them
 }
+
+rule Earthworm {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "13/11/2021"
+    target = "File, memory"
+  strings:
+    $1 = "Earthworm is a network agent tool."
+    $2 = "rootkiter : The creator"
+    $3 = "darksn0w  : Proviede some advice"
+    $4 = "zhuanjia  : Modify the Readme file"
+    $5 = "syc4mor3  : Named for this tool"
+    $6 = "http://rootkiter.com/EarthWrom/"
+  condition:
+    3 of them
+}
