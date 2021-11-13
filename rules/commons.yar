@@ -124,6 +124,8 @@ rule Hacktool_Telnet_Brute {
     $16 = "TY2gD6MZvKc7KU6r"
     $17 = "A023UU4U24UIU"
     $18 = "scanJosho"
+    $19 = "S2fGqNFs"
+    $20 = "7ujMko0admin"
   condition:
     any of them
 }
