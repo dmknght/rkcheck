@@ -299,3 +299,18 @@ rule Earthworm {
   condition:
     3 of them
 }
+
+rule BashDoor {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "13/11/2021"
+    target = "File, memory"
+  strings:
+    $1 = "Compiling SeCshell"
+    $2 = "-=[1]=- Update and backdoor Bash."
+    $3 = "-=[2]=- Compile and install SeCshell."
+    $4 = "nU.ajj1cF2Qk6"
+  condition:
+    any of them
+}
