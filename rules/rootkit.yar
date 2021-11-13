@@ -133,3 +133,16 @@ rule Umbreon_espeon_TrendMicro {
 		and uint8(16) == 0x0002 // Executable file
 		and all of them
 }
+
+rule Knark {
+  meta:
+		description = "Knark 2.4.3 rule detection"
+		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
+		date = "2021, 28 Jun"
+	strings:
+		$ = "/usr/lib/.hax0r/sshd_trojan"
+		// $2 = "/proc/ksyms"
+		// $3 = "/dev/kmem"
+	condition:
+		all of them
+}
