@@ -70,7 +70,7 @@ rule OSCommand_Curl_Downloader {
     all of them
 }
 
-rule CoinMiner_2
+rule CoinMiner
 {
   meta:
     author = "Nong Hoang Tu"
@@ -80,6 +80,23 @@ rule CoinMiner_2
     $2 = "Block %.4u [%3u]: %016lx"
   condition:
     is_elf and all of them
+}
+
+rule Hacktool_DenialOfService {
+  meta:
+    author = "Nong Hoang Tu"
+    description = "Botnet.Linux.LizardSquad"
+    email = "dmknght@parrotsec.org"
+    date = "12/11/2021"
+    target = "File, memory"
+  strings:
+    $1 = "JUNK Flooding %s:%d"
+    $2 = "UDP Flooding %s"
+    $3 = "TCP Flooding %s"
+    $4 = "LOLNOGTFO"
+    $5 = "KILLATTK"
+  condition:
+    2 of them
 }
 
 // rule OSCommand_WgetAndCurl_Downloader {
