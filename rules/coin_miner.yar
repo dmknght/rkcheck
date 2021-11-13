@@ -57,3 +57,53 @@ rule Coin_Miner_4
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "ea5f61d48cc64bcba47ed3d75ccc3e59"
     )
 }
+
+
+rule Connecticoin_Generic
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+  strings:
+    $1 = "connecticoin.org"
+    $2 = "Connecticoin-Qt"
+  condition:
+    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+      elf.sections[i].name == ".rodata" and
+        $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+        $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
+    )
+}
+
+rule XMRStak_Generic {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "13/11/2021"
+  strings:
+    $1 = "XMRSTAK_VERSION"
+    $2 = "pool.usxmrpool.com"
+    $3 = "donate.xmr-stak.net"
+    $4 = "xmr-stak-rx 1.0.4-rx 65ade74"
+    $5 = "XMRSTAK_VERSION"
+  condition:
+    any of them
+}
+
+rule Xmrig_Generic
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+  strings:
+    $1 = "donate.v2.xmrig.com"
+    $2 = "cryptonight/0"
+    $3 = "cryptonight-monerov7"
+  condition:
+    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+      elf.sections[i].name == ".rodata" and
+        $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+        $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+        $3 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
+    )
+}
