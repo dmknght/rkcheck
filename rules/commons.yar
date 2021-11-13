@@ -99,7 +99,7 @@ rule Hacktool_DenialOfService {
     2 of them
 }
 
-rule Hacktool_Telnet_Brute {
+rule Hacktool_LoginBrute {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
