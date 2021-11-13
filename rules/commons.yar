@@ -99,6 +99,34 @@ rule Hacktool_DenialOfService {
     2 of them
 }
 
+rule Hacktool_Telnet_Brute {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "12/11/2021"
+    target = "File, memory"
+  strings:
+    $1 = "p@ck3tf3nc3"
+    $2 = "7ujMko0"
+    $3 = "s4beBsEQhd"
+    $4 = "ROOT500"
+    $5 = "LSiuY7pOmZG2s"
+    $6 = "gwevrk7f@qwSX$fd"
+    $7 = "huigu309"
+    $8 = "taZz@23495859"
+    $9 = "hdipc%No"
+    $10 = "DFhxdhdf"
+    $11 = "XDzdfxzf"
+    $12 = "UYyuyioy"
+    $13 = "JuYfouyf87"
+    $14 = "NiGGeR69xd"
+    $15 = "NiGGeRD0nks69"
+    $16 = "TY2gD6MZvKc7KU6r"
+    $17 = "A023UU4U24UIU"
+    $18 = "scanJosho"
+  condition:
+    any of them
+}
 // rule OSCommand_WgetAndCurl_Downloader {
 //   meta:
 //     description = "Bash commands to download and execute binaries using CURL || Wget"
