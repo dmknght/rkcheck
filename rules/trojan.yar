@@ -176,10 +176,11 @@ rule Explodor {
     refrence = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
     target = "File, memory"
   strings:
-    $1 = "/etc/suid-debug"
-    $2 = "/proc/self/exe"
-    $3 = "/proc/sys/kernel/osrelease"
-    $s4 = "keld@dkuug.dk"
+    // $1 = "/etc/suid-debug"
+    // $2 = "/proc/self/exe"
+    $3 = "Unable to spawn shell"
+    $4 = "keld@dkuug.dk"
+    $5 = "PATH=/usr/bin:/bin:/usr/sbin:/sbin"
   condition:
     all of them
 }
