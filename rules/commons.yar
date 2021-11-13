@@ -70,7 +70,7 @@ rule OSCommand_Curl_Downloader {
     all of them
 }
 
-rule CoinMiner_1
+rule CoinMiner_xmrig
 {
   meta:
     author = "Nong Hoang Tu"
@@ -100,7 +100,7 @@ rule CoinMiner_2
     is_elf and all of them
 }
 
-rule CoinMiner_3
+rule CoinMiner_Connecticoin
 {
   meta:
     author = "Nong Hoang Tu"
