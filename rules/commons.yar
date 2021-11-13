@@ -99,7 +99,7 @@ rule CoinMiner_2
 //     author = "Nong Hoang Tu"
 //     email = "dmknght@parrotsec.org"
 //     description = "Bash command to remove everything in /var/log/"
-//     date = "12/11/1996"
+//     date = "12/11/2021"
 //     refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
 //   strings:
 //     $ = /rm(\/var\/log[\S\/ \-]+|\-rf|[ ])+/

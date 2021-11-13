@@ -132,7 +132,7 @@ rule Execdoor {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Execdoor"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
     target = "File, memory"
   strings:
@@ -150,7 +150,7 @@ rule EkoBackdoor {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux EkoBackdoor"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/74d29efbdf7df9bb7e51fad039e0e40455795056ec643610b38853c602a4357c"
     target = "File, memory"
   strings:
@@ -172,7 +172,7 @@ rule Explodor {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Explodor"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
     target = "File, memory"
   strings:
@@ -190,7 +190,7 @@ rule Homeunix {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Homeunix"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/ced749fecb0f9dde9355ee29007ea8a20de277d39ebcb5dda61cd290cd5dbc02"
     target = "File, memory"
   strings:
@@ -205,7 +205,7 @@ rule Fysbis {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Fysbis"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/ab6f39f913a925cf4e9fa7717db0e3eb38b5ae61e057a2e76043b539f3c0dc91"
     target = "File, memory"
     /*
@@ -225,7 +225,7 @@ rule Gbkdoor {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Gbkdoor"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/a1439937c8a383f010a071130aaae4443de6b7f4f7e71789c9964ea3a9d7f4a8"
     target = "File, memory"
   strings:
@@ -241,7 +241,7 @@ rule Gummo {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Gummo"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/67b9ddd4a21a78ff1a4adbf4b2fb70d279c79494d34e6e2e12673eed134f0d5f"
     target = "File, memory"
   strings:
@@ -255,7 +255,7 @@ rule KBD {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux KBD"
-    date = "12/11/1996"
+    date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/3aba59e8bbaecf065d05b7a74655668484bb16fdec589b8e7d169e4adf65d840"
     target = "File, memory"
   strings:
@@ -265,4 +265,20 @@ rule KBD {
     $4 = "orig_getuid"
   condition:
     all of them
+}
+
+rule Sckit {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "ELF:Sckit-A, Unix.Trojan.Suki-1, Backdoor:Linux/Rooter"
+    date = "13/11/2021"
+    refrence = "https://otx.alienvault.com/indicator/file/db4c0fe28e8fdce6f7b7e2e12738ff84f084667e07b408dc04dc92bd074bc0e2"
+    target = "File, memory"
+  strings:
+    $1 = "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:./bin:/etc/.MG:/etc/.MG/bin"
+    $2 = "HOME=/etc/.MG"
+    $3 = "HISTFILE=/dev/null"
+  condition:
+    2 of them
 }
