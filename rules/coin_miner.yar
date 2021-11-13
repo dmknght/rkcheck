@@ -99,7 +99,10 @@ rule Xmrig_Generic
     $1 = "donate.v2.xmrig.com"
     $2 = "cryptonight/0"
     $3 = "cryptonight-monerov7"
-    $s4 = "_ZN5xmrig"
+    $4 = "_ZN5xmrig"
+    $5 = "miner.fee.xmrig.com"
+    $6 = "emergency.fee.xmrig.com"
+    $7 = "Usage: xmrig [OPTIONS]"
   condition:
     any of them
     // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
