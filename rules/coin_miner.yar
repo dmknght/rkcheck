@@ -99,11 +99,13 @@ rule Xmrig_Generic
     $1 = "donate.v2.xmrig.com"
     $2 = "cryptonight/0"
     $3 = "cryptonight-monerov7"
+    $s4 = "_ZN5xmrig"
   condition:
-    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
-      elf.sections[i].name == ".rodata" and
-        $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
-        $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
-        $3 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
-    )
+    any of them
+    // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+    //   elf.sections[i].name == ".rodata" and
+    //     $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+    //     $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+    //     $3 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
+    // )
 }
