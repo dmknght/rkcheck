@@ -37,6 +37,9 @@ proc cb_clam_virus_found(fd: cint, virname: cstring, context: pointer) {.cdecl.}
   let
     virus_name = if user_data.virus_name != "": user_data.virus_name else: virname
   echo virus_name, " ", user_data.scan_object
+  #[Analysis code only. Move file to other path]#
+  # let newName = splitPath(user_data.scan_object).tail & "_detected"
+  # moveFile(user_data.scan_object, "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/" & newName)
 
 
 proc cb_clam_prescan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -119,9 +122,9 @@ proc rkeng_start_clam(engine: var RkEngine): cl_error_t =
   if result != CL_SUCCESS:
     echo "Failed to init ClamAV engine. Error code ", result
     return result
-  result = rkeng_init_clam_db(engine)
-  if result != CL_SUCCESS:
-    echo "Failed to load ClamAV DB. Error code ", result
+  # result = rkeng_init_clam_db(engine)
+  # if result != CL_SUCCESS:
+  #   echo "Failed to load ClamAV DB. Error code ", result
   return result
 
 
