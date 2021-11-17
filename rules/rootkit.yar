@@ -174,19 +174,18 @@ rule Ark_ar {
     any of them
 }
 
-rule Ark_du {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "58f6c91ca922aa3d6f6b79b218e62b46"
-  strings:
-    $1 = "eEgGkKmMpPtTyYzZ0"
-    $2 = "abchHklmsxDLSX"
-  condition:
-    any of them
-}
-
+// rule Ark_du {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "58f6c91ca922aa3d6f6b79b218e62b46"
+//   strings:
+//     $1 = "eEgGkKmMpPtTyYzZ0"
+//     $2 = "abchHklmsxDLSX"
+//   condition:
+//     any of them
+// }
 
 rule Lrk_B_fix {
   meta:
