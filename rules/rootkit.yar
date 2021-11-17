@@ -323,3 +323,14 @@ rule Urk {
   condition:
     any of them
 }
+
+rule Ark_lrkv {
+  strings:
+    $1 = "RadCxmnlogrtucpFbqisfL"
+    $2 = /@\(#\)[w]+.c/
+    $3 = "acCegjklnrStuvwxU"
+    $4 = "usage: du [-ars] [name ...]"
+    $5 = "du: No more processes"
+  condition:
+    any of them
+}
