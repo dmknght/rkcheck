@@ -146,3 +146,105 @@ rule Knark {
 	condition:
 		all of them
 }
+
+rule Ark_ar {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "06d8660ace1f3ef557a7df2e85623cce"
+  strings:
+    $1 = "Mmmkay.. Time to backdoor thiz slut.."
+    $2 = "Backdooring Completed"
+    $3 = "ARK-[ You may want to supply a password"
+    $4 = "ARK-[ Welcome to ARK"
+  condition:
+    any of them
+}
+
+rule Ark_du {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "58f6c91ca922aa3d6f6b79b218e62b46"
+  strings:
+    $1 = "eEgGkKmMpPtTyYzZ0"
+    $2 = "abchHklmsxDLSX"
+  condition:
+    any of them
+}
+
+
+rule Lrk_B_fix {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "a29f6927825c948c5df847505fe2dd11"
+  strings:
+    $1 = "fix original replacement [backup]"
+    $2 = "fix: Last 17 bytes not zero"
+    $3 = "fix: Can't fix checksum"
+  condition:
+    all of them
+}
+
+rule Lrk_B_lled {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "bf10ff4214716f20bcd23227c6b6c0bb"
+  strings:
+    $1 = "/var/adm/lastlog"
+    $2 = "lastlog.tmp"
+    $3 = "Erase entry (y/n/f(astforward))?"
+    $4 = "/var/adm/wtmp"
+    $5 = "wtmp.tmp"
+  condition:
+    ($1 and $2) or ($4 and $5) and $3
+}
+
+rule Lrk_B_z2 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "0181b03af8360480baf346007ec76849"
+  strings:
+    $1 = "/etc/utmp"
+    $2 = "/usr/adm/wtmp"
+    $3 = "/usr/adm/lastlog"
+    $4 = /Zap[\d]/
+  condition:
+    all of them
+}
+
+rule Lrk_E_sniffchk {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "82a61d8b23956703f164b06968a8e599"
+  strings:
+    $1 = "The_l0gz"
+    // $2 = "/var/run/.tmp"
+    $3 = "Sniffer running"
+    $4 = "Restarting sniffer..."
+  condition:
+    any of them
+}
+
+rule Lrk_E_bindhshell {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "96702b7180082a00b2ced1a243360ed6"
+  strings:
+    $1 = "(nfsiod)"
+    $2 = "/bin/sh"
+  condition:
+    all of them
+}
