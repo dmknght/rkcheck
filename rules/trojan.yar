@@ -416,6 +416,10 @@ rule Rrs {
 }
 
 rule Necro {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
   strings:
     $ = "N3Cr0m0rPh"
   condition:
@@ -423,6 +427,10 @@ rule Necro {
 }
 
 rule PunBB {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
   strings:
     $ = "change_email SQL injection exploit"
     $ = "PunBB"
