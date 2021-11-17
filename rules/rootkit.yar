@@ -260,3 +260,32 @@ rule Lrk_E_bindhshell {
   condition:
     all of them
 }
+
+rule Rkit_a {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "rootkit() failed!"
+    $2 = "password guesses exhausted"
+    $3 = "rkit by Deathr0w"
+    $4 = "deathr0w.speckz.com"
+  condition:
+    any of them
+}
+
+rule Rkit_pwd {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "./.rkpass"
+    $2 = "Enter a new password [1-8 characters]"
+    $3 = "Writing to file: %s failed! Exiting..."
+    $4 = "Opening of file: %s failed! Exiting..."
+    $5 = "Saved new password to file: %"
+  condition:
+    (is_elf and $1) or ($2 and $3 and $4 and $5)
+}
