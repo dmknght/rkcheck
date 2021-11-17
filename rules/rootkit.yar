@@ -174,18 +174,23 @@ rule Ark_ar {
     any of them
 }
 
-// rule Ark_du {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "17/11/2021"
-//     hash = "58f6c91ca922aa3d6f6b79b218e62b46"
-//   strings:
-//     $1 = "eEgGkKmMpPtTyYzZ0"
-//     $2 = "abchHklmsxDLSX"
-//   condition:
-//     any of them
-// }
+rule Ark_du {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+    hash = "58f6c91ca922aa3d6f6b79b218e62b46"
+  strings:
+    $path_1 = "/usr/lib/.ark"
+    $s1 = "ptyxx"
+    $s2 = "SUBJECT: `/sbin/ifconfig eth0 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
+    $mail_1 = "tuiqoitu039t09q3@bigfoot.com"
+    $mail_2 = "bnadfjg9023@hotmail.com"
+    $mail_3 = "t391u9t0qit@end-war.com"
+    $mail_4 = "mki62969o@yahoo.com"
+  condition:
+    ($path_1 and $s1) or $s2 or any of ($mail*)
+}
 
 rule Lrk_B_fix {
   meta:
