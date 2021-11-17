@@ -189,7 +189,7 @@ rule Ark_du {
     $mail_3 = "t391u9t0qit@end-war.com"
     $mail_4 = "mki62969o@yahoo.com"
   condition:
-    ($path_1 and $s1) or $s2 or any of ($mail*)
+    (is_elf and $path_1 and $s1) or $s2 or any of ($mail*)
 }
 
 rule Lrk_B_fix {
