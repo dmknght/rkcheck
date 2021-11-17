@@ -293,3 +293,33 @@ rule Rkit_pwd {
   condition:
     (is_elf and $1) or ($2 and $3 and $4 and $5)
 }
+
+rule Suckit_b {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "FUCK: Can't allocate raw socket"
+    $2 = "FUCK: Can't fork child"
+    $3 = "BD_Init: Starting backdoor daemon..."
+    $4 = "Suckit uninstalled sucesfully!"
+    $5 = "Please enter new rootkit password:"
+  condition:
+    any of them
+}
+
+rule Urk {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "Inverses the bit's in a file to make it unreadable."
+    $2 = "@(#)log"
+    $3 = " (Berkeley) "
+    $4 = "UX:login: ERROR: Login incorrect"
+    $5 = "User %s (gid %d) from %s: %s"
+  condition:
+    any of them
+}
