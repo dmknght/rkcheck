@@ -404,7 +404,7 @@ rule BlueDragon_sfe {
     any of them
 }
 
-rule rrs {
+rule Rrs {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -413,4 +413,19 @@ rule rrs {
     $ = "hlp:b:r:R:t:Dqk:x:sS:P:c:v:C:e:m0LV"
   condition:
     any of them
+}
+
+rule Necro {
+  strings:
+    $ = "N3Cr0m0rPh"
+  condition:
+    any of them
+}
+
+rule PunBB {
+  strings:
+    $ = "change_email SQL injection exploit"
+    $ = "PunBB"
+  condition:
+    all of them
 }
