@@ -200,10 +200,10 @@ rule Lrk_B_fix {
     hash = "a29f6927825c948c5df847505fe2dd11"
   strings:
     $1 = "fix original replacement [backup]"
-    $2 = "fix: Last 17 bytes not zero"
-    $3 = "fix: Can't fix checksum"
+    $2 = "Last 17 bytes not zero"
+    $3 = "Can't fix checksum"
   condition:
-    all of them
+    $1 or ($2 and $3)
 }
 
 rule Lrk_B_lled {
