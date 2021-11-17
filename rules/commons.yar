@@ -145,6 +145,16 @@ rule OSCommand_WgetAndCurl_Downloader {
     all of them
 }
 
+rule Root_shell {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "r00t shell"
+  condition:
+    is_elf and $1
+}
 // rule OSCommand_Syslog_Removal {
 //   meta:
 //     author = "Nong Hoang Tu"

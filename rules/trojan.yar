@@ -327,3 +327,90 @@ rule MushDoor {
   condition:
     all of them
 }
+
+rule ICMP_Backdoor {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "icmp-backdoor"
+    $2 = "you need to be root!"
+  condition:
+    all of them
+}
+
+rule Lyceum {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $ = "d:D:s:S:l:p:P:u:x:i:b:I"
+    $ = "icmp moonbouce backdoor"
+    $ = "bi-spoofed icmp backdoor"
+    $ = "spoof all packets"
+  condition:
+    any of them
+}
+
+rule Silencer {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = /backdoor[d]_BEGIN/
+    $2 = "ready for injection.."
+    $3 = "0x4553-Silencer"
+    $4 = "by BrainStorm and Ares"
+  condition:
+    any of them
+}
+
+rule Sneaky {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "i:l:t:s:S:d:D:"
+    $2 = "[Sneaky@%s]#"
+    $3 = "Phish@mindless.com"
+  condition:
+    any of them
+}
+
+rule Galore {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "Backdoor Galore By NTFX"
+  condition:
+    any of them
+}
+
+rule BlueDragon_sfe {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "tHE rECIdjVO"
+    $2 = "<recidjvo@pkcrew.org>"
+  condition:
+    any of them
+}
+
+rule rrs {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $ = "hlp:b:r:R:t:Dqk:x:sS:P:c:v:C:e:m0LV"
+  condition:
+    any of them
+}
