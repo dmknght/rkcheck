@@ -136,15 +136,27 @@ rule Umbreon_espeon_TrendMicro {
 
 rule Knark {
   meta:
-		description = "Knark 2.4.3 rule detection"
 		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
-		date = "2021, 28 Jun"
+		date = "17/11/2021"
 	strings:
-		$ = "/usr/lib/.hax0r/sshd_trojan"
-		// $2 = "/proc/ksyms"
-		// $3 = "/dev/kmem"
+		$path_1 = "/usr/lib/.hax0r/sshd_trojan"
+    $path_2 = "/usr/local/sbin/sshd"
+    $path_3 = "/usr/lib/.hax0r"
+    $cmd_1 = "hidef"
+    $cmd_2 = "unhidef"
+    $cmd_3 = "nethides"
+    $cmd_4 = "verify_rexec"
+    $s1 = "Knark rexec verify-packet must be one of:"
+    $s2 = "nark %s by Creed @"
+    $s3 = "fikadags?"
+    $s4 = "%s -c (clear nethide-list)"
+    $s5 = "ex: %s www.microsoft.com 192.168.1.77 /bin/rm -fr /"
+    $s6 = "Have you really loaded knark.o?!"
+    $s7 = "alluid or allgid can be used to specify all *uid's or *gid's"
 	condition:
-		all of them
+		any of ($s*) or (
+      any of ($path*) and any of ($cmd*)
+    )
 }
 
 rule Ark_ar {
