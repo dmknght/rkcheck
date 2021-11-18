@@ -168,3 +168,8 @@ proc rkcheck_scan_file*(file_path: string) =
 proc rkcheck_scan_dir*(dir_path: string) =
   for file_path in walkDirRec(dir_path):
     rkcheck_scan_file(file_path)
+
+
+proc rkcheck_scan_dirs*(dir_paths: seq[string]) =
+  for dir_path in dir_paths:
+    rkcheck_scan_dir(dir_path)
