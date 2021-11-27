@@ -53,7 +53,7 @@ macro defineEnum(typ: untyped): untyped =
     proc `notop`*(x: `typ`): `typ` {.borrow.}
 
 
-{.pragma: impclamavHdr, header: "/tmp/clamav/libclamav/clamav.h".}
+{.pragma: impclamavHdr, header: "/usr/include/clamav.h".}
 {.experimental: "codeReordering".}
 {.passL: "-lclamav".}
 
