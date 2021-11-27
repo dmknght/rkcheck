@@ -41,7 +41,8 @@ proc compile_rules(dst: string) =
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, unsafeAddr(setting_max_string))
   yr_compiler_set_callback(compiler, report_error, unsafeAddr(compiler_result))
 
-  discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Ransomeware", "ransomware.yar")
+  discard yr_compiler_add_file(compiler, open("rules/magics.yar"), "Magic", "magics.yar")
+  discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Ransomware", "ransomware.yar")
   discard yr_compiler_add_file(compiler, open("rules/commons.yar"), "Generic", "commons.yar")
   discard yr_compiler_add_file(compiler, open("rules/rootkit.yar"), "Rootkit", "rootkit.yar")
   discard yr_compiler_add_file(compiler, open("rules/trojan.yar"), "Trojan", "trojan.yar")
