@@ -8,10 +8,10 @@ private rule is_elf {
 
 private rule is_shebang {
   condition:
-    uint32(0) == 0x752F2123 // "#!/u"
+    uint32(0) == 0x752F2123 // "#!/u". Meant to detect "#!/usr/bin/"
 }
 
-rule is_python {
+rule private is_python {
   condition:
     is_shebang and (
       uint32(0xB) == 0x68747970 /* "htyp". Detect "#!/usr/bin/python" */ or
