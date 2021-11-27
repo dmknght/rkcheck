@@ -11,6 +11,7 @@ private rule is_shebang {
     uint32(0) == 0x752F2123 // "#!/u". Meant to detect "#!/usr/bin/"
 }
 
+
 rule private is_python {
   condition:
     is_shebang and (
