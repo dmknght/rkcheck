@@ -1,5 +1,5 @@
 import "elf"
-include "magics.yar"
+include "rules/magics.yar"
 
 
 private rule elf_no_sections {

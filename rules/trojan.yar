@@ -1,7 +1,7 @@
 import "elf"
 import "hash"
 import "pe"
-include "rules/commons.yar"
+include "rules/magics.yar"
 
 
 // rule Trojan_3

@@ -1,4 +1,4 @@
-include "rules/commons.yar"
+include "rules/magics.yar"
 
 
 rule HCRootkit_1_LaceworkLabs {

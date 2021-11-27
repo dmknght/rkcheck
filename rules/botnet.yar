@@ -1,6 +1,6 @@
 import "elf"
 import "hash"
-include "rules/commons.yar"
+include "rules/magics.yar"
 
 
 rule Mirai_1 {
