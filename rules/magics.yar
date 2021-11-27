@@ -19,3 +19,5 @@ rule private is_python {
       uint32(0xF) == 0x68747970 // Detect "#!/usr/bin/env python"
     )
 }
+
+// TODO add shebang for perl, ruby, php, bash and other scripting languages
