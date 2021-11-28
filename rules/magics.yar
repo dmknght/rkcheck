@@ -16,7 +16,8 @@ rule private is_python {
   condition:
     is_shebang and (
       uint32(0xB) == 0x68747970 /* "htyp". Detect "#!/usr/bin/python" */ or
-      uint32(0xF) == 0x68747970 // Detect "#!/usr/bin/env python"
+      uint32(0xF) == 0x68747970 /* Detect "#!/usr/bin/env python" */ or
+      uint32(0x11) == 0x68747970 /* Detect #!/usr/local/bin/python */
     )
 }
 
