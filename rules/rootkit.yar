@@ -334,3 +334,19 @@ rule Ark_lrkv {
   condition:
     any of them
 }
+
+
+rule Phalanx_b6 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "29/11/2021"
+    reference = "https://packetstormsecurity.com/files/download/42556/phalanx-b6.tar.bz2"
+  strings:
+    $1 = "/sbin/ifconfig|grep inet|head -1|awk '{print $2}'|cut -f 2 -d :"
+    $2 = "phalanX beta 6 connected"
+    $4 = "uninstalling phalanx from the kernel"
+    $5 = "testing the userland process spawning code"
+  condition:
+    any of them
+}
