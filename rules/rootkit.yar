@@ -245,11 +245,10 @@ rule Lrk_E_sniffchk {
     hash = "82a61d8b23956703f164b06968a8e599"
   strings:
     $1 = "The_l0gz"
-    // $2 = "/var/run/.tmp"
     $3 = "Sniffer running"
     $4 = "Restarting sniffer..."
   condition:
-    any of them
+    is_elf any of them
 }
 
 rule Lrk_E_bindhshell {
@@ -262,7 +261,7 @@ rule Lrk_E_bindhshell {
     $1 = "(nfsiod)"
     $2 = "/bin/sh"
   condition:
-    all of them
+    is_elf all of them
 }
 
 rule Rkit_a {
@@ -276,7 +275,7 @@ rule Rkit_a {
     $3 = "rkit by Deathr0w"
     $4 = "deathr0w.speckz.com"
   condition:
-    any of them
+    is_elf any of them
 }
 
 rule Rkit_pwd {
@@ -306,7 +305,7 @@ rule Suckit_b {
     $4 = "Suckit uninstalled sucesfully!"
     $5 = "Please enter new rootkit password:"
   condition:
-    any of them
+    is_elf and any of them
 }
 
 rule Urk {
@@ -321,7 +320,7 @@ rule Urk {
     $4 = "UX:login: ERROR: Login incorrect"
     $5 = "User %s (gid %d) from %s: %s"
   condition:
-    any of them
+    is_elf and any of them
 }
 
 rule Ark_lrkv {
@@ -332,7 +331,7 @@ rule Ark_lrkv {
     $4 = "usage: du [-ars] [name ...]"
     $5 = "du: No more processes"
   condition:
-    any of them
+    is_elf and any of them
 }
 
 
@@ -348,5 +347,22 @@ rule Phalanx_b6 {
     $4 = "uninstalling phalanx from the kernel"
     $5 = "testing the userland process spawning code"
   condition:
-    any of them
+    is_elf and any of them
+}
+
+
+rule Adore {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "29/11/2021"
+    reference = "https://github.com/yaoyumeng/adore-ng"
+  strings:
+    $1 = "Failed to run as root. Trying anyway ..."
+    $2 = "Adore 1.%d installed. Good luck."
+    $3 = "Made PID %d invisible."
+    $4 = "ELITE_UID: %u, ELITE_GID=%u, ADORE_KEY=%s"
+    $5 = "Removed PID %d from taskstruct"
+  condition:
+    is_elf and any of them
 }
