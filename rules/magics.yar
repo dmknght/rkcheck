@@ -12,7 +12,7 @@ private rule is_shebang {
 }
 
 
-rule private is_python {
+private rule is_python {
   condition:
     is_shebang and (
       uint32(0xB) == 0x68747970 /* "htyp". Detect "#!/usr/bin/python" */ or
@@ -21,4 +21,13 @@ rule private is_python {
     )
 }
 
-// TODO add shebang for perl, ruby, php, bash and other scripting languages
+
+private rule is_ruby {
+  condition:
+    is_shebang and (
+      uint32(0xB) == 0x79627572 /* "ruby". Detect "#!/usr/bin/ruby" */ or
+      uint32(0xF) == 0x79627572 /* "#!/usr/bin/env ruby" */ or
+      uint32(0x11) == 0x79627572 /* #!/usr/local/bin/ruby */
+    )
+}
+// TODO add shebang for perl, php, bash and other scripting languages
