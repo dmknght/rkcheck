@@ -139,20 +139,3 @@ rule BotenaGo {
   condition:
     is_elf and any of them
 }
-
-// 
-// rule KokainKit { TODO: the script generates multiple scripts. I have to work to search match all of files.
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Kokain"
-//     reference = "https://otx.alienvault.com/indicator/file/0e08cfb2d92b67ad67e7014e2e91849be3ef1b13c201b7ae928a1bab5a010b5b"
-//     date = "12/11/2021"
-//     target = "File, memory"
-//   strings:
-//     $1 = "TORNDIR=/usr/src/.puta"
-//     $2 = "THEDIR=/usr/lib/$THEPASS"
-//     $3 = "if ! test \"$(whoami)\" = \"root\"; then"
-//   condition:
-//     all of them
-// }
