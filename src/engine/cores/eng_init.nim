@@ -18,7 +18,8 @@ proc rinit_clam_engine*(engine: var CoreEngine): cl_error_t =
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_MACROS)
-    cl_engine_set_clcb_pre_scan(engine.ClamAV, rscanner_cb_clam_prescan)
+    # cl_engine_set_clcb_pre_cache(engine.ClamAV, rscanner_cb_clam_scan)
+    #
     cl_engine_set_clcb_virus_found(engine.ClamAV, rscanner_cb_clam_virus_found)
     if engine.LibClamDebug:
       cl_debug()
@@ -69,43 +70,3 @@ proc rfinit_yara_engine*(engine: var CoreEngine) =
   if engine.YaraEng != nil:
     discard yr_rules_destroy(engine.YaraEng)
   discard yr_finalize()
-
-
-# proc rkeng_start_clam(engine: var RkEngine): cl_error_t =
-#   result = rkeng_init_clam_eng(engine)
-#   if result != CL_SUCCESS:
-#     echo "Failed to init ClamAV engine. Error code ", result
-#     return result
-#   # result = rkeng_init_clam_db(engine)
-#   # if result != CL_SUCCESS:
-#   #   echo "Failed to load ClamAV DB. Error code ", result
-#   return result
-
-
-# proc rkeng_start_yara(engine: var RkEngine): int =
-#   result = rkeng_init_yara(engine)
-#   if result != ERROR_SUCCESS:
-#     echo "Failed to start yara engine. Error code ", result
-#     return result
-
-#   result = rkeng_init_yara_db(engine)
-#   if result != ERROR_SUCCESS:
-#     echo "Failed to load yara rules. Error code ", result
-#     return result
-
-
-# proc rkcheck_start_engine*(engine: var RkEngine): cl_error_t =
-#   result = rkeng_start_clam(engine)
-#   if result == CL_SUCCESS:
-#     result = cl_engine_compile(engine.CL_Eng)
-#     let yr_result = rkeng_start_yara(engine)
-#     if yr_result != ERROR_SUCCESS:
-#       result = CL_ERROR
-#     else:
-#       result = CL_SUCCESS
-#   return result
-
-
-# proc rkcheck_stop_engine*(engine: var RkEngine) =
-#   rkeng_finit_clam(engine)
-#   rkeng_finit_yara(engine)

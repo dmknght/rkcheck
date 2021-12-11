@@ -32,11 +32,14 @@ proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer)
 #   # moveFile(user_data.scan_object, "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/" & newName)
 
 
-proc rscanner_cb_clam_prescan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
   discard
   # TODO if we scan with ClamAV, better to scan yara if clam doesnt match
   # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
-  # discard yr_rules_scan_fd(engine.CoreEngine, fd, yr_scan_flags, rscanner_cb_yara_scan_file, addr(user_data), yr_scan_timeout)
+  let
+    engine = cast[CoreEngine](context)
+  var user_data: string
+  discard yr_rules_scan_fd(engine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, addr(user_data), yr_scan_timeout)
   # return user_data.scan_result
 
 
@@ -54,29 +57,19 @@ proc scanner_scan_dir(context: var FileScanContext, dir_path: string) =
     scanner_scan_file(context, file_path)
 
 
-proc rscanner_new_file_scan*(engine: CoreEngine, file_path: string) =
-  var
-    ScanContext: FileScanContext
-  ScanContext.ScanEngine = engine
-  scanner_scan_file(ScanContext, file_path)
+proc rscanner_new_file_scan*(context: var FileScanContext, file_path: string) =
+  scanner_scan_file(context, file_path)
 
 
-proc rscanner_new_files_scan*(engine: CoreEngine, file_paths: seq[string]) =
-  var
-    ScanContext: FileScanContext
-  ScanContext.ScanEngine = engine
+proc rscanner_new_files_scan*(context: var FileScanContext, file_paths: seq[string]) =
   for file_path in file_paths:
-    scanner_scan_file(ScanContext, file_path)
+    scanner_scan_file(context, file_path)
 
 
-proc rscanner_new_dir_scan*(engine: CoreEngine, dir_path: string) =
-  var ScanContext: FileScanContext
-  ScanContext.ScanEngine = engine
-  scanner_scan_dir(ScanContext, dir_path)
+proc rscanner_new_dir_scan*(context: var FileScanContext, dir_path: string) =
+  scanner_scan_dir(context, dir_path)
 
 
-proc rscanner_new_dirs_scan*(engine: CoreEngine, dir_paths: seq[string]) =
-  var ScanContext: FileScanContext
-  ScanContext.ScanEngine = engine
+proc rscanner_new_dirs_scan*(context: var FileScanContext, dir_paths: seq[string]) =
   for dir_path in dir_paths:
-    scanner_scan_dir(ScanContext, dir_path)
+    scanner_scan_dir(context, dir_path)

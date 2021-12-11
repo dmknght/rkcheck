@@ -36,25 +36,21 @@ proc rscanner_scan_proc(context: var ProcScanContext) =
   )
 
 
-proc rscanner_new_proc_scan*(engine: CoreEngine, pid: int) =
-  var ScanContext: ProcScanContext
-  ScanContext.ScanEngine = engine
-  ScanContext.scan_object.pid = pid
-  ScanContext.scan_object.pid_path = "/proc/" & intToStr(pid)
+proc rscanner_new_proc_scan*(context: var ProcScanContext, pid: int) =
+  context.scan_object.pid = pid
+  context.scan_object.pid_path = "/proc/" & intToStr(pid)
 
-  rscanner_scan_proc(ScanContext)
+  rscanner_scan_proc(context)
 
 
-proc rscanner_new_procs_scan*(engine: CoreEngine) =
-  var ScanContext: ProcScanContext
-  ScanContext.ScanEngine = engine
+proc rscanner_new_procs_scan*(context: var ProcScanContext) =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir:
       try:
         let pid = parseInt(path.split("/")[^1])
-        ScanContext.scan_object.pid = pid
-        ScanContext.scan_object.pid_path = path
-        rscanner_scan_proc(ScanContext)
+        context.scan_object.pid = pid
+        context.scan_object.pid_path = path
+        rscanner_scan_proc(context)
       except ValueError:
         # This is not a process from procfs
         discard

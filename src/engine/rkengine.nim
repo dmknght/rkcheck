@@ -9,7 +9,7 @@ proc rkeng_start_clam(engine: var CoreEngine): cl_error_t =
   if result != CL_SUCCESS:
     echo "Failed to init ClamAV engine. Error code ", result
     return result
-  # result = rkeng_init_clam_db(engine) # TODO think about custom ClamAV signatures
+  # result = rinit_clam_db(engine) # TODO think about custom ClamAV signatures
   # Current version doesn't have upx unpacker on Linux
   return result
 
@@ -41,24 +41,49 @@ proc rkcheck_stop_engine*(engine: var CoreEngine) =
 
 
 proc rkcheck_scan_proc*(engine: var CoreEngine, pid: int) =
-  rscanner_new_proc_scan(engine, pid)
+  var
+    ScanContext: FileScanContext
+  ScanContext.ScanEngine = engine
+  # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
+  rscanner_new_proc_scan(ScanContext, pid)
+  # TODO free context
 
 
 proc rkcheck_scan_procs*(engine: var CoreEngine) =
-  rscanner_new_procs_scan(engine)
+  var
+    ScanContext: FileScanContext
+  ScanContext.ScanEngine = engine
+  rscanner_new_procs_scan(ScanContext)
+  # TODO free context
 
 
 proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
-  rscanner_new_files_scan(engine, file_list)
+  var
+    ScanContext: FileScanContext
+  ScanContext.ScanEngine = engine
+  rscanner_new_files_scan(ScanContext, file_list)
+  # TODO free context
 
 
 proc rkcheck_scan_file*(engine: var CoreEngine, file_path: string) =
-  rscanner_new_file_scan(engine, file_path)
+  var
+    ScanContext: FileScanContext
+  ScanContext.ScanEngine = engine
+  rscanner_new_file_scan(ScanContext, file_path)
+  # TODO free context
 
 
 proc rkcheck_scan_dir*(engine: var CoreEngine, dir_path: string) =
-  rscanner_new_dir_scan(engine, dir_path)
+  var
+    ScanContext: FileScanContext
+  ScanContext.ScanEngine = engine
+  rscanner_new_dir_scan(ScanContext, dir_path)
+  # TODO free context
 
 
 proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
-  rscanner_new_dirs_scan(engine, dir_list)
+  var
+    ScanContext: FileScanContext
+  ScanContext.ScanEngine = engine
+  rscanner_new_dirs_scan(ScanContext, dir_list)
+  # TODO free context
