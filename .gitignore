@@ -1,3 +1,5 @@
 src/rkcheck
 src/rkcompiler
 database/*
+testsrc
+tools/rkcompiler
