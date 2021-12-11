@@ -24,7 +24,7 @@ proc rscanner_scan_proc(context: var ProcScanContext) =
   # TODO handle parent pid, child pid, ... to do ignore scan
   # TODO sometime the actual malicious part is cmdline (python3 -c <reverse shell> for example. We scan it as well)
   discard yr_rules_scan_proc(
-    context.CoreEngine.YaraEng, # FIXME type mismatch got ProcScanContext but expected CoreEngine = object
+    context.ScanEngine.YaraEng,
     cint(context.scan_object.pid),
     0,
     cb_yr_process_scan,
