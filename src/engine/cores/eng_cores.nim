@@ -17,7 +17,7 @@ type
   ProcInfo* = object
     pid*: int
     pid_path*: string
-    cmd_line*: string
+    cmdline*: string
     # TOOD parent, child pid, more
   ProcScanContext* = object
     ScanEngine*: CoreEngine
