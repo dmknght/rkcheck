@@ -2,6 +2,7 @@ import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
 import os
 import bitops
+import strutils
 
 type
   RkEngine* = object
@@ -33,6 +34,16 @@ proc cb_yr_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: point
     return CALLBACK_CONTINUE
 
 
+proc cb_yr_process_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+  if message == CALLBACK_MSG_RULE_MATCHING:
+    let binary_path = readFile(cast[ptr YR_User_Data](user_data).scan_object & "/cmdline")
+    echo cast[ptr YR_RULE](message_data).ns.name, ":", cast[ptr YR_RULE](message_data).identifier, " ", binary_path
+    return CALLBACK_ABORT
+  else:
+    cast[ptr YR_User_Data](user_data).virus_name = ""
+    return CALLBACK_CONTINUE
+
+
 proc cb_clam_virus_found(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   let
     virus_name = if user_data.virus_name != "": user_data.virus_name else: virname
@@ -46,7 +57,6 @@ proc cb_clam_prescan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {
   let
     yr_scan_flags: cint = SCAN_FLAGS_FAST_MODE
     yr_scan_timeout: cint = 1000000
-  
   discard yr_rules_scan_fd(engine.YR_Eng, fd, yr_scan_flags, cb_yr_scan, addr(user_data), yr_scan_timeout)
   return user_data.scan_result
 
@@ -173,3 +183,15 @@ proc rkcheck_scan_dir*(dir_path: string) =
 proc rkcheck_scan_dirs*(dir_paths: seq[string]) =
   for dir_path in dir_paths:
     rkcheck_scan_dir(dir_path)
+
+
+proc rkcheck_scan_procs*() =
+  let yr_scan_timeout: cint = 1000000
+  for kind, path in walkDir("/proc/"):
+    if kind == pcDir:
+      try:
+        let proc_id = parseInt(path.split("/")[^1])
+        user_data.scan_object = path
+        discard yr_rules_scan_proc(engine.YR_Eng, cint(proc_id), 0, cb_yr_process_scan, addr(user_data), yr_scan_timeout)
+      except ValueError:
+        discard
