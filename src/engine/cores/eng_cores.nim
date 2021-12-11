@@ -10,18 +10,21 @@ type
     ClamDbPath*: string
     YaraDbPath*: string
   FileScanContext* = object
+    ScanEngine*: CoreEngine
     scan_object*: string
     scan_result*: cl_error_t
     virus_name*: cstring
   ProcInfo* = object
-    pid*: cint
+    pid*: int
     pid_path*: string
     cmd_line*: string
     # TOOD parent, child pid, more
   ProcScanContext* = object
+    ScanEngine*: CoreEngine
     scan_object*: ProcInfo
     scan_result*: cl_error_t # TODO think about this
     virus_name*: string
+    # TODO there are parent processess, child processes has the same memory value. We try to ignore them during scan
 
 const
   yr_scan_flags*: cint = SCAN_FLAGS_FAST_MODE
