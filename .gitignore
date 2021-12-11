@@ -1,7 +1,7 @@
-src/rkcheck
 src/rkcompiler
 database/*
 testsrc
 src/tools/rkcompiler
 src/engine/startup_enum
 src/engine/file_handler
+src/main
