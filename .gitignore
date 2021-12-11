@@ -2,5 +2,5 @@ src/rkcheck
 src/rkcompiler
 database/*
 testsrc
-tools/rkcompiler
+src/tools/rkcompiler
 src/engine/startup_enum
