@@ -77,7 +77,6 @@ proc rkcheck_scan_file*(engine: var CoreEngine, file_path: string) =
 proc rkcheck_scan_dir*(engine: var CoreEngine, dir_path: string) =
   var
     ScanContext: FileScanContext
-  # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
   ScanContext.ScanEngine = engine
   rscanner_new_dir_scan(ScanContext, dir_path)
   # TODO free context

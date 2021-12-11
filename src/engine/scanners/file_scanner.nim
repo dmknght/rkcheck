@@ -8,39 +8,39 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
   #[
     Handle scan result from Yara engine
   ]#
+  
+  var
+    ctx = cast[ptr FileScanContext](user_data)
+    rule = cast[ptr YR_RULE](message_data)
   # If target matches a rule
+
   if message == CALLBACK_MSG_RULE_MATCHING:
     # Change current result of scan context to virus
-    cast[ptr FileScanContext](user_data).scan_result = CL_VIRUS
+    ctx.scan_result = CL_VIRUS
     # Change virus name of current scan context
-    cast[ptr FileScanContext](user_data).virus_name = $cast[ptr YR_RULE](message_data).ns.name & ":" & $cast[ptr YR_RULE](message_data).identifier
+    ctx.virus_name = $rule.ns.name & ":" & $rule.identifier
     return CALLBACK_ABORT
   else:
     # Remove status "virus" and virus name
-    cast[ptr FileScanContext](user_data).scan_result = CL_CLEAN
-    cast[ptr FileScanContext](user_data).virus_name = ""
+    ctx.scan_result = CL_CLEAN
+    ctx.virus_name = ""
     return CALLBACK_CONTINUE
 
 
 proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  discard
-#   let
-#     virus_name = if user_data.virus_name != "": user_data.virus_name else: virname
-#   echo virus_name, " ", user_data.scan_object
-#   #[Analysis code only. Move file to other path]#
-#   # let newName = splitPath(user_data.scan_object).tail & "_detected"
-#   # moveFile(user_data.scan_object, "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/" & newName)
+  # FIXME clam_virus_found wasn't called
+  let
+    ctx = cast[ptr FileScanContext](context)
+    virus_name = if ctx.virus_name != "": ctx.virus_name else: virname
+  echo virus_name, " ", ctx.scan_object
 
 
 proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
-  discard
+  let ctx = cast[ptr FileScanContext](context)
   # TODO if we scan with ClamAV, better to scan yara if clam doesnt match
   # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
-  let
-    engine = cast[CoreEngine](context)
-  var user_data: string
-  discard yr_rules_scan_fd(engine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, addr(user_data), yr_scan_timeout)
-  # return user_data.scan_result
+
+  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
 
 
 proc scanner_scan_file(context: var FileScanContext, file_path: string) =
@@ -49,7 +49,7 @@ proc scanner_scan_file(context: var FileScanContext, file_path: string) =
     scanned: culong = 0
 
   context.scan_object = file_path
-  discard cl_scanfile(file_path, addr(virname), addr(scanned), context.ScanEngine.ClamAV, addr(context.ScanEngine.ClamScanOpts))
+  discard cl_scanfile_callback(file_path, addr(virname), addr(scanned), context.ScanEngine.ClamAV, addr(context.ScanEngine.ClamScanOpts), addr(context))
 
 
 proc scanner_scan_dir(context: var FileScanContext, dir_path: string) =
