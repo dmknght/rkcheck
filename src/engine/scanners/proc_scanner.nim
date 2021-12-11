@@ -8,15 +8,12 @@ import strutils
 proc cb_yr_process_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   if message == CALLBACK_MSG_RULE_MATCHING:
     let
-      data = cast[ProcScanContext](user_data)
-      bin_path = data.scan_object.cmdline.split(" ")[0] # binary should be the first. # TODO handle binary with space in name with custom name parser
-    echo cast[ptr YR_RULE](message_data).ns.name, ":", cast[ptr YR_RULE](message_data).identifier, " ", bin_path, " pid: ", data.scan_object.pid
+      data = cast[ptr ProcInfo](user_data)
+    echo cast[ptr YR_RULE](message_data).ns.name, ":", cast[ptr YR_RULE](message_data).identifier, " pid: ", data.pid, " ", data.cmdline
     return CALLBACK_ABORT
   else:
     # cast[ProcScanContext](user_data).virus_name = ""
     return CALLBACK_CONTINUE
-
-# proc rscanner_scan_proc(pid: int) =
 
 
 proc rscanner_scan_proc(context: var ProcScanContext) =
@@ -28,7 +25,7 @@ proc rscanner_scan_proc(context: var ProcScanContext) =
     cint(context.scan_object.pid),
     0,
     cb_yr_process_scan,
-    addr(context),
+    addr(context.scan_object),
     yr_scan_timeout
   )
 

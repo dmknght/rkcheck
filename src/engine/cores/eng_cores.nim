@@ -22,8 +22,6 @@ type
   ProcScanContext* = object
     ScanEngine*: CoreEngine
     scan_object*: ProcInfo
-    scan_result*: cl_error_t # TODO think about this
-    virus_name*: string
     # TODO there are parent processess, child processes has the same memory value. We try to ignore them during scan
 
 const
