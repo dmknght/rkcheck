@@ -1,6 +1,7 @@
 import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
 import cores / [eng_cores, eng_init]
+import scanners / [file_scanner, proc_scanner]
 
 
 proc rkeng_start_clam(engine: var CoreEngine): cl_error_t =
@@ -37,3 +38,27 @@ proc rkcheck_start_engine*(engine: var CoreEngine): cl_error_t =
 proc rkcheck_stop_engine*(engine: var CoreEngine) =
   rfinit_clam_engine(engine)
   rfinit_yara_engine(engine)
+
+
+proc rkcheck_scan_proc*(engine: var CoreEngine, pid: int) =
+  rscanner_new_proc_scan(engine, pid)
+
+
+proc rkcheck_scan_procs*(engine: var CoreEngine) =
+  rscanner_new_procs_scan(engine)
+
+
+proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
+  rscanner_new_files_scan(engine, file_list)
+
+
+proc rkcheck_scan_file*(engine: var CoreEngine, file_path: string) =
+  rscanner_new_file_scan(engine, file_path)
+
+
+proc rkcheck_scan_dir*(engine: var CoreEngine, dir_path: string) =
+  rscanner_new_dir_scan(engine, dir_path)
+
+
+proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
+  rscanner_new_dirs_scan(engine, dir_list)
