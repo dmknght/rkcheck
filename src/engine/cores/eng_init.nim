@@ -2,6 +2,7 @@ import bitops
 import .. / .. / libs / libclamav / nim_clam
 import .. / .. / libs / libyara / nim_yara
 import eng_cores
+import .. / scanners / file_scanner
 
 
 proc rinit_clam_engine*(engine: var CoreEngine): cl_error_t =
@@ -17,8 +18,8 @@ proc rinit_clam_engine*(engine: var CoreEngine): cl_error_t =
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_MACROS)
-    # cl_engine_set_clcb_pre_scan(engine.ClamAV, cb_clam_prescan)
-    # cl_engine_set_clcb_virus_found(engine.ClamAV, cb_clam_virus_found)
+    cl_engine_set_clcb_pre_scan(engine.ClamAV, rscanner_cb_clam_prescan)
+    cl_engine_set_clcb_virus_found(engine.ClamAV, rscanner_cb_clam_virus_found)
     if engine.LibClamDebug:
       cl_debug()
   return result
