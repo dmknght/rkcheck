@@ -31,6 +31,7 @@ proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer)
   # FIXME clam_virus_found wasn't called
   let
     ctx = cast[ptr FileScanContext](context)
+    # Show virname for heur detection
     virus_name = if ctx.virus_name != "": ctx.virus_name else: virname
   echo virus_name, " ", ctx.scan_object
 
@@ -41,6 +42,7 @@ proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
   # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
 
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
+  return ctx.scan_result
 
 
 proc scanner_scan_file(context: var FileScanContext, file_path: string) =
