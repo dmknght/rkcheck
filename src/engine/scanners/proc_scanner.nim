@@ -9,7 +9,7 @@ proc cb_yr_process_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_dat
   if message == CALLBACK_MSG_RULE_MATCHING:
     let
       data = cast[ptr ProcInfo](user_data)
-    echo cast[ptr YR_RULE](message_data).ns.name, ":", cast[ptr YR_RULE](message_data).identifier, " pid: ", data.pid, " ", data.cmdline
+    echo cast[ptr YR_RULE](message_data).ns.name, ":", cast[ptr YR_RULE](message_data).identifier, " ", data.binary_path, " (pid: ", data.pid, ")"
     return CALLBACK_ABORT
   else:
     # cast[ProcScanContext](user_data).virus_name = ""
@@ -35,6 +35,7 @@ proc rscanner_new_proc_scan*(engine: CoreEngine, pid: int) =
   ScanContext.ScanEngine = engine
   ScanContext.scan_object.pid = pid
   ScanContext.scan_object.pid_path = "/proc/" & intToStr(pid)
+  ScanContext.scan_object.binary_path = expandSymlink(ScanContext.scan_object.pid_path & "/exe")
   rscanner_scan_proc(ScanContext)
 
 
