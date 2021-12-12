@@ -28,7 +28,9 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
 
 
 proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  # FIXME clam_virus_found wasn't called
+  #[
+    Print virus found message with file path
+  ]#
   let
     ctx = cast[ptr FileScanContext](context)
     # Show virname for heur detection
@@ -37,11 +39,14 @@ proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer)
 
 
 proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+  #[
+    The actual function to scan files. This function will call yara to scan file first.
+    If result is CL_CLEAN, Clam will scan with its signatures
+  ]#
   let ctx = cast[ptr FileScanContext](context)
-  # TODO if we scan with ClamAV, better to scan yara if clam doesnt match
   # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
-
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
+  # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result
 
 
