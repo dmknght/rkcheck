@@ -9,7 +9,7 @@ proc rkeng_start_clam(engine: var CoreEngine): cl_error_t =
   if result != CL_SUCCESS:
     echo "Failed to init ClamAV engine. Error code ", result
     return result
-  # result = rinit_clam_db(engine) # TODO think about custom ClamAV signatures
+  result = rinit_clam_db(engine)
   # Current version doesn't have upx unpacker on Linux
   return result
 
