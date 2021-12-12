@@ -37,6 +37,9 @@ proc rinit_clam_db*(engine: var CoreEngine): cl_error_t =
     ]#
   var
     sig_count: cuint = 0
+  # TODO skip if path is invalid
+  if engine.ClamDbPath == "":
+    return CL_SUCCESS
   result = cl_load(engine.ClamDbPath, engine.ClamAV, unsafeAddr(sig_count), CL_DB_STDOPT)
   if result == CL_SUCCESS:
     echo "Loaded ", sig_count, " ClamAV signatures"
