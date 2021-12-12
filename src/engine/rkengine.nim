@@ -45,7 +45,7 @@ proc rkcheck_scan_proc*(engine: var CoreEngine, pid: int) =
     ScanContext: ProcScanContext
   ScanContext.ScanEngine = engine
   rscanner_new_proc_scan(ScanContext, pid)
-  # TODO free context
+  dealloc(addr(ScanContext))
 
 
 proc rkcheck_scan_procs*(engine: var CoreEngine) =
@@ -53,7 +53,7 @@ proc rkcheck_scan_procs*(engine: var CoreEngine) =
     ScanContext: ProcScanContext
   ScanContext.ScanEngine = engine
   rscanner_new_procs_scan(ScanContext)
-  # TODO free context
+  dealloc(addr(ScanContext))
 
 
 proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
@@ -62,7 +62,7 @@ proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
   ScanContext.ScanEngine = engine
   rscanner_new_files_scan(ScanContext, file_list)
-  # TODO free context
+  dealloc(addr(ScanContext))
 
 
 proc rkcheck_scan_file*(engine: var CoreEngine, file_path: string) =
@@ -71,7 +71,7 @@ proc rkcheck_scan_file*(engine: var CoreEngine, file_path: string) =
   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
   ScanContext.ScanEngine = engine
   rscanner_new_file_scan(ScanContext, file_path)
-  # TODO free context
+  dealloc(addr(ScanContext))
 
 
 proc rkcheck_scan_dir*(engine: var CoreEngine, dir_path: string) =
@@ -79,7 +79,7 @@ proc rkcheck_scan_dir*(engine: var CoreEngine, dir_path: string) =
     ScanContext: FileScanContext
   ScanContext.ScanEngine = engine
   rscanner_new_dir_scan(ScanContext, dir_path)
-  # TODO free context
+  dealloc(addr(ScanContext))
 
 
 proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
@@ -88,4 +88,4 @@ proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
   ScanContext.ScanEngine = engine
   rscanner_new_dirs_scan(ScanContext, dir_list)
-  # TODO free context
+  dealloc(addr(ScanContext))
