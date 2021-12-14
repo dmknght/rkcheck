@@ -119,12 +119,28 @@ rule Metasploit_Staged {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Scan Metasploit's Linux staged payload by checking section hash"
+    description = "Scan Metasploit's Linux staged payload file by checking section hash"
+    target = "File"
   condition:
     is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
     )
+}
+
+rule Metasploit_Commons {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmnght@parrotsec.org"
+    description = "Metasploit's meterpreter common strings from dump memory"
+    target = "Process, File"
+  strings:
+    $ = "-p, --persist [none|install|uninstall] manage persistence"
+    $ = "session-guid"
+    $ = "MSF_LICENSE"
+    $ = "process_new: got %zd byte executable to run in memory"
+  condition:
+    all of them
 }
 
 rule Execdoor {
