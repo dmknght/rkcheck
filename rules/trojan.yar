@@ -453,3 +453,25 @@ rule PunBB {
   condition:
     all of them
 }
+
+rule keylogger_xspy {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "15/12/2021"
+    target = "File, memory"
+  strings:
+    // string from dumped mem + source code
+    $str_1 = "blah...."
+    $str_2 = "opened %s for snoopng"
+    $str_3 = "%s: can't open display %s"
+    // function call, also in source code, dump string. Those strings caused false positives
+    // $call_1 = "XKeycodeToKeysym"
+    // $call_2 = "XKeysymToString"
+    // $call_3 = "XQueryKeymap"
+    // $call_4 = "XDisplayKeycodes"
+    // $call_5 = "XOpenDisplay"
+  condition:
+    // (all of ($str_*)) or (all of ($call_*))
+    all of them
+}
