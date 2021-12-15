@@ -97,15 +97,16 @@ rule Xmrig_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "donate.v2.xmrig.com"
+    // $1 = "donate.v2.xmrig.com"
+    $1 = "xmrig.com"
     $2 = "cryptonight/0"
     $3 = "cryptonight-monerov7"
     $4 = "_ZN5xmrig"
-    $5 = "miner.fee.xmrig.com"
-    $6 = "emergency.fee.xmrig.com"
+    // $5 = "miner.fee.xmrig.com"
+    // $6 = "emergency.fee.xmrig.com"
     $7 = "Usage: xmrig [OPTIONS]"
     $8 = "xmrig.json"
-    $9 = "xmrigMiner"
+    $9 = "xmrigMiner" // fixme can't detect 0a79399*
   condition:
     is_elf and any of them
     // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
