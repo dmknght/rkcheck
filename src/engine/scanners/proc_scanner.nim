@@ -43,7 +43,12 @@ proc rscanner_new_proc_scan*(context: var ProcScanContext, pid: int) =
   rscanner_scan_proc(context)
 
 
-proc rscanner_new_procs_scan*(context: var ProcScanContext) =
+proc rscanner_new_procs_scan*(context: var ProcScanContext, pids: seq[int]) =
+  for pid in pids:
+    rscanner_new_proc_scan(context, pid)
+
+
+proc rscanner_new_all_procs_scan*(context: var ProcScanContext) =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir:
       try:

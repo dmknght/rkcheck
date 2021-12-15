@@ -48,11 +48,19 @@ proc rkcheck_scan_proc*(engine: var CoreEngine, pid: int) =
   dealloc(addr(ScanContext))
 
 
-proc rkcheck_scan_procs*(engine: var CoreEngine) =
+proc rkcheck_scan_procs*(engine: var CoreEngine, pids: seq[int]) =
   var
     ScanContext: ProcScanContext
   ScanContext.ScanEngine = engine
-  rscanner_new_procs_scan(ScanContext)
+  rscanner_new_procs_scan(ScanContext, pids)
+  dealloc(addr(ScanContext))
+
+
+proc rkcheck_scan_all_procs*(engine: var CoreEngine) =
+  var
+    ScanContext: ProcScanContext
+  ScanContext.ScanEngine = engine
+  rscanner_new_all_procs_scan(ScanContext)
   dealloc(addr(ScanContext))
 
 
