@@ -68,11 +68,12 @@ rule Connecticoin_Generic
     $1 = "connecticoin.org"
     $2 = "Connecticoin-Qt"
   condition:
-    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
-      elf.sections[i].name == ".rodata" and
-        $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
-        $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
-    )
+    is_elf and any of them
+    // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+    //   elf.sections[i].name == ".rodata" and
+    //     $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
+    //     $2 in (elf.sections[i].offset .. elf.sections[i + 1].offset)
+    // )
 }
 
 rule XMRStak_Generic {
@@ -87,7 +88,7 @@ rule XMRStak_Generic {
     $4 = "xmr-stak-rx 1.0.4-rx 65ade74"
     $5 = "XMRSTAK_VERSION"
   condition:
-    any of them
+    is_elf and any of them
 }
 
 rule Xmrig_Generic
@@ -103,8 +104,9 @@ rule Xmrig_Generic
     $5 = "miner.fee.xmrig.com"
     $6 = "emergency.fee.xmrig.com"
     $7 = "Usage: xmrig [OPTIONS]"
+    $8 = "xmrig.json"
   condition:
-    any of them
+    is_elf and any of them
     // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
     //   elf.sections[i].name == ".rodata" and
     //     $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
