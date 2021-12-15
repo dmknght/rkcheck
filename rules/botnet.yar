@@ -155,6 +155,7 @@ rule Mirai_variant_1 {
     $s1 = "Device Connected: %s | Port: %s | Arch: %s"
     $s2 = "TSource Engine Query"
     $s3 = "L33T HaxErS"
+    $s4 = "npxXoudifFeEgGaACScs" // Uniq string found in many Mirai's processes
   condition:
-    $cc or ($s2 and ($s1 or $s3))
+    $cc or ($s2 and ($s1 or $s3)) or $s4
 }
