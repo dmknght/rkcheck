@@ -105,6 +105,7 @@ rule Xmrig_Generic
     $6 = "emergency.fee.xmrig.com"
     $7 = "Usage: xmrig [OPTIONS]"
     $8 = "xmrig.json"
+    $9 = "xmrigMiner"
   condition:
     is_elf and any of them
     // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
