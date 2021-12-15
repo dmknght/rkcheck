@@ -154,6 +154,7 @@ rule Mirai_variant_1 {
     $cc = "194.76.226.240"
     $s1 = "Device Connected: %s | Port: %s | Arch: %s"
     $s2 = "TSource Engine Query"
+    $s3 = "L33T HaxErS"
   condition:
-    $cc or ($s1 and $s2)
+    $cc or ($s2 and ($s1 or $s3))
 }
