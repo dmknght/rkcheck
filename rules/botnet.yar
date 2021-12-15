@@ -160,3 +160,17 @@ rule Mirai_variant_1 {
   condition:
     $cc or ($s2 and ($s1 or $s3)) or $s4
 }
+
+rule Heur_Flooder_tool {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "15/11/2021"
+    target = "File, Memory"
+    hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
+  strings:
+    $1 = "Opening sockets"
+    $2 = "Sending attack"
+  condition:
+    all of them
+}
