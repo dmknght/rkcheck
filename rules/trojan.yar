@@ -475,3 +475,23 @@ rule keylogger_xspy {
     // (all of ($str_*)) or (all of ($call_*))
     all of them
 }
+
+
+rule exploit_dirtycow {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "15/12/2021"
+    target = "Memory"
+    hash = "0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
+    reference = "https://www.virustotal.com/gui/file/0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
+  strings:
+    $1 = "/etc/passwd"
+    $2 = "/tmp/passwd.bak"
+    $3 = "root"
+    $4 = "Please enter the new password:"
+    // $5 = "You can log in with the username"
+    $6 = "DON'T FORGET TO RESTORE!"
+  condition:
+    all of them
+}
