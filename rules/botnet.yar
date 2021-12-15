@@ -3,11 +3,12 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_1 {
+rule Heur_Mirai_SecHash_1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash"
+    // file fa9878*95ec37, compiled Py
   condition:
     is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
@@ -15,7 +16,7 @@ rule Mirai_1 {
     )
 }
 
-rule Mirai_2 {
+rule Heur_Mirai_SecHash_2 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -27,7 +28,7 @@ rule Mirai_2 {
     )
 }
 
-rule Mirai_Gafgyt {
+rule Heur_Mirai_SecHash_Gafgyt {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -40,7 +41,7 @@ rule Mirai_Gafgyt {
     )
 }
 
-rule Mirai_Tsunami
+rule Heur_Mirai_SecHash_Tsunami
 {
   meta:
     author = "Nong Hoang Tu"
@@ -138,4 +139,21 @@ rule BotenaGo {
     $5 = "http://adminisp:adminispbad"
   condition:
     is_elf and any of them
+}
+
+
+rule Mirai_variant_1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "15/11/2021"
+    target = "File, Memory"
+    description = "Strings from dumped mem"
+    hash = "a9878bffe5e771bd09109df185dc41883ca0a560bb7b635abddc4259995ec37"
+  strings:
+    $cc = "194.76.226.240"
+    $s1 = "Device Connected: %s | Port: %s | Arch: %s"
+    $s2 = "TSource Engine Query"
+  condition:
+    $cc or ($s1 and $s2)
 }
