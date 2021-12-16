@@ -2,6 +2,7 @@ import os
 import .. / .. / libs / libclamav / nim_clam
 import .. / .. / libs / libyara / nim_yara
 import .. / cores / eng_cores
+import strutils
 
 
 proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -18,7 +19,7 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     # Change current result of scan context to virus
     ctx.scan_result = CL_VIRUS
     # Change virus name of current scan context
-    ctx.virus_name = $rule.ns.name & ":" & $rule.identifier
+    ctx.virus_name = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
     return CALLBACK_ABORT
   else:
     # Remove status "virus" and virus name
@@ -48,6 +49,14 @@ proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result
+
+
+# proc rscanner_cb_clam_post_scan*(fd, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
+#   let ctx = cast[ptr FileScanContext](context)
+#   if scan_result == CL_CLEAN:
+#     discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
+#   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
+#   return ctx.scan_result
 
 
 proc scanner_scan_file(context: var FileScanContext, file_path: string) =
