@@ -60,8 +60,16 @@ rule Agent_2
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     vrt_report = "https://www.virustotal.com/gui/file/edbee3b92100cc9a6a8a3c1a5fc00212627560c5e36d29569d497613ea3e3c16"
+    // symbols: imp.getpid and imp.execvp
+    // strings (static) E: neither argv[0] nor $_ works.
+    // runtime strings /root/analyzed_bin and applet not found
+    // TODO need to test process scan
+  strings:
+    $1 = { 2F 72 6F 6F 74 2F 61 6E 61 6C 79 7A 65 64 5F 62 69 6E } // "/root/analyzed_bin"
+    $2 = { 61 70 70 6C 65 74 20 6E 6F 74 20 66 6F 75 6E 64 } // "applet not found"
   condition:
-    is_elf and hash.md5(elf.sections[16].offset, elf.sections[16].size) == "f3a96941a385fc9062269babdb5cbc02"
+    (is_elf and hash.md5(elf.sections[16].offset, elf.sections[16].size) == "f3a96941a385fc9062269babdb5cbc02") or
+    all of them
 }
 
 
@@ -115,7 +123,7 @@ rule custom_ssh_backdoor_server {
 }
 
 
-rule Metasploit_Staged {
+rule Metasploit_Staged_Heur {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -128,19 +136,20 @@ rule Metasploit_Staged {
     )
 }
 
-rule Metasploit_Commons {
+rule Metasploit_a_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmnght@parrotsec.org"
     description = "Metasploit's meterpreter common strings from dump memory"
+    // Only detects if process connects to C&C
     target = "Process, File"
   strings:
-    $ = "-p, --persist [none|install|uninstall] manage persistence"
-    $ = "session-guid"
-    $ = "MSF_LICENSE"
-    $ = "process_new: got %zd byte executable to run in memory"
+    $ = { 2D 70 2C 20 2D 2D 70 65 72 73 69 73 74 20 5B 6E 6F 6E 65 7C 69 6E 73 74 61 6C 6C 7C 75 6E 69 6E 73 74 61 6C 6C 5D 20 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "-p, --persist [none|install|uninstall] manage persistence"
+    $ = { 73 65 73 73 69 6F 6E 2D 67 75 69 64 } // "session-guid"
+    $ = { 4D 53 46 5F 4C 49 43 45 4E 53 45 } // "MSF_LICENSE"
+    $ = { 70 72 6F 63 65 73 73 5F 6E 65 77 3A 20 67 6F 74 20 25 7A 64 20 62 79 74 65 20 65 78 65 63 75 74 61 62 6C 65 20 74 6F 20 72 75 6E 20 69 6E 20 6D 65 6D 6F 72 79 } // "process_new: got %zd byte executable to run in memory"
   condition:
-    all of them
+    3 of them
 }
 
 rule Execdoor {
@@ -495,3 +504,7 @@ rule exploit_dirtycow {
   condition:
     all of them
 }
+
+// TODO 1384790107a5f200cab9593a39d1c80136762b58d22d9b3f081c91d99e5d0376 (upx)
+// hash unpacked: afb6ec634639a68624c052d083bbe28a0076cd3ab3d9a276c4b90cb4163b8317 golang malware
+// TODO 139b09543494ead859b857961d230a39b9f4fc730f81cf8445b6d83bacf67f3d: malware downloader rule34 python compiled file
