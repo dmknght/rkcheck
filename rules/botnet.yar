@@ -119,7 +119,7 @@ rule Tsunami_1 {
     $ = { 57 48 4F 20 25 73 } // "WHO %s"
     $ = { 50 4F 4E 47 20 25 73 } // "PONG %s"
   condition:
-    is_elf and all of them
+    all of them
 }
 
 
@@ -138,7 +138,7 @@ rule BotenaGo {
     $4 = "159.65.232.56"
     $5 = "http://adminisp:adminispbad"
   condition:
-    is_elf and any of them
+    any of them
 }
 
 
@@ -172,5 +172,5 @@ rule Flooder_a_Generic {
     $1 = { 4F 70 65 6E 69 6E 67 20 73 6F 63 6B 65 74 73 } // "Opening sockets"
     $2 = { 53 65 6E 64 69 6E 67 20 61 74 74 61 63 6B } // "Sending attack"
   condition:
-    is_elf and all of them
+    all of them
 }
