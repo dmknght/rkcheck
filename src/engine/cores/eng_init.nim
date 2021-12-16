@@ -19,6 +19,7 @@ proc rinit_clam_engine*(engine: var CoreEngine): cl_error_t =
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_MACROS)
     cl_engine_set_clcb_pre_cache(engine.ClamAV, rscanner_cb_clam_scan)
+    # cl_engine_set_clcb_post_scan(engine.ClamAV, rscanner_cb_clam_post_scan)
     cl_engine_set_clcb_virus_found(engine.ClamAV, rscanner_cb_clam_virus_found)
     if engine.LibClamDebug:
       cl_debug()
