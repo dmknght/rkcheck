@@ -3,7 +3,7 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Heur_Mirai_SecHash_1 {
+rule Mirai_a_SecH {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -16,7 +16,7 @@ rule Heur_Mirai_SecHash_1 {
     )
 }
 
-rule Heur_Mirai_SecHash_2 {
+rule Mirai_b_SecH {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -28,7 +28,7 @@ rule Heur_Mirai_SecHash_2 {
     )
 }
 
-rule Heur_Mirai_SecHash_Gafgyt {
+rule Mirai_Gafgyt_SecH {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -41,7 +41,7 @@ rule Heur_Mirai_SecHash_Gafgyt {
     )
 }
 
-rule Heur_Mirai_SecHash_Tsunami
+rule Mirai_Tsunami_SecH
 {
   meta:
     author = "Nong Hoang Tu"
@@ -54,7 +54,7 @@ rule Heur_Mirai_SecHash_Tsunami
     )
 }
 
-rule Mirai_DemonBot
+rule Mirai_DemonBot_SecH
 {
   meta:
     author = "Nong Hoang Tu"
@@ -116,10 +116,10 @@ rule Tsunami_1 {
     date = "13/11/2021"
     target = "File, memory"
   strings:
-    $ = "WHO %s"
-    $ = "PONG %s"
+    $ = { 57 48 4F 20 25 73 } // "WHO %s"
+    $ = { 50 4F 4E 47 20 25 73 } // "PONG %s"
   condition:
-    all of them
+    is_elf and all of them
 }
 
 
@@ -161,7 +161,7 @@ rule Mirai_variant_1 {
     $cc or ($s2 and ($s1 or $s3)) or $s4
 }
 
-rule Heur_Flooder_tool {
+rule Flooder_a_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -169,8 +169,8 @@ rule Heur_Flooder_tool {
     target = "File, Memory"
     hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
   strings:
-    $1 = "Opening sockets"
-    $2 = "Sending attack"
+    $1 = { 4F 70 65 6E 69 6E 67 20 73 6F 63 6B 65 74 73 } // "Opening sockets"
+    $2 = { 53 65 6E 64 69 6E 67 20 61 74 74 61 63 6B } // "Sending attack"
   condition:
-    all of them
+    is_elf and all of them
 }
