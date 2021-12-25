@@ -123,34 +123,25 @@ rule custom_ssh_backdoor_server {
 }
 
 
-rule Metasploit_Staged_Heur {
+rule Metasploit_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Scan Metasploit's Linux staged payload file by checking section hash"
-    target = "File"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
-    )
-}
-
-rule Metasploit_a_Generic {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmnght@parrotsec.org"
-    description = "Metasploit's meterpreter common strings from dump memory"
-    // Only detects if process connects to C&C
-    target = "Process, File"
+    date = "26/12/2021"
+    description = "Scan Metasploit's Linux by checking strings or section hash"
   strings:
-    $ = { 2D 70 2C 20 2D 2D 70 65 72 73 69 73 74 20 5B 6E 6F 6E 65 7C 69 6E 73 74 61 6C 6C 7C 75 6E 69 6E 73 74 61 6C 6C 5D 20 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "-p, --persist [none|install|uninstall] manage persistence"
+    // $ = { 2D 70 2C 20 2D 2D 70 65 72 73 69 73 74 20 5B 6E 6F 6E 65 7C 69 6E 73 74 61 6C 6C 7C 75 6E 69 6E 73 74 61 6C 6C 5D 20 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "-p, --persist [none|install|uninstall] manage persistence"
+    $ = { 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "manage persistence"
     $ = { 73 65 73 73 69 6F 6E 2D 67 75 69 64 } // "session-guid"
     $ = { 4D 53 46 5F 4C 49 43 45 4E 53 45 } // "MSF_LICENSE"
-    $ = { 70 72 6F 63 65 73 73 5F 6E 65 77 3A 20 67 6F 74 20 25 7A 64 20 62 79 74 65 20 65 78 65 63 75 74 61 62 6C 65 20 74 6F 20 72 75 6E 20 69 6E 20 6D 65 6D 6F 72 79 } // "process_new: got %zd byte executable to run in memory"
+    // $ = { 70 72 6F 63 65 73 73 5F 6E 65 77 3A 20 67 6F 74 20 25 7A 64 20 62 79 74 65 20 65 78 65 63 75 74 61 62 6C 65 20 74 6F 20 72 75 6E 20 69 6E 20 6D 65 6D 6F 72 79 } // "process_new: got %zd byte executable to run in memory"
   condition:
-    3 of them
+    // Check for file only
+    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
+    ) or all of them // Check file or memory's strings
 }
+
 
 rule Execdoor {
   meta:
