@@ -9,7 +9,7 @@
 # const 'safe_open' has unsupported value 'open'
 {.push hint[ConvFromXtoItselfNotNeeded]: off.}
 import macros
-# import posix
+import posix
 
 macro defineEnum(typ: untyped): untyped =
   result = newNimNode(nnkStmtList)
@@ -287,11 +287,11 @@ type
     builder*: cstring
     stime*: cuint
   
-  # cl_stat* {.bycopy, impclamavHdr, importc: "struct cl_stat".} = object
-  #   dir*: cstring
-  #   stattab*: ptr stat
-  #   statdname*: ptr cstring
-  #   entries*: cuint
+  cl_stat* {.bycopy, impclamavHdr, importc: "struct cl_stat".} = object
+    dir*: cstring
+    stattab*: ptr Stat
+    statdname*: ptr cstring
+    entries*: cuint
 
   cl_fmap* {.incompleteStruct, impclamavHdr, importc: "struct cl_fmap".} = object
   cl_fmap_t* {.importc, impclamavHdr.} = cl_fmap
@@ -782,9 +782,9 @@ proc cl_cvdfree*(cvd: ptr cl_cvd) {.importc, cdecl, impclamavHdr.}
                                                                   ##   
                                                                   ##    @param cvd   Pointer to a CVD header struct.
                                                                   ## ```
-# proc cl_statinidir*(dirname: cstring; dbstat: ptr cl_stat): cl_error_t {.
-#     importc, cdecl, impclamavHdr.}
-## ```
+proc cl_statinidir*(dirname: cstring; dbstat: ptr cl_stat): cl_error_t {.
+    importc, cdecl, impclamavHdr.}
+# ```
                                   ##   @brief Initialize a directory to be watched for database changes.
                                   ##   
                                   ##    The dbstat out variable is allocated and must be freed using cl_statfree().
@@ -793,16 +793,16 @@ proc cl_cvdfree*(cvd: ptr cl_cvd) {.importc, cdecl, impclamavHdr.}
                                   ##    @param[out] dbstat   dbstat handle.
                                   ##    @return cl_error_t   CL_SUCCESS if successfully initialized.
                                   ## ```
-# proc cl_statchkdir*(dbstat: ptr cl_stat): cint {.importc, cdecl, impclamavHdr.}
-## ```
+proc cl_statchkdir*(dbstat: ptr cl_stat): cint {.importc, cdecl, impclamavHdr.}
+# ```
                                                                                ##   @brief Check the database directory for changes.
                                                                                ##   
                                                                                ##    @param dbstat dbstat handle.
                                                                                ##    @return int   0 No change.
                                                                                ##    @return int   1 Some change occured.
                                                                                ## ```
-# proc cl_statfree*(dbstat: ptr cl_stat): cl_error_t {.importc, cdecl,
-#     impclamavHdr.}
+proc cl_statfree*(dbstat: ptr cl_stat): cl_error_t {.importc, cdecl,
+    impclamavHdr.}
 ## ```
                   ##   @brief Free the dbstat handle.
                   ##   
