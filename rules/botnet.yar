@@ -47,6 +47,7 @@ rule Mirai_Tsunami_SecH
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Gafgyt-Jm (Avast named) or Tsunami Botnet (FireEye and other), 1 backdoor and 1 used for Dirtycow exploit"
+    // Fixme false positive of idea-IU and powershell
   condition:
     is_elf and
     for any i in (0 .. elf.number_of_sections - 1): (
@@ -171,6 +172,22 @@ rule Flooder_a_Generic {
   strings:
     $1 = { 4F 70 65 6E 69 6E 67 20 73 6F 63 6B 65 74 73 } // "Opening sockets"
     $2 = { 53 65 6E 64 69 6E 67 20 61 74 74 61 63 6B } // "Sending attack"
+  condition:
+    all of them
+}
+
+rule Ngioweb_a {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "25/12/2021"
+    target = "File, memory"
+    hash = "524df78615ffb007a0d7a9aafcedf918c0568200f95c6936767aa3931a81c7cd" // UPX binary
+    hash = "0b213e1f92a2613f7cebff82e8ffbdae985e3446960bf4bd365b5751efa08b53" // unpacked binary
+    description = "String detection for Ngioweb memory scan. Static file was detected by section hash"
+  strings:
+    $1 = "D$8L;|"
+    $2 = "$D37D1"
   condition:
     all of them
 }
