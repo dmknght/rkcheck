@@ -186,8 +186,8 @@ rule Ngioweb_a {
     hash = "0b213e1f92a2613f7cebff82e8ffbdae985e3446960bf4bd365b5751efa08b53" // unpacked binary
     description = "String detection for Ngioweb memory scan. Static file was detected by section hash"
   strings:
-    $1 = "D$8L;|"
-    $2 = "$D37D1"
+    $1 = { 44 24 38 4C 3B 7C } // "D$8L;|"
+    $2 = { 24 44 33 37 44 31 } // "$D37D1"
   condition:
     all of them
 }
