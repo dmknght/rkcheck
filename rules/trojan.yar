@@ -123,12 +123,12 @@ rule custom_ssh_backdoor_server {
 }
 
 
-rule Metasploit_Generic {
+rule Metasploit_Staged_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "26/12/2021"
-    description = "Scan Metasploit's Linux by checking strings or section hash"
+    description = "Scan Metasploit's Linux Staged by checking strings or section hash. Current rule doesn't match encoded malware"
   strings:
     // $ = { 2D 70 2C 20 2D 2D 70 65 72 73 69 73 74 20 5B 6E 6F 6E 65 7C 69 6E 73 74 61 6C 6C 7C 75 6E 69 6E 73 74 61 6C 6C 5D 20 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "-p, --persist [none|install|uninstall] manage persistence"
     $ = { 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "manage persistence"
@@ -137,9 +137,9 @@ rule Metasploit_Generic {
     // $ = { 70 72 6F 63 65 73 73 5F 6E 65 77 3A 20 67 6F 74 20 25 7A 64 20 62 79 74 65 20 65 78 65 63 75 74 61 62 6C 65 20 74 6F 20 72 75 6E 20 69 6E 20 6D 65 6D 6F 72 79 } // "process_new: got %zd byte executable to run in memory"
   condition:
     // Check for file only
-    is_elf and for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "fbeb0b6fd7a7f78a880f68c413893f36"
-    ) or all of them // Check file or memory's strings
+    (is_elf and hash.md5(elf.sections[21].offset, elf.sections[21].size) == "fbeb0b6fd7a7f78a880f68c413893f36") or
+    // Check file or memory's strings
+    all of them
 }
 
 
