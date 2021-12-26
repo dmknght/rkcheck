@@ -54,23 +54,23 @@ rule Agent_1
       $str2 in (elf.sections[16].offset .. elf.sections[17].offset)
 }
 
-rule Agent_2
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    vrt_report = "https://www.virustotal.com/gui/file/edbee3b92100cc9a6a8a3c1a5fc00212627560c5e36d29569d497613ea3e3c16"
-    // symbols: imp.getpid and imp.execvp
-    // strings (static) E: neither argv[0] nor $_ works.
-    // runtime strings /root/analyzed_bin and applet not found
-    // TODO need to test process scan
-  strings:
-    $1 = { 2F 72 6F 6F 74 2F 61 6E 61 6C 79 7A 65 64 5F 62 69 6E } // "/root/analyzed_bin"
-    $2 = { 61 70 70 6C 65 74 20 6E 6F 74 20 66 6F 75 6E 64 } // "applet not found"
-  condition:
-    (is_elf and hash.md5(elf.sections[16].offset, elf.sections[16].size) == "f3a96941a385fc9062269babdb5cbc02") or
-    all of them
-}
+// rule Agent_2
+// {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     vrt_report = "https://www.virustotal.com/gui/file/edbee3b92100cc9a6a8a3c1a5fc00212627560c5e36d29569d497613ea3e3c16"
+//     // symbols: imp.getpid and imp.execvp
+//     // strings (static) E: neither argv[0] nor $_ works.
+//     // runtime strings /root/analyzed_bin and applet not found
+//     // TODO need to test process scan
+//   strings:
+//     $1 = { 2F 72 6F 6F 74 2F 61 6E 61 6C 79 7A 65 64 5F 62 69 6E } // "/root/analyzed_bin"
+//     $2 = { 61 70 70 6C 65 74 20 6E 6F 74 20 66 6F 75 6E 64 } // "applet not found"
+//   condition:
+//     (is_elf and hash.md5(elf.sections[16].offset, elf.sections[16].size) == "f3a96941a385fc9062269babdb5cbc02") or
+//     all of them
+// }
 
 
 rule Python_IRCBot
@@ -90,17 +90,15 @@ rule Python_IRCBot
     )
 }
 
-rule GoLang_EzuriLoader
+rule EzuriLoader_Golang_Generic
 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Linux Trojan written in Golang. https://www.virustotal.com/gui/file/751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
+    hash = "751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
   condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "dfd54f22d3a3bb072d34c424aa554500"
-    )
+    is_elf and hash.md5(elf.sections[3].offset, elf.sections[3].size) == "dfd54f22d3a3bb072d34c424aa554500"
 }
 
 
