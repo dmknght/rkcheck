@@ -1,6 +1,5 @@
 import "elf"
 import "hash"
-import "pe"
 include "rules/magics.yar"
 
 
