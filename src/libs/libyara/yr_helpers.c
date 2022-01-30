@@ -1,5 +1,5 @@
 #include <yara.h>
-// #include <stdio.h>
+#include <stdio.h>
 
 
 int yr_rule_count_strings(YR_RULE* rule) {
@@ -21,7 +21,7 @@ int yr_scan_count_strings_m(YR_SCAN_CONTEXT* context, YR_RULE* rule) {
     {
         YR_MATCH* match;
         yr_string_matches_foreach(context, string, match) {
-            // printf("%s\n", match->data); // Show matched strings
+            // printf("base: %d off: %d d_len: %d %s\n", match->base, match->offset, match->data_length, match->data); // Show matched strings
             i++;
         }
     }
