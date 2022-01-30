@@ -1764,3 +1764,8 @@ proc yr_strndup*(str: cstring; n: uint): cstring {.importc, cdecl, impyaraHdr.}
 proc yr_heap_alloc*(): cint {.importc, cdecl, impyaraHdr.}
 proc yr_heap_free*(): cint {.importc, cdecl, impyaraHdr.}
 {.pop.}
+
+# Custom procs for easier life
+{.compile: "yr_helpers.c".}
+proc yr_rule_count_strings*(rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
+proc yr_string_count_string_match*(context: ptr YR_SCAN_CONTEXT): cint {.importc, impyaraHdr.}
