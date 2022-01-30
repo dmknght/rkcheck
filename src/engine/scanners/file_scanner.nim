@@ -13,8 +13,8 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
   var
     ctx = cast[ptr FileScanContext](user_data)
     rule = cast[ptr YR_RULE](message_data)
-  # If target matches a rule
 
+  # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
     # Change current result of scan context to virus
     ctx.scan_result = CL_VIRUS
@@ -22,6 +22,21 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     ctx.virus_name = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     return CALLBACK_ABORT
   else:
+    # Safe check. Some rules make crashes
+    if rule.strings != nil and rule.ns != nil and not isEmptyOrWhitespace($rule.identifier) and $rule.identifier notin @["elf", "hash", "pe"]:
+      let rule_count_strs = yr_rule_count_strings(rule)
+      if rule_count_strs == 0:
+        discard
+      else:
+        # Calculate patterns weight
+        # TODO didn't count the "not $" cases
+        # echo rule.identifier #Fixme crash Ngioweb_a
+        let weight = yr_scan_count_strings_m(context, rule) * 100 / rule_count_strs
+        if weight > 55:
+          ctx.scan_result = CL_VIRUS
+          ctx.virus_name = cstring(weight.formatFloat(ffDecimal, 2) & "% " & $rule.ns.name & ":" & replace($rule.identifier, "_", "."))
+          return CALLBACK_ABORT
+    # else:
     # Remove status "virus" and virus name
     ctx.scan_result = CL_CLEAN
     ctx.virus_name = ""
