@@ -231,7 +231,7 @@ type
   cl_engine* {.incompleteStruct, impclamavHdr, importc: "struct cl_engine".} = object
   cl_settings* {.incompleteStruct, impclamavHdr, importc: "struct cl_settings".} = object
   cli_section_hash* {.bycopy, impclamavHdr, importc: "struct cli_section_hash".} = object
-    md5*: array[16, cuchar]
+    md5*: array[16, uint8]
     len*: uint
 
   cli_stats_sections* {.bycopy, impclamavHdr,
@@ -253,7 +253,7 @@ type
   clcb_msg* {.importc, impclamavHdr.} = proc (severity: cl_msg;
       fullmsg: cstring; msg: cstring; context: pointer) {.cdecl.}
   clcb_hash* {.importc, impclamavHdr.} = proc (fd: cint; size: culonglong;
-      md5: ptr cuchar; virname: cstring; context: pointer) {.cdecl.}
+      md5: ptr uint8; virname: cstring; context: pointer) {.cdecl.}
   clcb_meta* {.importc, impclamavHdr.} = proc (container_type: cstring;
       fsize_container: culong; filename: cstring; fsize_real: culong;
       is_encrypted: cint; filepos_container: cuint; context: pointer): cl_error_t {.
@@ -261,12 +261,12 @@ type
   clcb_file_props* {.importc, impclamavHdr.} = proc (j_propstr: cstring;
       rc: cint; cbdata: pointer): cint {.cdecl.}
   clcb_stats_add_sample* {.importc, impclamavHdr.} = proc (virname: cstring;
-      md5: ptr cuchar; size: uint; sections: ptr stats_section_t;
+      md5: ptr uint8; size: uint; sections: ptr stats_section_t;
       cbdata: pointer) {.cdecl.}
   clcb_stats_remove_sample* {.importc, impclamavHdr.} = proc (virname: cstring;
-      md5: ptr cuchar; size: uint; cbdata: pointer) {.cdecl.}
+      md5: ptr uint8; size: uint; cbdata: pointer) {.cdecl.}
   clcb_stats_decrement_count* {.importc, impclamavHdr.} = proc (
-      virname: cstring; md5: ptr cuchar; size: uint; cbdata: pointer) {.cdecl.}
+      virname: cstring; md5: ptr uint8; size: uint; cbdata: pointer) {.cdecl.}
   clcb_stats_submit* {.importc, impclamavHdr.} = proc (engine: ptr cl_engine;
       cbdata: pointer) {.cdecl.}
   clcb_stats_flush* {.importc, impclamavHdr.} = proc (engine: ptr cl_engine;
@@ -908,8 +908,8 @@ proc cl_scanmap_callback*(map: ptr cl_fmap_t; filename: cstring;
                                   ##                         signature matched. Another CL_E* error code if an
                                   ##                         error occured.
                                   ## ```
-proc cl_hash_data*(alg: cstring; buf: pointer; len: uint; obuf: ptr cuchar;
-                   olen: ptr cuint): ptr cuchar {.importc, cdecl, impclamavHdr.}
+proc cl_hash_data*(alg: cstring; buf: pointer; len: uint; obuf: ptr uint8;
+                   olen: ptr cuint): ptr uint8 {.importc, cdecl, impclamavHdr.}
   ## ```
                                                                                 ##   @brief Generate a hash of data.
                                                                                 ##   
@@ -920,7 +920,7 @@ proc cl_hash_data*(alg: cstring; buf: pointer; len: uint; obuf: ptr cuchar;
                                                                                 ##    @param[out] olen (optional) A pointer that stores how long the generated hash is.
                                                                                 ##    @return          A pointer to the generated hash or obuf if obuf is not NULL.
                                                                                 ## ```
-# proc cl_hash_file_fd_ctx*(ctx: ptr EVP_MD_CTX; fd: cint; olen: ptr cuint): ptr cuchar {.
+# proc cl_hash_file_fd_ctx*(ctx: ptr EVP_MD_CTX; fd: cint; olen: ptr cuint): ptr uint8 {.
 #     importc, cdecl, impclamavHdr.}
 ## ```
                                   ##   @brief Generate a hash of a file.
@@ -930,7 +930,7 @@ proc cl_hash_data*(alg: cstring; buf: pointer; len: uint; obuf: ptr cuchar;
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-proc cl_hash_file_fd*(fd: cint; alg: cstring; olen: ptr cuint): ptr cuchar {.
+proc cl_hash_file_fd*(fd: cint; alg: cstring; olen: ptr cuint): ptr uint8 {.
     importc, cdecl, impclamavHdr.}
   ## ```
                                   ##   @brief Generate a hash of a file.
@@ -940,7 +940,7 @@ proc cl_hash_file_fd*(fd: cint; alg: cstring; olen: ptr cuint): ptr cuchar {.
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-proc cl_hash_file_fp*(fp: File; alg: cstring; olen: ptr cuint): ptr cuchar {.
+proc cl_hash_file_fp*(fp: File; alg: cstring; olen: ptr cuint): ptr uint8 {.
     importc, cdecl, impclamavHdr.}
   ## ```
                                   ##   @brief Generate a hash of a file.
@@ -950,7 +950,7 @@ proc cl_hash_file_fp*(fp: File; alg: cstring; olen: ptr cuint): ptr cuchar {.
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-proc cl_sha256*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr cuchar {.
+proc cl_sha256*(buf: pointer; len: uint; obuf: ptr uint8; olen: ptr cuint): ptr uint8 {.
     importc, cdecl, impclamavHdr.}
   ## ```
                                   ##   @brief Generate a sha256 hash of data.
@@ -961,7 +961,7 @@ proc cl_sha256*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-proc cl_sha384*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr cuchar {.
+proc cl_sha384*(buf: pointer; len: uint; obuf: ptr uint8; olen: ptr cuint): ptr uint8 {.
     importc, cdecl, impclamavHdr.}
   ## ```
                                   ##   @brief Generate a sha384 hash of data.
@@ -972,7 +972,7 @@ proc cl_sha384*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-proc cl_sha512*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr cuchar {.
+proc cl_sha512*(buf: pointer; len: uint; obuf: ptr uint8; olen: ptr cuint): ptr uint8 {.
     importc, cdecl, impclamavHdr.}
   ## ```
                                   ##   @brief Generate a sha512 hash of data.
@@ -983,7 +983,7 @@ proc cl_sha512*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-proc cl_sha1*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr cuchar {.
+proc cl_sha1*(buf: pointer; len: uint; obuf: ptr uint8; olen: ptr cuint): ptr uint8 {.
     importc, cdecl, impclamavHdr.}
   ## ```
                                   ##   @brief Generate a sha1 hash of data.
@@ -994,8 +994,8 @@ proc cl_sha1*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr c
                                   ##    @param[out] olen (optional) The length of the generated hash.
                                   ##    @return          A pointer to a malloc'd buffer that holds the generated hash.
                                   ## ```
-# proc cl_verify_signature*(pkey: ptr EVP_PKEY; alg: cstring; sig: ptr cuchar;
-#                           siglen: cuint; data: ptr cuchar; datalen: uint;
+# proc cl_verify_signature*(pkey: ptr EVP_PKEY; alg: cstring; sig: ptr uint8;
+#                           siglen: cuint; data: ptr uint8; datalen: uint;
 #                           decode: cint): cint {.importc, cdecl, impclamavHdr.}
 ## ```
                                                                               ##   @brief Verify validity of signed data.
@@ -1010,8 +1010,8 @@ proc cl_sha1*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr c
                                                                               ##    @return          0 for success, -1 for error or invalid signature.
                                                                               ## ```
 # proc cl_verify_signature_hash*(pkey: ptr EVP_PKEY; alg: cstring;
-#                                sig: ptr cuchar; siglen: cuint;
-#                                digest: ptr cuchar): cint {.importc, cdecl,
+#                                sig: ptr uint8; siglen: cuint;
+#                                digest: ptr uint8): cint {.importc, cdecl,
 #     impclamavHdr.}
 #   ## ```
 ##   @brief Verify validity of signed data.
@@ -1023,7 +1023,7 @@ proc cl_sha1*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr c
 ##    @param digest    The hash of the signed data.
 ##    @return          0 for success, -1 for error or invalid signature.
 ## ```
-# proc cl_verify_signature_fd*(pkey: ptr EVP_PKEY; alg: cstring; sig: ptr cuchar;
+# proc cl_verify_signature_fd*(pkey: ptr EVP_PKEY; alg: cstring; sig: ptr uint8;
 #                              siglen: cuint; fd: cint): cint {.importc, cdecl,
 #     impclamavHdr.}
 ## ```
@@ -1037,7 +1037,7 @@ proc cl_sha1*(buf: pointer; len: uint; obuf: ptr cuchar; olen: ptr cuint): ptr c
 ##    @return          0 for success, -1 for error or invalid signature.
 ## ```
 proc cl_verify_signature_hash_x509_keyfile*(x509path: cstring; alg: cstring;
-    sig: ptr cuchar; siglen: cuint; digest: ptr cuchar): cint {.importc, cdecl,
+    sig: ptr uint8; siglen: cuint; digest: ptr uint8): cint {.importc, cdecl,
     impclamavHdr.}
   ## ```
                   ##   @brief Verify validity of signed data.
@@ -1050,7 +1050,7 @@ proc cl_verify_signature_hash_x509_keyfile*(x509path: cstring; alg: cstring;
                   ##    @return          0 for success, -1 for error or invalid signature.
                   ## ```
 proc cl_verify_signature_fd_x509_keyfile*(x509path: cstring; alg: cstring;
-    sig: ptr cuchar; siglen: cuint; fd: cint): cint {.importc, cdecl,
+    sig: ptr uint8; siglen: cuint; fd: cint): cint {.importc, cdecl,
     impclamavHdr.}
   ## ```
                   ##   @brief Verify validity of signed data.
@@ -1063,8 +1063,8 @@ proc cl_verify_signature_fd_x509_keyfile*(x509path: cstring; alg: cstring;
                   ##    @return          0 for success, -1 for error or invalid signature.
                   ## ```
 proc cl_verify_signature_x509_keyfile*(x509path: cstring; alg: cstring;
-                                       sig: ptr cuchar; siglen: cuint;
-                                       data: ptr cuchar; datalen: uint;
+                                       sig: ptr uint8; siglen: cuint;
+                                       data: ptr uint8; datalen: uint;
                                        decode: cint): cint {.importc, cdecl,
     impclamavHdr.}
   ## ```
@@ -1080,8 +1080,8 @@ proc cl_verify_signature_x509_keyfile*(x509path: cstring; alg: cstring;
                   ##    @return          0 for success, -1 for error or invalid signature.
                   ## ```
 # proc cl_verify_signature_hash_x509*(x509: ptr X509; alg: cstring;
-#                                     sig: ptr cuchar; siglen: cuint;
-#                                     digest: ptr cuchar): cint {.importc, cdecl,
+#                                     sig: ptr uint8; siglen: cuint;
+#                                     digest: ptr uint8): cint {.importc, cdecl,
 #     impclamavHdr.}
 ## ```
 ##   @brief Verify validity of signed data
@@ -1093,7 +1093,7 @@ proc cl_verify_signature_x509_keyfile*(x509path: cstring; alg: cstring;
 ##    @param digest    The hash of the signed data.
 ##    @return          0 for success, -1 for error or invalid signature.
 ## ```
-# proc cl_verify_signature_fd_x509*(x509: ptr X509; alg: cstring; sig: ptr cuchar;
+# proc cl_verify_signature_fd_x509*(x509: ptr X509; alg: cstring; sig: ptr uint8;
 #                                   siglen: cuint; fd: cint): cint {.importc,
 #     cdecl, impclamavHdr.}
 ## ```
@@ -1106,8 +1106,8 @@ proc cl_verify_signature_x509_keyfile*(x509path: cstring; alg: cstring;
 ##    @param fd        The file descriptor.
 ##    @return          0 for success, -1 for error or invalid signature.
 ## ```
-# proc cl_verify_signature_x509*(x509: ptr X509; alg: cstring; sig: ptr cuchar;
-#                                siglen: cuint; data: ptr cuchar; datalen: uint;
+# proc cl_verify_signature_x509*(x509: ptr X509; alg: cstring; sig: ptr uint8;
+#                                siglen: cuint; data: ptr uint8; datalen: uint;
 #                                decode: cint): cint {.importc, cdecl,
 #     impclamavHdr.}
 ## ```
@@ -1172,8 +1172,8 @@ proc cl_validate_certificate_chain*(authorities: ptr cstring; crlpath: cstring;
 ##    @param file  The path to the CRL.
 ##    @return      A pointer to an X509_CRL object or NULL on error.
 ## ```
-proc cl_sign_data_keyfile*(keypath: cstring; alg: cstring; hash: ptr cuchar;
-                           olen: ptr cuint; encode: cint): ptr cuchar {.importc,
+proc cl_sign_data_keyfile*(keypath: cstring; alg: cstring; hash: ptr uint8;
+                           olen: ptr cuint; encode: cint): ptr uint8 {.importc,
     cdecl, impclamavHdr.}
   ## ```
                          ##   @brief Sign data with a key stored on disk.
@@ -1185,8 +1185,8 @@ proc cl_sign_data_keyfile*(keypath: cstring; alg: cstring; hash: ptr cuchar;
                          ##    @param           Whether or not to base64-encode the signature. 1 for yes, 0 for no.
                          ##    @return          The generated signature.
                          ## ```
-# proc cl_sign_data*(pkey: ptr EVP_PKEY; alg: cstring; hash: ptr cuchar;
-#                    olen: ptr cuint; encode: cint): ptr cuchar {.importc, cdecl,
+# proc cl_sign_data*(pkey: ptr EVP_PKEY; alg: cstring; hash: ptr uint8;
+#                    olen: ptr cuint; encode: cint): ptr uint8 {.importc, cdecl,
 #     impclamavHdr.}
 ## ```
 ##   @brief Sign data with an RSA private key object.
@@ -1199,7 +1199,7 @@ proc cl_sign_data_keyfile*(keypath: cstring; alg: cstring; hash: ptr cuchar;
 ##    @return          The generated signature.
 ## ```
 # proc cl_sign_file_fd*(fd: cint; pkey: ptr EVP_PKEY; alg: cstring;
-#                       olen: ptr cuint; encode: cint): ptr cuchar {.importc,
+#                       olen: ptr cuint; encode: cint): ptr uint8 {.importc,
 #     cdecl, impclamavHdr.}
 ## ```
 ##   @brief Sign a file with an RSA private key object.
@@ -1212,7 +1212,7 @@ proc cl_sign_data_keyfile*(keypath: cstring; alg: cstring; hash: ptr cuchar;
 ##    @return          The generated signature.
 ## ```
 # proc cl_sign_file_fp*(fp: File; pkey: ptr EVP_PKEY; alg: cstring;
-#                       olen: ptr cuint; encode: cint): ptr cuchar {.importc,
+#                       olen: ptr cuint; encode: cint): ptr uint8 {.importc,
 #     cdecl, impclamavHdr.}
 ## ```
 ##   @brief Sign a file with an RSA private key object.

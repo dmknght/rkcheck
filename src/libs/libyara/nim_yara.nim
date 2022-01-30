@@ -1576,10 +1576,10 @@ proc yr_compiler_set_re_ast_callback*(compiler: ptr YR_COMPILER; re_ast_callback
                                      user_data: pointer) {.importc, cdecl,
     impyaraHdr.}
 proc yr_compiler_set_atom_quality_table*(compiler: ptr YR_COMPILER; table: pointer;
-                                        entries: cint; warning_threshold: cuchar) {.
+                                        entries: cint; warning_threshold: uint8) {.
     importc, cdecl, impyaraHdr.}
 proc yr_compiler_load_atom_quality_table*(compiler: ptr YR_COMPILER;
-    filename: cstring; warning_threshold: cuchar): cint {.importc, cdecl, impyaraHdr.}
+    filename: cstring; warning_threshold: uint8): cint {.importc, cdecl, impyaraHdr.}
 proc yr_compiler_add_file*(compiler: ptr YR_COMPILER; rules_file: File;
                           namespace_g: cstring; file_name: cstring): cint {.importc,
     cdecl, impyaraHdr.}
