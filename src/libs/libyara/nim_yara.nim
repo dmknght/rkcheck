@@ -1768,4 +1768,4 @@ proc yr_heap_free*(): cint {.importc, cdecl, impyaraHdr.}
 # Custom procs for easier life
 {.compile: "yr_helpers.c".}
 proc yr_rule_count_strings*(rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
-proc yr_string_count_string_match*(context: ptr YR_SCAN_CONTEXT): cint {.importc, impyaraHdr.}
+proc yr_scan_count_strings_m*(context: ptr YR_SCAN_CONTEXT, string: ptr YR_STRING): cint {.importc, impyaraHdr.}

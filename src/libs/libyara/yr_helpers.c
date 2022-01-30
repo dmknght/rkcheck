@@ -12,14 +12,13 @@ int yr_rule_count_strings(YR_RULE* rule) {
 }
 
 
-int yr_string_count_string_match(YR_SCAN_CONTEXT* context) {
+int yr_scan_count_strings_m(YR_SCAN_CONTEXT* context, YR_STRING* string) {
     int i = 0;
-    // YR_MATCH* match;
-    // YR_STRING* string;
+    YR_MATCH* match;
     
-    // yr_string_matches_foreach(context, string, match) {
-    //     i++;
-    // }
+    yr_string_matches_foreach(context, string, match) {
+        i++;
+    }
 
     return i;
 }
