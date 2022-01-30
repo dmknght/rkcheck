@@ -22,7 +22,7 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     ctx.virus_name = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     return CALLBACK_ABORT
   else:
-    # Safe check
+    # Safe check to avoid crash. Don't calculate weight if rule doesn't have tag "weight"
     if rule != nil and yr_rule_is_weight(rule) == 0:
       let rule_count_strs = yr_rule_count_strings(rule)
       if rule_count_strs != 0:
