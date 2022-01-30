@@ -41,7 +41,7 @@ proc rinit_clam_db*(engine: var CoreEngine): cl_error_t =
   # TODO skip if path is invalid
   if engine.ClamDbPath == "":
     return CL_SUCCESS
-  result = cl_load(engine.ClamDbPath, engine.ClamAV, unsafeAddr(sig_count), CL_DB_STDOPT)
+  result = cl_load(cstring(engine.ClamDbPath), engine.ClamAV, unsafeAddr(sig_count), CL_DB_STDOPT)
   if result == CL_SUCCESS:
     echo "Loaded ", sig_count, " ClamAV signatures"
   return result
@@ -52,7 +52,7 @@ proc rinit_yara_db*(engine: var CoreEngine): int =
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
 
-  result = yr_rules_load(engine.YaraDbPath, unsafeAddr(engine.YaraEng))
+  result = yr_rules_load(cstring(engine.YaraDbPath), unsafeAddr(engine.YaraEng))
   if result == ERROR_SUCCESS:
     echo "Loaded ", engine.YaraEng.num_rules, " Yara rules"
     discard yr_set_configuration(YR_CONFIG_STACK_SIZE, unsafeAddr(stack_size))
