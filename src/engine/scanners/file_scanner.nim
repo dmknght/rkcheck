@@ -19,7 +19,7 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     # Change current result of scan context to virus
     ctx.scan_result = CL_VIRUS
     # Change virus name of current scan context
-    ctx.virus_name = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
+    ctx.virus_name = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     return CALLBACK_ABORT
   else:
     # Remove status "virus" and virus name
