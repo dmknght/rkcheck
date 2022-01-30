@@ -86,7 +86,6 @@ rule XMRStak_Generic {
     $2 = "pool.usxmrpool.com"
     $3 = "donate.xmr-stak.net"
     $4 = "xmr-stak-rx 1.0.4-rx 65ade74"
-    $5 = "XMRSTAK_VERSION"
   condition:
     is_elf and any of them
 }
