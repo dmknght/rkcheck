@@ -22,15 +22,12 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     ctx.virus_name = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     return CALLBACK_ABORT
   else:
-    # Safe check. Some rules make crashes
-    if rule.strings != nil and rule.ns != nil and not isEmptyOrWhitespace($rule.identifier) and $rule.identifier notin @["elf", "hash", "pe"]:
+    # Safe check
+    if rule != nil and yr_rule_is_weight(rule) == 0:
       let rule_count_strs = yr_rule_count_strings(rule)
-      if rule_count_strs == 0:
-        discard
-      else:
+      if rule_count_strs != 0:
         # Calculate patterns weight
         # TODO didn't count the "not $" cases
-        # echo rule.identifier #Fixme crash Ngioweb_a
         let weight = yr_scan_count_strings_m(context, rule) * 100 / rule_count_strs
         if weight > 55:
           ctx.scan_result = CL_VIRUS
