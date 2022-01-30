@@ -1,5 +1,4 @@
 #include <yara.h>
-#include <stdio.h>
 
 
 int yr_rule_count_strings(YR_RULE* rule) {
