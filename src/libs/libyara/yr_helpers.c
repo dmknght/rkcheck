@@ -1,4 +1,5 @@
 #include <yara.h>
+#include <string.h>
 
 
 int yr_rule_count_strings(YR_RULE* rule) {
@@ -25,4 +26,16 @@ int yr_scan_count_strings_m(YR_SCAN_CONTEXT* context, YR_RULE* rule) {
         }
     }
     return i;
+}
+
+
+int yr_rule_is_weight(YR_RULE* rule) {
+    const char* tag;
+    yr_rule_tags_foreach(rule, tag)
+    {
+        if (strcmp(tag, "weight") == 0) {
+            return 0;
+        }
+    }
+    return 1;
 }

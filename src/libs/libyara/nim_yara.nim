@@ -1770,3 +1770,4 @@ proc yr_heap_free*(): cint {.importc, cdecl, impyaraHdr.}
 {.compile: "yr_helpers.c".}
 proc yr_rule_count_strings*(rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
 proc yr_scan_count_strings_m*(context: ptr YR_SCAN_CONTEXT, rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
+proc yr_rule_is_weight*(rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
