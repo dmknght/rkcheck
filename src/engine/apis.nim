@@ -40,12 +40,12 @@ proc rkcheck_stop_engine*(engine: var CoreEngine) =
   finit_yara_engine(engine)
 
 
-proc rkcheck_scan_proc*(engine: var CoreEngine, pid: int) =
-  var
-    ScanContext: ProcScanContext
-  ScanContext.ScanEngine = engine
-  pscanner_new_proc_scan(ScanContext, pid)
-  dealloc(addr(ScanContext))
+# proc rkcheck_scan_proc*(engine: var CoreEngine, pid: int) =
+#   var
+#     ScanContext: ProcScanContext
+#   ScanContext.ScanEngine = engine
+#   pscanner_new_proc_scan(ScanContext, pid)
+#   dealloc(addr(ScanContext))
 
 
 proc rkcheck_scan_procs*(engine: var CoreEngine, pids: seq[int]) =
@@ -64,36 +64,35 @@ proc rkcheck_scan_all_procs*(engine: var CoreEngine) =
   dealloc(addr(ScanContext))
 
 
-proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
+# proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
+#   var
+#     ScanContext: FileScanContext
+#   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
+#   ScanContext.ScanEngine = engine
+#   fscanner_new_files_scan(ScanContext, file_list)
+#   dealloc(addr(ScanContext))
+
+
+# proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
+#   var
+#     ScanContext: FileScanContext
+#   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
+#   ScanContext.ScanEngine = engine
+#   fscanner_new_dirs_scan(ScanContext, dir_list)
+#   dealloc(addr(ScanContext))
+
+
+proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[string] = [], dir_list: openArray[string] = []) =
   var
     ScanContext: FileScanContext
-  # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
+
   ScanContext.ScanEngine = engine
-  fscanner_new_files_scan(ScanContext, file_list)
-  dealloc(addr(ScanContext))
 
+  cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan)
+  cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
 
-proc rkcheck_scan_file*(engine: var CoreEngine, file_path: string) =
-  var
-    ScanContext: FileScanContext
-  # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
-  ScanContext.ScanEngine = engine
-  fscanner_new_file_scan(ScanContext, file_path)
-  dealloc(addr(ScanContext))
-
-
-proc rkcheck_scan_dir*(engine: var CoreEngine, dir_path: string) =
-  var
-    ScanContext: FileScanContext
-  ScanContext.ScanEngine = engine
-  fscanner_new_dir_scan(ScanContext, dir_path)
-  dealloc(addr(ScanContext))
-
-
-proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
-  var
-    ScanContext: FileScanContext
-  # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
-  ScanContext.ScanEngine = engine
-  fscanner_new_dirs_scan(ScanContext, dir_list)
+  if len(file_list) > 0:
+    fscanner_new_files_scan(ScanContext, @file_list)
+  if len(dir_list) > 0:
+    fscanner_new_dirs_scan(ScanContext, @dir_list)
   dealloc(addr(ScanContext))
