@@ -17,7 +17,7 @@ proc cb_yr_process_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_dat
     return CALLBACK_CONTINUE
 
 
-proc rscanner_scan_proc(context: var ProcScanContext) =
+proc pscanner_scan_proc(context: var ProcScanContext) =
   context.scan_object.cmdline = readFile(context.scan_object.pid_path & "/cmdline")
   try:
     context.scan_object.binary_path = expandSymlink(context.scan_object.pid_path & "/exe")
@@ -36,26 +36,26 @@ proc rscanner_scan_proc(context: var ProcScanContext) =
   )
 
 
-proc rscanner_new_proc_scan*(context: var ProcScanContext, pid: int) =
+proc pscanner_new_proc_scan*(context: var ProcScanContext, pid: int) =
   context.scan_object.pid = pid
   context.scan_object.pid_path = "/proc/" & intToStr(pid)
 
-  rscanner_scan_proc(context)
+  pscanner_scan_proc(context)
 
 
-proc rscanner_new_procs_scan*(context: var ProcScanContext, pids: seq[int]) =
+proc pscanner_new_procs_scan*(context: var ProcScanContext, pids: seq[int]) =
   for pid in pids:
-    rscanner_new_proc_scan(context, pid)
+    pscanner_new_proc_scan(context, pid)
 
 
-proc rscanner_new_all_procs_scan*(context: var ProcScanContext) =
+proc pscanner_new_all_procs_scan*(context: var ProcScanContext) =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir:
       try:
         let pid = parseInt(path.split("/")[^1])
         context.scan_object.pid = pid
         context.scan_object.pid_path = path
-        rscanner_scan_proc(context)
+        pscanner_scan_proc(context)
       except ValueError:
         # This is not a process from procfs
         discard

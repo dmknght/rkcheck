@@ -5,7 +5,7 @@ import eng_cores
 import .. / scanners / file_scanner
 
 
-proc rinit_clam_engine*(engine: var CoreEngine): cl_error_t =
+proc init_clam_engine*(engine: var CoreEngine): cl_error_t =
   #[ 
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -18,19 +18,20 @@ proc rinit_clam_engine*(engine: var CoreEngine): cl_error_t =
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_MACROS)
-    cl_engine_set_clcb_pre_cache(engine.ClamAV, rscanner_cb_clam_scan)
+    # TODO set engine callback before scan start instead
+    cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan)
     # cl_engine_set_clcb_post_scan(engine.ClamAV, rscanner_cb_clam_post_scan)
-    cl_engine_set_clcb_virus_found(engine.ClamAV, rscanner_cb_clam_virus_found)
+    cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
     if engine.LibClamDebug:
       cl_debug()
   return result
 
 
-proc rinit_yara_engine*(engine: var CoreEngine): int =
+proc init_yara_engine*(engine: var CoreEngine): int =
   return yr_initialize()
 
 
-proc rinit_clam_db*(engine: var CoreEngine): cl_error_t =
+proc init_clam_db*(engine: var CoreEngine): cl_error_t =
   #[ 
     Load ClamAV database. In this case we only load bytecode signatures
     Bytecode signatures supports unpacking
@@ -47,7 +48,7 @@ proc rinit_clam_db*(engine: var CoreEngine): cl_error_t =
   return result
 
 
-proc rinit_yara_db*(engine: var CoreEngine): int =
+proc init_yara_db*(engine: var CoreEngine): int =
   let
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
@@ -60,7 +61,7 @@ proc rinit_yara_db*(engine: var CoreEngine): int =
   return result
 
 
-proc rfinit_clam_engine*(engine: var CoreEngine) =
+proc finit_clam_engine*(engine: var CoreEngine) =
   #[ 
     Give ClamAV Engine's freedom
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -69,7 +70,7 @@ proc rfinit_clam_engine*(engine: var CoreEngine) =
     discard cl_engine_free(engine.ClamAV)
 
 
-proc rfinit_yara_engine*(engine: var CoreEngine) =
+proc finit_yara_engine*(engine: var CoreEngine) =
   if engine.YaraEng != nil:
     discard yr_rules_destroy(engine.YaraEng)
   discard yr_finalize()

@@ -5,7 +5,7 @@ import .. / cores / eng_cores
 import strutils
 
 
-proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+proc fscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   #[
     Handle scan result from Yara engine
   ]#
@@ -40,7 +40,7 @@ proc rscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     return CALLBACK_CONTINUE
 
 
-proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+proc fscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   #[
     Print virus found message with file path
   ]#
@@ -51,14 +51,14 @@ proc rscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer)
   echo virus_name, " ", ctx.scan_object
 
 
-proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+proc fscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
   #[
     The actual function to scan files. This function will call yara to scan file first.
     If result is CL_CLEAN, Clam will scan with its signatures
   ]#
   let ctx = cast[ptr FileScanContext](context)
   # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
-  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
+  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_file, context, yr_scan_timeout)
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result
 
@@ -71,7 +71,7 @@ proc rscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
 #   return ctx.scan_result
 
 
-proc scanner_scan_file(context: var FileScanContext, file_path: string) =
+proc fscanner_scan_file(context: var FileScanContext, file_path: string) =
   var
     virname: cstring
     scanned: culong = 0
@@ -80,24 +80,24 @@ proc scanner_scan_file(context: var FileScanContext, file_path: string) =
   discard cl_scanfile_callback(file_path, addr(virname), addr(scanned), context.ScanEngine.ClamAV, addr(context.ScanEngine.ClamScanOpts), addr(context))
 
 
-proc scanner_scan_dir(context: var FileScanContext, dir_path: string) =
+proc fscanner_scan_dir(context: var FileScanContext, dir_path: string) =
   for file_path in walkDirRec(dir_path):
-    scanner_scan_file(context, file_path)
+    fscanner_scan_file(context, file_path)
 
 
-proc rscanner_new_file_scan*(context: var FileScanContext, file_path: string) =
-  scanner_scan_file(context, file_path)
+proc fscanner_new_file_scan*(context: var FileScanContext, file_path: string) =
+  fscanner_scan_file(context, file_path)
 
 
-proc rscanner_new_files_scan*(context: var FileScanContext, file_paths: seq[string]) =
+proc fscanner_new_files_scan*(context: var FileScanContext, file_paths: seq[string]) =
   for file_path in file_paths:
-    scanner_scan_file(context, file_path)
+    fscanner_scan_file(context, file_path)
 
 
-proc rscanner_new_dir_scan*(context: var FileScanContext, dir_path: string) =
-  scanner_scan_dir(context, dir_path)
+proc fscanner_new_dir_scan*(context: var FileScanContext, dir_path: string) =
+  fscanner_scan_dir(context, dir_path)
 
 
-proc rscanner_new_dirs_scan*(context: var FileScanContext, dir_paths: seq[string]) =
+proc fscanner_new_dirs_scan*(context: var FileScanContext, dir_paths: seq[string]) =
   for dir_path in dir_paths:
-    scanner_scan_dir(context, dir_path)
+    fscanner_scan_dir(context, dir_path)
