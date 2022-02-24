@@ -367,6 +367,30 @@ rule Adore {
     is_elf and any of them
 }
 
+rule bvp47_a {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "24/02/2022"
+    description = "NSA-linked Bvp47 Linux backdoor"
+    md5 = "58b6696496450f254b1423ea018716dc"
+    reference = "https://bazaar.abuse.ch/sample/7989032a5a2baece889100c4cfeca81f1da1241ab47365dad89107e417ce7bac/"
+  strings:
+    // Encrypted strings from binary
+    $long_1 = "e86dd99a33cb9df96e793518f659746f8cc3d9ac39413871f5afd58d7d00685ab0c449d62aa35c865a133dff"
+    $short_1 = "NWlas" fullword
+    $short_2 = "qKizlbKRbFdM" fullword
+    $short_3 = "xdkzVqtnab" fullword
+    $short_4 = "ihRCzr" fullword
+    $short_5 = "dXRuFsbUutDV" fullword
+    $short_6 = "NcGNaOrdVC" fullword
+  condition:
+    is_elf and $long_1 or
+    4 of ($short_*)
+    // TODO runtime scan
+}
+
+
 // todo atk rootkit https://github.com/millken/kdev/tree/master/4atk%201.05new
 // 
 // rule KokainKit { TODO: the script generates multiple scripts. I have to work to search match all of files.
