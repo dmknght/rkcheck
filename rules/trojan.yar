@@ -483,3 +483,61 @@ rule exploit_dirtycow {
 // TODO 1384790107a5f200cab9593a39d1c80136762b58d22d9b3f081c91d99e5d0376 (upx)
 // hash unpacked: afb6ec634639a68624c052d083bbe28a0076cd3ab3d9a276c4b90cb4163b8317 golang malware
 // TODO 139b09543494ead859b857961d230a39b9f4fc730f81cf8445b6d83bacf67f3d: malware downloader rule34 python compiled file
+
+rule TinyShell {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Open-source TinyShell backdoor"
+    reference = "https://github.com/creaktive/tsh"
+    // execl, setsid is in imports, type: func
+  strings:
+    $1 = "s:p:c::" // getopt strings
+    $2 = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
+  condition:
+    is_elf and all of them
+}
+
+
+rule UNC1945_STEELCORGI_packed{
+  meta:
+    description = "Yara Rule for packed ELF backdoor of UNC1945"
+    author = "Yoroi Malware Zlab"
+    last_updated = "2020_12_21"
+    tlp = "white"
+    category = "informational"
+    reference = "https://yoroi.company/research/opening-steelcorgi-a-sophisticated-apt-swiss-army-knife/"
+  strings:
+    $s1={4? 88 47 3c c1 6c ?4 34 08 8a 54 ?? ?? 4? 88 57 3d c1 6c}
+    $s2={0f b6 5? ?? 0f b6 4? ?? 4? c1 e2 18 4? c1 e0 10 4? }
+    $s3={8a 03 84 c0 74 ?? 3c 3d 75 ?? 3c 3d 75 ?? c6 03 00 4? 8b 7d 00}
+    $s4={01 c6 89 44 ?? ?? 8b 44 ?? ?? 31 f2 89 74 ?? ?? c1}
+    $s5={ 4? 89 d8 4? 31 f2 4? c1 e0 13 4? 01 d7 4? }
+  condition:
+    is_elf and 3 of them
+}
+
+
+rule UNC1945_STEELCORGI_generic{
+  meta:
+    description = "Yara Rule for unpacked ELF backdoor of UNC1945"
+    author = "Yoroi Malware Zlab"
+    last_updated = "2020_12_21"
+    tlp = "white"
+    category = "informational"
+    reference = "https://yoroi.company/research/opening-steelcorgi-a-sophisticated-apt-swiss-army-knife/"
+  strings:
+    $s1="MCARC"
+    $s2="833fc0088ea41bc3331db60ae2.debug"
+    $s3="PORA1022"
+    $s4="server"
+    $s5="test"
+    $s6="no ejecutar git-update-server-info"
+    $s7="dlopen"
+    $s8="dlsym"
+    $s9="5d5c6da19e62263f67ca63f8bedeb6.debug"
+    $s10={72 69 6E 74 20 22 5B 56 5D 20 41 74 74 65 6D 70 74 69 6E 67 20 74 6F 20 67 65 74 20 4F 53 20 69 6E 66 6F 20 77 69 74 68 20 63 6F 6D 6D 61 6E 64 3A 20 24 63 6F 6D 6D 61 6E 64 5C 6E 22 20 69 66 20 24 76 65 72 62 6F 73 65 3B}
+
+  condition:
+    all of them and #s4>50 and #s5>20
+}
