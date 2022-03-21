@@ -102,12 +102,12 @@ rule EzuriLoader_Golang_Generic
 }
 
 
-rule Metasploit_Staged_Generic {
+rule Metasploit_Stageless_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "26/12/2021"
-    description = "Scan Metasploit's Linux Staged by checking strings or section hash. Current rule doesn't match encoded malware"
+    description = "Scan Metasploit's Linux Stageless by checking strings or section hash. Current rule doesn't match encoded malware"
   strings:
     // $ = { 2D 70 2C 20 2D 2D 70 65 72 73 69 73 74 20 5B 6E 6F 6E 65 7C 69 6E 73 74 61 6C 6C 7C 75 6E 69 6E 73 74 61 6C 6C 5D 20 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "-p, --persist [none|install|uninstall] manage persistence"
     $ = { 6D 61 6E 61 67 65 20 70 65 72 73 69 73 74 65 6E 63 65 } // "manage persistence"
