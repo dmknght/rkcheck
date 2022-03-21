@@ -3,10 +3,9 @@ import .. / .. / libs / libclamav / nim_clam
 import .. / .. / libs / libyara / nim_yara
 import .. / cores / eng_cores
 import strutils
-import terminal
 
 
-proc cli_scan_progress(path: string) =
+proc cli_scan_progress_show(path: string) =
   #[
     Progress bar on CLi. Move this function to a callback lib if switch to GUI
     Do not call eraseLine here. We keep showing this line until it's finished.
@@ -21,6 +20,15 @@ proc cli_scan_progress(path: string) =
   else:
     stdout.write("[Scn] " & path)
   stdout.flushFile()
+
+
+proc cli_scan_progress_flush() =
+  #[
+    Remove last line. Use terminal escape https://stackoverflow.com/a/1508589
+      \e[2K: Erase current line. Use \33[2K in C (maybe Py)
+      \r: Move cursor to first pos in line
+  ]#
+  stdout.write("\e[2K\r") 
 
 
 proc fscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -77,9 +85,9 @@ proc fscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
   ]#
   let
     ctx = cast[ptr FileScanContext](context)
-  cli_scan_progress(ctx.scan_object)
+  cli_scan_progress_show(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_file, context, yr_scan_timeout)
-  eraseLine()
+  cli_scan_progress_flush()
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result
 
