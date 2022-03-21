@@ -3,6 +3,19 @@ import .. / .. / libs / libclamav / nim_clam
 import .. / .. / libs / libyara / nim_yara
 import .. / cores / eng_cores
 import strutils
+import terminal
+
+
+proc cli_scan_progress(path: string) =
+  #[
+    Progress bar on CLi. Move this function to a callback lib if switch to GUI
+    Do not call eraseLine here. We keep showing this line until it's finished.
+    Call eraseLine after scan is done
+    https://nim-lang.org/docs/terminal.html
+  ]#
+  stdout.write("[Scn] " & path)
+  stdout.flushFile()
+
 
 
 proc fscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -55,10 +68,13 @@ proc fscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
   #[
     The actual function to scan files. This function will call yara to scan file first.
     If result is CL_CLEAN, Clam will scan with its signatures
+    # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
   ]#
-  let ctx = cast[ptr FileScanContext](context)
-  # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
+  let
+    ctx = cast[ptr FileScanContext](context)
+  cli_scan_progress(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_file, context, yr_scan_timeout)
+  eraseLine()
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result
 
@@ -100,4 +116,7 @@ proc fscanner_new_dir_scan*(context: var FileScanContext, dir_path: string) =
 
 proc fscanner_new_dirs_scan*(context: var FileScanContext, dir_paths: seq[string]) =
   for dir_path in dir_paths:
-    fscanner_scan_dir(context, dir_path)
+    if not dir_path.startsWith("/proc/"):
+      fscanner_scan_dir(context, dir_path)
+    else:
+      echo "Ignoring ", dir_path, ". Please try scan process instead."
