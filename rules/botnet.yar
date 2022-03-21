@@ -183,7 +183,7 @@ rule Ngioweb_a {
     date = "25/12/2021"
     target = "File, memory"
     hash = "524df78615ffb007a0d7a9aafcedf918c0568200f95c6936767aa3931a81c7cd" // UPX binary
-    hash = "0b213e1f92a2613f7cebff82e8ffbdae985e3446960bf4bd365b5751efa08b53" // unpacked binary
+    hash = "0b213e1f92a2613f7cebff82e8ffbdae985e3446960bf4bd365b5751efa08b53" // Packed UPX binary
     description = "String detection for Ngioweb memory scan. Static file was detected by section hash"
   strings:
     $1 = { 44 24 38 4C 3B 7C } // "D$8L;|"

@@ -28,7 +28,7 @@ rule ELF_NoSections {
     elf_no_sections and filesize < 1KB
 }
 
-rule OSCommand_Add_user {
+rule Shell_Add_user {
   meta:
     description = "Bash commands to add new user to passwd"
     author = "Nong Hoang Tu"
@@ -40,7 +40,7 @@ rule OSCommand_Add_user {
     all of them
 }
 
-rule OSCommand_Wget_Downloader {
+rule Shell_Wget_Downloader {
   meta:
     description = "Bash commands to download and execute binaries using wget"
     reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
@@ -53,7 +53,7 @@ rule OSCommand_Wget_Downloader {
     all of them
 }
 
-rule OSCommand_Curl_Downloader {
+rule Shell_Curl_Downloader {
   meta:
     description = "Bash commands to download and execute binaries using CURL"
     refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
@@ -126,7 +126,7 @@ rule Hacktool_DenialOfService {
 //     any of them
 // }
 
-rule OSCommand_WgetAndCurl_Downloader {
+rule Shell_WgetAndCurl_Downloader {
   meta:
     description = "Bash commands to download and execute binaries using CURL || Wget"
     author = "Nong Hoang Tu"
@@ -243,7 +243,7 @@ rule FakeDynamicSymbols_Tenable {
     )
 }
 
-rule OSCommand_TryCD {
+rule Shell_TryCD {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"

@@ -72,22 +72,22 @@ rule Agent_1
 // }
 
 
-rule Python_IRCBot
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Python IRCBot, Unknown Trojan malware. Likely compiled from Python scripts"
-    /*
-      Hash of .shstrtab 98c978a3d9f51f870ec65edc9a224bf8 matches as well but i don't know if all files compiled from python is detected
-      as wrong behavior
-    */
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "196b7c3bdcb1a697395053b23b25abce"
-    )
-}
+// rule Python_IRCBot
+// {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Python IRCBot, Unknown Trojan malware. Likely compiled from Python scripts"
+//     /*
+//       Hash of .shstrtab 98c978a3d9f51f870ec65edc9a224bf8 matches as well but i don't know if all files compiled from python is detected
+//       as wrong behavior
+//     */
+//   condition:
+//     is_elf and
+//     for any i in (0 .. elf.number_of_sections - 1): (
+//       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "196b7c3bdcb1a697395053b23b25abce"
+//     )
+// }
 
 rule EzuriLoader_Golang_Generic
 {
