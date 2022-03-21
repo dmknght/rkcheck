@@ -95,4 +95,4 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
     fscanner_new_files_scan(ScanContext, @file_list)
   if len(dir_list) > 0:
     fscanner_new_dirs_scan(ScanContext, @dir_list)
-  dealloc(addr(ScanContext))
+  # dealloc(addr(ScanContext))
