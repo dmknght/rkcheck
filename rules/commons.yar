@@ -14,8 +14,12 @@ rule Shellcode_Executor
     email = "dmknght@parrotsec.org"
     description = "Try to detect shellcode executor by exported \"shellcode\" string"
   condition:
+    // There is a false positive from yara name matching. Condition elf.symtab[i].name == "buf" matched
+    // any object name contains "buf" like "xxxbuf"
+    // False positive: /usr/lib/debug/.build-id/2e/5abcee94f3bcbed7bba094f341070a2585a2ba.debug
+    // False positive /usr/lib/modules/5.16.0-12parrot1-amd64/kernel/drivers/accessibility/speakup/speakup.ko
     is_elf and for any i in (0 .. elf.symtab_entries - 1): (
-      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code" or elf.symtab[i].name == "buf") and elf.symtab[i].type == elf.STT_OBJECT
+      (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code") and elf.symtab[i].type == elf.STT_OBJECT
     )
 }
 
