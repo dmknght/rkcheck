@@ -409,3 +409,18 @@ rule bvp47_a {
 //     all of them
 // }
 // TODO add https://github.com/peondusud/lin.rootkit
+
+
+rule TinyShell {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Open-source TinyShell backdoor"
+    reference = "https://github.com/creaktive/tsh"
+    // execl, setsid is in imports, type: func
+  strings:
+    $1 = "s:p:c::" // getopt strings
+    $2 = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
+  condition:
+    is_elf and all of them
+}
