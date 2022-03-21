@@ -15,11 +15,12 @@ proc cli_scan_progress(path: string) =
   ]#
   # If path is too long -> can't erase stdout. We try print only file name
   if len(path) >= 50:
-    stdout.write("[Scn] " & splitPath(path).tail)
+    let file_name = splitPath(path).tail
+    if len(file_name) < 50:
+      stdout.write("[Scn] " & file_name)
   else:
     stdout.write("[Scn] " & path)
   stdout.flushFile()
-
 
 
 proc fscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
