@@ -68,7 +68,7 @@ rule Connecticoin_Generic
     $1 = "connecticoin.org"
     $2 = "Connecticoin-Qt"
   condition:
-    is_elf and any of them
+    any of them
     // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
     //   elf.sections[i].name == ".rodata" and
     //     $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
@@ -87,7 +87,7 @@ rule XMRStak_Generic {
     $3 = "donate.xmr-stak.net"
     $4 = "xmr-stak-rx 1.0.4-rx 65ade74"
   condition:
-    is_elf and any of them
+    any of them
 }
 
 rule Xmrig_Generic
@@ -107,7 +107,7 @@ rule Xmrig_Generic
     $8 = "xmrig.json"
     $9 = "xmrigMiner" // fixme can't detect 0a79399*
   condition:
-    is_elf and any of them
+    any of them
     // is_elf and for any i in (0 .. elf.number_of_sections - 1): (
     //   elf.sections[i].name == ".rodata" and
     //     $1 in (elf.sections[i].offset .. elf.sections[i + 1].offset) and
