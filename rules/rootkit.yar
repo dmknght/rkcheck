@@ -409,3 +409,19 @@ rule bvp47_a {
 //     all of them
 // }
 // TODO add https://github.com/peondusud/lin.rootkit
+
+rule Chsh_Generic {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "28/12/2021"
+    description = "Detect Chsh rootkit and its variant Chfn. This method uses string matching for memory. File matching matched the LOAD rule"
+    hash = "3e296bbbd4d1e7ae5f538e86c2b99d01" // chfn
+    hash = "49b2fdd337a155029ef379b10032751a" // chsh
+  strings:
+    $ = { 63 68 73 68 20 30 2E 39 61 20 62 65 74 61 } // "chsh 0.9a beta"
+    $ = { 73 65 74 70 77 6E 61 6D } // "setpwnam"
+    $ = { 2A 6E 61 7A 67 75 6C 2A } // "*nazgul*"
+  condition:
+    any of them
+}
