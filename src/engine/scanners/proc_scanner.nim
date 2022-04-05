@@ -19,11 +19,11 @@ proc cb_yr_process_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_dat
 
 proc pscanner_scan_proc(context: var ProcScanContext) =
   # context.scan_object.cmdline = readFile(context.scan_object.pid_path & "/cmdline")
-  # try:
-  #   context.scan_object.binary_path = expandSymlink(context.scan_object.pid_path & "/exe")
-  # except:
-  #   # Fix crash when pid = 1 -> exe permission denied
-  #   context.scan_object.binary_path = context.scan_object.cmdline
+  try:
+    context.scan_object.binary_path = expandSymlink(context.scan_object.pid_path & "/exe")
+  except:
+    # Fix crash when pid = 1 -> exe permission denied
+    context.scan_object.binary_path = context.scan_object.cmdline
   # TODO handle parent pid, child pid, ... to do ignore scan
   # TODO sometime the actual malicious part is cmdline (python3 -c <reverse shell> for example. We scan it as well)
   discard yr_rules_scan_proc(
