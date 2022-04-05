@@ -425,3 +425,17 @@ rule Chsh_Generic {
   condition:
     any of them
 }
+
+
+rule Boopkit_Generic {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    reference = "https://github.com/kris-nova/boopkit/"
+  strings:
+    $1 = "cat /sys/kernel/tracing/trace_pipe"
+    $2 = "eBPF Probe Loaded:"
+    $3 = "-----------------------------------------------"
+  condition:
+    all of them
+}
