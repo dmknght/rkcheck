@@ -1,6 +1,6 @@
 
 import .. / .. / libs / libyara / nim_yara
-import .. / cores / eng_cores
+import .. / cores / [eng_cores, eng_cli_progress]
 import os
 import strutils
 
@@ -19,11 +19,6 @@ proc cb_yr_process_scan(context: ptr YR_SCAN_CONTEXT; message: cint; message_dat
 
 proc pscanner_scan_proc(context: var ProcScanContext) =
   # context.scan_object.cmdline = readFile(context.scan_object.pid_path & "/cmdline")
-  try:
-    context.scan_object.binary_path = expandSymlink(context.scan_object.pid_path & "/exe")
-  except:
-    # Fix crash when pid = 1 -> exe permission denied
-    context.scan_object.binary_path = context.scan_object.cmdline
   # TODO handle parent pid, child pid, ... to do ignore scan
   # TODO sometime the actual malicious part is cmdline (python3 -c <reverse shell> for example. We scan it as well)
   discard yr_rules_scan_proc(
@@ -53,9 +48,16 @@ proc pscanner_new_all_procs_scan*(context: var ProcScanContext) =
     if kind == pcDir:
       try:
         let pid = parseInt(path.split("/")[^1])
+        try:
+          context.scan_object.binary_path = expandSymlink(context.scan_object.pid_path & "/exe")
+        except:
+          # Fix crash when pid = 1 -> exe permission denied
+          context.scan_object.binary_path = context.scan_object.cmdline
         context.scan_object.pid = pid
         context.scan_object.pid_path = path
+        cli_progress_scan_process(pid, context.scan_object.binary_path)
         pscanner_scan_proc(context)
+        cli_progress_flush()
       except ValueError:
         # This is not a process from procfs
         discard

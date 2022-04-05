@@ -1,20 +1,28 @@
-import engine / rkengine
 import engine / cores / eng_cores
 import libs / libclamav / nim_clam
+import engine / apis
 
 
 proc main() =
   var engine: CoreEngine
-  engine.ClamDbPath = "/var/lib/clamav/bytecode.cld"
+  # engine.ClamDbPath = "/var/lib/clamav/"
+  # engine.ClamDbPath = "database/"
   engine.YaraDbPath = "/home/dmknght/ParrotProjects/rkcheck/database/signatures.ydb"
   engine.LibClamDebug = false
 
   if rkcheck_start_engine(engine) == CL_SUCCESS:
     try:
-      discard
-      # rkcheck_scan_dir("/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/")
-      # rkcheck_scan_dir("/tmp/magics_yara/")
-      # rkcheck_scan_procs()
+      # rkcheck_scan_procs(engine)
+      # rkcheck_scan_files_and_dirs(engine, dir_list=["/usr/bin/"])
+      # rkcheck_scan_procs(engine, @[1179, 793435])
+      rkcheck_scan_all_procs(engine)
+      # rkcheck_scan_file(engine, "/mnt/maintain/VirusCollection/vxheavens-2010-05-18/viruses-2010-05-18/Rootkit.Linux.Agent.30.Chfn")
+      # rkcheck_scan_proc(engine, 3798464)
+      # rkcheck_scan_dir(engine, "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/")
+      # rkcheck_scan_dir(engine, "/home/dmknght/Desktop/MalwareLab/Linux-Malware-Samples")
+      # rkcheck_scan_dir(engine, "/mnt/maintain/VirusCollection/vxheavens-2010-05-18/viruses-2010-05-18/")
+      # rkcheck_scan_dir(engine, "/opt/")
+      # rkcheck_scan_all_procs(engine)
     # try:
     #   let svrStatus = createServer()
     #   if svrStatus == SUCCESS:
