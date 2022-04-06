@@ -58,6 +58,18 @@ rule Coin_Miner_4
     )
 }
 
+rule Coin_Miner_5
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+  strings:
+    $1 = { 4D 65 6D 6F 72 79 3A 20 25 75 20 4B 69 42 2C 20 49 74 65 72 61 74 69 6F 6E 73 3A 20 25 75 2C 20 50 61 72 61 6C 6C 65 6C 69 73 6D 3A 20 25 75 20 6C 61 6E 65 73 2C 20 54 61 67 20 6C 65 6E 67 74 68 3A 20 25 75 20 62 79 74 65 73 } // "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes"
+    $2 = { 42 6C 6F 63 6B 20 25 2E 34 75 20 5B 25 33 75 5D 3A 20 25 30 31 36 6C 78 } // "Block %.4u [%3u]: %016lx"
+  condition:
+    all of them
+}
+
 
 rule Connecticoin_Generic
 {

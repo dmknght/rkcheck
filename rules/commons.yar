@@ -70,18 +70,6 @@ rule Shell_Curl_Downloader {
     all of them
 }
 
-rule CoinMiner
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-  strings:
-    $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes"
-    $2 = "Block %.4u [%3u]: %016lx"
-  condition:
-    is_elf and all of them
-}
-
 rule Hacktool_DenialOfService {
   meta:
     author = "Nong Hoang Tu"
