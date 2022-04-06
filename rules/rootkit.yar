@@ -331,7 +331,7 @@ rule Ark_lrkv {
     $4 = "usage: du [-ars] [name ...]"
     $5 = "du: No more processes"
   condition:
-    is_elf and any of them
+    any of them
 }
 
 
@@ -347,7 +347,7 @@ rule Phalanx_b6 {
     $4 = "uninstalling phalanx from the kernel"
     $5 = "testing the userland process spawning code"
   condition:
-    is_elf and any of them
+    any of them
 }
 
 
@@ -364,7 +364,7 @@ rule Adore {
     $4 = "ELITE_UID: %u, ELITE_GID=%u, ADORE_KEY=%s"
     $5 = "Removed PID %d from taskstruct"
   condition:
-    is_elf and any of them
+    any of them
 }
 
 rule bvp47_a {
@@ -385,8 +385,7 @@ rule bvp47_a {
     $short_5 = "dXRuFsbUutDV" fullword
     $short_6 = "NcGNaOrdVC" fullword
   condition:
-    is_elf and $long_1 or
-    4 of ($short_*)
+    is_elf and ($long_1 or 4 of ($short_*))
     // TODO runtime scan
 }
 
@@ -423,7 +422,7 @@ rule Chsh_Generic {
     $ = { 73 65 74 70 77 6E 61 6D } // "setpwnam"
     $ = { 2A 6E 61 7A 67 75 6C 2A } // "*nazgul*"
   condition:
-    any of them
+    all of them
 }
 
 
