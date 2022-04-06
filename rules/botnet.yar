@@ -156,12 +156,11 @@ rule Mirai_variant_1 {
     description = "Strings from dumped mem"
     hash = "a9878bffe5e771bd09109df185dc41883ca0a560bb7b635abddc4259995ec37"
   strings:
-    // false positive /usr/local/lib/python3.8/dist-packages/zelos/ext/env/linux-armv7/lib/libc.so.0
     $cc = { 31 39 34 2E 37 36 2E 32 32 36 2E 32 34 30 } // "194.76.226.240"
     $s1 = { 44 65 76 69 63 65 20 43 6F 6E 6E 65 63 74 65 64 3A 20 25 73 20 7C 20 50 6F 72 74 3A 20 25 73 20 7C 20 41 72 63 68 3A 20 25 73 } // "Device Connected: %s | Port: %s | Arch: %s"
     $s2 = { 54 53 6F 75 72 63 65 20 45 6E 67 69 6E 65 20 51 75 65 72 79 } // "TSource Engine Query"
     $s3 = { 4C 33 33 54 20 48 61 78 45 72 53 } // "L33T HaxErS"
-    $s4 = { 6E 70 78 58 6F 75 64 69 66 46 65 45 67 47 61 41 43 53 63 73 } //"npxXoudifFeEgGaACScs" // Uniq string found in many Mirai's binaries
+    // $s4 = { 6E 70 78 58 6F 75 64 69 66 46 65 45 67 47 61 41 43 53 63 73 } //"npxXoudifFeEgGaACScs" false positive. Likely armv7 uses this string
   condition:
     $cc or ($s2 and ($s1 or $s3)) or $s4
 }
