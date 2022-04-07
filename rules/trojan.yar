@@ -186,7 +186,7 @@ rule Homeunix_Generic {
     all of them
 }
 
-rule Fysbis {
+rule Fysbis_364f {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -195,17 +195,20 @@ rule Fysbis {
     refrence = "https://otx.alienvault.com/indicator/file/ab6f39f913a925cf4e9fa7717db0e3eb38b5ae61e057a2e76043b539f3c0dc91"
     reference = "http://researchcenter.paloaltonetworks.com/2016/02/a-look-into-fysbis-sofacys-linux-backdoor/"
     reference = "https://github.com/Yara-Rules/rules/blob/master/malware/APT_Sofacy_Fysbis.yar"
+    reference = "https://www.hybrid-analysis.com/sample/8bca0031f3b691421cb15f9c6e71ce193355d2d8cf2b190438b6962761d0c6bb"
     target = "File, memory"
-    /*
-    From result of string analysis, there are generated files at /usr/lib/systemd/system/, and startup file at find ~/.config/ -name autostart 
-    */
+    hash = "364ff454dcf00420cff13a57bcb78467"
   strings:
-    $1 = "ls /etc | egrep -e\"fedora*|debian*|gentoo*|mandriva*|mandrake*|meego*|redhat*|lsb-*|sun-*|SUSE*|release\""
-    $2 = "mkdir /usr/lib/sys-defender"
-    $3 = "pgrep -l \"gnome|kde|mate|cinnamon|lxde|xfce|jwm\""
-    $4 = "rm -f /usr/lib/systemd/system/"
+    $addr_1 = "azureon-line.com"
+    $path_1 = ".config/dbus-notifier" // full path: .config/dbus-notifier/dbus-inotifier
+    $path_2 = ".local/cva-ssys"
+    $path_3 = "~/.config/autostart"
+    $cmd_1 = "rm -f ~/.config/autostart/"
+    $cmd_2 = "rm -f /usr/lib/systemd/system/"
+    $cmd_3 = "mkdir /usr/lib/cva-ssys"
+    $cmd_4 = "mkdir ~/.config/autostart" // Could be false positive
   condition:
-    all of them
+    $addr_1 or any of ($path_*) or 3 of ($cmd_*)
 }
 
 rule Gbkdoor {
