@@ -10,6 +10,7 @@ proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; mess
     let
       data = cast[ptr ProcInfo](user_data)
       rule = cast[ptr YR_RULE](message_data)
+    cli_progress_flush()
     echo rule.ns.name, ":", rule.identifier, " ", data.binary_path, " (pid: ", data.pid, ")"
     return CALLBACK_ABORT
   else:
@@ -49,12 +50,12 @@ proc pscanner_new_all_procs_scan*(context: var ProcScanContext) =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir:
       try:
-        let pid = parseInt(path.split("/")[^1])
+        let pid = parseInt(splitPath(path).tail)
         try:
           context.scan_object.binary_path = expandSymlink(context.scan_object.pid_path & "/exe")
         except:
-          # Fix crash when pid = 1 -> exe permission denied
-          context.scan_object.binary_path = context.scan_object.cmdline
+          # Some processes causes permissino deny when do expandSymlink
+          context.scan_object.binary_path = readFile(path & "/cmdline")
         context.scan_object.pid = pid
         context.scan_object.pid_path = path
         pscanner_scan_proc(context)
