@@ -208,7 +208,8 @@ rule Fysbis_364f {
     $cmd_3 = { 6D 6B 64 69 72 20 2F 75 73 72 2F 6C 69 62 2F 63 76 61 2D 73 73 79 73 } // "mkdir /usr/lib/cva-ssys"
     $cmd_4 = { 6D 6B 64 69 72 20 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 } // "mkdir ~/.config/autostart" // Could be false positive
   condition:
-    $addr_1 or any of ($path_*) or 3 of ($cmd_*)
+    ($addr_1 or 2 of ($path_*) or 3 of ($cmd_*)) or
+    ($path_1 and xdg_desktop_entry) // TODO test with infected as root
 }
 
 rule Gbkdoor_Generic {
