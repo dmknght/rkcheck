@@ -205,7 +205,7 @@ rule Fysbis_364f {
     $path_3 = { 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 } // "~/.config/autostart"
     $cmd_1 = { 72 6D 20 2D 66 20 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 2F } // "rm -f ~/.config/autostart/"
     $cmd_2 = { 72 6D 20 2D 66 20 2F 75 73 72 2F 6C 69 62 2F 73 79 73 74 65 6D 64 2F 73 79 73 74 65 6D 2F } // "rm -f /usr/lib/systemd/system/"
-    $cmd_3 = { 6D 6B 64 69 72 20 2F 75 73 72 2F 6C 69 62 2F 63 76 61 2D 73 73 79 73 } "mkdir /usr/lib/cva-ssys"
+    $cmd_3 = { 6D 6B 64 69 72 20 2F 75 73 72 2F 6C 69 62 2F 63 76 61 2D 73 73 79 73 } // "mkdir /usr/lib/cva-ssys"
     $cmd_4 = { 6D 6B 64 69 72 20 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 } // "mkdir ~/.config/autostart" // Could be false positive
   condition:
     $addr_1 or any of ($path_*) or 3 of ($cmd_*)
