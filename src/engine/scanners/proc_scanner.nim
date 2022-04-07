@@ -43,6 +43,8 @@ proc pscanner_new_proc_scan*(context: var ProcScanContext, pid: int) =
 
 proc pscanner_new_procs_scan*(context: var ProcScanContext, pids: seq[int]) =
   for pid in pids:
+    context.scan_object.pid = pid
+    context.scan_object.pid_path = "/proc/" & intToStr(pid)
     pscanner_new_proc_scan(context, pid)
 
 
