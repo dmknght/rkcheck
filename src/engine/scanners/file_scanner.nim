@@ -66,14 +66,6 @@ proc fscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
   return ctx.scan_result
 
 
-# proc rscanner_cb_clam_post_scan*(fd, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
-#   let ctx = cast[ptr FileScanContext](context)
-#   if scan_result == CL_CLEAN:
-#     discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, rscanner_cb_yara_scan_file, context, yr_scan_timeout)
-#   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
-#   return ctx.scan_result
-
-
 proc fscanner_scan_file(context: var FileScanContext, file_path: string) =
   var
     virname: cstring
