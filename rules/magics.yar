@@ -6,6 +6,12 @@ private rule is_elf {
 }
 
 
+private rule xdg_desktop_entry {
+  condition:
+    uint32(0) == 0x7365445B and uint32(11) == 0x5D797274
+}
+
+
 // private rule is_shebang {
 //   condition:
 //     uint32(0) == 0x752F2123 // "#!/u". Meant to detect "#!/usr/bin/"
