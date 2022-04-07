@@ -16,7 +16,7 @@ include "rules/magics.yar"
 //     )
 // }
 
-rule Agent_1
+rule Agent_4b06
 {
   meta:
     author = "Nong Hoang Tu"
@@ -34,23 +34,12 @@ rule Agent_1
         fexecve(uVar1, &var_20h, &var_10h);
     */
   strings:
-    // .rodata
     $str1 = "pid,%d"
     $str2 = "no_elf"
-    // .dynstr
-    $import1 = "fexecve"
-    $import2 = "getpid"
-    $import3 = "syscall"
   condition:
-    is_elf and
-      // Check import in .dynstr
-      $import1 in (elf.sections[6].offset .. elf.sections[7].offset) and
-      $import2 in (elf.sections[6].offset .. elf.sections[7].offset) and
-      $import3 in (elf.sections[6].offset .. elf.sections[7].offset)
-    and
-      // Check .rodata
-      $str1 in (elf.sections[16].offset .. elf.sections[17].offset) and
-      $str2 in (elf.sections[16].offset .. elf.sections[17].offset)
+    (is_elf and elf.symtab[62].name == "fexecve@@GLIBC_2.2.5" and elf.symtab[63].name == "syscall@@GLIBC_2.2.5" and
+      elf.symtab[54].name == "getpid@@GLIBC_2.2.5")
+    or all of them
 }
 
 // rule Agent_2
