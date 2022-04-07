@@ -162,7 +162,7 @@ rule Mirai_variant_1 {
     $s3 = { 4C 33 33 54 20 48 61 78 45 72 53 } // "L33T HaxErS"
     // $s4 = { 6E 70 78 58 6F 75 64 69 66 46 65 45 67 47 61 41 43 53 63 73 } //"npxXoudifFeEgGaACScs" false positive. Likely armv7 uses this string
   condition:
-    $cc or ($s2 and ($s1 or $s3)) or $s4
+    $cc or ($s2 and ($s1 or $s3))
 }
 
 rule Flooder_a_Generic {
