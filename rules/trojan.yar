@@ -199,19 +199,19 @@ rule Fysbis_364f {
     target = "File, memory"
     hash = "364ff454dcf00420cff13a57bcb78467"
   strings:
-    $addr_1 = "azureon-line.com"
-    $path_1 = ".config/dbus-notifier" // full path: .config/dbus-notifier/dbus-inotifier
-    $path_2 = ".local/cva-ssys"
-    $path_3 = "~/.config/autostart"
-    $cmd_1 = "rm -f ~/.config/autostart/"
-    $cmd_2 = "rm -f /usr/lib/systemd/system/"
-    $cmd_3 = "mkdir /usr/lib/cva-ssys"
-    $cmd_4 = "mkdir ~/.config/autostart" // Could be false positive
+    $addr_1 = { 61 7A 75 72 65 6F 6E 2D 6C 69 6E 65 2E 63 6F 6D } // "azureon-line.com"
+    $path_1 = { 2E 63 6F 6E 66 69 67 2F 64 62 75 73 2D 6E 6F 74 69 66 69 65 72 } // ".config/dbus-notifier" // full path: .config/dbus-notifier/dbus-inotifier
+    $path_2 = { 2E 6C 6F 63 61 6C 2F 63 76 61 2D 73 73 79 73 } // ".local/cva-ssys"
+    $path_3 = { 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 } // "~/.config/autostart"
+    $cmd_1 = { 72 6D 20 2D 66 20 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 2F } // "rm -f ~/.config/autostart/"
+    $cmd_2 = { 72 6D 20 2D 66 20 2F 75 73 72 2F 6C 69 62 2F 73 79 73 74 65 6D 64 2F 73 79 73 74 65 6D 2F } // "rm -f /usr/lib/systemd/system/"
+    $cmd_3 = { 6D 6B 64 69 72 20 2F 75 73 72 2F 6C 69 62 2F 63 76 61 2D 73 73 79 73 } "mkdir /usr/lib/cva-ssys"
+    $cmd_4 = { 6D 6B 64 69 72 20 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 } // "mkdir ~/.config/autostart" // Could be false positive
   condition:
     $addr_1 or any of ($path_*) or 3 of ($cmd_*)
 }
 
-rule Gbkdoor {
+rule Gbkdoor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
