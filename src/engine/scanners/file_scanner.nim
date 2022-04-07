@@ -23,16 +23,16 @@ proc fscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; me
     return CALLBACK_ABORT
   else:
     # Safe check to avoid crash. Don't calculate weight if rule doesn't have tag "weight"
-    if rule != nil and yr_rule_is_weight(rule) == 0:
-      let rule_count_strs = yr_rule_count_strings(rule)
-      if rule_count_strs != 0:
-        # Calculate patterns weight
-        # TODO didn't count the "not $" cases
-        let weight = yr_scan_count_strings_m(context, rule) * 100 / rule_count_strs
-        if weight > 55:
-          ctx.scan_result = CL_VIRUS
-          ctx.virus_name = cstring(weight.formatFloat(ffDecimal, 2) & "% " & $rule.ns.name & ":" & replace($rule.identifier, "_", "."))
-          return CALLBACK_ABORT
+    # if rule != nil and yr_rule_is_weight(rule) == 0:
+    #   let rule_count_strs = yr_rule_count_strings(rule)
+    #   if rule_count_strs != 0:
+    #     # Calculate patterns weight
+    #     # TODO didn't count the "not $" cases
+    #     let weight = yr_scan_count_strings_m(context, rule) * 100 / rule_count_strs
+    #     if weight > 55:
+    #       ctx.scan_result = CL_VIRUS
+    #       ctx.virus_name = cstring(weight.formatFloat(ffDecimal, 2) & "% " & $rule.ns.name & ":" & replace($rule.identifier, "_", "."))
+    #       return CALLBACK_ABORT
     # else:
     # Remove status "virus" and virus name
     ctx.scan_result = CL_CLEAN
