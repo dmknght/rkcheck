@@ -5,7 +5,7 @@ import .. / cores / [eng_cores, eng_cli_progress]
 import strutils
 
 
-proc fscanner_cb_yara_scan_file*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   #[
     Handle scan result from Yara engine
   ]#
@@ -60,7 +60,7 @@ proc fscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_err
   let
     ctx = cast[ptr FileScanContext](context)
   cli_progress_scan_file(ctx.scan_object)
-  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_file, context, yr_scan_timeout)
+  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_result, context, yr_scan_timeout)
   cli_progress_flush()
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result

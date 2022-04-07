@@ -5,7 +5,7 @@ import os
 import strutils
 
 
-proc cb_yr_process_scan_found(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   if message == CALLBACK_MSG_RULE_MATCHING:
     let
       data = cast[ptr ProcInfo](user_data)
@@ -26,7 +26,7 @@ proc pscanner_scan_proc(context: var ProcScanContext) =
     context.ScanEngine.YaraEng,
     cint(context.scan_object.pid),
     0,
-    cb_yr_process_scan_found,
+    cb_yr_process_scan_result,
     addr(context.scan_object),
     yr_scan_timeout
   )
