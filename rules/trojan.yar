@@ -134,7 +134,7 @@ rule Excedoor_Generic {
     $s_4 // Heuristic level
 }
 
-rule EkoBackdoor {
+rule EkoBackdoor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -143,20 +143,19 @@ rule EkoBackdoor {
     refrence = "https://otx.alienvault.com/indicator/file/74d29efbdf7df9bb7e51fad039e0e40455795056ec643610b38853c602a4357c"
     target = "File, memory"
   strings:
-    $s1 = "Backdoor instalado! - Have a nice hack ;)"
-    $s2 = "< Coded by ca0s / Ezkracho Team >"
-    $s3 = ">> EkoBackdoor v1.1 by ca0s <<"
-    $s4 = "stream tcp nowait root /bin/sh sh -i"
-    $s5 = "Uso: ./ekobdoor [opcion] [argumento]"
-    $s6 = "ekorulez"
-    $s7 = ":/:/bin/sh"
-    $s8 = "cp /bin/sh /tmp/sh"
-    $s9 = "chmod 4711 /tmp/sh"
+    $spec_1 = { 42 61 63 6B 64 6F 6F 72 20 69 6E 73 74 61 6C 61 64 6F 21 20 2D 20 48 61 76 65 20 61 20 6E 69 63 65 20 68 61 63 6B 20 3B 29 } // "Backdoor instalado! - Have a nice hack ;)"
+    $spec_2 = { 43 6F 64 65 64 20 62 79 20 63 61 30 73 20 2F 20 45 7A 6B 72 61 63 68 6F 20 54 65 61 6D 20 3E } // "Coded by ca0s / Ezkracho Team >"
+    $spec_3 = { 45 6B 6F 42 61 63 6B 64 6F 6F 72 20 76 31 2E 31 20 62 79 20 63 61 30 73 } // "EkoBackdoor v1.1 by ca0s"
+    $spec_4 = { 65 6B 6F 72 75 6C 65 7A } // "ekorulez"
+    $spec_5 = { 73 74 72 65 61 6D 20 74 63 70 20 6E 6F 77 61 69 74 20 72 6F 6F 74 20 2F 62 69 6E 2F 73 68 20 73 68 20 2D 69 } // "stream tcp nowait root /bin/sh sh -i"
+    $cmd_2 = { 63 70 20 2F 62 69 6E 2F 73 68 20 2F 74 6D 70 2F 73 68 } // "cp /bin/sh /tmp/sh"
+    $cmd_3 = { 63 68 6D 6F 64 20 34 37 31 31 20 2F 74 6D 70 2F 73 68 } // "chmod 4711 /tmp/sh"
+    $cmd_4 = { 2E 2F 65 6B 6F 62 64 6F 6F 72 } // "./ekobdoor"
   condition:
-    3 of them
+    any of ($spec_*) or all of ($cmd_*)
 }
 
-rule Explodor {
+rule Explodor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -165,16 +164,14 @@ rule Explodor {
     refrence = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
     target = "File, memory"
   strings:
-    // $1 = "/etc/suid-debug"
-    // $2 = "/proc/self/exe"
-    $3 = "Unable to spawn shell"
-    $4 = "keld@dkuug.dk"
-    $5 = "PATH=/usr/bin:/bin:/usr/sbin:/sbin"
+    $3 = { 55 6E 61 62 6C 65 20 74 6F 20 73 70 61 77 6E 20 73 68 65 6C 6C } // "Unable to spawn shell"
+    $4 = { 6B 65 6C 64 40 64 6B 75 75 67 2E 64 6B } // "keld@dkuug.dk"
+    $5 = { 50 41 54 48 3D 2F 75 73 72 2F 62 69 6E 3A 2F 62 69 6E 3A 2F 75 73 72 2F 73 62 69 6E 3A 2F 73 62 69 6E } // "PATH=/usr/bin:/bin:/usr/sbin:/sbin"
   condition:
     all of them
 }
 
-rule Homeunix {
+rule Homeunix_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -183,8 +180,8 @@ rule Homeunix {
     refrence = "https://otx.alienvault.com/indicator/file/ced749fecb0f9dde9355ee29007ea8a20de277d39ebcb5dda61cd290cd5dbc02"
     target = "File, memory"
   strings:
-    $s1 = "unixforce::0:0:unixforce:/root:/bin/bash"
-    $s2 = "/etc/passwd"
+    $s1 = { 75 6E 69 78 66 6F 72 63 65 3A 3A 30 3A 30 3A 75 6E 69 78 66 6F 72 63 65 3A 2F 72 6F 6F 74 3A 2F 62 69 6E 2F 62 61 73 68 } // "unixforce::0:0:unixforce:/root:/bin/bash"
+    $s2 = { 2F 65 74 63 2F 70 61 73 73 77 64 } // "/etc/passwd"
   condition:
     all of them
 }
@@ -196,6 +193,8 @@ rule Fysbis {
     description = "Linux Fysbis"
     date = "12/11/2021"
     refrence = "https://otx.alienvault.com/indicator/file/ab6f39f913a925cf4e9fa7717db0e3eb38b5ae61e057a2e76043b539f3c0dc91"
+    reference = "http://researchcenter.paloaltonetworks.com/2016/02/a-look-into-fysbis-sofacys-linux-backdoor/"
+    reference = "https://github.com/Yara-Rules/rules/blob/master/malware/APT_Sofacy_Fysbis.yar"
     target = "File, memory"
     /*
     From result of string analysis, there are generated files at /usr/lib/systemd/system/, and startup file at find ~/.config/ -name autostart 
