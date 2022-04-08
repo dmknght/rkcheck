@@ -7,7 +7,7 @@ rule Aris_Generic {
     $1 = { 62 63 31 71 65 66 33 64 33 72 79 65 6D 6C 75 6E 65 68 64 78 74 78 38 78 76 72 6B 64 74 33 77 36 63 67 7A 6A 38 73 6B 6C 32 63 } // "bc1qef3d3ryemlunehdxtx8xvrkdt3w6cgzj8skl2c"
     $2 = { 43 6F 6E 67 72 61 74 73 20 79 6F 75 20 68 61 76 65 20 62 65 65 6E 20 68 69 74 20 62 79 20 74 68 65 20 41 72 69 73 4C 6F 63 6B 65 72 20 73 6F 20 6C 65 74 73 20 74 61 6C 6B 20 61 62 6F 75 74 20 72 65 63 6F 76 65 72 69 6E 67 20 79 6F 75 72 20 66 69 6C 65 73 } // "Congrats you have been hit by the ArisLocker so lets talk about recovering your files"
   condition:
-    any of them
+    all of them
 }
 
 rule ChastityLock_Generic {
