@@ -207,9 +207,13 @@ rule Fysbis_364f {
     $cmd_2 = { 72 6D 20 2D 66 20 2F 75 73 72 2F 6C 69 62 2F 73 79 73 74 65 6D 64 2F 73 79 73 74 65 6D 2F } // "rm -f /usr/lib/systemd/system/"
     $cmd_3 = { 6D 6B 64 69 72 20 2F 75 73 72 2F 6C 69 62 2F 63 76 61 2D 73 73 79 73 } // "mkdir /usr/lib/cva-ssys"
     $cmd_4 = { 6D 6B 64 69 72 20 7E 2F 2E 63 6F 6E 66 69 67 2F 61 75 74 6F 73 74 61 72 74 } // "mkdir ~/.config/autostart" // Could be false positive
+    // Generated when malware is executed as sudo. This is the systemd unit
+    $entry_1 = { 45 78 65 63 53 74 61 72 74 3D 2F 62 69 6E 2F 72 73 79 6E 63 64 } // ExecStart=/bin/rsyncd
+    $entry_2 = { 44 65 73 63 72 69 70 74 69 6F 6E 3D 20 73 79 6E 63 68 72 6F 6E 69 7A 65 20 61 6E 64 20 62 61 63 6B 75 70 20 73 65 72 76 69 63 65 } // Description= synchronize and backup service
   condition:
     ($addr_1 or 2 of ($path_*) or 3 of ($cmd_*)) or
-    ($path_1 and xdg_desktop_entry) // TODO test with infected as root
+    ($path_1 and xdg_desktop_entry) or // TODO test with infected as root
+    ($entry_1 and $entry_2)
 }
 
 rule Gbkdoor_Generic {
