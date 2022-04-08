@@ -45,9 +45,9 @@ proc compile_rules(dst: string) =
   discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Rans", "ransomware.yar")
   discard yr_compiler_add_file(compiler, open("rules/commons.yar"), "Heur", "commons.yar")
   discard yr_compiler_add_file(compiler, open("rules/rootkit.yar"), "Rkit", "rootkit.yar")
-  discard yr_compiler_add_file(compiler, open("rules/trojan.yar"), "Trj", "trojan.yar")
-  discard yr_compiler_add_file(compiler, open("rules/coin_miner.yar"), "Miner", "coin_miner.yar")
-  discard yr_compiler_add_file(compiler, open("rules/botnet.yar"), "Bot", "botnet.yar")
+  discard yr_compiler_add_file(compiler, open("rules/trojan.yar"), "Trjn", "trojan.yar")
+  discard yr_compiler_add_file(compiler, open("rules/coin_miner.yar"), "Minr", "coin_miner.yar")
+  discard yr_compiler_add_file(compiler, open("rules/botnet.yar"), "Botn", "botnet.yar")
 
   discard yr_compiler_get_rules(compiler, addr(rules))
   discard yr_rules_save(rules, dst)
