@@ -42,12 +42,12 @@ proc compile_rules(dst: string) =
   yr_compiler_set_callback(compiler, report_error, unsafeAddr(compiler_result))
 
   discard yr_compiler_add_file(compiler, open("rules/magics.yar"), "Magic", "magics.yar")
-  discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Ransomware", "ransomware.yar")
-  discard yr_compiler_add_file(compiler, open("rules/commons.yar"), "Generic", "commons.yar")
-  discard yr_compiler_add_file(compiler, open("rules/rootkit.yar"), "Rootkit", "rootkit.yar")
-  discard yr_compiler_add_file(compiler, open("rules/trojan.yar"), "Trojan", "trojan.yar")
-  discard yr_compiler_add_file(compiler, open("rules/coin_miner.yar"), "CoinMiner", "coin_miner.yar")
-  discard yr_compiler_add_file(compiler, open("rules/botnet.yar"), "Botnet", "botnet.yar")
+  discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Rans", "ransomware.yar")
+  discard yr_compiler_add_file(compiler, open("rules/commons.yar"), "Heur", "commons.yar")
+  discard yr_compiler_add_file(compiler, open("rules/rootkit.yar"), "Rkit", "rootkit.yar")
+  discard yr_compiler_add_file(compiler, open("rules/trojan.yar"), "Trj", "trojan.yar")
+  discard yr_compiler_add_file(compiler, open("rules/coin_miner.yar"), "Miner", "coin_miner.yar")
+  discard yr_compiler_add_file(compiler, open("rules/botnet.yar"), "Bot", "botnet.yar")
 
   discard yr_compiler_get_rules(compiler, addr(rules))
   discard yr_rules_save(rules, dst)
