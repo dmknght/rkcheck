@@ -11,7 +11,7 @@ proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; mess
       data = cast[ptr ProcInfo](user_data)
       rule = cast[ptr YR_RULE](message_data)
     cli_progress_flush()
-    echo rule.ns.name, ":", rule.identifier, " ", data.binary_path, " (pid: ", data.pid, ")"
+    echo rule.ns.name, ":", replace($rule.identifier, "_", "."), " ", data.binary_path, " (pid: ", data.pid, ")"
     return CALLBACK_ABORT
   else:
     # cast[ProcScanContext](user_data).virus_name = ""
