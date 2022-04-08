@@ -34,8 +34,9 @@ rule Agent_4b06
         fexecve(uVar1, &var_20h, &var_10h);
     */
   strings:
-    $str1 = "pid,%d"
-    $str2 = "no_elf"
+    $str1 = { 70 69 64 2C 25 64 } // "pid,%d"
+    $str2 = { 6E 6F 5F 65 6C 66 } // "no_elf"
+    $str3 = { 63 6F 6D 70 6C 65 74 65 64 2E 37 35 39 34 } // "completed.7594"
   condition:
     (is_elf and elf.symtab[62].name == "fexecve@@GLIBC_2.2.5" and elf.symtab[63].name == "syscall@@GLIBC_2.2.5" and
       elf.symtab[54].name == "getpid@@GLIBC_2.2.5")
