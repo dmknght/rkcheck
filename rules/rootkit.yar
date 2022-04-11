@@ -171,7 +171,7 @@ rule Ark_ar {
     $3 = "ARK-[ You may want to supply a password"
     $4 = "ARK-[ Welcome to ARK"
   condition:
-    any of them
+    2 of them
 }
 
 rule Ark_du {

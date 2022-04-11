@@ -226,9 +226,9 @@ rule Gbkdoor_Generic {
     refrence = "https://otx.alienvault.com/indicator/file/a1439937c8a383f010a071130aaae4443de6b7f4f7e71789c9964ea3a9d7f4a8"
     target = "File, memory"
   strings:
-    $1 = "mmeneghin@inwind.it"
-    $2 = "as if you are root, but the file to trojanize must be suidroot!"
-    $3 = "now, you can easily use the backdoor installed so:"
+    $1 = { 6D 6D 65 6E 65 67 68 69 6E 40 69 6E 77 69 6E 64 2E 69 74 } // "mmeneghin@inwind.it"
+    $2 = { 61 73 20 69 66 20 79 6F 75 20 61 72 65 20 72 6F 6F 74 2C 20 62 75 74 20 74 68 65 20 66 69 6C 65 20 74 6F 20 74 72 6F 6A 61 6E 69 7A 65 20 6D 75 73 74 20 62 65 20 73 75 69 64 72 6F 6F 74 21 } // "as if you are root, but the file to trojanize must be suidroot!"
+    $3 = { 6E 6F 77 2C 20 79 6F 75 20 63 61 6E 20 65 61 73 69 6C 79 20 75 73 65 20 74 68 65 20 62 61 63 6B 64 6F 6F 72 20 69 6E 73 74 61 6C 6C 65 64 20 73 6F 3A } // "now, you can easily use the backdoor installed so:"
   condition:
     $1 or ($2 and $3)
 }
@@ -242,7 +242,7 @@ rule Gummo {
     refrence = "https://otx.alienvault.com/indicator/file/67b9ddd4a21a78ff1a4adbf4b2fb70d279c79494d34e6e2e12673eed134f0d5f"
     target = "File, memory"
   strings:
-    $ = "echo rewt::0:0::/:/bin/sh>>/etc/passwd;"
+    $ = { 65 63 68 6F 20 72 65 77 74 3A 3A 30 3A 30 3A 3A 2F 3A 2F 62 69 6E 2F 73 68 3E 3E 2F 65 74 63 2F 70 61 73 73 77 64 3B } // "echo rewt::0:0::/:/bin/sh>>/etc/passwd;"
   condition:
     all of them
 }
@@ -256,10 +256,10 @@ rule KBD {
     refrence = "https://otx.alienvault.com/indicator/file/3aba59e8bbaecf065d05b7a74655668484bb16fdec589b8e7d169e4adf65d840"
     target = "File, memory"
   strings:
-    $1 = "Your Kung-Fu is good."
-    $2 = "orig_stat"
-    $3 = "bd_getuid"
-    $4 = "orig_getuid"
+    $1 = { 59 6F 75 72 20 4B 75 6E 67 2D 46 75 20 69 73 20 67 6F 6F 64 2E } // "Your Kung-Fu is good."
+    $2 = { 6F 72 69 67 5F 73 74 61 74 } // "orig_stat"
+    $3 = { 62 64 5F 67 65 74 75 69 64 } // "bd_getuid"
+    $4 = { 6F 72 69 67 5F 67 65 74 75 69 64 } // "orig_getuid"
   condition:
     all of them
 }
