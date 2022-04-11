@@ -538,3 +538,15 @@ rule UNC1945_STEELCORGI_generic{
   condition:
     all of them and #s4>50 and #s5>20
 }
+
+rule Gasit_ada7 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "946689ba1b22d457be06d95731fcbcac"
+  strings:
+    $1 = "GASIT *  %s:%s %s port: %s" fullword
+    $2 = "Gasit: %d" fullword
+  condition:
+    all of them
+}

@@ -87,7 +87,7 @@ rule Hacktool_DenialOfService {
     2 of them
 }
 
-rule Hacktool_NetScan_1 {
+rule NetScan_1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -96,6 +96,18 @@ rule Hacktool_NetScan_1 {
     $1 = "[i] Scanning:" fullword
     $2 = "Usage: %s <b-block> <port> [c-block]" fullword
     $3 = "Portscan completed in" fullword
+  condition:
+    all of them
+}
+
+rule SSHBrute_1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "946689ba1b22d457be06d95731fcbcac"
+  strings:
+    $1 = "FOUND: %s with port %s open" fullword
+    $2 = "%s:%s %s port: %s --> %s" fullword
   condition:
     all of them
 }
