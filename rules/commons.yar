@@ -95,6 +95,7 @@ rule Hacktool_NetScan_1 {
   strings:
     $1 = "[i] Scanning:" fullword
     $2 = "Usage: %s <b-block> <port> [c-block]" fullword
+    $3 = "Portscan completed in" fullword
   condition:
     all of them
 }
