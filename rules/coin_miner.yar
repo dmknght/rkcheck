@@ -129,3 +129,17 @@ rule NBMiner_682e {
   condition:
     all of them
 }
+
+rule GMiner_dbc5 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "dbc5d43763ea01043430f6cf325171d8"
+  strings:
+    $1 = "GMiner" fullword
+    $2 = "mining." fullword
+    $3 = "Started Mining on GPU" fullword
+    $4 = "Miner not responding" fullword
+  condition:
+    3 of them
+}
