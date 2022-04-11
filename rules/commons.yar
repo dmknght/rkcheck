@@ -87,6 +87,18 @@ rule Hacktool_DenialOfService {
     2 of them
 }
 
+rule Hacktool_NetScan_1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "946689ba1b22d457be06d95731fcbcac"
+  strings:
+    $1 = "[i] Scanning:" fullword
+    $2 = "Usage: %s <b-block> <port> [c-block]" fullword
+  condition:
+    all of them
+}
+
 // rule Hacktool_LoginBrute {
 //   meta:
 //     author = "Nong Hoang Tu"

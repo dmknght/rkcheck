@@ -116,3 +116,16 @@ rule Xmrig_Generic
   condition:
     any of them
 }
+
+rule NBMiner_682e {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "682e9645f289292b12561c3da62a059b"
+    reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
+  strings:
+    $1 = "/mnt/d/code/NBMiner"
+    $2 = "_ZN5Miner10signalStopEv"
+  condition:
+    all of them
+}
