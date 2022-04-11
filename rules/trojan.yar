@@ -547,6 +547,8 @@ rule Gasit_ada7 {
   strings:
     $1 = "GASIT *  %s:%s %s port: %s" fullword
     $2 = "Gasit: %d" fullword
+    $3 = "root@haiduc:~> GO!!!" fullword
+    $4 = "gasite.txt" fullword
   condition:
-    all of them
+    2 of them
 }
