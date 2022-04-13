@@ -213,7 +213,7 @@ rule Fysbis_364f {
     $entry_2 = { 44 65 73 63 72 69 70 74 69 6F 6E 3D 20 73 79 6E 63 68 72 6F 6E 69 7A 65 20 61 6E 64 20 62 61 63 6B 75 70 20 73 65 72 76 69 63 65 } // Description= synchronize and backup service
   condition:
     // ($addr_1 or 2 of ($path_*) or 3 of ($cmd_*)) or
-    (5 of ($path_*, $cmd_*, $addr_*) in (0x418d00 .. 0x419fff)) or
+    (all of ($path_*, $cmd_*, $addr_*) in (0x00418d00 .. 0x00418a4ff)) or
     ($path_1 and xdg_desktop_entry) or // desktop file, startup as user
     ($entry_1 and $entry_2) // systemd unit, startup as root
 }
