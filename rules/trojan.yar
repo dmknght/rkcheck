@@ -212,7 +212,16 @@ rule Fysbis_364f {
     $entry_1 = { 45 78 65 63 53 74 61 72 74 3D 2F 62 69 6E 2F 72 73 79 6E 63 64 } // ExecStart=/bin/rsyncd
     $entry_2 = { 44 65 73 63 72 69 70 74 69 6F 6E 3D 20 73 79 6E 63 68 72 6F 6E 69 7A 65 20 61 6E 64 20 62 61 63 6B 75 70 20 73 65 72 76 69 63 65 } // Description= synchronize and backup service
   condition:
-    (4 of ($path_*, $cmd_*, $addr_*) in (0x18d00 .. 0x192ff)) or // file offset. Static scan
+    /*
+    This rule works for dump file from gcore. It doesn't work for memory scan
+    for any i in (0 .. elf.number_of_segments): (
+      4 of ($path_*, $cmd_*, $addr_*) in (elf.segments[i].offset .. elf.segments[i].offset + elf.segments[i].file_size)
+    )
+    */
+    (is_elf and for any i in (0 .. elf.number_of_sections - 1): (
+      elf.sections[i].name == ".rodata" and
+      4 of ($path_*, $cmd_*, $addr_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )) or 
     (4 of ($path_*, $cmd_*, $addr_*) in (0x418d00 .. 0x41a4ff)) or // Memory scan
     ($path_1 and xdg_desktop_entry) or // desktop file, startup as user
     ($entry_1 and $entry_2) // systemd unit, startup as root
