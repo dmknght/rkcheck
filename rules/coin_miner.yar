@@ -3,20 +3,6 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Coin_Miner_4
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Generic Coin Miner"
-    // other golang coin miner
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "ea5f61d48cc64bcba47ed3d75ccc3e59"
-    )
-}
-
 rule Miner_1
 {
   meta:
@@ -27,6 +13,22 @@ rule Miner_1
     $2 = { 42 6C 6F 63 6B 20 25 2E 34 75 20 5B 25 33 75 5D 3A 20 25 30 31 36 6C 78 } // "Block %.4u [%3u]: %016lx"
   condition:
     all of them
+}
+
+rule XMRig_ee0e
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "XMRig golang coin miner, section hash ea5f61d48cc64bcba47ed3d75ccc3e59"
+    hash = "ee0e8516bfc431cb103f16117b9426c79263e279dc46bece5d4b96ddac9a5e90"
+    hash = "4c38654e08bd8d4c2211c5f0be417a77759bf945b0de45eb3581a2beb9226a29" // Can't find string base detection
+  strings:
+    $1 = "Zpw9qKOmhDOzF3GWwJTB/n0Y7l4tNbKi_20SnKY2V/abOQbe22wGJEqbNFCaQA/-otqwZsVDBRU3_zW503b" fullword
+    $2 = { 78 6D 72 69 67 76 65 72 74 61 72 } // "xmrigvertar"
+    $3 = { 6A 63 78 6D 72 69 67 } // "jcxmrig"
+  condition:
+    $1 at 0xfac or all of them
 }
 
 
