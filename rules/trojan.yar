@@ -243,7 +243,7 @@ rule Gbkdoor_Generic {
     $1 or ($2 and $3)
 }
 
-rule Gummo {
+rule Gummo_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -257,7 +257,7 @@ rule Gummo {
     all of them
 }
 
-rule KBD {
+rule KBD_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -274,7 +274,7 @@ rule KBD {
     all of them
 }
 
-rule Sckit {
+rule Sckit_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -283,66 +283,65 @@ rule Sckit {
     refrence = "https://otx.alienvault.com/indicator/file/db4c0fe28e8fdce6f7b7e2e12738ff84f084667e07b408dc04dc92bd074bc0e2"
     target = "File, memory"
   strings:
-    $1 = "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:./bin:/etc/.MG:/etc/.MG/bin"
-    $2 = "HOME=/etc/.MG"
-    $3 = "HISTFILE=/dev/null"
+    $1 = { 50 41 54 48 3D 2F 62 69 6E 3A 2F 73 62 69 6E 3A 2F 75 73 72 2F 62 69 6E 3A 2F 75 73 72 2F 73 62 69 6E 3A 2F 75 73 72 2F 6C 6F 63 61 6C 2F 62 69 6E 3A 2F 75 73 72 2F 6C 6F 63 61 6C 2F 73 62 69 6E 3A 2E 2F 62 69 6E 3A 2F 65 74 63 2F 2E 4D 47 3A 2F 65 74 63 2F 2E 4D 47 2F 62 69 6E } // "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:./bin:/etc/.MG:/etc/.MG/bin"
+    $2 = { 48 4F 4D 45 3D 2F 65 74 63 2F 2E 4D 47 } // "HOME=/etc/.MG"
+    $3 = { 48 49 53 54 46 49 4C 45 3D 2F 64 65 76 2F 6E 75 6C 6C } // "HISTFILE=/dev/null"
   condition:
     2 of them
 }
 
-rule Earthworm {
+rule Earthworm_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "13/11/2021"
     target = "File, memory"
   strings:
-    $1 = "Earthworm is a network agent tool."
-    $2 = "rootkiter : The creator"
-    $3 = "darksn0w  : Proviede some advice"
-    $4 = "zhuanjia  : Modify the Readme file"
-    $5 = "syc4mor3  : Named for this tool"
-    $6 = "http://rootkiter.com/EarthWrom/"
+    $1 = { 45 61 72 74 68 77 6F 72 6D } // "Earthworm"
+    $2 = { 72 6F 6F 74 6B 69 74 65 72 } // "rootkiter"
+    $3 = { 64 61 72 6B 73 6E 30 77 } // "darksn0w"
+    $4 = { 7A 68 75 61 6E 6A 69 61 } // "zhuanjia"
+    $5 = { 73 79 63 34 6D 6F 72 33 } // "syc4mor3"
   condition:
     3 of them
 }
 
-rule BashDoor {
+rule BashDoor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "13/11/2021"
     target = "File, memory"
   strings:
-    $1 = "Compiling SeCshell"
-    $2 = "-=[1]=- Update and backdoor Bash."
-    $3 = "-=[2]=- Compile and install SeCshell."
+    $1 = "SeCshell" fullword nocase
+    $2 = { 55 70 64 61 74 65 20 61 6E 64 20 62 61 63 6B 64 6F 6F 72 }// "Update and backdoor"
+    $3 = "bash" fullword nocase
     $4 = "nU.ajj1cF2Qk6"
   condition:
-    any of them
+    2 of them
 }
 
-rule MushDoor {
+rule MushDoor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "13/11/2021"
     target = "File, memory"
   strings:
-    $1 = "mushd00r"
-    $2 = "username to hide  & processes"
+    $1 = { 6D 75 73 68 64 30 30 72 } // "mushd00r"
+    $2 = { 75 73 65 72 6E 61 6D 65 20 74 6F 20 68 69 64 65 20 20 26 20 70 72 6F 63 65 73 73 65 73 } // "username to hide  & processes"
   condition:
     all of them
 }
 
-rule ICMP_Backdoor {
+rule IcmpBackdoor_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "17/11/2021"
   strings:
-    $1 = "icmp-backdoor"
-    $2 = "you need to be root!"
+    $1 = { 69 63 6D 70 2D 62 61 63 6B 64 6F 6F 72 } // "icmp-backdoor"
+    $2 = { 79 6F 75 20 6E 65 65 64 20 74 6F 20 62 65 20 72 6F 6F 74 21 } // "you need to be root!"
   condition:
     all of them
 }
@@ -445,7 +444,7 @@ rule PunBB {
     all of them
 }
 
-rule keylogger_xspy {
+rule Xspy_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -453,17 +452,10 @@ rule keylogger_xspy {
     target = "File, memory"
   strings:
     // string from dumped mem + source code
-    $str_1 = "blah...."
-    $str_2 = "opened %s for snoopng"
-    $str_3 = "%s: can't open display %s"
-    // function call, also in source code, dump string. Those strings caused false positives
-    // $call_1 = "XKeycodeToKeysym"
-    // $call_2 = "XKeysymToString"
-    // $call_3 = "XQueryKeymap"
-    // $call_4 = "XDisplayKeycodes"
-    // $call_5 = "XOpenDisplay"
+    $str_1 = { 62 6C 61 68 2E 2E 2E 2E } // "blah...."
+    $str_2 = { 6F 70 65 6E 65 64 20 25 73 20 66 6F 72 20 73 6E 6F 6F 70 6E 67 } // "opened %s for snoopng"
+    $str_3 = { 63 61 6E 27 74 20 6F 70 65 6E 20 64 69 73 70 6C 61 79 } // "can't open display"
   condition:
-    // (all of ($str_*)) or (all of ($call_*))
     all of them
 }
 
@@ -555,10 +547,9 @@ rule Gasit_ada7 {
     email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "GASIT *  %s:%s %s port: %s" fullword
-    $2 = "Gasit: %d" fullword
-    $3 = "root@haiduc:~> GO!!!" fullword
-    $4 = "gasite.txt" fullword
+    $1 = "GASIT" fullword nocase
+    $3 = { 72 6F 6F 74 40 68 61 69 64 75 63 } // "root@haiduc"
+    $4 = { 67 61 73 69 74 65 2E 74 78 74 } // "gasite.txt"
   condition:
     2 of them
 }
