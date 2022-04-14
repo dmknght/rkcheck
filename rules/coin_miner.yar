@@ -3,19 +3,6 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Coin_Miner_2
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "XMRMiner"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "15c48a37f52d016088f1bef13996d4cf"
-    )
-}
-
 rule Coin_Miner_3
 {
   meta:
