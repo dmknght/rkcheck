@@ -3,20 +3,6 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Coin_Miner_1
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detected Multios.Coinminer.Miner-6781728-2 (ClamAV)"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      elf.sections[i].name == ".comment" and hash.md5(elf.sections[i].offset, elf.sections[i].size) == "d2c0aaec378884e0d4eef2d3bb1db8fc"
-    )
-}
-
-
 rule Coin_Miner_2
 {
   meta:
