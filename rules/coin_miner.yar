@@ -30,6 +30,19 @@ rule Coin_Miner_5
 }
 
 
+rule Miner_Protocol {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Stratum protocols used in coinminer. Usually in rodata"
+  strings:
+    $1 = "stratum+ssl://" fullword
+    $2 = "stratum+tcp://" fullword
+  condition:
+    any of them
+}
+
+
 rule Connecticoin_Generic
 {
   meta:
@@ -62,7 +75,7 @@ rule Xmrig_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    // $1 = "donate.v2.xmrig.com"
+    // $1 = ""
     $1 = { 78 6D 72 69 67 2E 63 6F 6D } // "xmrig.com"
     $2 = { 63 72 79 70 74 6F 6E 69 67 68 74 2F 30 } // "cryptonight/0"
     $3 = { 63 72 79 70 74 6F 6E 69 67 68 74 2D 6D 6F 6E 65 72 6F 76 37 } // "cryptonight-monerov7"
@@ -72,6 +85,8 @@ rule Xmrig_Generic
     $7 = { 55 73 61 67 65 3A 20 78 6D 72 69 67 20 5B 4F 50 54 49 4F 4E 53 5D } // "Usage: xmrig [OPTIONS]"
     $8 = { 78 6D 72 69 67 2E 6A 73 6F 6E } // "xmrig.json"
     $9 = { 78 6D 72 69 67 4D 69 6E 65 72 } // "xmrigMiner" // fixme can't detect 0a79399*
+    $10 = "donate.v2.xmrig.com"
+    $11 = "api.xmrig.com"
   condition:
     any of them
 }
