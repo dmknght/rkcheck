@@ -17,7 +17,7 @@ rule Coin_Miner_4
     )
 }
 
-rule Coin_Miner_5
+rule Miner_1
 {
   meta:
     author = "Nong Hoang Tu"
@@ -49,7 +49,7 @@ rule Connecticoin_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = { 63 6F 6E 6E 65 63 74 69 63 6F 69 6E 2E 6F 72 67 } // "connecticoin.org"
+    $1 = "connecticoin.org" fullword nocase
     $2 = { 22 43 6F 6E 6E 65 63 74 69 63 6F 69 6E 2D 51 74 22 } // "Connecticoin-Qt"
   condition:
     any of them
@@ -62,8 +62,8 @@ rule XMRStak_Generic {
     date = "13/11/2021"
   strings:
     $1 = { 58 4D 52 53 54 41 4B 5F 56 45 52 53 49 4F 4E } // "XMRSTAK_VERSION"
-    $2 = { 70 6F 6F 6C 2E 75 73 78 6D 72 70 6F 6F 6C 2E 63 6F 6D } // "pool.usxmrpool.com"
-    $3 = { 64 6F 6E 61 74 65 2E 78 6D 72 2D 73 74 61 6B 2E 6E 65 74 } // "donate.xmr-stak.net"
+    $2 = "pool.usxmrpool.com" fullword nocase
+    $3 = "donate.xmr-stak.net" fullword nocase
     $4 = { 78 6D 72 2D 73 74 61 6B 2D 72 78 20 31 2E 30 2E 34 2D 72 78 20 36 35 61 64 65 37 34 } // "xmr-stak-rx 1.0.4-rx 65ade74"
   condition:
     any of them
@@ -75,8 +75,7 @@ rule Xmrig_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    // $1 = ""
-    $1 = { 78 6D 72 69 67 2E 63 6F 6D } // "xmrig.com"
+    $1 = "xmrig.com" fullword nocase
     $2 = { 63 72 79 70 74 6F 6E 69 67 68 74 2F 30 } // "cryptonight/0"
     $3 = { 63 72 79 70 74 6F 6E 69 67 68 74 2D 6D 6F 6E 65 72 6F 76 37 } // "cryptonight-monerov7"
     $4 = { 5F 5A 4E 35 78 6D 72 69 67 } // "_ZN5xmrig"
@@ -85,8 +84,8 @@ rule Xmrig_Generic
     $7 = { 55 73 61 67 65 3A 20 78 6D 72 69 67 20 5B 4F 50 54 49 4F 4E 53 5D } // "Usage: xmrig [OPTIONS]"
     $8 = { 78 6D 72 69 67 2E 6A 73 6F 6E } // "xmrig.json"
     $9 = { 78 6D 72 69 67 4D 69 6E 65 72 } // "xmrigMiner" // fixme can't detect 0a79399*
-    $10 = "donate.v2.xmrig.com"
-    $11 = "api.xmrig.com"
+    $10 = "donate.v2.xmrig.com" fullword nocase
+    $11 = "api.xmrig.com" fullword nocase
   condition:
     any of them
 }
@@ -98,8 +97,8 @@ rule NBMiner_682e {
     hash = "682e9645f289292b12561c3da62a059b"
     reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
   strings:
-    $1 = "/mnt/d/code/NBMiner"
-    $2 = "_ZN5Miner10signalStopEv"
+    $1 = { 2F 6D 6E 74 2F 64 2F 63 6F 64 65 2F 4E 42 4D 69 6E 65 72 } // "/mnt/d/code/NBMiner"
+    $2 = { 5F 5A 4E 35 4D 69 6E 65 72 31 30 73 69 67 6E 61 6C 53 74 6F 70 45 76 } // "_ZN5Miner10signalStopEv"
   condition:
     all of them
 }
