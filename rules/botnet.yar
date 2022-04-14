@@ -3,14 +3,14 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_a_SecH {
+rule Mirai_A_Cksum {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash"
     // file fa9878*95ec37, compiled Py
   condition:
-    is_elf and
+    is_elf and // Detect hash of .shstrtab
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
     )
