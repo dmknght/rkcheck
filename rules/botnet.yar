@@ -55,7 +55,7 @@ rule Mirai_Tsunami_SecH
     )
 }
 
-rule Mirai_DemonBot_SecH
+rule Mirai_DemonBot_Generic
 {
   meta:
     author = "Nong Hoang Tu"
