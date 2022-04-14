@@ -36,8 +36,8 @@ rule Miner_Protocol {
     email = "dmknght@parrotsec.org"
     description = "Stratum protocols used in coinminer. Usually in rodata"
   strings:
-    $1 = "stratum+ssl://" fullword
-    $2 = "stratum+tcp://" fullword
+    $1 = "stratum+ssl://" fullword nocase
+    $2 = "stratum+tcp://" fullword nocase
   condition:
     any of them
 }
