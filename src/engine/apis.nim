@@ -73,6 +73,7 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
     scanContext: FileScanContext
 
   scanContext.ScanEngine = engine
+  scanContext.file_scanned = 0
 
   cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan_file)
   cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
@@ -81,6 +82,8 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
     fscanner_new_files_scan(scanContext, @file_list)
   if len(dir_list) > 0:
     fscanner_new_dirs_scan(scanContext, @dir_list)
+
+  echo "Scanned ", scanContext.file_scanned, " files"
 
 
 proc rkcheck_scan_startup_apps*(engine: var CoreEngine) =
