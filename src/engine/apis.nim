@@ -51,48 +51,45 @@ proc rkcheck_stop_engine*(engine: var CoreEngine) =
 
 proc rkcheck_scan_procs*(engine: var CoreEngine, pids: seq[int]) =
   var
-    ScanContext: ProcScanContext
-  ScanContext.ScanEngine = engine
-  pscanner_new_procs_scan(ScanContext, pids)
-  dealloc(addr(ScanContext))
+    scanContext: ProcScanContext
+
+  scanContext.ScanEngine = engine
+  pscanner_new_procs_scan(scanContext, pids)
+  dealloc(addr(scanContext))
 
 
 proc rkcheck_scan_all_procs*(engine: var CoreEngine) =
   var
-    ScanContext: ProcScanContext
-  ScanContext.ScanEngine = engine
-  pscanner_new_all_procs_scan(ScanContext)
-  dealloc(addr(ScanContext))
+    scanContext: ProcScanContext
 
-
-# proc rkcheck_scan_files*(engine: var CoreEngine, file_list: seq[string]) =
-#   var
-#     ScanContext: FileScanContext
-#   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
-#   ScanContext.ScanEngine = engine
-#   fscanner_new_files_scan(ScanContext, file_list)
-#   dealloc(addr(ScanContext))
-
-
-# proc rkcheck_scan_dirs*(engine: var CoreEngine, dir_list: seq[string]) =
-#   var
-#     ScanContext: FileScanContext
-#   # engine.ClamAV.clcb_pre_cache = rscanner_cb_clam_scan
-#   ScanContext.ScanEngine = engine
-#   fscanner_new_dirs_scan(ScanContext, dir_list)
-#   dealloc(addr(ScanContext))
+  scanContext.ScanEngine = engine
+  pscanner_new_all_procs_scan(scanContext)
+  dealloc(addr(scanContext))
 
 
 proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[string] = [], dir_list: openArray[string] = []) =
   var
-    ScanContext: FileScanContext
+    scanContext: FileScanContext
 
-  ScanContext.ScanEngine = engine
+  scanContext.ScanEngine = engine
 
   cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan)
   cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
 
   if len(file_list) > 0:
-    fscanner_new_files_scan(ScanContext, @file_list)
+    fscanner_new_files_scan(scanContext, @file_list)
   if len(dir_list) > 0:
-    fscanner_new_dirs_scan(ScanContext, @dir_list)
+    fscanner_new_dirs_scan(scanContext, @dir_list)
+
+
+proc rkcheck_scan_startup_apps*(engine: var CoreEngine) =
+  var
+    scanContext: FileScanContext
+
+  scanContext.ScanEngine = engine
+
+  cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan)
+  cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
+
+  fscanner_scan_system_startup_app(scanContext)
+  fscanner_scan_user_startup_app(scanContext)
