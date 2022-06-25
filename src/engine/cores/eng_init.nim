@@ -17,7 +17,7 @@ proc init_clam_engine*(engine: var CoreEngine): cl_error_t =
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_MACROS)
-    discard engine.ClamAV.cl_engine_set_num(CL_ENGINE_PCRE_MAX_FILESIZE, 60 * 1024 * 1024) # Max scan size 60mb
+    discard engine.ClamAV.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
     if engine.LibClamDebug:
       cl_debug()
   return result
