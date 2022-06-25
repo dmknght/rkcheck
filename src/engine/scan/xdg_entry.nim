@@ -73,7 +73,7 @@ proc parse_scan_objects_from_entry(file_list, buffer_list: var seq[string], entr
   if not isEmptyOrWhitespace(entry.exec):
     parse_scan_objects(file_list, buffer_list, entry.exec, entry.path)
   if not isEmptyOrWhitespace(entry.tryExec):
-    parse_scan_objects(file_list, buffer_list, entry.exec, entry.path)
+    parse_scan_objects(file_list, buffer_list, entry.tryExec, entry.path)
 
 
 proc parse_xdg_entry*(file_list, buffer_list: var seq[string], path: string) =
