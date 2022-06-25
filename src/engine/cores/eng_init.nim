@@ -5,7 +5,7 @@ import eng_cores
 
 
 proc init_clam_engine*(engine: var CoreEngine): cl_error_t =
-  #[ 
+  #[
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
   ]#
@@ -17,7 +17,7 @@ proc init_clam_engine*(engine: var CoreEngine): cl_error_t =
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
     engine.ClamScanOpts.heuristic = bitor(engine.ClamScanOpts.heuristic, CL_SCAN_HEURISTIC_MACROS)
-    # FIXME: change max file size to scan, allow to scan file < 100mb
+    discard engine.ClamAV.cl_engine_set_num(CL_ENGINE_PCRE_MAX_FILESIZE, 60 * 1024 * 1024) # Max scan size 60mb
     if engine.LibClamDebug:
       cl_debug()
   return result
@@ -28,7 +28,7 @@ proc init_yara_engine*(engine: var CoreEngine): int =
 
 
 proc init_clam_db*(engine: var CoreEngine): cl_error_t =
-  #[ 
+  #[
     Load ClamAV database. In this case we only load bytecode signatures
     Bytecode signatures supports unpacking
     https://docs.clamav.net/manual/Development/libclamav.html#database-loading
