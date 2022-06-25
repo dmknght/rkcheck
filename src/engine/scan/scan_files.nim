@@ -47,6 +47,7 @@ proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): c
     ctx = cast[ptr FileScanContext](context)
   cli_progress_scan_file(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_result, context, yr_scan_timeout)
+  ctx.file_scanned += 1
   cli_progress_flush()
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
   return ctx.scan_result

@@ -11,6 +11,7 @@ proc fscanner_new_files_scan*(context: var FileScanContext, file_paths: seq[stri
 
 proc fscanner_scan_file(context: var FileScanContext, file_path: string) =
   var
+    scanned: culong
     virname: cstring
     file_list: seq[string]
     buffer_list: seq[string]
@@ -20,7 +21,7 @@ proc fscanner_scan_file(context: var FileScanContext, file_path: string) =
     fscanner_new_files_scan(context, file_list)
   else:
     context.scan_object = file_path
-    discard cl_scanfile_callback(file_path, addr(virname), addr(context.file_scanned), context.ScanEngine.ClamAV, addr(context.ScanEngine.ClamScanOpts), addr(context))
+    discard cl_scanfile_callback(file_path, addr(virname), addr(scanned), context.ScanEngine.ClamAV, addr(context.ScanEngine.ClamScanOpts), addr(context))
 
 
 proc fscanner_scan_dir(context: var FileScanContext, dir_path: string) =
