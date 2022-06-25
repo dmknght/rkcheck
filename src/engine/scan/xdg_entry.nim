@@ -24,6 +24,7 @@ proc parse_xdg_execute_command(path: string): FreeDesktopEntry =
       entry.tryExec = line.captureBetween('=', '\n', 7)
     elif line.startsWith("Path="):
       entry.path = line.captureBetween('=', '\n', 4)
+  return entry
 
 
 proc parse_command_to_execute(entry_cmd: string): seq[string] =
