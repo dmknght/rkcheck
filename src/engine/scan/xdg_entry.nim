@@ -39,11 +39,11 @@ proc find_exec_path_to_scan(exec_entry, path: string): string =
       let absolutePath = if not path.endsWith("/"): path & "/" & exec_entry else: path & exec_entry
       if fileExists(absolutePath):
         return absolutePath
+      else:
+        return ""
     # Else, find from $PATH
     else:
-      let absolutePath = findExe(exec_entry)
-      if not isEmptyOrWhitespace(absolutePath):
-        return absolutePath
+      return findExe(exec_entry)
   else:
     return exec_entry
 
@@ -56,9 +56,15 @@ proc binary_is_not_interpreter(path: string): bool =
 proc parse_scan_objects(file_list, buffer_list: var seq[string], exec_cmd, path: string) =
   let
     exec_command = parse_command_to_execute(exec_cmd)
+
+  if len(exec_command) == 0:
+    return
+
+  let
     executable_file = find_exec_path_to_scan(exec_command[0], path)
   if binary_is_not_interpreter(executable_file):
-    file_list.add(executable_file)
+    if not isEmptyOrWhitespace(executable_file):
+      file_list.add(executable_file)
   else:
     buffer_list.add(exec_command)
 

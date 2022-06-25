@@ -1,8 +1,9 @@
 import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
 import cores / [eng_cores, eng_init]
-import scanners / [file_scanner, proc_scanner]
+import scanners / [file_scanner, proc_scanner, scanner_consts]
 import scan / scan_files
+import os
 
 
 proc rkeng_start_clam(engine: var CoreEngine): cl_error_t =
@@ -83,13 +84,4 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
 
 
 proc rkcheck_scan_startup_apps*(engine: var CoreEngine) =
-  var
-    scanContext: FileScanContext
-
-  scanContext.ScanEngine = engine
-
-  cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan)
-  cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
-
-  fscanner_scan_system_startup_app(scanContext)
-  fscanner_scan_user_startup_app(scanContext)
+  rkcheck_scan_files_and_dirs(engine, dir_list = [sys_dir_autostart, getHomeDir() & home_dir_autostart])
