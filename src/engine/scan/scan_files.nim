@@ -34,6 +34,7 @@ proc fscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer)
     ctx = cast[ptr FileScanContext](context)
     # Show virname for heur detection
     virus_name = if ctx.virus_name != "": ctx.virus_name else: virname
+  ctx.file_infected += 1
   echo virus_name, " ", ctx.scan_object
 
 

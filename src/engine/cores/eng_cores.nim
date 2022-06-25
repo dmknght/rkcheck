@@ -15,6 +15,7 @@ type
     scan_result*: cl_error_t
     virus_name*: cstring
     file_scanned*: int
+    file_infected*: int
   ProcInfo* = object
     pid*: int
     pid_path*: string
