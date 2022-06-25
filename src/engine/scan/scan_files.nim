@@ -37,7 +37,7 @@ proc fscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer)
   echo virus_name, " ", ctx.scan_object
 
 
-proc fscanner_cb_clam_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
   #[
     The actual function to scan files. This function will call yara to scan file first.
     If result is CL_CLEAN, Clam will scan with its signatures

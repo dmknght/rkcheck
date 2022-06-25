@@ -74,7 +74,7 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
 
   scanContext.ScanEngine = engine
 
-  cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan)
+  cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan_file)
   cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
 
   if len(file_list) > 0:
