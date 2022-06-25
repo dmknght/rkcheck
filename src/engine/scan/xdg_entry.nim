@@ -66,7 +66,7 @@ proc parse_scan_objects(file_list, buffer_list: var seq[string], exec_cmd, path:
     if not isEmptyOrWhitespace(executable_file):
       file_list.add(executable_file)
   else:
-    buffer_list.add(exec_command)
+    buffer_list.add(exec_cmd)
 
 
 proc parse_scan_objects_from_entry(file_list, buffer_list: var seq[string], entry: FreeDesktopEntry) =
