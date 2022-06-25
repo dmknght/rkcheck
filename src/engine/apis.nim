@@ -2,6 +2,7 @@ import .. / libs / libclamav / nim_clam
 import .. / libs / libyara / nim_yara
 import cores / [eng_cores, eng_init]
 import scanners / [file_scanner, proc_scanner]
+import scan / scan_files
 
 
 proc rkeng_start_clam(engine: var CoreEngine): cl_error_t =
@@ -95,4 +96,3 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
     fscanner_new_files_scan(ScanContext, @file_list)
   if len(dir_list) > 0:
     fscanner_new_dirs_scan(ScanContext, @dir_list)
-  # dealloc(addr(ScanContext))
