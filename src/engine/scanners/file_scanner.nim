@@ -1,9 +1,10 @@
 import os
 import .. / .. / libs / libclamav / nim_clam
 import .. / cores / eng_cores
+import .. / scan / xdg_entry
 import scanner_consts
 import strutils
-import .. / scan / xdg_entry
+import sequtils
 
 
 proc fscanner_new_files_scan*(context: var FileScanContext, file_paths: seq[string])
@@ -14,11 +15,10 @@ proc fscanner_scan_file(context: var FileScanContext, file_path: string) =
     scanned: culong
     virname: cstring
     file_list: seq[string]
-    buffer_list: seq[string]
 
   if splitFile(file_path).ext == ".desktop":
-    parse_xdg_entry(file_list, buffer_list, file_path)
-    fscanner_new_files_scan(context, file_list)
+    parse_xdg_entry(file_list, file_path)
+    fscanner_new_files_scan(context, deduplicate(file_list))
   else:
     context.scan_object = file_path
     discard cl_scanfile_callback(file_path, addr(virname), addr(scanned), context.ScanEngine.ClamAV, addr(context.ScanEngine.ClamScanOpts), addr(context))

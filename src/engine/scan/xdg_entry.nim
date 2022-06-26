@@ -53,7 +53,7 @@ proc binary_is_not_interpreter(path: string): bool =
   return true
 
 
-proc parse_scan_objects(file_list, buffer_list: var seq[string], exec_cmd, path: string) =
+proc parse_scan_objects(file_list: var seq[string], exec_cmd, path: string) =
   let
     exec_command = parse_command_to_execute(exec_cmd)
 
@@ -66,17 +66,17 @@ proc parse_scan_objects(file_list, buffer_list: var seq[string], exec_cmd, path:
     if not isEmptyOrWhitespace(executable_file):
       file_list.add(executable_file)
   else:
-    buffer_list.add(exec_cmd)
+    file_list.add(path)
 
 
-proc parse_scan_objects_from_entry(file_list, buffer_list: var seq[string], entry: FreeDesktopEntry) =
+proc parse_scan_objects_from_entry(file_list: var seq[string], entry: FreeDesktopEntry) =
   if not isEmptyOrWhitespace(entry.exec):
-    parse_scan_objects(file_list, buffer_list, entry.exec, entry.path)
+    parse_scan_objects(file_list, entry.exec, entry.path)
   if not isEmptyOrWhitespace(entry.tryExec):
-    parse_scan_objects(file_list, buffer_list, entry.tryExec, entry.path)
+    parse_scan_objects(file_list, entry.tryExec, entry.path)
 
 
-proc parse_xdg_entry*(file_list, buffer_list: var seq[string], path: string) =
+proc parse_xdg_entry*(file_list: var seq[string], path: string) =
   let
     entry = parse_xdg_execute_command(path)
-  parse_scan_objects_from_entry(file_list, buffer_list, entry)
+  parse_scan_objects_from_entry(file_list, entry)
