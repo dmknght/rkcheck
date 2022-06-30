@@ -94,5 +94,6 @@ proc pscanner_scan_proc*(ctx: var ProcScanContext) =
   # TODO handle parent pid, child pid, ... to do ignore scan
   cli_progress_scan_process(ctx.proc_object.pid, ctx.proc_object.binary_path)
   do_analysis_proc(ctx)
+  cli_progress_flush()
   if ctx.scan_result == CL_VIRUS:
     cb_yr_virus_found(ctx)
