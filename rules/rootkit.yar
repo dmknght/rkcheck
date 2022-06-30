@@ -20,6 +20,7 @@ rule HCRootkit_1_LaceworkLabs {
       ((any of ($a*)) and (any of ($s*)))
 }
 
+
 rule HCRootkit_2_LaceworkLabs {
   meta:
     description = "Detects Linux HCRootkit Wide, unpacked"
@@ -60,7 +61,8 @@ rule HCRootkit_2_LaceworkLabs {
     is_elf and 10 of them
 }
 
-rule Suterusu_LaceworkLabs {
+
+rule Suterusu_Generic {
   meta:
     description = "Detects open source rootkit named suterusu"
     hash1 = "7e5b97135e9a68000fd3efee51dc5822f623b3183aecc69b42bde6d4b666cfe1"
@@ -76,17 +78,18 @@ rule Suterusu_LaceworkLabs {
     is_elf and all of them
 }
 
-rule Umbreon_TrendMicro {
+
+rule Umbreon_Generic {
 	meta:
 		description = "Catches Umbreon rootkit"
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
 		author = "Fernando Merces, FTR, Trend Micro"
 		date = "2016-08"
-	
+
 	strings:
 		$ = { 75 6e 66 75 63 6b 5f 6c 69 6e 6b 6d 61 70 }
-		$ = "unhide.rb" ascii fullword
-		$ = "rkit" ascii fullword
+		$ = "unhide.rb" fullword
+		$ = "rkit" fullword
 
 	condition:
 		is_elf // Generic ELF header
@@ -94,7 +97,8 @@ rule Umbreon_TrendMicro {
 		and all of them
 }
 
-rule Umbreon_strace_TrendMicro {
+
+rule Umbreon_Strace {
 	meta:
 		description = "Catches Umbreon strace rootkit component"
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
@@ -113,7 +117,8 @@ rule Umbreon_strace_TrendMicro {
 		and all of them
 }
 
-rule Umbreon_espeon_TrendMicro {
+
+rule Umbreon_Espeon {
 	meta:
 		description = "Catches Umbreon strace rootkit component"
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
@@ -134,7 +139,8 @@ rule Umbreon_espeon_TrendMicro {
 		and all of them
 }
 
-rule Knark {
+
+rule Knark_Generic {
   meta:
 		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
 		date = "17/11/2021"
@@ -159,7 +165,8 @@ rule Knark {
     )
 }
 
-rule Ark_ar {
+
+rule Ark_AR {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -174,7 +181,8 @@ rule Ark_ar {
     2 of them
 }
 
-rule Ark_du {
+
+rule Ark_DU {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -192,7 +200,8 @@ rule Ark_du {
     (is_elf and $path_1 and $s1) or $s2 or any of ($mail*)
 }
 
-rule Lrk_B_fix {
+
+rule Lrk_B_Fix {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -206,7 +215,8 @@ rule Lrk_B_fix {
     $1 or ($2 and $3)
 }
 
-rule Lrk_B_lled {
+
+rule Lrk_B_Lled {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -222,7 +232,8 @@ rule Lrk_B_lled {
     ($1 and $2) or ($4 and $5) and $3
 }
 
-rule Lrk_B_z2 {
+
+rule Lrk_B_Z2 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -237,7 +248,8 @@ rule Lrk_B_z2 {
     all of them
 }
 
-rule Lrk_E_sniffchk {
+
+rule Lrk_E_Sniffchk {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -251,7 +263,8 @@ rule Lrk_E_sniffchk {
     is_elf and any of them
 }
 
-rule Lrk_E_bindhshell {
+
+rule Lrk_E_BindhShell {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -264,7 +277,8 @@ rule Lrk_E_bindhshell {
     is_elf and all of them
 }
 
-rule Rkit_a {
+
+rule Rkit_A {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -278,7 +292,8 @@ rule Rkit_a {
     is_elf and any of them
 }
 
-rule Rkit_pwd {
+
+rule Rkit_Pwd {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -293,7 +308,8 @@ rule Rkit_pwd {
     (is_elf and $1) or ($2 and $3 and $4 and $5)
 }
 
-rule Suckit_b {
+
+rule Suckit_B {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -308,7 +324,8 @@ rule Suckit_b {
     is_elf and any of them
 }
 
-rule Urk {
+
+rule Urk_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -323,7 +340,8 @@ rule Urk {
     is_elf and any of them
 }
 
-rule Ark_lrkv {
+
+rule Ark_Lrkv {
   strings:
     $1 = "RadCxmnlogrtucpFbqisfL"
     $2 = /@\(#\)[w]+.c/
@@ -335,7 +353,7 @@ rule Ark_lrkv {
 }
 
 
-rule Phalanx_b6 {
+rule Phalanx_B6 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -351,7 +369,7 @@ rule Phalanx_b6 {
 }
 
 
-rule Adore {
+rule Adore_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -367,7 +385,8 @@ rule Adore {
     any of them
 }
 
-rule bvp47_a {
+
+rule Bvp47_A {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -378,15 +397,14 @@ rule bvp47_a {
   strings:
     // Encrypted strings from binary
     $long_1 = "e86dd99a33cb9df96e793518f659746f8cc3d9ac39413871f5afd58d7d00685ab0c449d62aa35c865a133dff"
-    $short_1 = "NWlas" fullword
-    $short_2 = "qKizlbKRbFdM" fullword
-    $short_3 = "xdkzVqtnab" fullword
-    $short_4 = "ihRCzr" fullword
-    $short_5 = "dXRuFsbUutDV" fullword
-    $short_6 = "NcGNaOrdVC" fullword
+    $short_1 = "NWlas"
+    $short_2 = "qKizlbKRbFdM"
+    $short_3 = "xdkzVqtnab"
+    $short_4 = "ihRCzr"
+    $short_5 = "dXRuFsbUutDV"
+    $short_6 = "NcGNaOrdVC"
   condition:
-    is_elf and ($long_1 or 4 of ($short_*))
-    // TODO runtime scan
+    $long_1 or 4 of ($short_*)
 }
 
 
@@ -418,11 +436,11 @@ rule Chsh_Generic {
     hash = "3e296bbbd4d1e7ae5f538e86c2b99d01" // chfn
     hash = "49b2fdd337a155029ef379b10032751a" // chsh
   strings:
-    $ = { 63 68 73 68 20 30 2E 39 61 20 62 65 74 61 } // "chsh 0.9a beta"
-    $ = { 73 65 74 70 77 6E 61 6D } // "setpwnam"
-    $ = { 2A 6E 61 7A 67 75 6C 2A } // "*nazgul*"
+    $ = "chsh 0.9a beta"
+    $ = "setpwnam"
+    $ = "*nazgul*"
   condition:
-    all of them
+    2 of them
 }
 
 
@@ -434,7 +452,6 @@ rule Boopkit_Generic {
   strings:
     $1 = "cat /sys/kernel/tracing/trace_pipe"
     $2 = "eBPF Probe Loaded:"
-    $3 = "-----------------------------------------------"
   condition:
     all of them
 }
