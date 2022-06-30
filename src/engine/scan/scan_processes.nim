@@ -9,10 +9,12 @@ proc cb_yr_virus_found(ctx: var ProcScanContext) =
   #[
     Print virus found message with file path
   ]#
+  cli_progress_flush()
   if not isEmptyOrWhitespace(ctx.proc_object.binary_path):
     echo $ctx.virus_name, " ", $ctx.proc_object.binary_path
   else:
     echo $ctx.virus_name, " process: ", ctx.proc_object.pid
+  cli_progress_flush()
 
 
 proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -34,8 +36,9 @@ proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; mess
 proc do_analysis_proc(ctx: var ProcScanContext) =
   # Check if process has deleted binary. Usually used by malware
   if ctx.proc_object.binary_path.endsWith(" (deleted)"):
-    ctx.virus_name = "Heur:Deleted_process"
+    ctx.virus_name = "Heur:DeletedProcess"
     ctx.scan_result = CL_VIRUS
+    ctx.proc_object.binary_path.removeSuffix(" (deleted)")
     return
   # Scan cmdline file
   # FIXME: data has \x00 instead of space. Need to scan buffer
@@ -92,4 +95,3 @@ proc pscanner_scan_proc*(ctx: var ProcScanContext) =
   do_analysis_proc(ctx)
   if ctx.scan_result == CL_VIRUS:
     cb_yr_virus_found(ctx)
-  cli_progress_flush()
