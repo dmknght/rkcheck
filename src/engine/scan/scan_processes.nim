@@ -11,7 +11,7 @@ proc cb_yr_virus_found(ctx: var ProcScanContext) =
   ]#
   cli_progress_flush()
   if not isEmptyOrWhitespace(ctx.proc_object.binary_path):
-    echo $ctx.virus_name, " ", $ctx.proc_object.binary_path
+    echo $ctx.virus_name, " ", $ctx.proc_object.binary_path, " (pid: ", ctx.proc_object.pid, ")"
   else:
     echo $ctx.virus_name, " process: ", ctx.proc_object.pid
   cli_progress_flush()
