@@ -78,10 +78,10 @@ rule Hacktool_DenialOfService {
     date = "12/11/2021"
     target = "File, memory"
   strings:
-    $1 = "JUNK Flooding %s:%d"
-    $2 = "UDP Flooding %s"
-    $3 = "TCP Flooding %s"
-    $4 = "LOLNOGTFO"
+    $1 = "JUNK Flooding %s:%d" ascii
+    $2 = "UDP Flooding %s" ascii
+    $3 = "TCP Flooding %s" ascii
+    $4 = "LOLNOGTFO" ascii
     $5 = "KILLATTK"
   condition:
     2 of them
@@ -93,9 +93,9 @@ rule NetScan_1 {
     email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "[i] Scanning:" fullword
-    $2 = "Usage: %s <b-block> <port> [c-block]" fullword
-    $3 = "Portscan completed in" fullword
+    $1 = "[i] Scanning:" ascii
+    $2 = "Usage: %s <b-block> <port> [c-block]" ascii
+    $3 = "Portscan completed in" ascii
   condition:
     all of them
 }
@@ -106,8 +106,8 @@ rule SSHBrute_1 {
     email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "FOUND: %s with port %s open" fullword
-    $2 = "%s:%s %s port: %s --> %s" fullword
+    $1 = "FOUND: %s with port %s open" ascii
+    $2 = "%s:%s %s port: %s --> %s" ascii
   condition:
     all of them
 }

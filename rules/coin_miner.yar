@@ -3,43 +3,27 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Miner_1
+rule Miner_Generic_A
 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = { 4D 65 6D 6F 72 79 3A 20 25 75 20 4B 69 42 2C 20 49 74 65 72 61 74 69 6F 6E 73 3A 20 25 75 2C 20 50 61 72 61 6C 6C 65 6C 69 73 6D 3A 20 25 75 20 6C 61 6E 65 73 2C 20 54 61 67 20 6C 65 6E 67 74 68 3A 20 25 75 20 62 79 74 65 73 } // "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes"
-    $2 = { 42 6C 6F 63 6B 20 25 2E 34 75 20 5B 25 33 75 5D 3A 20 25 30 31 36 6C 78 } // "Block %.4u [%3u]: %016lx"
+    $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" ascii
+    $2 = "Block %.4u [%3u]: %016lx" ascii
   condition:
     all of them
 }
 
-rule XMRig_ee0e
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "XMRig golang coin miner, section hash ea5f61d48cc64bcba47ed3d75ccc3e59"
-    hash = "ee0e8516bfc431cb103f16117b9426c79263e279dc46bece5d4b96ddac9a5e90"
-    hash = "4c38654e08bd8d4c2211c5f0be417a77759bf945b0de45eb3581a2beb9226a29" // Can't find string base detection
-  strings:
-    $1 = "Zpw9qKOmhDOzF3GWwJTB/n0Y7l4tNbKi_20SnKY2V/abOQbe22wGJEqbNFCaQA/-otqwZsVDBRU3_zW503b" fullword
-    $2 = { 78 6D 72 69 67 76 65 72 74 61 72 } // "xmrigvertar"
-    $3 = { 6A 63 78 6D 72 69 67 } // "jcxmrig"
-  condition:
-    $1 at 0xfac or all of them
-}
 
-
-rule Miner_Protocol {
+rule Miner_Generic_B {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Stratum protocols used in coinminer. Usually in rodata"
   strings:
-    $1 = "stratum+ssl://" fullword nocase
-    $2 = "stratum+tcp://" fullword nocase
+    $1 = "stratum+ssl://" ascii nocase
+    $2 = "stratum+tcp://" ascii nocase
   condition:
     any of them
 }
@@ -51,11 +35,12 @@ rule Connecticoin_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "connecticoin.org" fullword nocase
-    $2 = { 22 43 6F 6E 6E 65 63 74 69 63 6F 69 6E 2D 51 74 22 } // "Connecticoin-Qt"
+    $1 = "connecticoin.org" ascii nocase
+    $2 = "Connecticoin-Qt" ascii
   condition:
     any of them
 }
+
 
 rule XMRStak_Generic {
   meta:
@@ -63,13 +48,14 @@ rule XMRStak_Generic {
     email = "dmknght@parrotsec.org"
     date = "13/11/2021"
   strings:
-    $1 = { 58 4D 52 53 54 41 4B 5F 56 45 52 53 49 4F 4E } // "XMRSTAK_VERSION"
-    $2 = "pool.usxmrpool.com" fullword nocase
-    $3 = "donate.xmr-stak.net" fullword nocase
-    $4 = { 78 6D 72 2D 73 74 61 6B 2D 72 78 20 31 2E 30 2E 34 2D 72 78 20 36 35 61 64 65 37 34 } // "xmr-stak-rx 1.0.4-rx 65ade74"
+    $1 = "XMRSTAK_VERSION" ascii
+    $2 = "pool.usxmrpool.com" ascii nocase
+    $3 = "donate.xmr-stak.net" ascii nocase
+    $4 = "xmr-stak-rx" ascii
   condition:
     any of them
 }
+
 
 rule Xmrig_Generic
 {
@@ -77,20 +63,38 @@ rule Xmrig_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "xmrig.com" fullword nocase
-    $2 = { 63 72 79 70 74 6F 6E 69 67 68 74 2F 30 } // "cryptonight/0"
-    $3 = { 63 72 79 70 74 6F 6E 69 67 68 74 2D 6D 6F 6E 65 72 6F 76 37 } // "cryptonight-monerov7"
-    $4 = { 5F 5A 4E 35 78 6D 72 69 67 } // "_ZN5xmrig"
+    $1 = "xmrig.com" ascii nocase
+    $2 = "cryptonight/0" ascii
+    $3 = "cryptonight-monerov7" ascii
+    $4 = "_ZN5xmrig" ascii
     // $5 = "miner.fee.xmrig.com"
     // $6 = "emergency.fee.xmrig.com"
-    $7 = { 55 73 61 67 65 3A 20 78 6D 72 69 67 20 5B 4F 50 54 49 4F 4E 53 5D } // "Usage: xmrig [OPTIONS]"
-    $8 = { 78 6D 72 69 67 2E 6A 73 6F 6E } // "xmrig.json"
-    $9 = { 78 6D 72 69 67 4D 69 6E 65 72 } // "xmrigMiner" // fixme can't detect 0a79399*
-    $10 = "donate.v2.xmrig.com" fullword nocase
-    $11 = "api.xmrig.com" fullword nocase
+    $7 = "Usage: xmrig [OPTIONS]" ascii
+    $8 = "xmrig.json" ascii
+    $9 = "xmrigMiner" ascii
+    $10 = "donate.v2.xmrig.com" ascii nocase
+    $11 = "api.xmrig.com" ascii nocase
   condition:
     any of them
 }
+
+
+rule XMRig_ee0e
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "XMRig golang coin miner, section hash ea5f61d48cc64bcba47ed3d75ccc3e59"
+    hash = "ee0e8516bfc431cb103f16117b9426c79263e279dc46bece5d4b96ddac9a5e90"
+    hash = "4c38654e08bd8d4c2211c5f0be417a77759bf945b0de45eb3581a2beb9226a29" // Can't find string base detection
+  strings:
+    $1 = "Zpw9qKOmhDOzF3GWwJTB/n0Y7l4tNbKi_20SnKY2V/abOQbe22wGJEqbNFCaQA/-otqwZsVDBRU3_zW503b" ascii
+    $2 = "xmrigvertar" ascii
+    $3 = "jcxmrig" ascii
+  condition:
+    $1 at 0xfac or all of them
+}
+
 
 rule NBMiner_682e {
   meta:
@@ -99,8 +103,8 @@ rule NBMiner_682e {
     hash = "682e9645f289292b12561c3da62a059b"
     reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
   strings:
-    $1 = { 2F 6D 6E 74 2F 64 2F 63 6F 64 65 2F 4E 42 4D 69 6E 65 72 } // "/mnt/d/code/NBMiner"
-    $2 = { 5F 5A 4E 35 4D 69 6E 65 72 31 30 73 69 67 6E 61 6C 53 74 6F 70 45 76 } // "_ZN5Miner10signalStopEv"
+    $1 = "/mnt/d/code/NBMiner" ascii
+    $2 = "_ZN5Miner10signalStopEv" ascii
   condition:
     all of them
 }
@@ -111,11 +115,11 @@ rule GMiner_dbc5 {
     email = "dmknght@parrotsec.org"
     hash = "dbc5d43763ea01043430f6cf325171d8"
   strings:
-    $ = "GMiner" fullword
-    $ = "Started Mining on GPU" fullword
-    $ = "Miner will restart" fullword
-    $ = "Miner not responding" fullword
-    $ = "EthereumStratum" fullword
+    $ = "GMiner" ascii
+    $ = "Started Mining on GPU" ascii
+    $ = "Miner will restart" ascii
+    $ = "Miner not responding" ascii
+    $ = "EthereumStratum" ascii
   condition:
     3 of them
 }
