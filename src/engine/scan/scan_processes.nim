@@ -19,10 +19,10 @@ proc pscanner_scan_proc*(context: var ProcScanContext) =
   # context.scan_object.cmdline = readFile(context.scan_object.pid_path & "/cmdline")
   # TODO handle parent pid, child pid, ... to do ignore scan
   # TODO sometime the actual malicious part is cmdline (python3 -c <reverse shell> for example. We scan it as well)
-  cli_progress_scan_process(context.scan_object.pid, context.scan_object.binary_path)
+  cli_progress_scan_process(context.proc_object.pid, context.proc_object.binary_path)
   discard yr_rules_scan_proc(
     context.ScanEngine.YaraEng,
-    cint(context.scan_object.pid),
+    cint(context.proc_object.pid),
     0,
     cb_yr_process_scan_result,
     addr(context.scan_object),

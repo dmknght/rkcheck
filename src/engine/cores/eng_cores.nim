@@ -9,22 +9,21 @@ type
     LibClamDebug*: bool
     ClamDbPath*: string
     YaraDbPath*: string
-  FileScanContext* = object
+  ProcInfo* = object
+    pid*: int
+    pid_path*: string
+    cmdline*: string
+    binary_path*: string
+  FileScanContext* = object of RootObj
     ScanEngine*: CoreEngine
     scan_object*: string
     scan_result*: cl_error_t
     virus_name*: cstring
     file_scanned*: int
     file_infected*: int
-  ProcInfo* = object
-    pid*: int
-    pid_path*: string
-    cmdline*: string
-    binary_path*: string
     # TOOD parent, child pid, more
-  ProcScanContext* = object
-    ScanEngine*: CoreEngine
-    scan_object*: ProcInfo
+  ProcScanContext* = object of FileScanContext
+    proc_object*: ProcInfo
     # TODO there are parent processess, child processes has the same memory value. We try to ignore them during scan
 
 const
