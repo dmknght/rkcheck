@@ -74,6 +74,7 @@ rule Xmrig_Generic
     $9 = "xmrigMiner"
     $10 = "donate.v2.xmrig.com" nocase
     $11 = "api.xmrig.com" nocase
+    $12 = "donate.ssl.xmrig.com" nocase
   condition:
     any of them
 }
