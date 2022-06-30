@@ -15,17 +15,19 @@ proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; mess
     return CALLBACK_CONTINUE
 
 
-proc pscanner_scan_proc*(context: var ProcScanContext) =
+proc pscanner_scan_proc*(ctx: var ProcScanContext) =
   # context.scan_object.cmdline = readFile(context.scan_object.pid_path & "/cmdline")
   # TODO handle parent pid, child pid, ... to do ignore scan
   # TODO sometime the actual malicious part is cmdline (python3 -c <reverse shell> for example. We scan it as well)
-  cli_progress_scan_process(context.proc_object.pid, context.proc_object.binary_path)
+  cli_progress_scan_process(ctx.proc_object.pid, ctx.proc_object.binary_path)
+  discard yr_rules_scan_file(ctx.ScanEngine.YaraEng, cstring(ctx.proc_object.cmdline), yr_scan_flags, cb_yr_process_scan_result, addr(ctx.proc_object), yr_scan_timeout)
+  # TODO maybe check the rule to scan file instead of both file and memory. Depends on rule
   discard yr_rules_scan_proc(
-    context.ScanEngine.YaraEng,
-    cint(context.proc_object.pid),
+    ctx.ScanEngine.YaraEng,
+    cint(ctx.proc_object.pid),
     0,
     cb_yr_process_scan_result,
-    addr(context.scan_object),
+    addr(ctx.proc_object),
     yr_scan_timeout
   )
   cli_progress_flush()
