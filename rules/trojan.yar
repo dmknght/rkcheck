@@ -344,7 +344,7 @@ rule IcmpBackdoor_Generic {
     all of them
 }
 
-rule Lyceum {
+rule Lyceum_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -358,7 +358,7 @@ rule Lyceum {
     any of them
 }
 
-rule Silencer {
+rule Silencer_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -372,7 +372,7 @@ rule Silencer {
     any of them
 }
 
-rule Sneaky {
+rule Sneaky_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -385,7 +385,7 @@ rule Sneaky {
     any of them
 }
 
-rule Galore {
+rule Galore_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -408,7 +408,7 @@ rule BlueDragon_sfe {
     any of them
 }
 
-rule Rrs {
+rule Rrs_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -419,7 +419,7 @@ rule Rrs {
     any of them
 }
 
-rule Necro {
+rule Necro_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -430,7 +430,7 @@ rule Necro {
     any of them
 }
 
-rule PunBB {
+rule PunBB_Generic {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
