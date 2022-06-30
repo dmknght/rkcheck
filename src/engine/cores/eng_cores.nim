@@ -19,8 +19,8 @@ type
     scan_object*: string
     scan_result*: cl_error_t
     virus_name*: cstring
-    file_scanned*: int
-    file_infected*: int
+    obj_scanned*: int
+    obj_infected*: int
     # TOOD parent, child pid, more
   ProcScanContext* = object of FileScanContext
     proc_object*: ProcInfo

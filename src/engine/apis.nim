@@ -73,8 +73,8 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
     scanContext: FileScanContext
 
   scanContext.ScanEngine = engine
-  scanContext.file_scanned = 0
-  scanContext.file_infected = 0
+  scanContext.obj_scanned = 0
+  scanContext.obj_infected = 0
 
   cl_engine_set_clcb_pre_cache(engine.ClamAV, fscanner_cb_clam_scan_file)
   cl_engine_set_clcb_virus_found(engine.ClamAV, fscanner_cb_clam_virus_found)
@@ -85,8 +85,8 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
     fscanner_new_dirs_scan(scanContext, @dir_list)
 
   echo ""
-  echo "Infected: ", scanContext.file_infected, " files"
-  echo "Scanned: ", scanContext.file_scanned, " files"
+  echo "Infected: ", scanContext.obj_infected, " objects"
+  echo "Scanned: ", scanContext.obj_scanned, " objects"
 
 
 proc rkcheck_scan_startup_apps*(engine: var CoreEngine) =
