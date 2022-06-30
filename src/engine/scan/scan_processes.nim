@@ -5,6 +5,16 @@ import strutils
 import os
 
 
+proc cb_yr_virus_found(ctx: var ProcScanContext) =
+  #[
+    Print virus found message with file path
+  ]#
+  if not isEmptyOrWhitespace(ctx.proc_object.binary_path):
+    echo $ctx.virus_name, " ", $ctx.proc_object.binary_path
+  else:
+    echo $ctx.virus_name, " process: ", ctx.proc_object.pid
+
+
 proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   let
     ctx = cast[ptr ProcScanContext](user_data)
@@ -65,7 +75,7 @@ proc do_analysis_proc(ctx: var ProcScanContext) =
 
 proc pscanner_scan_proc*(ctx: var ProcScanContext) =
   ctx.proc_object.cmdline = ctx.proc_object.pid_path & "/cmdline"
-  if not isEmptyOrWhitespace(readFile(ctx.proc_object.cmdline)):
+  if isEmptyOrWhitespace(readFile(ctx.proc_object.cmdline)):
     # Can't get either binary path nor cmdline
     return
 
@@ -81,5 +91,5 @@ proc pscanner_scan_proc*(ctx: var ProcScanContext) =
   cli_progress_scan_process(ctx.proc_object.pid, ctx.proc_object.binary_path)
   do_analysis_proc(ctx)
   if ctx.scan_result == CL_VIRUS:
-    discard
+    cb_yr_virus_found(ctx)
   cli_progress_flush()
