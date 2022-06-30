@@ -181,7 +181,7 @@ rule Root_shell {
 //     all of them
 // }
 
-rule CritSegm_LOAD
+rule Suspicious_Segment
 {
   meta:
     description = "Flags binaries with a single LOAD segment marked as RWE."
@@ -198,7 +198,7 @@ rule CritSegm_LOAD
     elf.segments[0].flags == elf.PF_R | elf.PF_W | elf.PF_X
 }
 
-rule FakeSectionHeadersConflictEntryPointAddr_Tenable {
+rule FakeSectionHeaders_EntryPointAddr {
   meta:
     description = "A fake sections header has been added to the binary."
     family = "Obfuscation"
@@ -228,7 +228,7 @@ rule FakeSectionHeadersConflictEntryPointAddr_Tenable {
     )
 }
 
-rule FakeDynamicSymbols_Tenable {
+rule FakeDynamicSymbols {
   meta:
     description = "A fake dynamic symbol table has been added to the binary"
     family = "Obfuscation"
@@ -260,7 +260,7 @@ rule FakeDynamicSymbols_Tenable {
     )
 }
 
-rule Shell_TryCD {
+rule Shell_WalkDirCD {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
