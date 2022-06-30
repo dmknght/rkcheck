@@ -27,5 +27,4 @@ type
     # TODO there are parent processess, child processes has the same memory value. We try to ignore them during scan
 
 const
-  yr_scan_flags*: cint = SCAN_FLAGS_FAST_MODE
   yr_scan_timeout*: cint = 1000000

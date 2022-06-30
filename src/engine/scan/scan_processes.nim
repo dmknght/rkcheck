@@ -34,6 +34,7 @@ proc cb_yr_process_scan_result(context: ptr YR_SCAN_CONTEXT; message: cint; mess
 
 
 proc do_analysis_proc(ctx: var ProcScanContext) =
+  let yr_scan_flags: cint = SCAN_FLAGS_PROCESS_MEMORY
   # Check if process has deleted binary. Usually used by malware
   if ctx.proc_object.binary_path.endsWith(" (deleted)"):
     ctx.virus_name = "Heur:DeletedProcess"

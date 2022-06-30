@@ -46,6 +46,7 @@ proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): c
   ]#
   let
     ctx = cast[ptr FileScanContext](context)
+    yr_scan_flags: cint = SCAN_FLAGS_FAST_MODE
   cli_progress_scan_file(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_result, context, yr_scan_timeout)
   ctx.obj_scanned += 1
