@@ -32,7 +32,7 @@ rule ELF_NoSections {
     elf_no_sections and filesize < 1KB
 }
 
-rule Shell_Add_user {
+rule Shell_Add_User {
   meta:
     description = "Bash commands to add new user to passwd"
     author = "Nong Hoang Tu"
