@@ -219,7 +219,7 @@ rule Fysbis_364f {
     (is_elf and for any i in (0 .. elf.number_of_sections - 1): (
       elf.sections[i].name == ".rodata" and
       4 of ($path_*, $cmd_*, $addr_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-    )) or 
+    )) or
     (4 of ($path_*, $cmd_*, $addr_*) in (0x418d00 .. 0x41a4ff)) or // Memory scan
     ($path_1 and xdg_desktop_entry) or // desktop file, startup as user
     ($entry_1 and $entry_2) // systemd unit, startup as root
