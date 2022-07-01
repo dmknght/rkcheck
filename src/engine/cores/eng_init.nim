@@ -58,7 +58,7 @@ proc init_yara_db*(engine: var CoreEngine): int =
 
 
 proc finit_clam_engine*(engine: var CoreEngine) =
-  #[ 
+  #[
     Give ClamAV Engine's freedom
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
     ]#
