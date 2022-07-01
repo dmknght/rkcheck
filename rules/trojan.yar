@@ -551,3 +551,14 @@ rule Gasit_ada7 {
   condition:
     2 of them
 }
+
+rule Root_Shell {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "17/11/2021"
+  strings:
+    $1 = "r00t shell"
+  condition:
+    is_elf and $1
+}
