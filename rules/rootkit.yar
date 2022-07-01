@@ -1,4 +1,5 @@
 include "rules/magics.yar"
+import "elf"
 
 
 rule HCRootkit_1_LaceworkLabs {
