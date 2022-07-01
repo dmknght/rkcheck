@@ -468,3 +468,15 @@ rule Agent_ed80 {
   condition:
     all of them
 }
+
+
+rule Agent_4d1e {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "4d1e6120a5c05b709435925e967a7e43"
+  condition:
+    for any i in (0 .. elf.number_of_segments): (
+			hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "6f95513cc65d2e53de15b1ce5431d8c4"
+		)
+}
