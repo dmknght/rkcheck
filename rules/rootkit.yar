@@ -455,3 +455,16 @@ rule Boopkit_Generic {
   condition:
     all of them
 }
+
+
+rule Agent_ed80 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "ed80f05f474ba2471e5dc5611a900f4a"
+  strings:
+    $1 = "USAGE: %s dst-net-addr dst-port src-addr usleep-time"
+    $2 = "Randomizing port numbers"
+  condition:
+    all of them
+}
