@@ -571,6 +571,7 @@ rule Blackhole_e1e0 {
     hash = "e1e03364e6e2360927470ad1b4ba7ea1"
   condition:
     for any i in (0 .. elf.number_of_segments): (
-			hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "2ee12c5c21c794cbedfc274751f8218d"
+			hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "2ee12c5c21c794cbedfc274751f8218d" or
+        hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "abfae74ad4efced4c68c600969951df8"
 		)
 }
