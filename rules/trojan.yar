@@ -579,3 +579,17 @@ rule Blackhole_e1e0 {
 		) or
     all of them
 }
+
+
+rule Koka_27d3 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "27d39d44fc547e97f4e1eb885f00d60e"
+  strings:
+    $1 = { 68 d6 86 04 08 e8 83 fe ff ff} // execve("/bin/sh")
+    $2 = "/dev/mounnt"
+    $3 = "cocacola"
+  condition:
+    all of them
+}
