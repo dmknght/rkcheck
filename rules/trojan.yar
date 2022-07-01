@@ -569,9 +569,13 @@ rule Blackhole_e1e0 {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     hash = "e1e03364e6e2360927470ad1b4ba7ea1"
+  strings:
+    $1 = "This fine tool coded by Bronc Buster"
+    $2 = "I_did_not_change_HIDE"
+    $3 = "/etc/.pwd.lock"
   condition:
     for any i in (0 .. elf.number_of_segments): (
-			hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "2ee12c5c21c794cbedfc274751f8218d" or
-        hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "abfae74ad4efced4c68c600969951df8"
-		)
+			hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "2ee12c5c21c794cbedfc274751f8218d"
+		) or
+    all of them
 }
