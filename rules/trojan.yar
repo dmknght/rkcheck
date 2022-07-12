@@ -593,3 +593,39 @@ rule Koka_27d3 {
   condition:
     all of them
 }
+
+
+rule Orbit_6704 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "67048a69a007c37f8be5d01a95f6a026"
+  strings:
+    $1 = "sniff_ssh_session"
+    $2 = "getpwnam_r"
+    $4 = "chown -R 920366:920366"
+    $5 = "libntpVnQE6mk"
+    $6 = "os.execv(\"/bin/bash\", (\"/bin/bash\", \"-i\"))" base64
+    $7 = "os.setreuid(0,0)" base64
+    $8 = "lib0UZ0LfvWZ.so"
+    $9 = "/dev/shm/ldx/.l"
+    $10 = "libntpVnQE6mk"
+  condition:
+    5 of them
+}
+
+
+rule Orbit_ac89 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "ac89d638cb6912b58de47ac2a274b2fb"
+  strings:
+    $1 = "HTTP_X_MAGICAL_PONIES"
+    $2 = "/dev/shm/.lck"
+    $3 = "/tmp/.orbit"
+    $4 = "ld.so.nohwcap"
+    $5 = "setegid"
+  condition:
+    3 of them
+}
