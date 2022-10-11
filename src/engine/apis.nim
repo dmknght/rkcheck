@@ -56,7 +56,6 @@ proc rkcheck_scan_procs*(engine: var CoreEngine, pids: seq[uint]) =
 
   scanContext.ScanEngine = engine
   pscanner_new_procs_scan(scanContext, pids)
-  dealloc(addr(scanContext))
 
 
 proc rkcheck_scan_all_procs*(engine: var CoreEngine) =
@@ -65,7 +64,6 @@ proc rkcheck_scan_all_procs*(engine: var CoreEngine) =
 
   scanContext.ScanEngine = engine
   pscanner_new_all_procs_scan(scanContext)
-  dealloc(addr(scanContext))
 
 
 proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[string] = [], dir_list: openArray[string] = []) =
