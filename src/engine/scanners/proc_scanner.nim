@@ -6,14 +6,14 @@ import strutils
 import scanner_consts
 
 
-proc pscanner_new_proc_scan*(context: var ProcScanContext, pid: int) =
+proc pscanner_new_proc_scan*(context: var ProcScanContext, pid: uint) =
   context.proc_object.pid = pid
-  context.proc_object.pid_path = sys_dir_proc & intToStr(pid)
+  context.proc_object.pid_path = sys_dir_proc & $pid
 
   pscanner_scan_proc(context)
 
 
-proc pscanner_new_procs_scan*(context: var ProcScanContext, pids: seq[int]) =
+proc pscanner_new_procs_scan*(context: var ProcScanContext, pids: seq[uint]) =
   for pid in pids:
     pscanner_new_proc_scan(context, pid)
 
@@ -23,7 +23,7 @@ proc pscanner_new_all_procs_scan*(context: var ProcScanContext) =
     if kind == pcDir:
       try:
         let
-          pid = parseInt(splitPath(path).tail)
+          pid = parseUInt(splitPath(path).tail)
         context.proc_object.pid = pid
         context.proc_object.pid_path = path
         pscanner_scan_proc(context)
