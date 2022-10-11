@@ -4,6 +4,18 @@ import .. / cores / [eng_cores, eng_cli_progress]
 import strutils
 
 
+proc fscanner_on_rule_matched(scan_result: var cl_error_t, virus_name: var cstring, rule_name_space, rule_identifier: string): cint =
+  scan_result = CL_VIRUS
+  virus_name = cstring($rule_name_space & ":" & replace($rule_identifier, "_", "."))
+  return CALLBACK_ABORT
+
+
+proc fscanner_on_rule_not_matched(scan_result: var cl_error_t, virus_name: var cstring): cint =
+  scan_result = CL_CLEAN
+  virus_name = ""
+  return CALLBACK_CONTINUE
+
+
 proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   #[
     Handle scan result from Yara engine
@@ -15,27 +27,9 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; 
 
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
-    # Change current result of scan context to virus
-    ctx.scan_result = CL_VIRUS
-    # Change virus name of current scan context
-    ctx.virus_name = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
-    return CALLBACK_ABORT
+    return fscanner_on_rule_matched(ctx.scan_result, ctx.virus_name, $rule.ns.name, $rule.identifier)
   else:
-    ctx.scan_result = CL_CLEAN
-    ctx.virus_name = ""
-    return CALLBACK_CONTINUE
-
-
-proc fscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  #[
-    Print virus found message with file path
-  ]#
-  let
-    ctx = cast[ptr FileScanContext](context)
-    # Show virname for heur detection
-    virus_name = if ctx.virus_name != "": ctx.virus_name else: virname
-  ctx.obj_infected += 1
-  echo virus_name, " ", ctx.scan_object
+    return fscanner_on_rule_not_matched(ctx.scan_result, ctx.virus_name)
 
 
 proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -47,6 +41,7 @@ proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): c
   let
     ctx = cast[ptr FileScanContext](context)
     yr_scan_flags: cint = SCAN_FLAGS_FAST_MODE
+
   cli_progress_scan_file(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_result, context, yr_scan_timeout)
   ctx.obj_scanned += 1
