@@ -73,7 +73,7 @@ rule Umbreon_Strace {
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
 		author = "Fernando Merces, FTR, Trend Micro"
 		date = "2016-08"
-	
+
 	strings:
 		$ = "LD_PRELOAD" fullword
 		$ = /ld\.so\.[a-zA-Z0-9]{7}/ fullword
