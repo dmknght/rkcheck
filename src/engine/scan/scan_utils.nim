@@ -34,3 +34,15 @@ proc fscanner_on_process_cmd_matched*(virus_name: var cstring, scan_result: var 
   virus_name = cstring("Heur:MalCmdExe." & $virus_name)
   scan_result = CL_VIRUS
   return 0
+
+
+proc fscanner_on_file_detected*(virname, vir_detected: cstring, scan_object: string, infected: var uint) =
+    #[
+    Print virus found message with file path
+  ]#
+  let
+    # Show virname for heur detection
+    virus_name = if vir_detected != "": vir_detected else: virname
+
+  infected += 1
+  echo virus_name, " ", scan_object

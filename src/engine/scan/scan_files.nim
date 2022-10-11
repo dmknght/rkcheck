@@ -4,6 +4,16 @@ import .. / cores / [eng_cores, eng_cli_progress]
 import scan_utils
 
 
+proc fscanner_cb_clam_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+  #[
+    Print virus found message with file path
+  ]#
+  let
+    ctx = cast[ptr FileScanContext](context)
+
+  fscanner_on_file_detected(virname, ctx.virus_name, ctx.scan_object, ctx.obj_infected)
+
+
 proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   #[
     Handle scan result from Yara engine

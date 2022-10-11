@@ -50,7 +50,7 @@ proc rkcheck_stop_engine*(engine: var CoreEngine) =
 #   dealloc(addr(ScanContext))
 
 
-proc rkcheck_scan_procs*(engine: var CoreEngine, pids: seq[int]) =
+proc rkcheck_scan_procs*(engine: var CoreEngine, pids: seq[uint]) =
   var
     scanContext: ProcScanContext
 
