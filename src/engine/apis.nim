@@ -84,8 +84,7 @@ proc rkcheck_scan_files_and_dirs*(engine: var CoreEngine, file_list: openArray[s
   if len(dir_list) > 0:
     fscanner_new_dirs_scan(scanContext, @dir_list)
 
-  echo ""
-  echo "Infected: ", scanContext.obj_infected, " objects"
+  echo "\nInfected: ", scanContext.obj_infected, " objects"
   echo "Scanned: ", scanContext.obj_scanned, " objects"
 
 
