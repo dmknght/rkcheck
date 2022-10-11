@@ -3,64 +3,31 @@ import "elf"
 import "hash"
 
 
-rule HCRootkit_1_LaceworkLabs {
+rule HCRootkit_Generic {
   meta:
     description = "Detects Linux HCRootkit, as reported by Avast"
-    hash1 = "2daa5503b7f068ac471330869ccfb1ae617538fecaea69fd6c488d57929f8279"
-    hash2 = "10c7e04d12647107e7abf29ae612c1d0e76a79447e03393fa8a44f8a164b723d"
-    hash3 = "602c435834d796943b1e547316c18a9a64c68f032985e7a5a763339d82598915"
+    description = "Modified from original LaceworkLabs's rules"
     author = "Lacework Labs"
     ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
   strings:
-    $a1 = "172.96.231."
-    $a2 = "/tmp/.tmp_XXXXXX"
-    $s1 = "/proc/net/tcp"
-    $s2 = "/proc/.inl"
-    $s3 = "rootkit"
-  condition:
-    is_elf and 
-      ((any of ($a*)) and (any of ($s*)))
-}
+    $a1 = "/tmp/.tmp_XXXXXX"
+    $a2 = "/proc/.inl"
+    $a3 = "rootkit"
 
-
-rule HCRootkit_2_LaceworkLabs {
-  meta:
-    description = "Detects Linux HCRootkit Wide, unpacked"
-    hash1 = "2daa5503b7f068ac471330869ccfb1ae617538fecaea69fd6c488d57929f8279"
-    hash2 = "10c7e04d12647107e7abf29ae612c1d0e76a79447e03393fa8a44f8a164b723d"
-    author = "Lacework Labs"
-    ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
-  strings:
     $s1 = "s_hide_pids"
     $s2 = "handler_kallsyms_lookup_name"
     $s3 = "s_proc_ino"
     $s4 = "n_filldir"
-    $s5 = "s_is_proc_ino"
-    $s6 = "n_tcp4_seq_show"
-    $s7 = "r_tcp4_seq_show"
-    $s8 = "s_hide_tcp4_ports"
-    $s9 = "s_proc_open"
-    $s10 = "s_proc_show"
-    $s11 = "s_passwd_buf"
-    $s12 = "s_passwd_buf_len"
-    $s13 = "r_sys_write"
-    $s14 = "r_sys_mmap"
-    $s15 = "r_sys_munmap"
-    $s16 = "s_hide_strs"
-    $s17 = "s_proc_write"
-    $s18 = "s_proc_inl_operations"
-    $s19 = "s_inl_entry"
-    $s20 = "kp_kallsyms_lookup_name"
-    $s21 = "s_sys_call_table"
-    $s22 = "kp_do_exit"
-    $s23 = "r_sys_getdents"
-    $s24 = "s_hook_remote_ip"
-    $s25= "s_hook_remote_port"
-    $s26 = "s_hook_local_port"
-    $s27 = "s_hook_local_ip"
-    $s28 = "nf_hook_pre_routing"
+    $s5 = "s_hide_tcp4_ports"
+    $s6 = "s_hide_strs"
+    $s7 = "kp_kallsyms_lookup_name"
+    $s8 = "s_hook_remote_ip"
+    $s9 = "s_hook_remote_port"
+    $s10 = "s_hook_local_port"
+    $s11 = "s_hook_local_ip"
+    $s12 = "nf_hook_pre_routing"
   condition:
-    is_elf and 10 of them
+    all of ($a*) or 5 of ($s*)
 }
 
 
