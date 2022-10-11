@@ -33,12 +33,12 @@ proc do_analysis_proc(ctx: var ProcScanContext): cint =
 
   # Scan cmdline file
   # FIXME: data has \x00 instead of space. Need to scan buffer
-  discard yr_rules_scan_file(ctx.ScanEngine.YaraEng, cstring(ctx.proc_object.cmdline), SCAN_FLAGS_PROCESS_MEMORY, cb_yr_process_scan_result, addr(ctx), yr_scan_timeout)
+  discard yr_rules_scan_file(ctx.ScanEngine.YaraEng, cstring(ctx.proc_object.cmdline), SCAN_FLAGS_FAST_MODE, cb_yr_process_scan_result, addr(ctx), yr_scan_timeout)
   if ctx.scan_result == CL_VIRUS:
     return fscanner_on_process_cmd_matched(ctx.virus_name, ctx.scan_result)
 
   # Maybe scan binary to execute?
-  return yr_rules_scan_proc(ctx.ScanEngine.YaraEng, cint(ctx.proc_object.pid), SCAN_FLAGS_FAST_MODE, cb_yr_process_scan_result, addr(ctx), yr_scan_timeout)
+  return yr_rules_scan_proc(ctx.ScanEngine.YaraEng, cint(ctx.proc_object.pid), SCAN_FLAGS_PROCESS_MEMORY, cb_yr_process_scan_result, addr(ctx), yr_scan_timeout)
 
 
 proc pscanner_scan_proc*(ctx: var ProcScanContext) =
