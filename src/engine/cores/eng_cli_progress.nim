@@ -1,5 +1,4 @@
 import os
-import strutils
 
 
 proc cli_progress_scan_file*(path: string) =
@@ -19,13 +18,13 @@ proc cli_progress_scan_file*(path: string) =
   stdout.flushFile()
 
 
-proc cli_progress_scan_process*(pid: int, path: string) =
+proc cli_progress_scan_process*(pid: uint, path: string) =
   if len(path) >= 50:
     let file_name = splitPath(path).tail
     if len(file_name) < 50:
-      stdout.write("[Scn] " & intToStr(pid) & " " & file_name)
+      stdout.write("[Scn] " & $pid & " " & file_name)
   else:
-    stdout.write("[Scn] " & intToStr(pid) & " " & path)
+    stdout.write("[Scn] " & $pid & " " & path)
   stdout.flushFile()
 
 

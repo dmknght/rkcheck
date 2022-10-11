@@ -1,19 +1,7 @@
 import .. / .. / libs / libclamav / nim_clam
 import .. / .. / libs / libyara / nim_yara
 import .. / cores / [eng_cores, eng_cli_progress]
-import strutils
-
-
-proc fscanner_on_rule_matched(scan_result: var cl_error_t, virus_name: var cstring, rule_name_space, rule_identifier: string): cint =
-  scan_result = CL_VIRUS
-  virus_name = cstring($rule_name_space & ":" & replace($rule_identifier, "_", "."))
-  return CALLBACK_ABORT
-
-
-proc fscanner_on_rule_not_matched(scan_result: var cl_error_t, virus_name: var cstring): cint =
-  scan_result = CL_CLEAN
-  virus_name = ""
-  return CALLBACK_CONTINUE
+import scan_utils
 
 
 proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -40,10 +28,9 @@ proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): c
   ]#
   let
     ctx = cast[ptr FileScanContext](context)
-    yr_scan_flags: cint = SCAN_FLAGS_FAST_MODE
 
   cli_progress_scan_file(ctx.scan_object)
-  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, yr_scan_flags, fscanner_cb_yara_scan_result, context, yr_scan_timeout)
+  discard yr_rules_scan_fd(ctx.ScanEngine.YaraEng, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, yr_scan_timeout)
   ctx.obj_scanned += 1
   cli_progress_flush()
   # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again

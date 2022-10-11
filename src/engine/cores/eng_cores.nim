@@ -10,7 +10,7 @@ type
     ClamDbPath*: string
     YaraDbPath*: string
   ProcInfo* = object
-    pid*: int
+    pid*: uint
     pid_path*: string
     cmdline*: string
     binary_path*: string
