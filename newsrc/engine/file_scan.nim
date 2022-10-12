@@ -24,6 +24,7 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; 
     ctx = cast[ptr FileScanner](user_data)
     rule = cast[ptr YR_RULE](message_data)
 
+  ctx.result_scanned += 1
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
     return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
@@ -43,6 +44,5 @@ proc fscanner_cb_clam_scan_file*(fd: cint, `type`: cstring, context: pointer): c
   progress_bar_scan_file(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
   progress_bar_flush()
-  # If result is CL_CLEAN, clamAV will use signatures of ClamAV to scan file again
-  ctx.result_scanned += 1
+
   return ctx.scan_result
