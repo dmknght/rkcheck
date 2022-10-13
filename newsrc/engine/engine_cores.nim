@@ -33,6 +33,7 @@ type
     proc_path*: string
     # proc_cmdline*: string
     proc_binary*: string
+    scan_virname*: cstring
   #[
     yr_scanner: YR_RULES
     scan_object: current path / name of object that engine is scanning

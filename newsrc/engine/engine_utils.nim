@@ -15,19 +15,6 @@ proc file_scanner_on_clean*(scan_result: var cl_error_t, virus_name: var cstring
   return CALLBACK_CONTINUE
 
 
-proc proc_scanner_on_file_deleted*(virus_name: var cstring, binary_path: var string, scan_result: var cl_error_t): cint =
-  virus_name = "Heur:DeletedProcess"
-  scan_result = CL_VIRUS
-  binary_path.removeSuffix(" (deleted)")
-  return 0
-
-
-proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_error_t): cint =
-  virus_name = cstring("Heur:MalCmdExe." & $virus_name)
-  scan_result = CL_VIRUS
-  return 0
-
-
 proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object: string, infected: var uint) =
   #[
     Print virus found message with file path
@@ -41,8 +28,28 @@ proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object:
   echo virus_name, " ", scan_object
 
 
-# proc fscanner_on_process_matched*(virus_name, binary_path: string, pid: uint) =
-#   if not isEmptyOrWhitespace(binary_path):
-#     echo virus_name, " ", binary_path, " (pid: ", pid, ")"
-#   else:
-#     echo virus_name, " process: ", pid
+proc proc_scanner_on_binary_deleted*(virus_name: var cstring, binary_path: var string) =
+  virus_name = "Heur:DeletedProcess"
+  binary_path.removeSuffix(" (deleted)")
+
+
+proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_error_t): cint =
+  virus_name = cstring("Heur:MalCmdExe." & $virus_name)
+  scan_result = CL_VIRUS
+  return 0
+
+
+proc proc_scanner_on_scan_matched*(rule_ns, rule_id, binary_path: string, pid: uint) =
+  # TODO move this to CLI
+  let
+    virus_name = cstring(rule_ns & ":" & replace(rule_id, "_", "."))
+
+  if not isEmptyOrWhitespace(binary_path):
+    echo virus_name, " ", binary_path, " (pid: ", pid, ")"
+  else:
+    echo virus_name, " process: ", pid
+
+
+proc proc_scanner_on_scan_heur*(virus_name, binary_path: string, pid: uint) =
+  # TODO move this to CLI
+  echo virus_name, " ", binary_path, " (pid: ", pid, ")"
