@@ -31,20 +31,22 @@ proc fscanner_cb_scan_file*(fd: cint, `type`: cstring, context: pointer): cl_err
   let
     ctx = cast[ptr FileScanner](context)
 
+  # progress_bar_scan_file(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
+  # progress_bar_flush()
   # TODO use libclam debug to show errors if scanner returns != 0
 
   return ctx.scan_result
 
 
-proc fscanner_cb_pre_cache*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
-  let
-    ctx = cast[ptr FileScanner](context)
+# proc fscanner_cb_show_progress*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+#   let
+#     ctx = cast[ptr FileScanner](context)
 
-  progress_bar_scan_file(ctx.scan_object)
+#   progress_bar_scan_file(ctx.scan_object)
 
 
-# proc fscanner_cb_post_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+# proc fscanner_cb_flush_progress*(fd: cint; scan_result: cint; virname: cstring; context: pointer): cl_error_t {.cdecl.} =
 #   progress_bar_flush()
 
 

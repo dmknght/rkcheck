@@ -11,23 +11,33 @@ proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[str
   file_scanner.yr_scanner = yara_engine
   file_scanner.result_infected = 0
   file_scanner.result_scanned = 0
-
+  # file_scanner.debug_mode = true
 
   if file_scanner.init_clamav() != ERROR_SUCCESS:
     echo "Failed to init ClamAV Engine" # TODO use cli module here
     return
 
-  # TODO research and set callback for better workflow
-  cl_engine_set_clcb_pre_cache(file_scanner.engine, fscanner_cb_scan_file)
+  #[
+    ClamAV scan phases
+    1. pre_cache: Access file (both inner and outer) before scan
+    2. pre_scan: Before scan
+    3. post_scan: after file scan complete
+    4. virus_found: only when a virus is found
+  ]#
+  # cl_engine_set_clcb_pre_cache(file_scanner.engine, fscanner_cb_show_progress)
+  # cl_engine_set_clcb_post_scan(file_scanner.engine, fscanner_cb_flush_progress)
+  cl_engine_set_clcb_pre_scan(file_scanner.engine, fscanner_cb_scan_file)
   cl_engine_set_clcb_virus_found(file_scanner.engine, fscanner_cb_virus_found)
 
   if len(list_dirs) != 0:
     for dir_path in list_dirs:
       for path in walkDirRec(dir_path):
+        file_scanner.scan_object = path
         discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
 
   if len(list_files) != 0:
     for path in list_files:
+      file_scanner.scan_object = path
       discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
 
   finit_clamav(file_scanner)
