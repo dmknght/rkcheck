@@ -64,15 +64,17 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
     https://docs.clamav.net/manual/Development/libclamav.html#database-loading
   ]#
   result = cl_init(CL_INIT_DEFAULT)
-  if result == CL_SUCCESS:
-    # Set options to enable scanner features
-    f_engine.engine = cl_engine_new()
-    f_engine.options.parse = bitnot(bitor(f_engine.options.parse, 0))
-    f_engine.options.general = bitor(f_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
-    f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
-    f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
-    f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_MACROS)
-    discard f_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
+  if result != CL_SUCCESS:
+    return result
+
+  # Set options to enable scanner features
+  f_engine.engine = cl_engine_new()
+  f_engine.options.parse = bitnot(bitor(f_engine.options.parse, 0))
+  f_engine.options.general = bitor(f_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
+  f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
+  f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
+  f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_MACROS)
+  discard f_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
 
   # Did we set debug?
   if f_engine.debug_mode:
@@ -87,10 +89,10 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
       # TODO use libClamDebug or so
       echo "Loaded ", sig_count, " ClamAV signatures"
 
-  return result
+  return cl_engine_compile(f_engine.engine)
 
 
-proc finit_clam_engine*(f_engine: var FileScanner) =
+proc finit_clamav*(f_engine: var FileScanner) =
   #[
     Give ClamAV Engine's freedom
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
