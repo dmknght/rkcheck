@@ -22,7 +22,7 @@ proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object:
   ]#
   let
     # Show virname for heur detection
-    virus_name = if vir_detected != "": vir_detected else: virname
+    virus_name = if isEmptyOrWhitespace($vir_detected): virname else: vir_detected
 
   infected += 1
   echo virus_name, " ", scan_object
