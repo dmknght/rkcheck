@@ -9,12 +9,9 @@ proc progress_bar_scan_file*(path: string) =
     https://nim-lang.org/docs/terminal.html
   ]#
   # If path is too long -> can't erase stdout. We try print only file name
-  if len(path) >= 50:
-    let file_name = splitPath(path).tail
-    if len(file_name) < 50:
-      stdout.write("[Scn] " & file_name)
-  else:
-    stdout.write("[Scn] " & path)
+  let file_name = splitPath(path).tail
+  if len(file_name) < 50:
+    stdout.write("[Scn] " & file_name)
   stdout.flushFile()
 
 
