@@ -7,7 +7,7 @@ private rule elf_no_sections {
     is_elf and elf.number_of_sections == 0
 }
 
-rule Shellcode_Executor
+rule SusELF_ShlCodeExe
 {
   meta:
     author = "Nong Hoang Tu"
@@ -23,7 +23,7 @@ rule Shellcode_Executor
     )
 }
 
-rule ELF_NoSections {
+rule SusELF_NoSects {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -70,7 +70,7 @@ rule Shell_Curl_Downloader {
     all of them
 }
 
-rule Hacktool_DenialOfService {
+rule HackTool_DOS1 {
   meta:
     author = "Nong Hoang Tu"
     description = "Botnet.Linux.LizardSquad"
@@ -87,7 +87,7 @@ rule Hacktool_DenialOfService {
     2 of them
 }
 
-rule NetScan_1 {
+rule HackTool_NetScan1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -100,7 +100,7 @@ rule NetScan_1 {
     all of them
 }
 
-rule SSHBrute_1 {
+rule HackTool_SSHBrute1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -171,7 +171,7 @@ rule Shell_WgetAndCurl_Downloader {
 //     all of them
 // }
 
-rule SuspiciousSegment
+rule SusELF_Segment
 {
   meta:
     description = "Flags binaries with a single LOAD segment marked as RWE."
@@ -188,7 +188,7 @@ rule SuspiciousSegment
     elf.segments[0].flags == elf.PF_R | elf.PF_W | elf.PF_X
 }
 
-rule FakeSectionHeaders_EntryPointAddr {
+rule SusELF_FkSectHdrs {
   meta:
     description = "A fake sections header has been added to the binary."
     family = "Obfuscation"
@@ -218,7 +218,7 @@ rule FakeSectionHeaders_EntryPointAddr {
     )
 }
 
-rule FakeDynamicSymbols {
+rule SusELF_FkDynSym {
   meta:
     description = "A fake dynamic symbol table has been added to the binary"
     family = "Obfuscation"
@@ -250,17 +250,17 @@ rule FakeDynamicSymbols {
     )
 }
 
-rule Shell_WalkDirCD {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "15/11/2021"
-    description = "Bash command to try cd common directories used by Mirai variants"
-  strings:
-    $ = "echo \"cd /tmp || cd /var/run || cd /mnt || cd /root || cd /;"
-  condition:
-    all of them
-}
+// rule Shell_WalkDirCD {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "15/11/2021"
+//     description = "Bash command to try cd common directories used by Mirai variants"
+//   strings:
+//     $ = "echo \"cd /tmp || cd /var/run || cd /mnt || cd /root || cd /;"
+//   condition:
+//     all of them
+// }
 // rule SuspiciousEnvironmentVariable {
 //   // Malicious exports:
 //   //  export PATH=/var/bin:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin;%s
