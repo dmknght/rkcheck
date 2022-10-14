@@ -18,8 +18,8 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; 
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
     return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
-  else:
-    return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
+  # else:
+  #   return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
 proc fscanner_cb_scan_file*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -44,8 +44,8 @@ proc fscanner_cb_pre_cache*(fd: cint, `type`: cstring, context: pointer): cl_err
   progress_bar_scan_file(ctx.scan_object)
 
 
-proc fscanner_cb_post_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
-  progress_bar_flush()
+# proc fscanner_cb_post_scan*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
+#   progress_bar_flush()
 
 
 proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
