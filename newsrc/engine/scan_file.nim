@@ -27,7 +27,8 @@ proc fscanner_cb_scan_file*(fd: cint; scan_result: cint; virname: cstring; conte
   let
     ctx = cast[ptr FileScanner](context)
 
-  discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
+  if scan_result != CL_VIRUS and ctx.scan_result != CL_VIRUS:
+    discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
 
   return ctx.scan_result
 
