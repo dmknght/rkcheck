@@ -24,9 +24,7 @@ proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[str
     3. post_scan: after file scan complete
     4. virus_found: only when a virus is found
   ]#
-  # cl_engine_set_clcb_pre_cache(file_scanner.engine, fscanner_cb_show_progress)
-  # cl_engine_set_clcb_post_scan(file_scanner.engine, fscanner_cb_flush_progress)
-  cl_engine_set_clcb_pre_scan(file_scanner.engine, fscanner_cb_scan_file)
+  cl_engine_set_clcb_post_scan(file_scanner.engine, fscanner_cb_scan_file)
   cl_engine_set_clcb_virus_found(file_scanner.engine, fscanner_cb_virus_found)
 
   if len(list_dirs) != 0:
