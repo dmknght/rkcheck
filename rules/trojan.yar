@@ -92,7 +92,7 @@ rule EzuriLoader_Generic
 }
 
 
-rule Metasploit_Stageless_Generic {
+rule Metasploit_Stageless {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
