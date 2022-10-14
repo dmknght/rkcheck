@@ -2,7 +2,7 @@ import libyara
 import libclamav
 import engine_cores
 import engine_utils
-import .. / cli / progress_bar
+# import .. / cli / progress_bar
 
 
 proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -22,32 +22,14 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; 
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
-proc fscanner_cb_scan_file*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
-  #[
-    The actual function to scan files. This function will call yara to scan file first.
-    If result is CL_CLEAN, Clam will scan with its signatures
-    # TODO we want to handle text files to scan .desktop files and .service files. Better to handle them before we call yr_rules_scan_fd
-  ]#
+proc fscanner_cb_scan_file*(fd: cint; scan_result: cint; virname: cstring; context: pointer): cl_error_t {.cdecl.} =
+  # TODO maybe add progress bar again (try no conflict with debug on)
   let
     ctx = cast[ptr FileScanner](context)
 
-  # progress_bar_scan_file(ctx.scan_object)
   discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
-  # progress_bar_flush()
-  # TODO use libclam debug to show errors if scanner returns != 0
 
   return ctx.scan_result
-
-
-# proc fscanner_cb_show_progress*(fd: cint, `type`: cstring, context: pointer): cl_error_t {.cdecl.} =
-#   let
-#     ctx = cast[ptr FileScanner](context)
-
-#   progress_bar_scan_file(ctx.scan_object)
-
-
-# proc fscanner_cb_flush_progress*(fd: cint; scan_result: cint; virname: cstring; context: pointer): cl_error_t {.cdecl.} =
-#   progress_bar_flush()
 
 
 proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
