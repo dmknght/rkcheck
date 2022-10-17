@@ -102,11 +102,14 @@ rule Metasploit_Stageless {
     $ = "manage persistence"
     $ = "session-guid"
     $ = "MSF_LICENSE"
+    $ = "mettle_get_machine_id"
+    $ = "mettle_get_procmgr"
+    $ = "/mettle/mettle/src/"
   condition:
     // Check for file only
     (is_elf and hash.md5(elf.sections[21].offset, elf.sections[21].size) == "fbeb0b6fd7a7f78a880f68c413893f36") or
     // Check file or memory's strings
-    all of them
+    3 of them
 }
 
 
