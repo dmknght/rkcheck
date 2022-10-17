@@ -118,10 +118,7 @@ rule SusELF_SectHighEntropy {
     email = "dmknght@parrotsec.org"
     description = "Check high entropy in file's section"
   condition:
-    for any i in (0 .. elf.number_of_sections):
-    (
-      math.entropy(elf.sections[i].offset, elf.sections[i].size) >= 7
-    )
+    math.entropy(elf.sections[0].offset, elf.sections[elf.number_of_sections - 1].offset + elf.sections[elf.number_of_sections - 1].size) >= 7
 }
 
 rule ShellExec_UserAdd {
