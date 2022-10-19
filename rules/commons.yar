@@ -193,6 +193,20 @@ rule HackTool_DOS2 {
     all of them
 }
 
+rule HackTool_DOS3 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "15/11/2021"
+    target = "File, Memory"
+    hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
+  strings:
+    $1 = "Opening sockets"
+    $2 = "Sending attack"
+  condition:
+    all of them
+}
+
 rule HackTool_NetScan1 {
   meta:
     author = "Nong Hoang Tu"

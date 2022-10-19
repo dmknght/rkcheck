@@ -3,7 +3,22 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_Generic_A {
+rule Mirai_Generic
+{
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Common strings used in Mirai"
+  strings:
+    $ = "WHO %s"
+    $ = "PONG %s"
+    $ = "NICK %s"
+    $ = "JOIN %s"
+  condition:
+    2 of them
+}
+
+rule Mirai_TypeA {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -17,7 +32,7 @@ rule Mirai_Generic_A {
 }
 
 
-rule Mirai_Generic_B {
+rule Mirai_TypeB {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -30,7 +45,7 @@ rule Mirai_Generic_B {
 }
 
 
-rule Mirai_Generic_C {
+rule Mirai_TypeC {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -60,31 +75,6 @@ rule Mirai_Gafgyt_A {
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
     )
-}
-
-
-rule Mirai_Tsunami_A
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Gafgyt-Jm (Avast named) or Tsunami Botnet (FireEye and other), 1 backdoor and 1 used for Dirtycow exploit"
-    reference = "https://www.virustotal.com/gui/file/305901aa920493695729132cfd20cbddc9db2cf861071450a646c6a07b4a50f3"
-    // Fixme false positive of idea-IU and powershell
-    // Update: Merge memory scan
-  strings:
-    $ = "WHO %s"
-    $ = "PONG %s"
-    $ = "NICK %s"
-    $ = "JOIN %s"
-  condition:
-    (
-      is_elf and
-      for any i in (0 .. elf.number_of_sections - 1): (
-        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a7b6569072c6f43a2072b8ef906a2bf9"
-      )
-    )
-    or 2 of them
 }
 
 
@@ -161,23 +151,7 @@ rule BotenaGo_Generic_A {
     any of them
 }
 
-
-rule Flooder_Generic_A {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "15/11/2021"
-    target = "File, Memory"
-    hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
-  strings:
-    $1 = "Opening sockets"
-    $2 = "Sending attack"
-  condition:
-    all of them
-}
-
-
-rule Ngioweb_Generic_A {
+rule Mirai_Ngioweb {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
