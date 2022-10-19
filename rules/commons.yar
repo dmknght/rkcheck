@@ -118,7 +118,7 @@ rule SusELF_SectHighEntropy {
     email = "dmknght@parrotsec.org"
     description = "Check high entropy in file's section"
   condition:
-    math.entropy(elf.sections[0].offset, elf.sections[elf.number_of_sections - 1].offset + elf.sections[elf.number_of_sections - 1].size) >= 7.4 or
+    math.entropy(elf.sections[0].offset, elf.sections[elf.number_of_sections - 1].offset + elf.sections[elf.number_of_sections - 1].size) >= 7.4
     // for any i in (0 .. elf.number_of_sections):
     // (
     //   math.entropy(elf.sections[i].offset, elf.sections[i].size) >= 7.4
@@ -178,6 +178,19 @@ rule HackTool_DOS1 {
     $5 = "KILLATTK"
   condition:
     2 of them
+}
+
+rule HackTool_DOS2 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    date = "19/10/2022"
+  strings:
+    $1 = "[UDP] Failed to ddos" ascii
+    $2 = "[HTTP] Flooding" ascii
+    $3 = "[UDP] Flooding Rooted Spoof" ascii
+  condition:
+    all of them
 }
 
 rule HackTool_NetScan1 {
