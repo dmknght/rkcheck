@@ -75,6 +75,8 @@ rule Mirai_Tsunami_A
   strings:
     $ = "WHO %s"
     $ = "PONG %s"
+    $ = "NICK %s"
+    $ = "JOIN %s"
   condition:
     (
       is_elf and
@@ -82,7 +84,7 @@ rule Mirai_Tsunami_A
         hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a7b6569072c6f43a2072b8ef906a2bf9"
       )
     )
-    or all of them
+    or 2 of them
 }
 
 
