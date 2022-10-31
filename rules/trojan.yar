@@ -465,19 +465,28 @@ rule Exploit_DirtyCow {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    date = "15/12/2021"
-    target = "Memory"
+    date = "1/11/2022"
     hash = "0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
     reference = "https://www.virustotal.com/gui/file/0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
   strings:
-    $1 = "/etc/passwd"
-    $2 = "/tmp/passwd.bak"
-    $3 = "root"
-    $4 = "Please enter the new password:"
-    // $5 = "You can log in with the username"
-    $6 = "DON'T FORGET TO RESTORE!"
+    $i_1 = "crypt" fullword ascii
+    $i_2 = "madvise" ascii
+    $i_3 = "pthread_create" ascii
+    $i_4 = "ptrace" ascii
+    $i_5 = "waitpid" fullword ascii
+    $i_6 = "getpass" fullword ascii
+    $s_1 = "/tmp/passwd.bak" ascii
+    $s_2 = "madvise %d" fullword ascii
+    $s_3 = "ptrace %d" fullword ascii
+    $s_4 = "DON'T FORGET TO RESTORE!" ascii
   condition:
-    all of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        elf.sections[i].type == elf.SHT_STRTAB and all of ($i_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    ) or
+    all of ($s_*)
 }
 
 // TODO 1384790107a5f200cab9593a39d1c80136762b58d22d9b3f081c91d99e5d0376 (upx)
