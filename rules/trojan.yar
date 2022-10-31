@@ -461,7 +461,7 @@ rule Xspy_Generic {
 }
 
 
-rule exploit_dirtycow {
+rule Exploit_DirtyCow {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
