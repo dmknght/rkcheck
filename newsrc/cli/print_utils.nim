@@ -7,6 +7,6 @@ proc print_file_infected*(virname, scan_obj: string) =
 
 proc print_process_infected*(virname, path: string, pid: uint) =
   if not isEmptyOrWhitespace(path):
-    echo "[!] \e[105m", virname, "\e[0m \e[106mpid: ", pid, "\e[0m ", path
+    echo "[\e[91m!] \e[105m", virname, "\e[0m \e[106mpid: ", pid, "\e[0m ", path
   else:
-    echo "[!] \e[105m", virname, "\e[0m \e[106mpid: ", pid, "\e[0m"
+    echo "[\e[91m!] \e[105m", virname, "\e[0m \e[106mpid: ", pid, "\e[0m"
