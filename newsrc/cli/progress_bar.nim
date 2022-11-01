@@ -1,5 +1,4 @@
 import os
-import unicode
 
 
 proc progress_bar_scan_file*(path: string) =
