@@ -54,7 +54,7 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
-    2 of them
+    (is_elf and 2 of them) or (2 of them in (0x400000 .. 0x530000))
 }
 
 // rule Mirai_Gen2 {
