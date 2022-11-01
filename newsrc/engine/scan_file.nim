@@ -2,7 +2,7 @@ import libyara
 import libclamav
 import engine_cores
 import engine_utils
-# import .. / cli / progress_bar
+import .. / cli / progress_bar
 
 
 proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
@@ -15,6 +15,8 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     rule = cast[ptr YR_RULE](message_data)
 
   ctx.result_scanned += 1
+  progress_bar_flush()
+
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
     return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
@@ -27,6 +29,8 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
   # TODO try to get inner file name (lib yara debug mode)
   let
     ctx = cast[ptr FileScanner](context)
+
+  progress_bar_scan_file(ctx.scan_object)
 
   if scan_result == CL_VIRUS:
     ctx.scan_virname = virname
