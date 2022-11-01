@@ -3,6 +3,45 @@ import "hash"
 include "rules/magics.yar"
 
 
+rule Mirai_Hsh1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
+    // file fa9878*95ec37, compiled Py
+  condition:
+    is_elf and // Detect hash of .shstrtab
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
+    )
+}
+
+
+rule Mirai_Hsh1 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Detect some Mirai's variants (named by ClamAV) using section hash. File only"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1"
+    )
+}
+
+rule Mirai_Hsh3 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
+  condition:
+    is_elf and
+    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
+    )
+}
+
 rule Mirai_Gen1
 {
   meta:
@@ -18,22 +57,23 @@ rule Mirai_Gen1
     2 of them
 }
 
-rule Mirai_Gen2 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Unique strings of Mirai samples for memory scan"
-  strings:
-    $1 = "4r3s b0tn3t" // 0e492a3be57312e9b53ea378fa09650191ddb4aee0eed96dfc71567863b500a8
-    // strings from 206ad8fec64661c1fed8f20f71523466d0ca4ed9c01d20bea128bfe317f4395a
-    // and 341a49940749d5f07d32d1c8dfddf6388a11e45244cc54bc8768a8cd7f00b46a
-    $2 = "User-Agent: Hello, Momentum"
-    $3 = "GET /shell?cd+/tmp;+wget+http:/\\/"
-    $4 = "w5q6he3dbrsgmclkiu4to18npavj702f" // 5a888ae2128e398b401d8ab8333f0fe125134892b667e1acd3dd3fee98f6ea3f
-    $5 = "EcstasyCode#0420 | Famy#2900" // d8878a0593c1920571afaa2c024d8d4589f13b334c064200b35af0cff20de3e5
-  condition:
-    any of them
-}
+// rule Mirai_Gen2 {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Unique strings of Mirai samples for memory scan"
+//   strings:
+//     $1 = "4r3s b0tn3t" // 0e492a3be57312e9b53ea378fa09650191ddb4aee0eed96dfc71567863b500a8
+//     // strings from 206ad8fec64661c1fed8f20f71523466d0ca4ed9c01d20bea128bfe317f4395a
+//     // and 341a49940749d5f07d32d1c8dfddf6388a11e45244cc54bc8768a8cd7f00b46a
+//     $2 = "User-Agent: Hello, Momentum"
+//     $3 = "GET /shell?cd+/tmp;+wget+http:/\\/"
+//     // Found in 5a888ae2128e398b401d8ab8333f0fe125134892b667e1acd3dd3fee98f6ea3f
+//     $4 = "w5q6he3dbrsgmclkiu4to18npavj702f" fullword ascii
+//     $5 = "EcstasyCode#0420 | Famy#2900" // d8878a0593c1920571afaa2c024d8d4589f13b334c064200b35af0cff20de3e5
+//   condition:
+//     any of them
+// }
 
 rule Mirai_Gen3 {
   meta:
@@ -41,37 +81,10 @@ rule Mirai_Gen3 {
     email = "dmknght@parrotsec.org"
     description = "Unique strings of Mirai samples for memory scan"
   strings:
-    $ = "UDPRAW"
-    $ = "shell"
-    $ = "KILLBOT"
+    $ = "UDPRAW" fullword ascii
+    $ = "ATUSH" fullword ascii
   condition:
     all of them
-}
-
-rule Mirai_TypeA {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash"
-    // file fa9878*95ec37, compiled Py
-  condition:
-    is_elf and // Detect hash of .shstrtab
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
-    )
-}
-
-
-rule Mirai_TypeB {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detect some Mirai's variants (named by ClamAV) using section hash"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1"
-    )
 }
 
 
@@ -91,20 +104,6 @@ rule Mirai_TypeC {
     $s3 = "L33T HaxErS"
   condition:
     $cc or ($s2 and ($s1 or $s3))
-}
-
-
-rule Mirai_Gafgyt_A {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
-  condition:
-    is_elf and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
-    )
 }
 
 
