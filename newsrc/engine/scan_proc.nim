@@ -3,6 +3,7 @@ import engine_cores
 import engine_utils
 import .. / cli / progress_bar
 import strutils
+import os
 
 
 proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
@@ -46,3 +47,38 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   #   return fscanner_on_process_cmd_matched(ctx.virus_name, ctx.scan_result)
 
   # Maybe scan binary to execute?
+
+
+proc pscanner_process_pid*(ctx: var ProcScanner, pid: uint) =
+  ctx.proc_binary = expandSymlink(ctx.proc_path & "exe")
+  # TODO map cmdline and scan parseCmdLine(readFile(ctx.proc_object.cmdline).replace("\x00", " "))[0]
+  # TODO maybe do findExe for proc_binary
+  # TODO handle parent pid, child pid, ... to do ignore scan
+
+  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary)
+  discard pscanner_cb_scan_proc(ctx)
+  progress_bar_flush()
+
+
+proc pscanner_scan_procs*(ctx: var ProcScanner, list_procs: seq[uint]) =
+  for pid in list_procs:
+    let
+      procfs_path = "/proc/" & $pid & "/"
+    if dirExists(procfs_path):
+      ctx.proc_id = pid
+      ctx.proc_path = procfs_path
+      pscanner_process_pid(ctx, pid)
+
+
+proc pscanner_scan_system_procs*(ctx: var ProcScanner) =
+  for kind, path in walkDir("/proc/"):
+    if kind == pcDir:
+      try:
+        let
+          pid = parseUInt(splitPath(path).tail)
+
+        ctx.proc_path = path & "/"
+        ctx.proc_id = pid
+        pscanner_process_pid(ctx, pid)
+      except ValueError:
+        discard
