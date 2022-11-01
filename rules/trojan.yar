@@ -483,10 +483,11 @@ rule Exploit_DirtyCow {
     (
       is_elf and for any i in (0 .. elf.number_of_sections):
       (
+        // Detect by import functions
         elf.sections[i].type == elf.SHT_STRTAB and all of ($i_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       )
     ) or
-    all of ($s_*)
+    all of ($s_*) in (0x400000 .. 0x603000) // Exact memory religion search. Memory scan
 }
 
 // TODO 1384790107a5f200cab9593a39d1c80136762b58d22d9b3f081c91d99e5d0376 (upx)
