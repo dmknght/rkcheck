@@ -1,6 +1,7 @@
 import libclamav
 import libyara
 import strutils
+import .. / cli / print_utils
 
 
 proc file_scanner_on_matched*(scan_result: var cl_error_t, virus_name: var cstring, rule_name_space, rule_identifier: string): cint =
@@ -18,14 +19,13 @@ proc file_scanner_on_clean*(scan_result: var cl_error_t, virus_name: var cstring
 proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object: string, infected: var uint) =
   #[
     Print virus found message with file path
-    TODO move this to cli and use sort of clamav debug
   ]#
   let
     # Show virname for heur detection
     virus_name = if isEmptyOrWhitespace($vir_detected): virname else: vir_detected
 
   infected += 1
-  echo virus_name, " ", scan_object
+  print_file_infected($virus_name, $scan_object)
 
 
 proc proc_scanner_on_binary_deleted*(virus_name: var cstring, binary_path: var string) =
@@ -40,16 +40,11 @@ proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_e
 
 
 proc proc_scanner_on_scan_matched*(rule_ns, rule_id, binary_path: string, pid: uint) =
-  # TODO move this to CLI
   let
     virus_name = cstring(rule_ns & ":" & replace(rule_id, "_", "."))
 
-  if not isEmptyOrWhitespace(binary_path):
-    echo virus_name, " ", binary_path, " (pid: ", pid, ")"
-  else:
-    echo virus_name, " process: ", pid
+  print_process_infected($virus_name, binary_path, pid)
 
 
 proc proc_scanner_on_scan_heur*(virus_name, binary_path: string, pid: uint) =
-  # TODO move this to CLI
-  echo virus_name, " ", binary_path, " (pid: ", pid, ")"
+  print_process_infected(virus_name, binary_path, pid)
