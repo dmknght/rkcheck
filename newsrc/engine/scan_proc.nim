@@ -50,14 +50,17 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
 
 
 proc pscanner_process_pid*(ctx: var ProcScanner, pid: uint) =
-  ctx.proc_binary = expandSymlink(ctx.proc_path & "exe")
   # TODO map cmdline and scan parseCmdLine(readFile(ctx.proc_object.cmdline).replace("\x00", " "))[0]
   # TODO maybe do findExe for proc_binary
   # TODO handle parent pid, child pid, ... to do ignore scan
-
-  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary)
-  discard pscanner_cb_scan_proc(ctx)
-  progress_bar_flush()
+  try:
+    ctx.proc_binary = expandSymlink(ctx.proc_path & "exe")
+    progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary)
+    discard pscanner_cb_scan_proc(ctx)
+    progress_bar_flush()
+  except:
+    # Do not scan if has error. For example: Permission Denied when read /proc/1/exe
+    discard
 
 
 proc pscanner_scan_procs*(ctx: var ProcScanner, list_procs: seq[uint]) =
