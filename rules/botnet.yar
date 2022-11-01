@@ -3,19 +3,49 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_Generic
+rule Mirai_Gen1
 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Common strings used in Mirai"
   strings:
-    $ = "WHO %s"
-    $ = "PONG %s"
-    $ = "NICK %s"
-    $ = "JOIN %s"
+    $ = "WHO %s" fullword ascii
+    $ = "PONG %s" fullword ascii
+    $ = "NICK %s" fullword ascii
+    $ = "JOIN %s" fullword ascii
   condition:
     2 of them
+}
+
+rule Mirai_Gen2 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Unique strings of Mirai samples for memory scan"
+  strings:
+    $1 = "4r3s b0tn3t" // 0e492a3be57312e9b53ea378fa09650191ddb4aee0eed96dfc71567863b500a8
+    // strings from 206ad8fec64661c1fed8f20f71523466d0ca4ed9c01d20bea128bfe317f4395a
+    // and 341a49940749d5f07d32d1c8dfddf6388a11e45244cc54bc8768a8cd7f00b46a
+    $2 = "User-Agent: Hello, Momentum"
+    $3 = "GET /shell?cd+/tmp;+wget+http:/\\/"
+    $4 = "w5q6he3dbrsgmclkiu4to18npavj702f" // 5a888ae2128e398b401d8ab8333f0fe125134892b667e1acd3dd3fee98f6ea3f
+    $5 = "EcstasyCode#0420 | Famy#2900" // d8878a0593c1920571afaa2c024d8d4589f13b334c064200b35af0cff20de3e5
+  condition:
+    any of them
+}
+
+rule Mirai_Gen3 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Unique strings of Mirai samples for memory scan"
+  strings:
+    $ = "UDPRAW"
+    $ = "shell"
+    $ = "KILLBOT"
+  condition:
+    all of them
 }
 
 rule Mirai_TypeA {
