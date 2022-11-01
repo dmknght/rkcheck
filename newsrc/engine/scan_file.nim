@@ -5,7 +5,7 @@ import engine_utils
 # import .. / cli / progress_bar
 
 
-proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
   #[
     Handle scan result from Yara engine
   ]#
@@ -22,7 +22,7 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT; message: cint; 
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
-proc fscanner_cb_scan_file*(fd: cint, scan_result: cint; virname: cstring, context: pointer): cl_error_t {.cdecl.} =
+proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
   # TODO maybe add progress bar again (try no conflict with debug on)
   # TODO try to get inner file name (lib yara debug mode)
   let
