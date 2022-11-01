@@ -1,5 +1,5 @@
-import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 import os
+import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 
 
 proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[string]) =
@@ -12,6 +12,7 @@ proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[str
   file_scanner.result_infected = 0
   file_scanner.result_scanned = 0
   # file_scanner.debug_mode = true
+  # file_scanner.database = "/var/lib/clamav"
 
   if file_scanner.init_clamav() != ERROR_SUCCESS:
     echo "Failed to init ClamAV Engine" # TODO use cli module here
@@ -44,11 +45,13 @@ proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[str
 proc create_task_proc_scan(yara_engine: YrEngine, list_procs: seq[string], scan_all_procs: bool) =
   var
     proc_scan_engine: ProcScanner
+
   proc_scan_engine.engine = yara_engine.engine
+
   if scan_all_procs:
-    discard # TODO do proc walk here
+    pscanner_scan_system_procs(proc_scan_engine)
   else:
-    discard # TODO scan list procs here
+    pscanner_scan_procs(proc_scan_engine, cast[seq[uint]](list_procs))
 
   finit_yara(proc_scan_engine)
 
