@@ -81,7 +81,7 @@ rule Mirai_Gen3 {
     email = "dmknght@parrotsec.org"
     description = "Unique strings of Mirai samples for memory scan"
   strings:
-    $ = "UDPRAW" fullword ascii
+    $ = "__vdso_clock_gettime" fullword ascii
     $ = "ATUSH" fullword ascii
   condition:
     (is_elf and all of them) or (all of them in (0x400000 .. 0x530000))
@@ -178,20 +178,4 @@ rule Mirai_Gen3 {
 //     $cmd_1 = "/bin/busybox chmod 777 * /tmp/xvg; /tmp/xvg selfrep.huawei"
 //   condition:
 //     any of them
-// }
-
-// rule Mirai_Ngioweb {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "25/12/2021"
-//     target = "File, memory"
-//     hash = "524df78615ffb007a0d7a9aafcedf918c0568200f95c6936767aa3931a81c7cd" // UPX binary
-//     hash = "0b213e1f92a2613f7cebff82e8ffbdae985e3446960bf4bd365b5751efa08b53" // Packed UPX binary
-//     description = "String detection for Ngioweb memory scan. Static file was detected by section hash"
-//   strings:
-//     $1 = "D$8L;|"
-//     $2 = "$D37D1"
-//   condition:
-//     all of them
 // }
