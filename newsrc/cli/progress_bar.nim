@@ -11,17 +11,16 @@ proc progress_bar_scan_file*(path: string) =
   # If path is too long -> can't erase stdout. We try print only file name
   let file_name = splitPath(path).tail
   if len(file_name) < 50:
-    stdout.write("[S] " & file_name)
+    stdout.write("\e[106m[S]\e[0m " & file_name)
   stdout.flushFile()
 
 
 proc progress_bar_scan_proc*(pid: uint, path: string) =
-  if len(path) >= 50:
-    let file_name = splitPath(path).tail
-    if len(file_name) < 50:
-      stdout.write("[S] " & $pid & " " & file_name)
+  let file_name = splitPath(path).tail
+  if len(file_name) < 50:
+    stdout.write("\e[106m[S]\e[0m " & $pid & " " & file_name)
   else:
-    stdout.write("[S] " & $pid & " " & path)
+    stdout.write("\e[106m[S]\e[0m " & $pid)
   stdout.flushFile()
 
 
