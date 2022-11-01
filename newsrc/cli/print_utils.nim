@@ -1,7 +1,14 @@
 import strutils
+import progress_bar
 
 
 proc print_file_infected*(virname, scan_obj: string) =
+  #[
+    If the Yara is post scan (scan after ClamAV)
+    and ClamAV marked file as infected, the progress bar
+    is messed up. Call flush again to clear that
+  ]#
+  progress_bar_flush()
   echo "[\e[91m!\e[0m] \e[101m", virname, "\e[0m ", scan_obj
 
 
