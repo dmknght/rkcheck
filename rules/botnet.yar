@@ -84,7 +84,7 @@ rule Mirai_Gen3 {
     $ = "UDPRAW" fullword ascii
     $ = "ATUSH" fullword ascii
   condition:
-    all of them
+    (is_elf and all of them) or (all of them in (0x400000 .. 0x530000))
 }
 
 
