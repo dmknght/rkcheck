@@ -54,7 +54,10 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
-    (is_elf and 2 of them) or (2 of them in (0x400000 .. 0x512000))
+    (is_elf and 2 of them) or for any i in (0 .. elf.number_of_segments):
+    (
+      2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 // rule Mirai_Gen2 {
@@ -75,17 +78,21 @@ rule Mirai_Gen1
 //     any of them
 // }
 
-rule Mirai_Gen3 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Unique strings of Mirai samples for memory scan"
-  strings:
-    $ = "__vdso_clock_gettime" fullword ascii
-    $ = "ATUSH" fullword ascii
-  condition:
-    (is_elf and all of them) or (all of them in (0x400000 .. 0x530000))
-}
+// rule Mirai_Gen3 {
+//   // FIXME multiple false positive
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Unique strings of Mirai samples for memory scan"
+//   strings:
+//     $ = "__vdso_clock_gettime" fullword ascii
+//     $ = "ATUSH" fullword ascii
+//   condition:
+//     (is_elf and all of them) or for any i in (0 .. elf.number_of_segments):
+//     (
+//       all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+//     )
+// }
 
 
 // rule Mirai_TypeC {
