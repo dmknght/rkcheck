@@ -67,6 +67,30 @@ rule Mirai_Gen1
     )
 }
 
+
+rule Tsunami_de1b {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "de1bbb1e4a94de0d047673adaed080c1"
+    description = "Tsunami variant"
+  strings:
+    $1 = "Tsunami successfully deployed!" ascii
+    $2 = ".tsunami -l .t -g" fullword ascii
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
 // rule Mirai_Gen2 {
 //   meta:
 //     author = "Nong Hoang Tu"
