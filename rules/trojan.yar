@@ -75,7 +75,8 @@ rule Agent_849b {
     md5 = "849b45fee92762d2b6ec31a11e1bcd76"
     description = "A Nim infector malware"
   strings:
-    $1 = "akpcTVEZHXJe8ZbbQdHsSA" // contains in strtab. Could be not detected
+    $1 = "akpcTVEZHXJe8ZbbQdHsSA" // Contains in strtab. Static binary only
+    // 2 strings should show at runtime.
     $2 = "/tmp/.host"
     $3 = "The more you know... :)"
   condition:
@@ -85,11 +86,7 @@ rule Agent_849b {
       $1 them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
     )
   )
-  or
-  for any i in (0 .. elf.number_of_segments):
-  (
-    ($2 and $3) in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-  )
+  or ($2 and $3)
 }
 // rule Agent_2
 // {
