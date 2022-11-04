@@ -83,7 +83,7 @@ rule Agent_849b {
   (
     is_elf and for any i in (0 .. elf.number_of_sections):
     (
-      $1 them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      $1 in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
     )
   )
   or ($2 and $3)
