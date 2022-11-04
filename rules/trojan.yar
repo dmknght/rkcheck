@@ -66,6 +66,31 @@ rule SSHD_95d7 {
       any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
     )
 }
+
+
+rule Agent_849b {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "849b45fee92762d2b6ec31a11e1bcd76"
+    description = "A Nim infector malware"
+  strings:
+    $1 = "akpcTVEZHXJe8ZbbQdHsSA" // contains in strtab. Could be not detected
+    $2 = "/tmp/.host"
+    $3 = "The more you know... :)"
+  condition:
+  (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      $1 them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+  )
+  or
+  for any i in (0 .. elf.number_of_segments):
+  (
+    ($2 and $3) in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+  )
+}
 // rule Agent_2
 // {
 //   meta:
