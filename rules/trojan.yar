@@ -575,19 +575,15 @@ rule Exploit_DirtyCow {
     $s_3 = "ptrace %d" fullword ascii
     $s_4 = "DON'T FORGET TO RESTORE!" ascii
   condition:
-  elf.type != elf.ET_DYN and
-  (
+    is_elf and elf.type != elf.ET_DYN and for any i in (0 .. elf.number_of_sections):
     (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        // Detect by import functions
-        elf.sections[i].type == elf.SHT_STRTAB and all of ($i_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      )
-    ) or for any i in (0 .. elf.number_of_segments):
+      // Detect by import functions
+      elf.sections[i].type == elf.SHT_STRTAB and all of ($i_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+    or for any i in (0 .. elf.number_of_segments):
     (
       all of ($s_*) in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
     )
-  )
 }
 
 // TODO 1384790107a5f200cab9593a39d1c80136762b58d22d9b3f081c91d99e5d0376 (upx)
