@@ -88,6 +88,55 @@ rule Agent_849b {
   )
   or ($2 and $3)
 }
+
+
+rule Agent_be4d {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "be4d3133afee0f4da853430339ba379f"
+  strings:
+    $1 = "/tmp/.server.sig" fullword ascii
+    $2 = "touch /tmp/elevate" fullword ascii
+    $3 = "/c.php?authkey=" fullword ascii
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
+
+rule Kowai_f06a {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "f06a780e653c680e2e4ddab4b397ddd2"
+  strings:
+    $1 = "KOWAI-BAdAsV" fullword ascii
+    $2 = "KOWAI-d" fullword ascii
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
+
 // rule Agent_2
 // {
 //   meta:
