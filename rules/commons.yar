@@ -19,7 +19,7 @@ rule SusELF_ShlCodeExe
     // any object name contains "buf" like "xxxbuf"
     // False positive: /usr/lib/debug/.build-id/2e/5abcee94f3bcbed7bba094f341070a2585a2ba.debug
     // False positive /usr/lib/modules/5.16.0-12parrot1-amd64/kernel/drivers/accessibility/speakup/speakup.ko
-    is_elf and for any i in (0 .. elf.symtab_entries - 1): (
+    is_elf and for any i in (0 .. elf.symtab_entries): (
       (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code") and elf.symtab[i].type == elf.STT_OBJECT
     )
 }
@@ -131,12 +131,12 @@ rule SusELF_SegOffset {
     email = "dmknght@parrotsec.org"
     description = "Segment offset + size exceeds the size of the file"
   condition:
+    is_elf and
     for any i in (0 .. elf.number_of_segments):
     (
       // elf.segments[i].type == elf.PT_DYNAMIC and
       elf.segments[i].offset + elf.segments[i].file_size > filesize
     )
-
 }
 
 rule ShellExec_UserAdd {
