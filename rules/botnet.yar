@@ -91,6 +91,28 @@ rule Tsunami_de1b {
     )
 }
 
+rule Mirai_4c36 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "4c366b0552eac10a254ed2d177ba233d"
+  strings:
+    $1 = "%9s %3hu %255[^\n]" fullword ascii
+    $2 = "oanacroane" fullword ascii
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
 // rule Mirai_Gen2 {
 //   meta:
 //     author = "Nong Hoang Tu"
