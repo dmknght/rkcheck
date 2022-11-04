@@ -3,29 +3,75 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Miner_Generic_A
+rule Miner_GenA
 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes"
-    $2 = "Block %.4u [%3u]: %016lx"
+    $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" fullword ascii
+    $2 = "Block %.4u [%3u]: %016lx" fullword ascii
   condition:
-    all of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
-rule Miner_Generic_B {
+rule Miner_GenB {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Stratum protocols used in coinminer. Usually in rodata"
   strings:
-    $1 = "stratum+ssl://" nocase
-    $2 = "stratum+tcp://" nocase
+    $1 = "stratum+ssl://" ascii
+    $2 = "stratum+tcp://" ascii
+    $3 = "daemon+https://" ascii
+    $4 = "daemon+http://" ascii
   condition:
-    any of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
+
+rule Miner_GenC {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Generic strings for coin miner"
+  strings:
+    $ = "Started Mining" ascii
+    $ = "Miner will restart" ascii
+    $ = "Miner not responding" ascii
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
@@ -35,10 +81,20 @@ rule Connecticoin_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "connecticoin.org" nocase
-    $2 = "Connecticoin-Qt"
+    $1 = "connecticoin.org" fullword ascii nocase
+    $2 = "Connecticoin-Qt" fullword ascii
   condition:
-    any of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
@@ -48,12 +104,22 @@ rule XMRStak_Generic {
     email = "dmknght@parrotsec.org"
     date = "13/11/2021"
   strings:
-    $1 = "XMRSTAK_VERSION"
-    $2 = "pool.usxmrpool.com" nocase
-    $3 = "donate.xmr-stak.net" nocase
-    $4 = "xmr-stak-rx"
+    $1 = "XMRSTAK_VERSION" fullword ascii
+    $2 = "pool.usxmrpool.com" fullword ascii nocase
+    $3 = "donate.xmr-stak.net" fullword ascii nocase
+    $4 = "xmr-stak-rx" fullword ascii
   condition:
-    any of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
@@ -63,37 +129,26 @@ rule Xmrig_Generic
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "xmrig.com" nocase
-    $2 = "cryptonight/0"
-    $3 = "cryptonight-monerov7"
-    $4 = "_ZN5xmrig"
-    // $5 = "miner.fee.xmrig.com"
-    // $6 = "emergency.fee.xmrig.com"
-    $7 = "Usage: xmrig [OPTIONS]"
-    $8 = "xmrig.json"
-    $9 = "xmrigMiner"
-    $10 = "donate.v2.xmrig.com" nocase
-    $11 = "api.xmrig.com" nocase
-    $12 = "donate.ssl.xmrig.com" nocase
+    $1 = "xmrig.com" fullword ascii nocase
+    $2 = "cryptonight" fullword ascii
+    $3 = "_ZN5xmrig" ascii
+    $4 = "Usage: xmrig [OPTIONS]" ascii
+    $5 = "xmrig.json" fullword ascii
+    $6 = "xmrigMiner" ascii
+    $7 = "jcxmrig" ascii
+    $8 = "xmrigvertar" ascii
   condition:
-    any of them
-}
-
-
-rule XMRig_ee0e
-{
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "XMRig golang coin miner, section hash ea5f61d48cc64bcba47ed3d75ccc3e59"
-    hash = "ee0e8516bfc431cb103f16117b9426c79263e279dc46bece5d4b96ddac9a5e90"
-    hash = "4c38654e08bd8d4c2211c5f0be417a77759bf945b0de45eb3581a2beb9226a29" // Can't find string base detection
-  strings:
-    $1 = "Zpw9qKOmhDOzF3GWwJTB/n0Y7l4tNbKi_20SnKY2V/abOQbe22wGJEqbNFCaQA/-otqwZsVDBRU3_zW503b"
-    $2 = "xmrigvertar"
-    $3 = "jcxmrig"
-  condition:
-    $1 at 0xfac or all of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
@@ -107,20 +162,27 @@ rule NBMiner_682e {
     $1 = "/mnt/d/code/NBMiner"
     $2 = "_ZN5Miner10signalStopEv"
   condition:
-    all of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
-rule GMiner_dbc5 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    hash = "dbc5d43763ea01043430f6cf325171d8"
-  strings:
-    $ = "GMiner"
-    $ = "Started Mining on GPU"
-    $ = "Miner will restart"
-    $ = "Miner not responding"
-    $ = "EthereumStratum"
-  condition:
-    3 of them
-}
+// rule GMiner_dbc5 {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     hash = "dbc5d43763ea01043430f6cf325171d8"
+//   strings:
+//     $ = "GMiner"
+//     $ = "EthereumStratum"
+//   condition:
+//     3 of them
+// }
