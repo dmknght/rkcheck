@@ -45,26 +45,25 @@ rule Agent_4b06
 
 
 rule SSHD_95d7 {
-  // FIXME: false poistive /usr/sbin/sshd
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "SSH Backdoor"
     md5 = "95d7335fa643949534f128795c8ac21c"
   strings:
-    $1 = "setuid %u: %.100s" fullword ascii
-    $2 = "Failed to set uids to %u." fullword ascii
+    $1 = "Rhosts Authentication disabled, originating port %d not trusted." ascii
+    $2 = "kHgn4vlwonyP" fullword ascii
   condition:
     (
       is_elf and for any i in (0 .. elf.number_of_sections):
       (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       )
     )
     or
     for any i in (0 .. elf.number_of_segments):
     (
-      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
     )
 }
 
