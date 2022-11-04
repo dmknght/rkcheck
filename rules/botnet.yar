@@ -54,7 +54,14 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
-    (is_elf and 2 of them) or for any i in (0 .. elf.number_of_segments):
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
     (
       2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
     )
