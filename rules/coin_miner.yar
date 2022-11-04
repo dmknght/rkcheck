@@ -175,6 +175,27 @@ rule NBMiner_682e {
     )
 }
 
+rule Miner_b238 {
+  meta:
+    author = "Nong Hoang Tu"
+    description = "A heavily striped Golang coin miner"
+    md5 = "b238fe09791e169600fd3dbcdd0018a3"
+  strings:
+    $ = "Zpw9qKOmhDOzF3GWwJTB"
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
 // rule GMiner_dbc5 {
 //   meta:
 //     author = "Nong Hoang Tu"
