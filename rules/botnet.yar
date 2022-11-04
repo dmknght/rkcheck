@@ -54,16 +54,43 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
+    elf.type != elf.ET_DYN and
+    (
+      (
+        for any i in (0 .. elf.number_of_sections):
+        (
+          2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+        )
+      )
+      or for any i in (0 .. elf.number_of_segments):
+      (
+        2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
+
+
+rule Mirai_Gen2 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Common strings used in Mirai"
+  strings:
+    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii
+    $ = "makeIPPacket" fullword ascii
+    $ = "UDPRAW"
+    $ = "sendRAW"
+  condition:
     (
       is_elf and for any i in (0 .. elf.number_of_sections):
       (
-        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       )
     )
     or
     for any i in (0 .. elf.number_of_segments):
     (
-      2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
     )
 }
 
@@ -110,6 +137,28 @@ rule Mirai_4c36 {
     for any i in (0 .. elf.number_of_segments):
     (
       any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
+
+rule Mirai_9c77 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "9c77a9f860f2643dc0cdbcd6bda65140"
+  strings:
+    $1 = "31mip:%s" ascii
+  condition:
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
     )
 }
 
