@@ -33,7 +33,7 @@ rule SusELF_NoSects {
     elf_no_sections and filesize < 1KB
 }
 
-rule SusELF_Segment
+rule SusELF_SegLoadRWE
 {
   meta:
     description = "Flags binaries with a single LOAD segment marked as RWE."
@@ -123,6 +123,20 @@ rule SusELF_SectHighEntropy {
     // (
     //   math.entropy(elf.sections[i].offset, elf.sections[i].size) >= 7.4
     // )
+}
+
+rule SusELF_SegOffset {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "Segment offset + size exceeds the size of the file"
+  condition:
+    for any i in (0 .. elf.number_of_segments):
+    (
+      // elf.segments[i].type == elf.PT_DYNAMIC and
+      elf.segments[i].offset + elf.segments[i].file_size > filesize
+    )
+
 }
 
 rule ShellExec_UserAdd {
@@ -232,6 +246,18 @@ rule HackTool_SSHBrute1 {
     all of them
 }
 
+
+// rule SusElf_PyCompiled {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//   condition:
+//     is_elf and for any i in (0 .. elf.symtab_entries):
+//     (
+//       elf.symtab[i].type == elf.STT_FUNC and elf.symtab[i].name == "PyCode_New"
+//     )
+// }
+
 // rule Hacktool_LoginBrute {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -292,18 +318,6 @@ rule ShellExec_WgetCurlDloader {
 // }
 
 
-
-// rule Shell_WalkDirCD {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "15/11/2021"
-//     description = "Bash command to try cd common directories used by Mirai variants"
-//   strings:
-//     $ = "echo \"cd /tmp || cd /var/run || cd /mnt || cd /root || cd /;"
-//   condition:
-//     all of them
-// }
 // rule SuspiciousEnvironmentVariable {
 //   // Malicious exports:
 //   //  export PATH=/var/bin:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin;%s
