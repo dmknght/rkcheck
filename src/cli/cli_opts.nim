@@ -9,8 +9,19 @@ proc cliopts_create_default(options: var ScanOptions) =
   options.use_clam_db = false
   options.scan_all_procs = false
   options.db_path_clamav = "/var/lib/clamav/"
-  # TODO walkdir to select possible paths or raise error
-  options.db_path_yara = "database/signatures.ydb"
+
+  if fileExists("/usr/share/rkscanner/database/signatures.ydb"):
+    # If the program is installed to the system
+    # Signature should be absolute path
+    options.db_path_yara = "/usr/share/rkscanner/database/signatures.ydb"
+  else:
+    # Find database that should be located with compiled binary
+    let
+      binaryDir = splitPath(getAppFilename()).head & "/database/signatures.ydb"
+    if fileExists(binaryDir):
+      options.db_path_yara = "database/signatures.ydb"
+    else:
+      raise newException(OSError, "Missing Yara's Database")
 
 
 proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_param: int) =
