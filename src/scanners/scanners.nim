@@ -62,10 +62,9 @@ proc create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_c
   finit_yara(proc_scan_engine)
 
 
-proc create_scan_task*(options: ScanOptions) =
+proc create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
   var
     yara_engine: YrEngine
-    f_count, f_infect, p_count, p_infect: uint
 
   yara_engine.database = options.db_path_yara
 
@@ -77,6 +76,3 @@ proc create_scan_task*(options: ScanOptions) =
 
   if len(options.list_procs) != 0 or options.scan_all_procs:
     create_task_proc_scan(yara_engine, options, p_count, p_infect)
-
-  # TODO print sumary here
-  # print_sumary()
