@@ -2,7 +2,7 @@ all:
 
 build:
 	# Generate "build" folder
-	mkdir -p build
+	mkdir -p build/database
 	# Compile and run signature compiler
 	nim c -r --nimcache:/tmp -d:release --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
