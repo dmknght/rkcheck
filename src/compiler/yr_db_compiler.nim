@@ -61,8 +61,4 @@ proc compile_rules(dst: string) =
     discard yr_rules_destroy(rules)
   discard yr_finalize()
 
-
-if not dirExists("database"):
-  createDir("database")
-
 compile_rules("build/database/signatures.ydb")
