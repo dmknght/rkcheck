@@ -27,7 +27,7 @@ proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
 
 
 proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
-  echo "===SCAN COMPLETED==="
+  echo "\n===SCAN COMPLETED==="
   if scanned_files > 0:
     echo "Scanned files: ", scanned_files
     echo "Infected files: ", infected_files
