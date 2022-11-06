@@ -92,7 +92,7 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
     cl_debug()
 
   # If database path is not empty, load ClamAV Signatures
-  if f_engine.database != "":
+  if f_engine.use_clam_sigs:
     var sig_count: cuint = 0
     result = cl_load(cstring(f_engine.database), f_engine.engine, unsafeAddr(sig_count), CL_DB_STDOPT)
 
