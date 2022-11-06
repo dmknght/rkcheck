@@ -24,12 +24,15 @@ proc cliopts_create_default(options: var CliOptions) =
   options.db_path_yara = "rules/signatures.db"
 
 
-proc cliopts_set_db_path_clamav(options: var CliOPtions, i: var int): bool =
+proc cliopts_set_db_path_clamav(options: var CliOPtions, i: var int, total_param: int) =
+  if i + 1 > total_param:
+    raise newException(ValueError, "Missing value for ClamAV's Database path")
+
   let
     paramValue = paramStr(i + 1)
 
   if not fileExists(paramValue) and not dirExists(paramValue):
-    return false
+    raise newException(OSError, "Invalid ClamAV's Database path " & paramValue)
 
   options.db_path_clamav = paramValue
   # Force program to use ClamAV Signature anyway
@@ -37,38 +40,53 @@ proc cliopts_set_db_path_clamav(options: var CliOPtions, i: var int): bool =
   i += 1
 
 
-proc cliopts_set_db_path_yara(options: var CliOptions, i: var int): bool =
+proc cliopts_set_db_path_yara(options: var CliOptions, i: var int, total_param: int) =
+  if i + 1 > total_param:
+    raise newException(ValueError, "Missing value for Yara's Database path")
+
   let
     paramValue = paramStr(i + 1)
 
   if not fileExists(paramValue):
     # Invalid yara path. Raise error.
     # TODO: we need to define compiled rules and text rule
-    return false
+    raise newException(OSError, "Invalid Yara's Database file path " & paramValue)
 
   options.db_path_yara = paramValue
   i += 1
 
 
-proc cliopts_set_list_dirs(options: var CliOptions, i: var int) =
+proc cliopts_set_list_dirs(options: var CliOptions, i: var int, total_param: int) =
+  if i + 1 > total_param:
+    raise newException(ValueError, "Missing value for list dirs")
   # TODO: what if file / folder has ","?
+
   options.list_dirs = split(paramStr(i + 1), ",").deduplicate()
   i += 1
 
 
-proc cliopts_set_list_files(options: var CliOptions, i: var int) =
+proc cliopts_set_list_files(options: var CliOptions, i: var int, total_param: int) =
+  if i + 1 > total_param:
+    raise newException(ValueError, "Missing value for list files")
   # TODO: what if file / folder has ","?
+
   options.list_files = split(paramStr(i + 1), ",").deduplicate()
   i += 1
 
 
-proc cliopts_set_list_procs(options: var CliOptions, i: var int) =
+proc cliopts_set_list_procs(options: var CliOptions, i: var int, total_param: int) =
+  if i + 1 > total_param:
+    raise newException(ValueError, "Missing value for list processes")
+
   for value in split(paramStr(i + 1), ",").deduplicate():
     try:
       let int_value = parseUInt(value)
       options.list_procs.add(int_value)
     except:
       discard
+
+  if len(options.list_procs) == 0:
+    raise newException(ValueError, "Invalid pid values")
   i += 1
 
 
@@ -86,32 +104,32 @@ proc cliopts_get_options*(options: var CliOptions): bool =
   while i <= total_params_count:
     let
       currentParam = paramStr(i)
+
     if currentParam.startsWith("-"):
-      if currentParam == "-h" or currentParam == "--help" or currentParam == "-help":
-        # TODO: show help banner
+      case currentParam:
+      of "--help":
         return false
-      if currentParam == "--all-processes":
+      of "-h":
+        return false
+      of "-help":
+        return false
+      of "--all-processes":
         options.scan_all_procs = true
-      elif currentParam == "--use-clamdb":
+      of "--use-clamdb":
         options.use_clam_db = true
-      elif currentParam == "--clam-debug":
+      of "--clam-debug":
         options.is_clam_debug = true
-      elif i + 1 > total_params_count:
-        raise newException(ValueError, "Option " & currentParam & " has no value or is an invalid option")
-      elif currentParam == "--path-clamdb":
-        if not cliopts_set_db_path_clamav(options, i):
-          raise newException(ValueError, "Invalid ClamAV's database path")
-      elif currentParam == "--path-yaradb":
-        if not cliopts_set_db_path_yara(options, i):
-          raise newException(ValueError, "Invalid Yara's database path")
-      elif currentParam == "--list-dirs":
-        cliopts_set_list_dirs(options, i)
-      elif currentParam == "--list-files":
-        cliopts_set_list_files(options, i)
-      elif currentParam == "--list-procs":
-        cliopts_set_list_procs(options, i)
-        if len(options.list_procs) == 0:
-          raise newException(ValueError, "Invalid list processes")
+      of "--path-clamdb":
+        cliopts_set_db_path_clamav(options, i, total_params_count):
+      of "--path-yaradb":
+        cliopts_set_db_path_yara(options, i, total_params_count):
+      of "--list-dirs":
+        cliopts_set_list_dirs(options, i, total_params_count)
+      of "--list-files":
+        cliopts_set_list_files(options, i, total_params_count)
+      of "--list-procs":
+        cliopts_set_list_procs(options, i, total_params_count)
       else:
         raise newException(ValueError, "Invalid option " & currentParam)
+
     i += 1
