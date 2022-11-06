@@ -45,6 +45,8 @@ type
     # proc_cmdline*: string
     proc_binary*: string
     scan_virname*: cstring
+    sumary_scanned*: uint
+    sumary_infected*: uint
   #[
     yr_scanner: YR_RULES
     scan_object: current path / name of object that engine is scanning

@@ -24,3 +24,10 @@ proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
     echo "Loaded ", num_loaded, " Yara rules"
   else:
     echo "Loaded ", num_loaded, " ClamAV signatures"
+
+
+proc print_sumary*(files_scanned, file_infected, proc_scanned, proc_infected: int) =
+  echo "Scanned: ", files_scanned, " files"
+  echo "Infected: ", file_infected, " files"
+  echo "Scanned: ", proc_scanned, " processes"
+  echo "Infected: ", proc_infected, " processes"

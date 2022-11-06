@@ -13,12 +13,15 @@ proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
   progress_bar_flush()
   proc_scanner_on_scan_matched($rule.ns.name, $rule.identifier, ctx.proc_binary, ctx.proc_id)
   progress_bar_flush()
+  ctx.sumary_infected += 1
+
   return CALLBACK_ABORT
 
 
-proc pscanner_on_proc_deleted_binary(virname: var cstring, binary_path: var string, pid: uint): cint =
+proc pscanner_on_proc_deleted_binary(virname: var cstring, binary_path: var string, pid: uint, infected: var uint): cint =
   proc_scanner_on_binary_deleted(virname, binary_path)
   proc_scanner_on_scan_heur($virname, binary_path, pid)
+  infected += 1
   return CALLBACK_ABORT
 
 
@@ -35,7 +38,7 @@ proc pscanner_cb_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; messag
 
 proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   if ctx.proc_binary.endsWith(" (deleted)"):
-    return pscanner_on_proc_deleted_binary(ctx.scan_virname, ctx.proc_binary, ctx.proc_id)
+    return pscanner_on_proc_deleted_binary(ctx.scan_virname, ctx.proc_binary, ctx.proc_id, ctx.sumary_infected)
   # TODO scan cmdline
   return yr_rules_scan_proc(ctx.engine, cint(ctx.proc_id), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
@@ -56,6 +59,7 @@ proc pscanner_process_pid*(ctx: var ProcScanner, pid: uint) =
   try:
     ctx.proc_binary = expandSymlink(ctx.proc_path & "exe")
     progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary)
+    ctx.sumary_scanned += 1
     discard pscanner_cb_scan_proc(ctx)
     progress_bar_flush()
   except:
