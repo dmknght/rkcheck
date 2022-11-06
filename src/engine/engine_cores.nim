@@ -1,6 +1,7 @@
 import libclamav
 import libyara
 import bitops
+import .. / cli / print_utils
 
 
 type
@@ -66,7 +67,6 @@ const
   YR_SCAN_TIMEOUT*: cint = 1000000
 
 
-
 proc init_clamav*(f_engine: var FileScanner): cl_error_t =
   #[
     Start ClamAV engine
@@ -97,8 +97,7 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
     result = cl_load(cstring(f_engine.database), f_engine.engine, unsafeAddr(sig_count), CL_DB_STDOPT)
 
     if result == CL_SUCCESS:
-      # TODO use libClamDebug or so
-      echo "Loaded ", sig_count, " ClamAV signatures"
+      print_loaded_signatures(uint(sig_count), false)
 
   return cl_engine_compile(f_engine.engine)
 
@@ -127,7 +126,8 @@ proc init_yara*(engine: var YrEngine): int =
   if result != ERROR_SUCCESS:
     return result
 
-  echo "Loaded ", engine.engine.num_rules, " Yara rules" # TODO use libclam debug or so
+  print_loaded_signatures(uint(engine.engine.num_rules), true)
+
   discard yr_set_configuration(YR_CONFIG_STACK_SIZE, unsafeAddr(stack_size))
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, unsafeAddr(max_strings_per_rule))
   return result

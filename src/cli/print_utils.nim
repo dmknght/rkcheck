@@ -17,3 +17,10 @@ proc print_process_infected*(virname, path: string, pid: uint) =
     echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m pid: \e[95m", pid, "\e[0m ", path
   else:
     echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m pid: \e[95m", pid, "\e[0m"
+
+
+proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
+  if is_yara:
+    echo "Loaded ", num_loaded, " Yara rules"
+  else:
+    echo "Loaded ", num_loaded, " ClamAV signatures"
