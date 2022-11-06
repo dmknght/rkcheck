@@ -10,6 +10,16 @@ proc cliopts_create_default(options: var ScanOptions) =
   options.scan_all_procs = false
   options.db_path_clamav = "/var/lib/clamav/"
 
+  # Load bytecode signatures by default. Problems: if user pass only --use-clamdb,
+  # program must check multiple args to make sure the values are correct
+  # ignore it for now
+  # if fileExists("/var/lib/clamav/bytecode.cld"):
+  #   options.db_path_clamav = "/var/lib/clamav/bytecode.cld"
+  #   options.use_clam_db = true
+  # else:
+  #   options.db_path_clamav = "/var/lib/clamav/"
+  #   options.use_clam_db = false
+
   if fileExists("/usr/share/rkscanner/database/signatures.ydb"):
     # If the program is installed to the system
     # Signature should be absolute path

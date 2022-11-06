@@ -70,7 +70,6 @@ const
 proc init_clamav*(f_engine: var FileScanner): cl_error_t =
   #[
     Start ClamAV engine
-    # TODO should load bytecode signatures by default
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
     https://docs.clamav.net/manual/Development/libclamav.html#database-loading
   ]#
