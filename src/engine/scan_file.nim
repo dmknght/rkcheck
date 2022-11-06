@@ -2,7 +2,6 @@ import libyara
 import libclamav
 import engine_cores
 import engine_utils
-import strutils
 import .. / cli / progress_bar
 
 
@@ -26,19 +25,9 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
 
 
 proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
-  # TODO maybe add progress bar again (try no conflict with debug on)
   # TODO try to get inner file name (lib yara debug mode)
   let
     ctx = cast[ptr FileScanner](context)
-
-  # If path is "/proc/", we check if it's the procfs of process
-  if ctx.scan_object.startsWith("/proc/"):
-    try:
-      discard parseUint(ctx.scan_object.split("/")[1])
-      # Do not do file scan
-      return CL_CLEAN
-    except:
-      discard
 
   progress_bar_scan_file(ctx.scan_object)
 
