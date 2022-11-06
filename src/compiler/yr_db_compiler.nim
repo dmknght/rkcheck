@@ -4,7 +4,6 @@
 ]#
 
 import .. / engine / libyara
-import os
 import strformat
 
 type
