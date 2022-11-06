@@ -10,6 +10,16 @@ type
     database: Path to ClamAV signatures
     debug_mode: Enable debug in libclam
   ]#
+  ScanOptions* = object
+    list_dirs*: seq[string]
+    list_files*: seq[string]
+    list_procs*: seq[uint]
+    scan_all_procs*: bool
+    is_clam_debug*: bool
+    use_clam_db*: bool
+    db_path_clamav*: string
+    db_path_yara*: string
+
   ClEngine* = object of RootObj
     engine*: ptr cl_engine
     options*: cl_scan_options
@@ -49,6 +59,7 @@ type
     scan_virname*: cstring
     result_scanned*: uint
     result_infected*: uint
+    use_clam_sigs*: bool
 
 
 const

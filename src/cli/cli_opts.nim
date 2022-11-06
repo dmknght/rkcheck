@@ -1,21 +1,10 @@
 import os
 import strutils
 import sequtils
+import .. / engine / engine_cores
 
 
-type
-  CliOptions* = object
-    list_dirs*: seq[string]
-    list_files*: seq[string]
-    list_procs*: seq[uint]
-    scan_all_procs*: bool
-    is_clam_debug*: bool
-    use_clam_db*: bool
-    db_path_clamav*: string
-    db_path_yara*: string
-
-
-proc cliopts_create_default(options: var CliOptions) =
+proc cliopts_create_default(options: var ScanOptions) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
@@ -24,7 +13,7 @@ proc cliopts_create_default(options: var CliOptions) =
   options.db_path_yara = "rules/signatures.db"
 
 
-proc cliopts_set_db_path_clamav(options: var CliOPtions, i: var int, total_param: int) =
+proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
     raise newException(ValueError, "Missing value for ClamAV's Database path")
 
@@ -40,7 +29,7 @@ proc cliopts_set_db_path_clamav(options: var CliOPtions, i: var int, total_param
   i += 1
 
 
-proc cliopts_set_db_path_yara(options: var CliOptions, i: var int, total_param: int) =
+proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
     raise newException(ValueError, "Missing value for Yara's Database path")
 
@@ -56,7 +45,7 @@ proc cliopts_set_db_path_yara(options: var CliOptions, i: var int, total_param: 
   i += 1
 
 
-proc cliopts_set_list_dirs(options: var CliOptions, i: var int, total_param: int) =
+proc cliopts_set_list_dirs(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
     raise newException(ValueError, "Missing value for list dirs")
   # TODO: what if file / folder has ","?
@@ -65,7 +54,7 @@ proc cliopts_set_list_dirs(options: var CliOptions, i: var int, total_param: int
   i += 1
 
 
-proc cliopts_set_list_files(options: var CliOptions, i: var int, total_param: int) =
+proc cliopts_set_list_files(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
     raise newException(ValueError, "Missing value for list files")
   # TODO: what if file / folder has ","?
@@ -74,7 +63,7 @@ proc cliopts_set_list_files(options: var CliOptions, i: var int, total_param: in
   i += 1
 
 
-proc cliopts_set_list_procs(options: var CliOptions, i: var int, total_param: int) =
+proc cliopts_set_list_procs(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
     raise newException(ValueError, "Missing value for list processes")
 
@@ -90,7 +79,7 @@ proc cliopts_set_list_procs(options: var CliOptions, i: var int, total_param: in
   i += 1
 
 
-proc cliopts_get_options*(options: var CliOptions): bool =
+proc cliopts_get_options*(options: var ScanOptions): bool =
   cliopts_create_default(options)
   var
     i = 0

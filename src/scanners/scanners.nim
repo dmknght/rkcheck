@@ -2,7 +2,7 @@ import os
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 
 
-proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[string]) =
+proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[string], clam_debug, use_clam_sigs: bool, clam_db_path: string) =
   var
     file_scanner: FileScanner
     scanned: culong
@@ -11,12 +11,12 @@ proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[str
   file_scanner.yr_scanner = yara_engine
   file_scanner.result_infected = 0
   file_scanner.result_scanned = 0
-  # file_scanner.debug_mode = true
-  # file_scanner.database = "/var/lib/clamav"
+  file_scanner.debug_mode = clam_debug
+  file_scanner.database = clam_db_path
+  file_scanner.use_clam_sigs = use_clam_sigs
 
   if file_scanner.init_clamav() != ERROR_SUCCESS:
-    echo "Failed to init ClamAV Engine" # TODO use cli module here
-    return
+    raise newException(ValueError, "Failed to init ClamAV Engine")
 
   #[
     ClamAV scan phases
@@ -42,7 +42,7 @@ proc create_task_file_scan(yara_engine: YrEngine, list_files, list_dirs: seq[str
   finit_clamav(file_scanner)
 
 
-proc create_task_proc_scan(yara_engine: YrEngine, list_procs: seq[string], scan_all_procs: bool) =
+proc create_task_proc_scan(yara_engine: YrEngine, list_procs: seq[uint], scan_all_procs: bool) =
   var
     proc_scan_engine: ProcScanner
 
@@ -51,25 +51,23 @@ proc create_task_proc_scan(yara_engine: YrEngine, list_procs: seq[string], scan_
   if scan_all_procs:
     pscanner_scan_system_procs(proc_scan_engine)
   else:
-    pscanner_scan_procs(proc_scan_engine, cast[seq[uint]](list_procs))
+    pscanner_scan_procs(proc_scan_engine, list_procs)
 
   finit_yara(proc_scan_engine)
 
 
-proc create_scan_task*(list_files, list_dirs, list_procs: seq[string] = @[], scan_all_procs = false) =
-  # TODO must deduplicate input before call
-  # TODO must define database path
+proc create_scan_task*(options: ScanOptions) =
+
   var
     yara_engine: YrEngine
 
-  yara_engine.database = "database/signatures.ydb"
+  yara_engine.database = options.db_path_yara
 
   if yara_engine.init_yara() != ERROR_SUCCESS:
-    echo "Failed to init yara" # TODO use cli module here
-    return
+    raise newException(ValueError, "Failed to init Yara Engine")
 
-  if len(list_files) != 0 or len(list_dirs) != 0:
-    create_task_file_scan(yara_engine, list_files, list_dirs)
+  if len(options.list_files) != 0 or len(options.list_dirs) != 0:
+    create_task_file_scan(yara_engine, options.list_files, options.list_dirs, options.is_clam_debug, options.use_clam_db, options.db_path_clamav)
 
-  if len(list_procs) != 0 or scan_all_procs:
-    create_task_proc_scan(yara_engine, list_procs, scan_all_procs)
+  if len(options.list_procs) != 0 or options.scan_all_procs:
+    create_task_proc_scan(yara_engine, options.list_procs, options.scan_all_procs)
