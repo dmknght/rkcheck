@@ -122,3 +122,5 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         raise newException(ValueError, "Invalid option " & currentParam)
 
     i += 1
+
+  return true
