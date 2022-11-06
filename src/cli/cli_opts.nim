@@ -21,18 +21,18 @@ proc cliopts_create_default(options: var ScanOptions) =
     if fileExists(binaryDir):
       options.db_path_yara = "database/signatures.ydb"
     else:
-      raise newException(OSError, "Missing Yara's Database")
+      raise newException(OSError, "Missing Yara's database")
 
 
 proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
-    raise newException(ValueError, "Missing value for ClamAV's Database path")
+    raise newException(ValueError, "Missing value for ClamAV's database path")
 
   let
     paramValue = paramStr(i + 1)
 
   if not fileExists(paramValue) and not dirExists(paramValue):
-    raise newException(OSError, "Invalid ClamAV's Database path " & paramValue)
+    raise newException(OSError, "Invalid ClamAV's database path " & paramValue)
 
   options.db_path_clamav = paramValue
   # Force program to use ClamAV Signature anyway
@@ -42,7 +42,7 @@ proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_para
 
 proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param: int) =
   if i + 1 > total_param:
-    raise newException(ValueError, "Missing value for Yara's Database path")
+    raise newException(ValueError, "Missing value for Yara's database path")
 
   let
     paramValue = paramStr(i + 1)
@@ -50,7 +50,7 @@ proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param:
   if not fileExists(paramValue):
     # Invalid yara path. Raise error.
     # TODO: we need to define compiled rules and text rule
-    raise newException(OSError, "Invalid Yara's Database file path " & paramValue)
+    raise newException(OSError, "Invalid Yara's database file path " & paramValue)
 
   options.db_path_yara = paramValue
   i += 1
