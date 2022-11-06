@@ -29,7 +29,6 @@ proc cliopts_set_db_path_clamav(options: var CliOPtions, i: var int): bool =
     paramValue = paramStr(i + 1)
 
   if not fileExists(paramValue) and not dirExists(paramValue):
-    # TODO current path is not avaiable. Raise error
     return false
 
   options.db_path_clamav = paramValue
@@ -64,7 +63,6 @@ proc cliopts_set_list_files(options: var CliOptions, i: var int) =
 
 
 proc cliopts_set_list_procs(options: var CliOptions, i: var int) =
-  # TODO: what the list is empty?
   for value in split(paramStr(i + 1), ",").deduplicate():
     try:
       let int_value = parseUInt(value)
@@ -72,6 +70,7 @@ proc cliopts_set_list_procs(options: var CliOptions, i: var int) =
     except:
       discard
   i += 1
+
 
 proc cliopts_get_options*(options: var CliOptions): bool =
   cliopts_create_default(options)
@@ -98,21 +97,21 @@ proc cliopts_get_options*(options: var CliOptions): bool =
       elif currentParam == "--clam-debug":
         options.is_clam_debug = true
       elif i + 1 > total_params_count:
-        # TODO The last options doesn't have any value? It might crash if it's not bool options
-        return false
+        raise newException(ValueError, "Option " & currentParam & " has no value or is an invalid option")
       elif currentParam == "--path-clamdb":
         if not cliopts_set_db_path_clamav(options, i):
-          return false
+          raise newException(ValueError, "Invalid ClamAV's database path")
       elif currentParam == "--path-yaradb":
         if not cliopts_set_db_path_yara(options, i):
-          return false
+          raise newException(ValueError, "Invalid Yara's database path")
       elif currentParam == "--list-dirs":
         cliopts_set_list_dirs(options, i)
       elif currentParam == "--list-files":
         cliopts_set_list_files(options, i)
       elif currentParam == "--list-procs":
         cliopts_set_list_procs(options, i)
+        if len(options.list_procs) == 0:
+          raise newException(ValueError, "Invalid list processes")
       else:
-        # Invalid options. Raise error
-        return false
+        raise newException(ValueError, "Invalid option " & currentParam)
     i += 1
