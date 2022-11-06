@@ -10,7 +10,7 @@ proc cliopts_create_default(options: var ScanOptions) =
   options.scan_all_procs = false
   options.db_path_clamav = "/var/lib/clamav/"
   # TODO walkdir to select possible paths or raise error
-  options.db_path_yara = "rules/signatures.db"
+  options.db_path_yara = "database/signatures.ydb"
 
 
 proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_param: int) =
