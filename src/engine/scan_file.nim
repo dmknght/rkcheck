@@ -14,7 +14,6 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     ctx = cast[ptr FileScanner](user_data)
     rule = cast[ptr YR_RULE](message_data)
 
-  ctx.result_scanned += 1
   progress_bar_flush()
 
   # If target matches a rule
@@ -30,6 +29,7 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
     ctx = cast[ptr FileScanner](context)
 
   progress_bar_scan_file(ctx.scan_object)
+  ctx.result_scanned += 1
 
   if scan_result == CL_VIRUS:
     ctx.scan_virname = virname
