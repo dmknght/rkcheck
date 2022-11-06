@@ -5,8 +5,6 @@ build:
 	mkdir -p build
 	# Compile and run signature compiler
 	nim c -r --nimcache:/tmp -d:release --out:build/rkcompiler src/compiler/yr_db_compiler.nim
-	# Copy the compiled signatures to build
-	cp -r database build/
 	# Compile main file
 	nim c --nimcache:/tmp -d:release --out:build/rkscanner src/rkscanner.nim
 

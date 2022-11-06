@@ -65,4 +65,4 @@ proc compile_rules(dst: string) =
 if not dirExists("database"):
   createDir("database")
 
-compile_rules("database/signatures.ydb")
+compile_rules("build/database/signatures.ydb")
