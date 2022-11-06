@@ -66,38 +66,54 @@ proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param:
   i += 1
 
 
-proc cliopts_set_list_dirs(options: var ScanOptions, i: var int, total_param: int) =
+proc cliopts_set_list_files_or_dirs(list_vars: var seq[string], i: var int, total_param: int) =
   if i + 1 > total_param:
-    raise newException(ValueError, "Missing value for list dirs")
-  # TODO: what if file / folder has ","?
+    # Check if flag has no value behind it, raise value error
+    raise newException(ValueError, "Missing values for " & paramStr(i))
+  else:
+    # Move offset by 1 and start getting all values
+    i += 1
 
-  options.list_dirs = split(paramStr(i + 1), ",").deduplicate()
-  i += 1
+  while i <= total_param:
+    let
+      currentParam = paramStr(i)
+
+    if currentParam.startsWith("-"):
+      list_vars = deduplicate(list_vars)
+      i -= 1
+      # In the end of the loop (parent function), we increase i by 1
+      # This causes missing flag by unexpected offset
+      break
+    else:
+      list_vars.add(currentParam)
+    i += 1
 
 
-proc cliopts_set_list_files(options: var ScanOptions, i: var int, total_param: int) =
-  if i + 1 > total_param:
-    raise newException(ValueError, "Missing value for list files")
-  # TODO: what if file / folder has ","?
-
-  options.list_files = split(paramStr(i + 1), ",").deduplicate()
-  i += 1
-
-
-proc cliopts_set_list_procs(options: var ScanOptions, i: var int, total_param: int) =
+proc cliopts_set_list_procs(list_procs: var seq[uint], i: var int, total_param: int) =
   if i + 1 > total_param:
     raise newException(ValueError, "Missing value for list processes")
+  else:
+    i += 1
 
-  for value in split(paramStr(i + 1), ",").deduplicate():
-    try:
-      let int_value = parseUInt(value)
-      options.list_procs.add(int_value)
-    except:
-      discard
+  while i <= total_param:
+    let
+      currentParam = paramStr(i)
 
-  if len(options.list_procs) == 0:
+    if currentParam.startsWith("-"):
+      list_procs = deduplicate(list_procs)
+      i -= 1
+      # In the end of the loop (parent function), we increase i by 1
+      # This causes missing flag by unexpected offset
+      break
+    else:
+      try:
+        list_procs.add(parseUInt(currentParam))
+      except:
+        discard
+    i += 1
+
+  if len(list_procs) == 0:
     raise newException(ValueError, "Invalid pid values")
-  i += 1
 
 
 proc cliopts_get_options*(options: var ScanOptions): bool =
@@ -134,11 +150,11 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
       of "--path-yaradb":
         cliopts_set_db_path_yara(options, i, total_params_count):
       of "--list-dirs":
-        cliopts_set_list_dirs(options, i, total_params_count)
+        cliopts_set_list_files_or_dirs(options.list_dirs, i, total_params_count)
       of "--list-files":
-        cliopts_set_list_files(options, i, total_params_count)
+        cliopts_set_list_files_or_dirs(options.list_files, i, total_params_count)
       of "--list-procs":
-        cliopts_set_list_procs(options, i, total_params_count)
+        cliopts_set_list_procs(options.list_procs, i, total_params_count)
       else:
         raise newException(ValueError, "Invalid option " & currentParam)
 
