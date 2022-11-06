@@ -26,9 +26,11 @@ proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
     echo "Loaded ", num_loaded, " ClamAV signatures"
 
 
-proc print_sumary*(files_scanned, file_infected, proc_scanned, proc_infected: uint) =
-  echo "===Scan completed==="
-  echo "Scanned: ", files_scanned, " files"
-  echo "Infected: ", file_infected, " files"
-  echo "Scanned: ", proc_scanned, " processes"
-  echo "Infected: ", proc_infected, " processes"
+proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
+  echo "===SCAN COMPLETED==="
+  if scanned_files > 0:
+    echo "Scanned files: ", scanned_files
+    echo "Infected files: ", infected_files
+  if scanned_procs > 0:
+    echo "Scanned processes: ", scanned_procs
+    echo "Infected processes: ", infected_procs
