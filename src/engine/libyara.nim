@@ -463,21 +463,21 @@ const
   OBJECT_TYPE_DICTIONARY* = 6
   OBJECT_TYPE_FLOAT* = 7
 type
+  timeval = object
+  timespec = object
+  pthread_t = object
   pthread_key_t = object
   pthread_mutex_t = object
   jmp_buf = object
-  pthread_t = object
-  timespec = object
-  timeval = object
   YR_MAPPED_FILE* {.bycopy, impyaraHdr, importc: "struct _YR_MAPPED_FILE".} = object
     file*: cint
     size*: uint
     data*: ptr uint8
 
-  YR_STREAM_READ_FUNC* {.importc, impyaraHdr.} = proc (`ptr`: pointer; size: uint;
-      count: uint; user_data: pointer): uint {.cdecl.}
-  YR_STREAM_WRITE_FUNC* {.importc, impyaraHdr.} = proc (`ptr`: pointer; size: uint;
-      count: uint; user_data: pointer): uint {.cdecl.}
+  YR_STREAM_READ_FUNC* {.importc, impyaraHdr.} = proc (`ptr`: pointer;
+      size: uint; count: uint; user_data: pointer): uint {.cdecl.}
+  YR_STREAM_WRITE_FUNC* {.importc, impyaraHdr.} = proc (`ptr`: pointer;
+      size: uint; count: uint; user_data: pointer): uint {.cdecl.}
   YR_STREAM* {.bycopy, impyaraHdr, importc: "struct _YR_STREAM".} = object
     user_data*: pointer
     read*: YR_STREAM_READ_FUNC
@@ -485,55 +485,67 @@ type
 
   yr_arena_off_t* {.importc, impyaraHdr.} = uint32
   YR_ARENA* {.importc, impyaraHdr, bycopy.} = object
-    xrefs*: cint ## ```
-               ##   Number of users of this arena. This is set to one when the arena is created,
-               ##      and can be incremented by calling yr_arena_acquire. On each call
-               ##      to yr_arena_release it gets decremented by one, if xrefs reaches zero
-               ##      the buffers and the YR_ARENA structures are freed.
-               ## ```
-    num_buffers*: cint         ## ```
-                     ##   Number of buffers in this arena.
-                     ## ```
-    buffers*: array[16, YR_ARENA_BUFFER] ## ```
-                                      ##   Status of individual buffers.
-                                      ## ```
-    initial_buffer_size*: uint ## ```
-                             ##   Initial size for each buffer.
+    xrefs*: uint32 ## ```
+                   ##   Number of users of this arena. This is set to one when the arena is
+                   ##      created, and can be incremented by calling yr_arena_acquire. On each call
+                   ##      to yr_arena_release it gets decremented by one, if xrefs reaches zero
+                   ##      the buffers and the YR_ARENA structures are freed.
+                   ## ```
+    num_buffers*: uint32     ## ```
+                             ##   Number of buffers in this arena.
                              ## ```
+    buffers*: array[16, YR_ARENA_BUFFER] ## ```
+                                         ##   Status of individual buffers.
+                                         ## ```
+    initial_buffer_size*: uint ## ```
+                               ##   Initial size for each buffer.
+                               ## ```
     reloc_list_head*: ptr YR_RELOC ## ```
-                                ##   Head of the list containing relocation entries.
-                                ## ```
+                                   ##   Head of the list containing relocation entries.
+                                   ## ```
     reloc_list_tail*: ptr YR_RELOC ## ```
-                                ##   Tail of the list containing relocation entries.
-                                ## ```
-
+                                   ##   Tail of the list containing relocation entries.
+                                   ## ```
+  
   YR_ARENA_BUFFER* {.importc, impyaraHdr, bycopy.} = object
-    data*: ptr uint8            ## ```
-                  ##   Pointer the buffer's data.
-                  ## ```
+    data*: ptr uint8         ## ```
+                             ##   Pointer the buffer's data.
+                             ## ```
     size*: uint ## ```
-              ##   Total buffer size, including the used and unused areas.
-              ## ```
+                ##   Total buffer size, including the used and unused areas. The maximum size
+                ##      allowed for a buffer is 4GB because offsets in YR_ARENA_REF are 32-bit
+                ##      integers.
+                ## ```
     used*: uint ## ```
-              ##   Number of bytes that are actually used (equal to or lower than size).
-              ## ```
-
+                ##   Number of bytes that are actually used (equal to or lower than size).
+                ## ```
+  
   YR_ARENA_REF* {.importc, impyaraHdr, bycopy.} = object
     buffer_id*: uint32
-    offset*: uint32
+    offset*: yr_arena_off_t
 
   YR_RELOC* {.importc, impyaraHdr, bycopy.} = object
-    buffer_id*: uint32         ## ```
-                     ##   Buffer ID associated to this relocation entry.
-                     ## ```
+    buffer_id*: uint32       ## ```
+                             ##   Buffer ID associated to this relocation entry.
+                             ## ```
     offset*: yr_arena_off_t ## ```
-                          ##   Offset within the buffer where the relocatable pointer resides.
-                          ## ```
-    next*: ptr YR_RELOC         ## ```
-                     ##   Pointer to the next entry in the list.
-                     ## ```
+                            ##   Offset within the buffer where the relocatable pointer resides.
+                            ## ```
+    next*: ptr YR_RELOC      ## ```
+                             ##   Pointer to the next entry in the list.
+                             ## ```
+  
+  SIZED_STRING* {.bycopy, impyaraHdr, importc: "struct _SIZED_STRING".} = object ## ```
+                                                                                  ##   This struct is used to support strings containing null chars. The length of
+                                                                                  ##      the string is stored along the string data. However the string data is also
+                                                                                  ##      terminated with a null char.
+                                                                                  ## ```
+    length*: uint32
+    flags*: uint32
+    c_string*: array[1, cchar]
 
-  YR_HASH_TABLE_ENTRY* {.bycopy, impyaraHdr, importc: "struct _YR_HASH_TABLE_ENTRY".} = object
+  YR_HASH_TABLE_ENTRY* {.bycopy, impyaraHdr,
+                         importc: "struct _YR_HASH_TABLE_ENTRY".} = object
     key*: pointer
     key_length*: uint
     ns*: cstring
@@ -548,15 +560,6 @@ type
       cdecl.}
   YR_HASH_TABLE_ITERATE_FUNC* {.importc, impyaraHdr.} = proc (key: pointer;
       key_length: uint; value: pointer; data: pointer): cint {.cdecl.}
-  SIZED_STRING* {.bycopy, impyaraHdr, importc: "struct _SIZED_STRING".} = object ## ```
-                                                                          ##   This struct is used to support strings containing null chars. The length of
-                                                                          ##      the string is stored along the string data. However the string data is also
-                                                                          ##      terminated with a null char.
-                                                                          ## ```
-    length*: uint32
-    flags*: uint32
-    c_string*: array[1, cchar]
-
   YR_STOPWATCH* {.bycopy, impyaraHdr, importc: "struct _YR_STOPWATCH".} = object
     tv_start*: timeval
     ts_start*: timespec
@@ -597,15 +600,15 @@ type
     message*: array[384, cchar]
 
   RE_FIBER* {.importc, impyaraHdr, bycopy.} = object
-    ip*: ptr uint8              ## ```
-                ##   instruction pointer
-                ## ```
-    sp*: int32                 ## ```
-             ##   stack pointer
-             ## ```
-    rc*: int32                 ## ```
-             ##   repeat counter
-             ## ```
+    ip*: ptr uint8           ## ```
+                             ##   instruction pointer
+                             ## ```
+    sp*: int32               ## ```
+                             ##   stack pointer
+                             ## ```
+    rc*: int32               ## ```
+                             ##   repeat counter
+                             ## ```
     prev*: ptr RE_FIBER
     next*: ptr RE_FIBER
     stack*: array[1024, uint16]
@@ -618,38 +621,48 @@ type
     fiber_count*: cint
     fibers*: RE_FIBER_LIST
 
+  RE_FAST_EXEC_POSITION* {.importc, impyaraHdr, bycopy.} = object
+    round*: cint
+    input*: ptr uint8
+    prev*: ptr RE_FAST_EXEC_POSITION
+    next*: ptr RE_FAST_EXEC_POSITION
+
+  RE_FAST_EXEC_POSITION_LIST* {.importc, impyaraHdr, incompleteStruct.} = object
+  RE_FAST_EXEC_POSITION_POOL* {.importc, impyaraHdr, bycopy.} = object
+    head*: ptr RE_FAST_EXEC_POSITION
+
   YR_AC_STATE* {.importc, impyaraHdr, bycopy.} = object
     failure*: ptr YR_AC_STATE
     first_child*: ptr YR_AC_STATE
     siblings*: ptr YR_AC_STATE
     matches_ref*: YR_ARENA_REF ## ```
-                             ##   Reference to the YR_AC_MATCH structure that heads the list of matches
-                             ##      for this state.
-                             ## ```
+                               ##   Reference to the YR_AC_MATCH structure that heads the list of matches
+                               ##      for this state.
+                               ## ```
     depth*: uint8
     input*: uint8
     t_table_slot*: uint32
 
   YR_AC_AUTOMATON* {.importc, impyaraHdr, bycopy.} = object
     arena*: ptr YR_ARENA ## ```
-                      ##   Arena used by this automaton to store the transition and match tables.
-                      ## ```
+                         ##   Arena used by this automaton to store the transition and match tables.
+                         ## ```
     tables_size*: uint32 ## ```
-                       ##   Both m_table and t_table have the same number of elements, which is
-                       ##      stored in tables_size.
-                       ## ```
+                         ##   Both m_table and t_table have the same number of elements, which is
+                         ##      stored in tables_size.
+                         ## ```
     t_table_unused_candidate*: uint32 ## ```
-                                    ##   The first slot in the transition table (t_table) that may be be unused.
-                                    ##      Used for speeding up the construction of the transition table.
-                                    ## ```
+                                      ##   The first slot in the transition table (t_table) that may be be unused.
+                                      ##      Used for speeding up the construction of the transition table.
+                                      ## ```
     bitmask*: ptr culong ## ```
-                      ##   Bitmask where each bit indicates if the corresponding slot in the
-                      ##      transition table is already in use.
-                      ## ```
-    root*: ptr YR_AC_STATE      ## ```
-                        ##   Pointer to the root Aho-Corasick state.
-                        ## ```
-
+                         ##   Bitmask where each bit indicates if the corresponding slot in the
+                         ##      transition table is already in use.
+                         ## ```
+    root*: ptr YR_AC_STATE   ## ```
+                             ##   Pointer to the root Aho-Corasick state.
+                             ## ```
+  
   YR_AC_TABLES* {.importc, impyaraHdr, incompleteStruct.} = object
   YR_AC_MATCH_LIST_ENTRY* {.importc, impyaraHdr, bycopy.} = object
     backtrack*: uint16
@@ -669,20 +682,20 @@ type
     next*: ptr YR_AC_MATCH
     next_g*: YR_ARENA_REF
     backtrack*: uint16 ## ```
-                     ##   When the Aho-Corasick automaton reaches some state that has associated
-                     ##      matches, the current position in the input buffer is a few bytes past
-                     ##      the point where the match actually occurs, for example, when looking for
-                     ##      string "bar" in "foobarbaz", when the automaton reaches the state associated
-                     ##      to the ending "r" in "bar, which is the one that has a match, the current
-                     ##      position in the input is 6 (the "b" after the "r"), but the match is at
-                     ##      position 3. The backtrack field indicates how many bytes the scanner has
-                     ##      to go back to find the point where the match actually start.
-                     ##
-                     ##      YR_ALIGN(8) forces the backtrack field to be treated as a 8-bytes field
-                     ##      and therefore the struct's size is 40 bytes. This is necessary only for
-                     ##      32-bits versions of YARA compiled with Visual Studio. See: #1358.
-                     ## ```
-
+                       ##   When the Aho-Corasick automaton reaches some state that has associated
+                       ##      matches, the current position in the input buffer is a few bytes past
+                       ##      the point where the match actually occurs, for example, when looking for
+                       ##      string "bar" in "foobarbaz", when the automaton reaches the state
+                       ##      associated to the ending "r" in "bar, which is the one that has a match,
+                       ##      the current position in the input is 6 (the "b" after the "r"), but the
+                       ##      match is at position 3. The backtrack field indicates how many bytes the
+                       ##      scanner has to go back to find the point where the match actually start.
+                       ##     
+                       ##      YR_ALIGN(8) forces the backtrack field to be treated as a 8-bytes field
+                       ##      and therefore the struct's size is 40 bytes. This is necessary only for
+                       ##      32-bits versions of YARA compiled with Visual Studio. See: #1358.
+                       ## ```
+  
   YR_NAMESPACE* {.importc, impyaraHdr, bycopy.} = object
     name*: cstring
     name_g*: YR_ARENA_REF
@@ -694,7 +707,7 @@ type
                ##      and therefore the struct's size is 16 bytes. This is necessary only for
                ##      32-bits versions of YARA compiled with Visual Studio. See: #1358.
                ## ```
-
+  
   YR_META* {.importc, impyaraHdr, bycopy.} = object
     identifier*: cstring
     identifier_g*: YR_ARENA_REF
@@ -764,79 +777,82 @@ type
 
   YR_RULES* {.importc, impyaraHdr, bycopy.} = object
     arena*: ptr YR_ARENA
+    rules_table*: ptr YR_RULE
     rules_list_head*: ptr YR_RULE
+    strings_table*: ptr YR_STRING
     strings_list_head*: ptr YR_STRING
+    ext_vars_table*: ptr YR_EXTERNAL_VARIABLE
     externals_list_head*: ptr YR_EXTERNAL_VARIABLE
     ac_transition_table*: ptr YR_AC_TRANSITION
     ac_match_pool*: ptr YR_AC_MATCH
     ac_match_table*: ptr uint32
     code_start*: ptr uint8
-    num_rules*: uint32         ## ```
-                     ##   Total number of rules.
-                     ## ```
-    num_strings*: uint32       ## ```
-                       ##   Total number of strings.
-                       ## ```
-    num_namespaces*: uint32    ## ```
-                          ##   Total number of namespaces.
-                          ## ```
-
+    num_rules*: uint32       ## ```
+                             ##   Total number of rules.
+                             ## ```
+    num_strings*: uint32     ## ```
+                             ##   Total number of strings.
+                             ## ```
+    num_namespaces*: uint32  ## ```
+                             ##   Total number of namespaces.
+                             ## ```
+  
   YR_SUMMARY* {.importc, impyaraHdr, bycopy.} = object
     num_rules*: uint32
     num_strings*: uint32
     num_namespaces*: uint32
 
   YR_RULES_STATS* {.importc, impyaraHdr, bycopy.} = object
-    num_rules*: uint32         ## ```
-                     ##   Total number of rules
-                     ## ```
-    num_strings*: uint32       ## ```
-                       ##   Total number of strings across all rules.
-                       ## ```
+    num_rules*: uint32       ## ```
+                             ##   Total number of rules
+                             ## ```
+    num_strings*: uint32     ## ```
+                             ##   Total number of strings across all rules.
+                             ## ```
     ac_matches*: uint32 ## ```
-                      ##   Total number of Aho-Corasick matches. Each node in the Aho-Corasick
-                      ##      automaton has a list of YR_AC_MATCH_LIST_ENTRY structures (match list)
-                      ##      pointing to strings that are potential matches. This field holds the total
-                      ##      number of those structures across all nodes in the automaton.
-                      ## ```
-    ac_root_match_list_length*: uint32 ## ```
-                                     ##   Length of the match list for the root node in the Aho-Corasick automaton.
-                                     ## ```
-    ac_average_match_list_length*: cfloat ## ```
-                                        ##   Average number of matches per match list.
-                                        ## ```
-    top_ac_match_list_lengths*: array[100, uint32] ## ```
-                                                ##   Top 10 longest match lists.
-                                                ## ```
-    ac_match_list_length_pctls*: array[101, uint32] ## ```
-                                                 ##   Percentiles of match lists' lengths. If the i-th value in the array is N
-                                                 ##      then i percent of the match lists have N or less items.
-                                                 ## ```
-    ac_tables_size*: uint32    ## ```
-                          ##   Size of Aho-Corasick transition & match tables.
-                          ## ```
-
-  YR_PROFILING_INFO* {.importc, impyaraHdr, bycopy.} = object ## ```
-                                                        ##   YR_PROFILING_INFO contains profiling information for a rule.
-                                                        ## ```
-    atom_matches*: uint32 ## ```
-                        ##   Number of times that some atom belonging to the rule matched. Each
-                        ##      matching atom means a potential string match that needs to be verified.
+                        ##   Total number of Aho-Corasick matches. Each node in the Aho-Corasick
+                        ##      automaton has a list of YR_AC_MATCH_LIST_ENTRY structures (match list)
+                        ##      pointing to strings that are potential matches. This field holds the total
+                        ##      number of those structures across all nodes in the automaton.
                         ## ```
+    ac_root_match_list_length*: uint32 ## ```
+                                       ##   Length of the match list for the root node in the Aho-Corasick automaton.
+                                       ## ```
+    ac_average_match_list_length*: cfloat ## ```
+                                          ##   Average number of matches per match list.
+                                          ## ```
+    top_ac_match_list_lengths*: array[100, uint32] ## ```
+                                                   ##   Top 10 longest match lists.
+                                                   ## ```
+    ac_match_list_length_pctls*: array[101, uint32] ## ```
+                                                    ##   Percentiles of match lists' lengths. If the i-th value in the array is N
+                                                    ##      then i percent of the match lists have N or less items.
+                                                    ## ```
+    ac_tables_size*: uint32  ## ```
+                             ##   Size of Aho-Corasick transition & match tables.
+                             ## ```
+  
+  YR_PROFILING_INFO* {.importc, impyaraHdr, bycopy.} = object ## ```
+                                                               ##   YR_PROFILING_INFO contains profiling information for a rule.
+                                                               ## ```
+    atom_matches*: uint32 ## ```
+                          ##   Number of times that some atom belonging to the rule matched. Each
+                          ##      matching atom means a potential string match that needs to be verified.
+                          ## ```
     match_time*: uint64 ## ```
-                      ##   Amount of time (in nanoseconds) spent verifying atom matches for
-                      ##      determining if the corresponding string actually matched or not. This
-                      ##      time is not measured for all atom matches, only 1 out of 1024 matches
-                      ##      are actually measured.
-                      ## ```
+                        ##   Amount of time (in nanoseconds) spent verifying atom matches for
+                        ##      determining if the corresponding string actually matched or not. This
+                        ##      time is not measured for all atom matches, only 1 out of 1024 matches
+                        ##      are actually measured.
+                        ## ```
     exec_time*: uint64 ## ```
-                     ##   Amount of time (in nanoseconds) spent evaluating the rule condition.
-                     ## ```
-
+                       ##   Amount of time (in nanoseconds) spent evaluating the rule condition.
+                       ## ```
+  
   YR_RULE_PROFILING_INFO* {.importc, impyaraHdr, bycopy.} = object ## ```
-                                                             ##   YR_RULE_PROFILING_INFO is the structure returned by
-                                                             ##      yr_scanner_get_profiling_info
-                                                             ## ```
+                                                                    ##   YR_RULE_PROFILING_INFO is the structure returned by
+                                                                    ##      yr_scanner_get_profiling_info
+                                                                    ## ```
     rule*: ptr YR_RULE
     cost*: uint64
 
@@ -847,106 +863,115 @@ type
     identifier_g*: YR_ARENA_REF
 
   YR_MATCH* {.importc, impyaraHdr, bycopy.} = object
-    base*: int64               ## ```
-               ##   Base address for the match
-               ## ```
-    offset*: int64             ## ```
-                 ##   Offset relative to base for the match
-                 ## ```
-    match_length*: int32       ## ```
-                       ##   Match length
-                       ## ```
-    data_length*: int32        ## ```
-                      ##   Match length
-                      ## ```
+    base*: int64             ## ```
+                             ##   Base address for the match
+                             ## ```
+    offset*: int64           ## ```
+                             ##   Offset relative to base for the match
+                             ## ```
+    match_length*: int32     ## ```
+                             ##   Match length
+                             ## ```
+    data_length*: int32      ## ```
+                             ##   Match length
+                             ## ```
     data*: ptr uint8 ## ```
-                  ##   Pointer to a buffer containing a portion of the matched data. The size of
-                  ##      the buffer is data_length. data_length is always <= length and is limited
-                  ##      to YR_CONFIG_MAX_MATCH_DATA bytes.
-                  ## ```
+                     ##   Pointer to a buffer containing a portion of the matched data. The size of
+                     ##      the buffer is data_length. data_length is always <= length and is limited
+                     ##      to YR_CONFIG_MAX_MATCH_DATA bytes.
+                     ## ```
     prev*: ptr YR_MATCH
     next*: ptr YR_MATCH
     chain_length*: int32 ## ```
-                       ##   If the match belongs to a chained string chain_length contains the
-                       ##      length of the chain. This field is used only in unconfirmed matches.
-                       ## ```
-    is_private*: bool
-
+                         ##   If the match belongs to a chained string chain_length contains the
+                         ##      length of the chain. This field is used only in unconfirmed matches.
+                         ## ```
+    is_private*: bool        ## ```
+                             ##   True if this is match for a private string.
+                             ## ```
+  
   YR_SCAN_CONTEXT* {.importc, impyaraHdr, bycopy.} = object
-    file_size*: uint64         ## ```
-                     ##   File size of the file being scanned.
-                     ## ```
+    file_size*: uint64       ## ```
+                             ##   File size of the file being scanned.
+                             ## ```
     entry_point*: uint64 ## ```
-                       ##   Entry point of the file being scanned, if the file is PE or ELF.
-                       ## ```
-    flags*: cint               ## ```
-               ##   Scanning flags.
-               ## ```
+                         ##   Entry point of the file being scanned, if the file is PE or ELF.
+                         ## ```
+    flags*: cint             ## ```
+                             ##   Scanning flags.
+                             ## ```
     canary*: cint ## ```
-                ##   Canary value used for preventing hand-crafted objects from being embedded
-                ##      in compiled rules and used to exploit YARA. The canary value is initialized
-                ##      to a random value and is subsequently set to all objects created by
-                ##      yr_object_create. The canary is verified when objects are used by
-                ##      yr_execute_code.
-                ## ```
-    timeout*: uint64           ## ```
-                   ##   Scan timeout in nanoseconds.
-                   ## ```
+                  ##   Canary value used for preventing hand-crafted objects from being embedded
+                  ##      in compiled rules and used to exploit YARA. The canary value is initialized
+                  ##      to a random value and is subsequently set to all objects created by
+                  ##      yr_object_create. The canary is verified when objects are used by
+                  ##      yr_execute_code.
+                  ## ```
+    timeout*: uint64         ## ```
+                             ##   Scan timeout in nanoseconds.
+                             ## ```
     user_data*: pointer ## ```
-                      ##   Pointer to user-provided data passed to the callback function.
-                      ## ```
+                        ##   Pointer to user-provided data passed to the callback function.
+                        ## ```
     callback*: YR_CALLBACK_FUNC ## ```
-                              ##   Pointer to the user-provided callback function that is called when an
-                              ##      event occurs during the scan (a rule matching, a module being loaded, etc)
-                              ## ```
-    rules*: ptr YR_RULES ## ```
-                      ##   Pointer to the YR_RULES object associated to this scan context.
-                      ## ```
-    last_error_string*: ptr YR_STRING ## ```
-                                   ##   Pointer to the YR_STRING causing the most recent scan error.
-                                   ## ```
-    `iterator`*: ptr YR_MEMORY_BLOCK_ITERATOR ## ```
-                                           ##   Pointer to the iterator used for scanning
-                                           ## ```
-    objects_table*: ptr YR_HASH_TABLE ## ```
-                                   ##   Pointer to a table mapping identifiers to YR_OBJECT structures. This table
-                                   ##      contains entries for external variables and modules.
-                                   ## ```
-    matches_notebook*: ptr YR_NOTEBOOK ## ```
-                                    ##   Notebook used for storing YR_MATCH structures associated to the matches
-                                    ##      found.
-                                    ## ```
-    stopwatch*: YR_STOPWATCH ## ```
-                           ##   Stopwatch used for measuring the time elapsed during the scan.
-                           ## ```
-    re_fiber_pool*: RE_FIBER_POOL ## ```
-                                ##   Fiber pool used by yr_re_exec.
+                                ##   Pointer to the user-provided callback function that is called when an
+                                ##      event occurs during the scan (a rule matching, a module being loaded, etc)
                                 ## ```
-    rule_matches_flags*: ptr culong ## ```
-                                 ##   A bitmap with one bit per rule, bit N is set when the rule with index N
-                                 ##      has matched.
-                                 ## ```
-    ns_unsatisfied_flags*: ptr culong ## ```
-                                   ##   A bitmap with one bit per namespace, bit N is set if the namespace with
-                                   ##      index N has some global rule that is not satisfied.
-                                   ## ```
-    matches*: ptr YR_MATCHES ## ```
-                          ##   Array with pointers to lists of matches. Item N in the array has the
-                          ##      list of matches for string with index N.
-                          ## ```
-    unconfirmed_matches*: ptr YR_MATCHES ## ```
-                                      ##   "unconfirmed_matches" is like "matches" but for strings that are part of
-                                      ##      a chain. Let's suppose that the string S is split in two chained strings
-                                      ##      S1 <- S2. When a match is found for S1, we can't be sure that S matches
-                                      ##      until a match for S2 is found (within the range defined by chain_gap_min
-                                      ##      and chain_gap_max), so the matches for S1 are put in "unconfirmed_matches"
-                                      ##      until they can be confirmed or discarded.
+    rules*: ptr YR_RULES ## ```
+                         ##   Pointer to the YR_RULES object associated to this scan context.
+                         ## ```
+    last_error_string*: ptr YR_STRING ## ```
+                                      ##   Pointer to the YR_STRING causing the most recent scan error.
                                       ## ```
+    `iterator`*: ptr YR_MEMORY_BLOCK_ITERATOR ## ```
+                                              ##   Pointer to the iterator used for scanning
+                                              ## ```
+    objects_table*: ptr YR_HASH_TABLE ## ```
+                                      ##   Pointer to a table mapping identifiers to YR_OBJECT structures. This table
+                                      ##      contains entries for external variables and modules.
+                                      ## ```
+    matches_notebook*: ptr YR_NOTEBOOK ## ```
+                                       ##   Notebook used for storing YR_MATCH structures associated to the matches
+                                       ##      found.
+                                       ## ```
+    stopwatch*: YR_STOPWATCH ## ```
+                             ##   Stopwatch used for measuring the time elapsed during the scan.
+                             ## ```
+    re_fiber_pool*: RE_FIBER_POOL ## ```
+                                  ##   Fiber pool used by yr_re_exec.
+                                  ## ```
+    re_fast_exec_position_pool*: RE_FAST_EXEC_POSITION_POOL ## ```
+                                                            ##   Pool used by yr_re_fast_exec.
+                                                            ## ```
+    rule_matches_flags*: ptr culong ## ```
+                                    ##   A bitmap with one bit per rule, bit N is set when the rule with index N
+                                    ##      has matched.
+                                    ## ```
+    ns_unsatisfied_flags*: ptr culong ## ```
+                                      ##   A bitmap with one bit per namespace, bit N is set if the namespace with
+                                      ##      index N has some global rule that is not satisfied.
+                                      ## ```
+    strings_temp_disabled*: ptr culong ## ```
+                                       ##   A bitmap with one bit per string, bit N is set if the string with index
+                                       ##      N has too many matches.
+                                       ## ```
+    matches*: ptr YR_MATCHES ## ```
+                             ##   Array with pointers to lists of matches. Item N in the array has the
+                             ##      list of matches for string with index N.
+                             ## ```
+    unconfirmed_matches*: ptr YR_MATCHES ## ```
+                                         ##   "unconfirmed_matches" is like "matches" but for strings that are part of
+                                         ##      a chain. Let's suppose that the string S is split in two chained strings
+                                         ##      S1 <- S2. When a match is found for S1, we can't be sure that S matches
+                                         ##      until a match for S2 is found (within the range defined by chain_gap_min
+                                         ##      and chain_gap_max), so the matches for S1 are put in "unconfirmed_matches"
+                                         ##      until they can be confirmed or discarded.
+                                         ## ```
     profiling_info*: ptr YR_PROFILING_INFO ## ```
-                                        ##   profiling_info is a pointer to an array of YR_PROFILING_INFO structures,
-                                        ##      one per rule. Entry N has the profiling information for rule with index N.
-                                        ## ```
-
+                                           ##   profiling_info is a pointer to an array of YR_PROFILING_INFO structures,
+                                           ##      one per rule. Entry N has the profiling information for rule with index N.
+                                           ## ```
+  
   YR_VALUE* {.importc, impyaraHdr, bycopy.} = object
     i*: int64
     d*: cdouble
@@ -958,8 +983,8 @@ type
     re*: ptr RE
 
   YR_VALUE_STACK* {.importc, impyaraHdr, bycopy.} = object
-    sp*: int32
-    capacity*: int32
+    sp*: uint32
+    capacity*: uint32
     items*: ptr YR_VALUE
 
   YR_OBJECT* {.importc, impyaraHdr, bycopy.} = object
@@ -1011,13 +1036,13 @@ type
     next*: ptr YR_STRUCTURE_MEMBER
 
   YR_ARRAY_ITEMS* {.importc, impyaraHdr, bycopy.} = object
-    capacity*: cint            ## ```
-                  ##   Capacity is the size of the objects array.
-                  ## ```
+    capacity*: cint          ## ```
+                             ##   Capacity is the size of the objects array.
+                             ## ```
     length*: cint ## ```
-                ##   Length is determined by the last element in the array. If the index of the
-                ##      last element is N, then length is N+1 because indexes start at 0.
-                ## ```
+                  ##   Length is determined by the last element in the array. If the index of the
+                  ##      last element is N, then length is N+1 because indexes start at 0.
+                  ## ```
     objects*: array[1, ptr YR_OBJECT]
 
   YR_DICTIONARY_ITEMS* {.importc, impyaraHdr, bycopy.} = object
@@ -1045,11 +1070,37 @@ type
     context*: pointer
     fetch_data*: YR_MEMORY_BLOCK_FETCH_DATA_FUNC
 
-  YR_MEMORY_BLOCK_ITERATOR* {.importc, impyaraHdr, bycopy.} = object
-    context*: pointer
-    first*: YR_MEMORY_BLOCK_ITERATOR_FUNC
+  YR_MEMORY_BLOCK_ITERATOR* {.importc, impyaraHdr, bycopy.} = object ## ```
+                                                                      ##   /
+                                                                      ##      YR_MEMORY_BLOCK_ITERATOR represents an iterator that returns a series of
+                                                                      ##      memory blocks to be scanned by yr_scanner_scan_mem_blocks. The iterator have
+                                                                      ##      pointers to three functions: "first", "next" and "file_size". The "first"
+                                                                      ##      function is invoked for retrieving the first memory block, followed by calls
+                                                                      ##      to "next" for retrieving the following blocks until "next" returns a NULL
+                                                                      ##      pointer. The "file_size" function is called for obtaining the size of the
+                                                                      ##      file.
+                                                                      ## ```
+    context*: pointer ## ```
+                      ##   A pointer that can be used by specific implementations of an iterator for
+                      ##      storing the iterator's state.
+                      ## ```
+    first*: YR_MEMORY_BLOCK_ITERATOR_FUNC ## ```
+                                          ##   Pointers to functions for iterating over the memory blocks.
+                                          ## ```
     next*: YR_MEMORY_BLOCK_ITERATOR_FUNC
-
+    file_size*: YR_MEMORY_BLOCK_ITERATOR_SIZE_FUNC ## ```
+                                                   ##   Pointer to a function that returns the file size as computed by the
+                                                   ##      iterator. This is a the size returned by the filesize keyword in YARA
+                                                   ##      rules. If this pointer is NULL the file size will be undefined.
+                                                   ## ```
+    last_error*: cint ## ```
+                      ##   Error occurred during the last call to "first" or "next" functions. These
+                      ##      functions must set the value of last_error to ERROR_SUCCESS or to some
+                      ##      other error code if appropriate. Alternatively, last_error can be set to
+                      ##      ERROR_SUCCESS before using the iterator and changed by "first" or "next"
+                      ##      only when they want to report an error.
+                      ## ```
+  
   YR_MODIFIER* {.importc, impyaraHdr, bycopy.} = object
     flags*: int32
     xor_min*: uint8
@@ -1057,7 +1108,9 @@ type
     alphabet*: ptr SIZED_STRING
 
   YR_ITERATOR* {.importc, impyaraHdr, bycopy.} = object
-    next*: YR_ITERATOR_NEXT_FUNC
+    next_func_idx*: cint ## ```
+                         ##   Index of the next function within the iter_next_func_table global array.
+                         ## ```
     array_it*: YR_ARRAY_ITERATOR
     dict_it*: YR_DICT_ITERATOR
     int_range_it*: YR_INT_RANGE_ITERATOR
@@ -1073,10 +1126,14 @@ type
       self: ptr YR_MEMORY_BLOCK): ptr uint8 {.cdecl.}
   YR_MEMORY_BLOCK_ITERATOR_FUNC* {.importc, impyaraHdr.} = proc (
       self: ptr YR_MEMORY_BLOCK_ITERATOR): ptr YR_MEMORY_BLOCK {.cdecl.}
-  YR_CALLBACK_FUNC* {.importc, impyaraHdr.} = proc (context: ptr YR_SCAN_CONTEXT;
-      message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.}
+  YR_MEMORY_BLOCK_ITERATOR_SIZE_FUNC* {.importc, impyaraHdr.} = proc (
+      self: ptr YR_MEMORY_BLOCK_ITERATOR): uint64 {.cdecl.}
+  YR_CALLBACK_FUNC* {.importc, impyaraHdr.} = proc (
+      context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer;
+      user_data: pointer): cint {.cdecl.}
   YR_MODULE_FUNC* {.importc, impyaraHdr.} = proc (args: ptr YR_VALUE;
-      context: ptr YR_SCAN_CONTEXT; function_obj: ptr YR_OBJECT_FUNCTION): cint {.cdecl.}
+      context: ptr YR_SCAN_CONTEXT; function_obj: ptr YR_OBJECT_FUNCTION): cint {.
+      cdecl.}
   YR_ITERATOR_NEXT_FUNC* {.importc, impyaraHdr.} = proc (self: ptr YR_ITERATOR;
       stack: ptr YR_VALUE_STACK): cint {.cdecl.}
   YR_ARRAY_ITERATOR* {.bycopy, impyaraHdr, importc: "struct YR_ARRAY_ITERATOR".} = object
@@ -1088,14 +1145,14 @@ type
     index*: cint
 
   YR_INT_RANGE_ITERATOR* {.bycopy, impyaraHdr,
-                          importc: "struct YR_INT_RANGE_ITERATOR".} = object
+                           importc: "struct YR_INT_RANGE_ITERATOR".} = object
     next*: int64
     last*: int64
 
   YR_INT_ENUM_ITERATOR* {.bycopy, impyaraHdr,
-                         importc: "struct YR_INT_ENUM_ITERATOR".} = object
-    next*: cint
-    count*: cint
+                          importc: "struct YR_INT_ENUM_ITERATOR".} = object
+    next*: int64
+    count*: int64
     items*: array[1, int64]
 
   RE_MATCH_CALLBACK_FUNC* {.importc, impyaraHdr.} = proc (match: ptr uint8;
@@ -1109,8 +1166,8 @@ type
     `type`*: uint8
     atom*: YR_ATOM
     re_nodes*: array[4, ptr RE_NODE] ## ```
-                                 ##   RE nodes that correspond to each byte in the atom.
-                                 ## ```
+                                     ##   RE nodes that correspond to each byte in the atom.
+                                     ## ```
     children_head*: ptr YR_ATOM_TREE_NODE
     children_tail*: ptr YR_ATOM_TREE_NODE
     next_sibling*: ptr YR_ATOM_TREE_NODE
@@ -1136,37 +1193,37 @@ type
     quality_table_entries*: cint
     free_quality_table*: bool
 
-  YR_ATOMS_QUALITY_FUNC* {.importc, impyaraHdr.} = proc (config: ptr YR_ATOMS_CONFIG;
-      atom: ptr YR_ATOM): cint {.cdecl.}
-  Union_yarah22* {.union, bycopy, impyaraHdr, importc: "union Union_yarah22".} = object
+  YR_ATOMS_QUALITY_FUNC* {.importc, impyaraHdr.} = proc (
+      config: ptr YR_ATOMS_CONFIG; atom: ptr YR_ATOM): cint {.cdecl.}
+  Union_yarah25* {.union, bycopy, impyaraHdr, importc: "union Union_yarah25".} = object
     integer*: int64
     `object`*: ptr YR_OBJECT
     sized_string_ref*: YR_ARENA_REF
 
   Type_yarah3* {.bycopy, impyaraHdr, importc: "struct Type_yarah3".} = object ## ```
-                                                                       ##   An expression can have an associated identifier, if "ptr" is not NULL it
-                                                                       ##      points to the identifier name, if it is NULL, then "ref" holds a reference
-                                                                       ##      to the identifier within YR_SZ_POOL. When the identifier is in YR_SZ_POOL
-                                                                       ##      a pointer can't be used as the YR_SZ_POOL can be moved to a different
-                                                                       ##      memory location.
-                                                                       ## ```
+                                                                               ##   An expression can have an associated identifier, if "ptr" is not NULL it
+                                                                               ##      points to the identifier name, if it is NULL, then "ref" holds a reference
+                                                                               ##      to the identifier within YR_SZ_POOL. When the identifier is in YR_SZ_POOL
+                                                                               ##      a pointer can't be used as the YR_SZ_POOL can be moved to a different
+                                                                               ##      memory location.
+                                                                               ## ```
     `ptr`*: cstring
     `ref`*: YR_ARENA_REF
 
   YR_EXPRESSION* {.bycopy, impyaraHdr, importc: "struct _YR_EXPRESSION".} = object
     `type`*: cint
-    value*: Union_yarah22
+    value*: Union_yarah25
     identifier*: Type_yarah3 ## ```
-                           ##   An expression can have an associated identifier, if "ptr" is not NULL it
-                           ##      points to the identifier name, if it is NULL, then "ref" holds a reference
-                           ##      to the identifier within YR_SZ_POOL. When the identifier is in YR_SZ_POOL
-                           ##      a pointer can't be used as the YR_SZ_POOL can be moved to a different
-                           ##      memory location.
-                           ## ```
-
+                             ##   An expression can have an associated identifier, if "ptr" is not NULL it
+                             ##      points to the identifier name, if it is NULL, then "ref" holds a reference
+                             ##      to the identifier within YR_SZ_POOL. When the identifier is in YR_SZ_POOL
+                             ##      a pointer can't be used as the YR_SZ_POOL can be moved to a different
+                             ##      memory location.
+                             ## ```
+  
   YR_COMPILER_CALLBACK_FUNC* {.importc, impyaraHdr.} = proc (error_level: cint;
-      file_name: cstring; line_number: cint; rule: ptr YR_RULE; message: cstring;
-      user_data: pointer) {.cdecl.}
+      file_name: cstring; line_number: cint; rule: ptr YR_RULE;
+      message: cstring; user_data: pointer) {.cdecl.}
   YR_COMPILER_INCLUDE_CALLBACK_FUNC* {.importc, impyaraHdr.} = proc (
       include_name: cstring; calling_rule_filename: cstring;
       calling_rule_namespace: cstring; user_data: pointer): cstring {.cdecl.}
@@ -1181,86 +1238,86 @@ type
 
   YR_LOOP_CONTEXT* {.bycopy, impyaraHdr, importc: "struct _YR_LOOP_CONTEXT".} = object
     start_ref*: YR_ARENA_REF ## ```
-                           ##   Reference indicating the the place in the code where the loop starts. The
-                           ##      loop goes back to this address on each iteration.
-                           ## ```
+                             ##   Reference indicating the the place in the code where the loop starts. The
+                             ##      loop goes back to this address on each iteration.
+                             ## ```
     vars_count*: cint ## ```
-                    ##   vars_count is the number of local variables defined by the loop, and vars
-                    ##      is an array of expressions with the identifier and type for each of those
-                    ##      local variables.
-                    ## ```
+                      ##   vars_count is the number of local variables defined by the loop, and vars
+                      ##      is an array of expressions with the identifier and type for each of those
+                      ##      local variables.
+                      ## ```
     vars*: array[2, YR_EXPRESSION]
     vars_internal_count*: cint ## ```
-                             ##   vars_internal_count is the number of variables used by the loop which are
-                             ##      not defined by the rule itself but that are necessary for keeping the
-                             ##      loop's state. One example is the iteration counter.
-                             ## ```
-
+                               ##   vars_internal_count is the number of variables used by the loop which are
+                               ##      not defined by the rule itself but that are necessary for keeping the
+                               ##      loop's state. One example is the iteration counter.
+                               ## ```
+  
   YR_COMPILER* {.bycopy, impyaraHdr, importc: "struct _YR_COMPILER".} = object
     arena*: ptr YR_ARENA ## ```
-                      ##   Arena that contains the data generated by the compiled. The arena has
-                      ##      the following buffers:
-                      ##
-                      ##        YR_SUMMARY_SECTION:
-                      ##           A YR_SUMMARY struct.
-                      ##        YR_RULES_TABLE:
-                      ##           An array of YR_RULE structures, one per each rule.
-                      ##        YR_STRINGS_TABLE:
-                      ##           An array of YR_STRING structures, one per each string.
-                      ##        YR_METAS_TABLE:
-                      ##           An array of YR_META structures, one per each meta definition.
-                      ##        YR_NAMESPACES_TABLE:
-                      ##           An array of YR_NAMESPACE structures, one per each namespace.
-                      ##        YR_EXTERNAL_VARIABLES_TABLE:
-                      ##           An array of YR_EXTERNAL_VARIABLE structures, one per each external
-                      ##           variable defined.
-                      ##        YR_SZ_POOL:
-                      ##           A collection of null-terminated strings. This buffer contains
-                      ##           identifiers, literal strings, and in general any null-terminated
-                      ##           string referenced by other data structures.
-                      ##        YR_CODE_SECTION:
-                      ##           The code for the condition section of all the rules. This is the
-                      ##           code executed by yr_execute_code.
-                      ##        YR_RE_CODE_SECTION:
-                      ##           Similar to YR_CODE_SECTION, but it contains the code for regular
-                      ##           expressions. This is the code executed by yr_re_exec and
-                      ##           yr_re_fast_exec.
-                      ##        YR_AC_TRANSITION_TABLE:
-                      ##           An array of uint32_t containing the Aho-Corasick transition table.
-                      ##           See comment in _yr_ac_build_transition_table for details.
-                      ##        YR_AC_STATE_MATCHES_TABLE:
-                      ##           An array of uint32_t with the same number of items than the transition
-                      ##           table. If entry N in the transition table corresponds to some
-                      ##           Aho-Corasick state, the N-th item in this array has the index within
-                      ##           the matches pool where the list of matches for that state begins.
-                      ##        YR_AC_STATE_MATCHES_POOL:
-                      ##           An array of YR_AC_MATCH structures.
-                      ## ```
-    current_rule_idx*: uint32 ## ```
-                            ##   Index of the rule being compiled in the array of YR_RULE structures
-                            ##      stored in YR_RULES_TABLE. If this is MAX_UINT32 the compiler is not
-                            ##      parsing a rule.
-                            ## ```
-    next_rule_idx*: uint32 ## ```
-                         ##   Index of the rule that comes next during parsing.
+                         ##   Arena that contains the data generated by the compiled. The arena has
+                         ##      the following buffers:
+                         ##     
+                         ##        YR_SUMMARY_SECTION:
+                         ##           A YR_SUMMARY struct.
+                         ##        YR_RULES_TABLE:
+                         ##           An array of YR_RULE structures, one per each rule.
+                         ##        YR_STRINGS_TABLE:
+                         ##           An array of YR_STRING structures, one per each string.
+                         ##        YR_METAS_TABLE:
+                         ##           An array of YR_META structures, one per each meta definition.
+                         ##        YR_NAMESPACES_TABLE:
+                         ##           An array of YR_NAMESPACE structures, one per each namespace.
+                         ##        YR_EXTERNAL_VARIABLES_TABLE:
+                         ##           An array of YR_EXTERNAL_VARIABLE structures, one per each external
+                         ##           variable defined.
+                         ##        YR_SZ_POOL:
+                         ##           A collection of null-terminated strings. This buffer contains
+                         ##           identifiers, literal strings, and in general any null-terminated
+                         ##           string referenced by other data structures.
+                         ##        YR_CODE_SECTION:
+                         ##           The code for the condition section of all the rules. This is the
+                         ##           code executed by yr_execute_code.
+                         ##        YR_RE_CODE_SECTION:
+                         ##           Similar to YR_CODE_SECTION, but it contains the code for regular
+                         ##           expressions. This is the code executed by yr_re_exec and
+                         ##           yr_re_fast_exec.
+                         ##        YR_AC_TRANSITION_TABLE:
+                         ##           An array of uint32_t containing the Aho-Corasick transition table.
+                         ##           See comment in _yr_ac_build_transition_table for details.
+                         ##        YR_AC_STATE_MATCHES_TABLE:
+                         ##           An array of uint32_t with the same number of items than the transition
+                         ##           table. If entry N in the transition table corresponds to some
+                         ##           Aho-Corasick state, the N-th item in this array has the index within
+                         ##           the matches pool where the list of matches for that state begins.
+                         ##        YR_AC_STATE_MATCHES_POOL:
+                         ##           An array of YR_AC_MATCH structures.
                          ## ```
-    current_string_idx*: uint32 ## ```
-                              ##   Index of the string being compiled in the array of YR_STRING structures
-                              ##      stored in YR_STRINGS_TABLE.
+    current_rule_idx*: uint32 ## ```
+                              ##   Index of the rule being compiled in the array of YR_RULE structures
+                              ##      stored in YR_RULES_TABLE. If this is MAX_UINT32 the compiler is not
+                              ##      parsing a rule.
                               ## ```
+    next_rule_idx*: uint32 ## ```
+                           ##   Index of the rule that comes next during parsing.
+                           ## ```
+    current_string_idx*: uint32 ## ```
+                                ##   Index of the string being compiled in the array of YR_STRING structures
+                                ##      stored in YR_STRINGS_TABLE.
+                                ## ```
     current_namespace_idx*: uint32 ## ```
-                                 ##   Index of the current namespace in the array of YR_NAMESPACE structures
-                                 ##      stored in YR_NAMESPACES_TABLE.
-                                 ## ```
+                                   ##   Index of the current namespace in the array of YR_NAMESPACE structures
+                                   ##      stored in YR_NAMESPACES_TABLE.
+                                   ## ```
     current_meta_idx*: uint32 ## ```
-                            ##   Index of the current meta in the array of YR_META structures stored in
-                            ##      YR_METAS_TABLE.
-                            ## ```
+                              ##   Index of the current meta in the array of YR_META structures stored in
+                              ##      YR_METAS_TABLE.
+                              ## ```
     rules*: ptr YR_RULES ## ```
-                      ##   Pointer to a YR_RULES structure that represents the compiled rules. This
-                      ##      is what yr_compiler_get_rules returns. Once these rules are generated you
-                      ##      can't call any of the yr_compiler_add_xxx functions.
-                      ## ```
+                         ##   Pointer to a YR_RULES structure that represents the compiled rules. This
+                         ##      is what yr_compiler_get_rules returns. Once these rules are generated you
+                         ##      can't call any of the yr_compiler_add_xxx functions.
+                         ## ```
     errors*: cint
     current_line*: cint
     last_error*: cint
@@ -1270,13 +1327,27 @@ type
     rules_table*: ptr YR_HASH_TABLE
     objects_table*: ptr YR_HASH_TABLE
     strings_table*: ptr YR_HASH_TABLE
+    wildcard_identifiers_table*: ptr YR_HASH_TABLE ## ```
+                                                   ##   Hash table that contains all the identifiers with wildcards used in
+                                                   ##      conditions. This is used to make sure we error out if we are parsing a
+                                                   ##      rule _AFTER_ an existing rule has referenced it in a condition. For
+                                                   ##      example:
+                                                   ##     
+                                                   ##      rule a1 { condition: true }
+                                                   ##      rule b { condition: 1 of (a*) }
+                                                   ##      rule a2 { condition: true }
+                                                   ##     
+                                                   ##      This must be a compiler error when parsing a2 because b has already been
+                                                   ##      parsed and the instructions to check _ONLY_ a1 have been emitted. Rule b
+                                                   ##      has no concept of a2 and would not work as expected.
+                                                   ## ```
     sz_table*: ptr YR_HASH_TABLE ## ```
-                              ##   Hash table that contains all the strings that has been written to the
-                              ##      YR_SZ_POOL buffer in the compiler's arena. Values in the hash table are
-                              ##      the offset within the YR_SZ_POOL where the string resides. This allows to
-                              ##      know is some string has already been written in order to reuse instead of
-                              ##      writting it again.
-                              ## ```
+                                 ##   Hash table that contains all the strings that has been written to the
+                                 ##      YR_SZ_POOL buffer in the compiler's arena. Values in the hash table are
+                                 ##      the offset within the YR_SZ_POOL where the string resides. This allows to
+                                 ##      know is some string has already been written in order to reuse instead of
+                                 ##      writting it again.
+                                 ## ```
     fixup_stack_head*: ptr YR_FIXUP
     num_namespaces*: cint
     loop*: array[4, YR_LOOP_CONTEXT]
@@ -1285,7 +1356,12 @@ type
     file_name_stack*: array[16, cstring]
     file_name_stack_ptr*: cint
     last_error_extra_info*: array[256, cchar]
-    lex_buf*: array[8192, cchar]
+    lex_buf*: array[8192, cchar] ## ```
+                                 ##   This buffer is used by the lexer for accumulating text strings. Those
+                                 ##      strings are copied from flex's internal variables. lex_buf_ptr points to
+                                 ##      the end of the string and lex_buf_len contains the number of bytes that
+                                 ##      have been copied into lex_buf.
+                                 ## ```
     lex_buf_ptr*: cstring
     lex_buf_len*: cushort
     include_base_dir*: array[1024, cchar]
@@ -1298,18 +1374,18 @@ type
     re_ast_callback*: YR_COMPILER_RE_AST_CALLBACK_FUNC
     atoms_config*: YR_ATOMS_CONFIG
 
+  YR_SCANNER* {.importc, impyaraHdr.} = YR_SCAN_CONTEXT
   YR_EXT_INITIALIZE_FUNC* {.importc, impyaraHdr.} = proc (module: ptr YR_MODULE): cint {.
       cdecl.}
   YR_EXT_FINALIZE_FUNC* {.importc, impyaraHdr.} = proc (module: ptr YR_MODULE): cint {.
       cdecl.}
   YR_EXT_DECLARATIONS_FUNC* {.importc, impyaraHdr.} = proc (
       module_object: ptr YR_OBJECT): cint {.cdecl.}
-  YR_EXT_LOAD_FUNC* {.importc, impyaraHdr.} = proc (context: ptr YR_SCAN_CONTEXT;
-      module_object: ptr YR_OBJECT; module_data: pointer; module_data_size: uint): cint {.
-      cdecl.}
-  YR_EXT_UNLOAD_FUNC* {.importc, impyaraHdr.} = proc (module_object: ptr YR_OBJECT): cint {.
-      cdecl.}
-  YR_SCANNER* {.importc, impyaraHdr.} = YR_SCAN_CONTEXT
+  YR_EXT_LOAD_FUNC* {.importc, impyaraHdr.} = proc (
+      context: ptr YR_SCAN_CONTEXT; module_object: ptr YR_OBJECT;
+      module_data: pointer; module_data_size: uint): cint {.cdecl.}
+  YR_EXT_UNLOAD_FUNC* {.importc, impyaraHdr.} = proc (
+      module_object: ptr YR_OBJECT): cint {.cdecl.}
 proc xtoi*(hexstr: cstring): uint64 {.importc, cdecl, impyaraHdr.}
   ## ```
                                                                   ##   Other "compilers" and later versions of Microsoft Visual Studio C++ and
