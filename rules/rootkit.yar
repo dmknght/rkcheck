@@ -62,7 +62,7 @@ rule Umbreon_Generic {
 
 	condition:
 		is_elf // Generic ELF header
-		and uint8(16) == 0x0003 // Shared object file
+		and elf.type == elf.ET_DYN // Shared object file
 		and all of them
 }
 
@@ -82,7 +82,7 @@ rule Umbreon_Strace {
 
 	condition:
 		is_elf // Generic ELF header
-		and uint8(16) == 0x0003 // Shared object file
+		and elf.type == elf.ET_DYN // Shared object file
 		and all of them
 }
 
@@ -104,7 +104,7 @@ rule Umbreon_Espeon {
 
 	condition:
 		is_elf // Generic ELF header
-		and uint8(16) == 0x0002 // Executable file
+		and elf.type == elf.ET_EXEC // Executable file
 		and all of them
 }
 
@@ -448,4 +448,33 @@ rule Agent_4d1e {
     for any i in (0 .. elf.number_of_segments): (
 			hash.md5(elf.segments[i].offset, elf.segments[i].memory_size) == "6f95513cc65d2e53de15b1ce5431d8c4"
 		)
+}
+
+
+rule Rkit_a669 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    md5 = "1fccc4f70c2c800173b7c56558b74a95"
+    md5 = "acf87e0165bc121eb384346d10c74997"
+    descriptions = "Unknown Linux rootkit"
+  strings:
+    $ = "/proc/self/fd/%d" fullword ascii
+    $ = "/proc/%s/stat" fullword ascii
+    $ = "%d (%[^)]s" fullword ascii
+    $ = "Error in dlsym: %s" fullword ascii
+  condition:
+    elf.type == elf.ET_DYN and
+    (
+      (
+        is_elf and for any i in (0 .. elf.number_of_sections):
+        (
+          all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+        )
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
 }
