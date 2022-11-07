@@ -2,6 +2,8 @@ import libclamav
 import libyara
 import bitops
 import .. / cli / print_utils
+import engine_utils
+import .. / compiler / compiler_utils
 
 
 type
@@ -95,7 +97,7 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
   # If database path is not empty, load ClamAV Signatures
   if f_engine.use_clam_sigs:
     var sig_count: cuint = 0
-    result = cl_load(cstring(f_engine.database), f_engine.engine, unsafeAddr(sig_count), CL_DB_STDOPT)
+    result = cl_load(cstring(f_engine.database), f_engine.engine, addr(sig_count), CL_DB_STDOPT)
 
     if result == CL_SUCCESS:
       print_loaded_signatures(uint(sig_count), false)
@@ -118,11 +120,16 @@ proc init_yara*(engine: var YrEngine): int =
   if result != ERROR_SUCCESS:
     return result
 
-  let
+  var
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
 
-  result = yr_rules_load(cstring(engine.database), unsafeAddr(engine.engine))
+  # If rule is compiled, we load it
+  if yr_rule_file_is_compiled(engine.database):
+    result = yr_rules_load(cstring(engine.database), addr(engine.engine))
+  else:
+    # Need to compile rules
+    yr_rules_compile_custom_rules(engine.engine, engine.database)
 
   if result != ERROR_SUCCESS:
     return result
@@ -130,8 +137,8 @@ proc init_yara*(engine: var YrEngine): int =
   print_loaded_signatures(uint(engine.engine.num_rules), true)
   print_yara_version(YR_VERSION)
 
-  discard yr_set_configuration(YR_CONFIG_STACK_SIZE, unsafeAddr(stack_size))
-  discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, unsafeAddr(max_strings_per_rule))
+  discard yr_set_configuration(YR_CONFIG_STACK_SIZE, addr(stack_size))
+  discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(max_strings_per_rule))
   return result
 
 

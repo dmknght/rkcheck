@@ -4,42 +4,23 @@
 ]#
 
 import .. / engine / libyara
-import strformat
-
-type
-  COMPILER_RESULT = object
-    errors: int
-    warnings: int
+import compiler_utils
 
 
-proc report_error(error_level: cint; file_name: cstring; line_number: cint; rule: ptr YR_RULE; message: cstring; user_data: pointer) {.cdecl.} =
-  if rule != nil:
-    echo fmt"{message} at {file_name}:{line_number}"
-
-
-proc compile_rules(dst: string) =
+proc compile_default_rules(dst: string) =
   # Init yara
   var
     compiler: ptr YR_COMPILER
     rules: ptr YR_RULES
     compiler_result: COMPILER_RESULT
-
-  let setting_max_string = DEFAULT_MAX_STRINGS_PER_RULE
-
+    setting_max_string = DEFAULT_MAX_STRINGS_PER_RULE
   if yr_initialize() != ERROR_SUCCESS:
     return
   if yr_compiler_create(addr(compiler)) != ERROR_SUCCESS:
     return
 
-  # Load yara rules
-
-  # discard yr_compiler_define_string_variable(compiler, "file_path", "")
-  # discard yr_compiler_define_string_variable(compiler, "file_name", "")
-  # discard yr_compiler_define_string_variable(compiler, "file_dir", "")
-  # discard yr_compiler_define_string_variable(compiler, "file_ext", ""
-
-  discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, unsafeAddr(setting_max_string))
-  yr_compiler_set_callback(compiler, report_error, unsafeAddr(compiler_result))
+  discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(setting_max_string))
+  yr_compiler_set_callback(compiler, yr_rules_report_errors, addr(compiler_result))
 
   discard yr_compiler_add_file(compiler, open("rules/magics.yar"), "Magic", "magics.yar")
   discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Rans", "ransomware.yar")
@@ -60,4 +41,4 @@ proc compile_rules(dst: string) =
     discard yr_rules_destroy(rules)
   discard yr_finalize()
 
-compile_rules("build/database/signatures.ydb")
+compile_default_rules("build/database/signatures.ydb")
