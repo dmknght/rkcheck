@@ -31,6 +31,7 @@ proc print_yara_version*(version: string) =
 
 
 proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
+  progress_bar_flush()
   echo "\n===SCAN COMPLETED==="
   if scanned_files > 0:
     echo "Scanned files: ", scanned_files
