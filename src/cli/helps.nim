@@ -4,6 +4,7 @@ proc show_help_banner*(): bool =
   echo "\nEngine options:"
   echo " --use-clamdb                  Use default ClamAV's signatures at /var/lib/clamav/"
   echo " --clam-debug                  Enable libclam debug mode"
+  echo " --clam-parser                 Enable all parsers of ClamAV engine"
   echo " --path-clamdb  <file or dir>  Set custom ClamAV's signatures"
   echo " --path-yaradb  <file>         Set custom Yara's rules"
   echo "\nScan options:"

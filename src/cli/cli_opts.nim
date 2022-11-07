@@ -9,6 +9,7 @@ proc cliopts_create_default(options: var ScanOptions) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
+  options.use_clam_parser = false
   options.db_path_clamav = "/var/lib/clamav/"
 
   # Load bytecode signatures by default. Problems: if user pass only --use-clamdb,
@@ -146,6 +147,8 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         options.use_clam_db = true
       of "--clam-debug":
         options.is_clam_debug = true
+      of "--clam-parser":
+        options.use_clam_parser = true
       of "--path-clamdb":
         cliopts_set_db_path_clamav(options, i, total_params_count):
       of "--path-yaradb":
