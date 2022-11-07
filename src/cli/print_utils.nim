@@ -26,6 +26,10 @@ proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
     echo "Loaded ", num_loaded, " ClamAV signatures"
 
 
+proc print_yara_version*(version: string) =
+  echo "Yara Engine: ", version
+
+
 proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
   echo "\n===SCAN COMPLETED==="
   if scanned_files > 0:
