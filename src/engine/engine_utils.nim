@@ -2,6 +2,7 @@ import libclamav
 import libyara
 import strutils
 import .. / cli / print_utils
+import streams
 
 
 proc file_scanner_on_matched*(scan_result: var cl_error_t, virus_name: var cstring, rule_name_space, rule_identifier: string): cint =
@@ -48,3 +49,12 @@ proc proc_scanner_on_scan_matched*(rule_ns, rule_id, binary_path: string, pid: u
 
 proc proc_scanner_on_scan_heur*(virus_name, binary_path: string, pid: uint) =
   print_process_infected(virus_name, binary_path, pid)
+
+
+proc yr_rule_file_is_compiled*(path: string): bool =
+  let f = newFileStream(path)
+  if f.readStr(4) == "YARA":
+    result = true
+  else:
+    result = false
+  f.close()
