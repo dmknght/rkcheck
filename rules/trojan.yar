@@ -753,7 +753,7 @@ rule Metasploit_Maldoc1 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    descriptions = "Generic signature for multi/misc/openoffice_document_macro"
+    descriptions = "Generic signature for exploit/multi/misc/openoffice_document_macro"
   strings:
     $ = "Sub Exploit" fullword ascii
     $ = "python -c" fullword ascii
