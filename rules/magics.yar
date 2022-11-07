@@ -12,6 +12,11 @@ private rule xdg_desktop_entry {
 }
 
 
+private rule is_xml {
+  condition:
+    uint32(0) == 0x6d783f3cq
+}
+
 // private rule is_shebang {
 //   condition:
 //     uint32(0) == 0x752F2123 // "#!/u". Meant to detect "#!/usr/bin/"
