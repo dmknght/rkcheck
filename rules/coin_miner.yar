@@ -134,7 +134,7 @@ rule Xmrig_Generic
     $3 = "_ZN5xmrig" ascii
     $4 = "Usage: xmrig [OPTIONS]" ascii
     $5 = "xmrig.json" fullword ascii
-    $6 = "xmrigMiner" ascii
+    $6 = "xmrigMiner" fullword ascii
     $7 = "jcxmrig" ascii
     $8 = "xmrigvertar" ascii
   condition:
