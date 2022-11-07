@@ -140,6 +140,18 @@ rule SusELF_SegOffset {
     )
 }
 
+
+rule SusELF_BrokenExecutable {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    descriptions = "Try to simulate ELF Heuristic feature of ClamAV with Yara"
+    // TODO elf.entry_point = YR_UNDEFINED
+  condition:
+    is_elf and elf.sh_entry_size == 0
+}
+
+
 rule ShellExec_UserAdd {
   meta:
     description = "Bash commands to add new user to passwd"
