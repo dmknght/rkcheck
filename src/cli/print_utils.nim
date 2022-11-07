@@ -34,8 +34,8 @@ proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs:
   progress_bar_flush()
   echo "\n===SCAN COMPLETED==="
   if scanned_files > 0:
-    echo "Scanned files: ", scanned_files
-    echo "Infected files: ", infected_files
+    echo "Scanned objects: ", scanned_files
+    echo "Infected objects: ", infected_files
   if scanned_procs > 0:
     echo "Scanned processes: ", scanned_procs
     echo "Infected processes: ", infected_procs
