@@ -2,6 +2,7 @@ import os
 import strutils
 import sequtils
 import .. / engine / engine_cores
+import helps
 
 
 proc cliopts_create_default(options: var ScanOptions) =
@@ -134,11 +135,11 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
     if currentParam.startsWith("-"):
       case currentParam:
       of "--help":
-        return false
+        return show_help_banner()
       of "-h":
-        return false
+        return show_help_banner()
       of "-help":
-        return false
+        return show_help_banner()
       of "--all-processes":
         options.scan_all_procs = true
       of "--use-clamdb":
