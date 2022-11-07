@@ -14,7 +14,7 @@ private rule xdg_desktop_entry {
 
 private rule is_xml {
   condition:
-    uint32(0) == 0x6d783f3cq
+    uint32(0) == 0x6d783f3c
 }
 
 // private rule is_shebang {
