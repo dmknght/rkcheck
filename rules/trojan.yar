@@ -603,7 +603,14 @@ rule TinyShell {
     $1 = "s:p:c::" // getopt strings
     $2 = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
   condition:
-    is_elf and all of them
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+    or for any i in (0 .. elf.number_of_segments):
+    (
+      all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
