@@ -23,8 +23,18 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
+proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+  #[
+    Print virus found message with file path
+  ]#
+  let
+    ctx = cast[ptr FileScanner](context)
+
+  file_scanner_on_malware_found(virname, ctx.scan_virname, ctx.scan_object, ctx.result_infected)
+
+
 proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
-  # TODO try to get inner file name (lib yara debug mode)
+  # TODO try to get inner file name (lib clamav debug mode)
   let
     ctx = cast[ptr FileScanner](context)
 
@@ -42,13 +52,3 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
   else:
     discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
     return ctx.scan_result
-
-
-proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  #[
-    Print virus found message with file path
-  ]#
-  let
-    ctx = cast[ptr FileScanner](context)
-
-  file_scanner_on_malware_found(virname, ctx.scan_virname, ctx.scan_object, ctx.result_infected)
