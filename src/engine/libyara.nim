@@ -21,6 +21,7 @@
 # const 'begin_declarations' has unsupported value 'int module_declarations(YR_OBJECT* module) { YR_OBJECT* stack[64]; int stack_top = 0; stack[stack_top] = module;'
 # const 'end_declarations' has unsupported value 'return ERROR_SUCCESS; }'
 {.push hint[ConvFromXtoItselfNotNeeded]: off.}
+type va_list* {.importc, header:"<stdarg.h>".} = object
 import macros
 
 macro defineEnum(typ: untyped): untyped =
@@ -545,6 +546,8 @@ type
 
   YR_HASH_TABLE_FREE_VALUE_FUNC* {.importc, impyaraHdr.} = proc (value: pointer): cint {.
       cdecl.}
+  YR_HASH_TABLE_ITERATE_FUNC* {.importc, impyaraHdr.} = proc (key: pointer;
+      key_length: uint; value: pointer; data: pointer): cint {.cdecl.}
   SIZED_STRING* {.bycopy, impyaraHdr, importc: "struct _SIZED_STRING".} = object ## ```
                                                                           ##   This struct is used to support strings containing null chars. The length of
                                                                           ##      the string is stored along the string data. However the string data is also
@@ -1307,258 +1310,568 @@ type
   YR_EXT_UNLOAD_FUNC* {.importc, impyaraHdr.} = proc (module_object: ptr YR_OBJECT): cint {.
       cdecl.}
   YR_SCANNER* {.importc, impyaraHdr.} = YR_SCAN_CONTEXT
-var yr_scanner_scan_mem* {.importc: "_yr_scanner_scan_mem", impyaraHdr.}: proc (
-    scanner: ptr YR_SCANNER; buffer: ptr uint8; buffer_size: uint): cint {.cdecl.}
 proc xtoi*(hexstr: cstring): uint64 {.importc, cdecl, impyaraHdr.}
   ## ```
-  ##   Other "compilers" and later versions of Microsoft Visual Studio C++ and
-  ##      Borland C/C++ define the types in <stdint.h>
-  ##      Cygwin already has these functions.
-  ## ```
-proc strlcpy*(dst: cstring; src: cstring; size: uint): uint {.importc, cdecl, impyaraHdr.}
-proc strlcat*(dst: cstring; src: cstring; size: uint): uint {.importc, cdecl, impyaraHdr.}
-proc memmem*(haystack: pointer; haystack_size: uint; needle: pointer; needle_size: uint): pointer {.
-    importc, cdecl, impyaraHdr.}
+                                                                  ##   Other "compilers" and later versions of Microsoft Visual Studio C++ and
+                                                                  ##      Borland C/C++ define the types in <stdint.h>
+                                                                  ##      Cygwin already has these functions.
+                                                                  ## ```
+proc strlcpy*(dst: cstring; src: cstring; size: uint): uint {.importc, cdecl,
+    impyaraHdr.}
+proc strlcat*(dst: cstring; src: cstring; size: uint): uint {.importc, cdecl,
+    impyaraHdr.}
+proc memmem*(haystack: pointer; haystack_size: uint; needle: pointer;
+             needle_size: uint): pointer {.importc, cdecl, impyaraHdr.}
 proc strnlen_w*(w_str: cstring): cint {.importc, cdecl, impyaraHdr.}
 proc strcmp_w*(w_str: cstring; str: cstring): cint {.importc, cdecl, impyaraHdr.}
-proc strlcpy_w*(dst: cstring; w_src: cstring; n: uint): uint {.importc, cdecl, impyaraHdr.}
+proc strlcpy_w*(dst: cstring; w_src: cstring; n: uint): uint {.importc, cdecl,
+    impyaraHdr.}
+proc yr_isalnum*(s: ptr uint8): cint {.importc, cdecl, impyaraHdr.}
+proc yr_vasprintf*(strp: ptr cstring; fmt: cstring; ap: va_list) {.importc,
+    cdecl, impyaraHdr.}
+proc yr_asprintf*(strp: ptr cstring; fmt: cstring) {.importc, cdecl, impyaraHdr,
+    varargs.}
 proc yr_filemap_map*(file_path: cstring; pmapped_file: ptr YR_MAPPED_FILE): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_filemap_map_fd*(file: cint; offset: clong; size: uint;
-                       pmapped_file: ptr YR_MAPPED_FILE): cint {.importc, cdecl,
+proc yr_filemap_map_fd*(file: cint; offset: uint64; size: uint;
+                        pmapped_file: ptr YR_MAPPED_FILE): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_filemap_map_ex*(file_path: cstring; offset: uint64; size: uint;
+                        pmapped_file: ptr YR_MAPPED_FILE): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_filemap_unmap*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl,
     impyaraHdr.}
-proc yr_filemap_map_ex*(file_path: cstring; offset: clong; size: uint;
-                       pmapped_file: ptr YR_MAPPED_FILE): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_filemap_unmap*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl, impyaraHdr.}
 proc yr_filemap_unmap_fd*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl,
     impyaraHdr.}
-proc yr_stream_read*(`ptr`: pointer; size: uint; count: uint; stream: ptr YR_STREAM): uint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_stream_write*(`ptr`: pointer; size: uint; count: uint; stream: ptr YR_STREAM): uint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_arena_create*(num_buffers: cint; initial_buffer_size: uint;
-                     arena: ptr ptr YR_ARENA): cint {.importc, cdecl, impyaraHdr.}
   ## ```
-  ##   Creates an arena with the specified number of buffers and takes ownership of
-  ##      it. Initially each buffer is empty, the first time that some data is written
-  ##      into a buffer at least initial_buffer_size are reserved for the buffer.
+                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ## ```
+proc yr_stream_read*(`ptr`: pointer; size: uint; count: uint;
+                     stream: ptr YR_STREAM): uint {.importc, cdecl, impyaraHdr.}
+proc yr_stream_write*(`ptr`: pointer; size: uint; count: uint;
+                      stream: ptr YR_STREAM): uint {.importc, cdecl, impyaraHdr.}
+proc yr_arena_create*(num_buffers: uint32; initial_buffer_size: uint;
+                      arena: ptr ptr YR_ARENA): cint {.importc, cdecl,
+    impyaraHdr.}
   ## ```
+                ##   Creates an arena with the specified number of buffers and takes ownership of
+                ##      it. Initially each buffer is empty, the first time that some data is written
+                ##      into a buffer at least initial_buffer_size are reserved for the buffer.
+                ## ```
 proc yr_arena_acquire*(arena: ptr YR_ARENA) {.importc, cdecl, impyaraHdr.}
   ## ```
-  ##   Takes ownership of the arena.
-  ## ```
+                                                                          ##   Takes ownership of the arena.
+                                                                          ## ```
 proc yr_arena_release*(arena: ptr YR_ARENA): cint {.importc, cdecl, impyaraHdr.}
   ## ```
-  ##   Release ownership of the arena. If the number of owners drops to zero the
-  ##      arena is destroyed and all its resources are freed.
-  ## ```
+                                                                                ##   Release ownership of the arena. If the number of owners drops to zero the
+                                                                                ##      arena is destroyed and all its resources are freed.
+                                                                                ## ```
 proc yr_arena_ref_to_ptr*(arena: ptr YR_ARENA; `ref`: ptr YR_ARENA_REF): pointer {.
     importc, cdecl, impyaraHdr.}
   ## ```
-  ##   Given a reference to some data within the arena, it returns a pointer to
-  ##      the data. This pointer is valid only until the next call to any of the
-  ##      functions that allocates space in the buffer where the data resides, like
-  ##      yr_arena_allocate_xxx and yr_arena_write_xxx. These functions can cause
-  ##      the buffer to be moved to different memory location and the pointer won't
-  ##      valid any longer.
-  ## ```
+                                ##   Given a reference to some data within the arena, it returns a pointer to
+                                ##      the data. This pointer is valid only until the next call to any of the
+                                ##      functions that allocates space in the buffer where the data resides, like
+                                ##      yr_arena_allocate_xxx and yr_arena_write_xxx. These functions can cause
+                                ##      the buffer to be moved to different memory location and the pointer won't
+                                ##      valid any longer.
+                                ## ```
 proc yr_arena_ptr_to_ref*(arena: ptr YR_ARENA; address: pointer;
-                         `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl, impyaraHdr.}
+                          `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl,
+    impyaraHdr.}
   ## ```
-  ##   Given a pointer into the arena, it returns a reference to it. The reference
-  ##      can be used with yr_arena_ref_to_ptr to obtain a pointer again. Unlike
-  ##      pointers, references are during the arena's lifetime, even if the buffers
-  ##      are moved to a different memory location.
+                ##   Given a pointer into the arena, it returns a reference to it. The reference
+                ##      can be used with yr_arena_ref_to_ptr to obtain a pointer again. Unlike
+                ##      pointers, references are during the arena's lifetime, even if the buffers
+                ##      are moved to a different memory location.
+                ## ```
+proc yr_arena_get_ptr*(arena: ptr YR_ARENA; buffer_id: uint32;
+                       offset: yr_arena_off_t): pointer {.importc, cdecl,
+    impyaraHdr.}
   ## ```
-proc yr_arena_get_ptr*(arena: ptr YR_ARENA; buffer_id: uint32; offset: yr_arena_off_t): pointer {.
-    importc, cdecl, impyaraHdr.}
-  ## ```
-  ##   Given a buffer number and an offset within the buffer, returns a pointer
-  ##      to that offset. The same limitations explained for yr_arena_ref_to_ptr
-  ##      applies for the pointers returned by this function.
-  ## ```
+                ##   Given a buffer number and an offset within the buffer, returns a pointer
+                ##      to that offset. The same limitations explained for yr_arena_ref_to_ptr
+                ##      applies for the pointers returned by this function.
+                ## ```
 proc yr_arena_get_current_offset*(arena: ptr YR_ARENA; buffer_id: uint32): yr_arena_off_t {.
     importc, cdecl, impyaraHdr.}
-proc yr_arena_allocate_memory*(arena: ptr YR_ARENA; buffer_id: uint32; size: uint;
-                              `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_arena_allocate_zeroed_memory*(arena: ptr YR_ARENA; buffer_id: uint32;
-                                     size: uint; `ref`: ptr YR_ARENA_REF): cint {.
+proc yr_arena_allocate_memory*(arena: ptr YR_ARENA; buffer_id: uint32;
+                               size: uint; `ref`: ptr YR_ARENA_REF): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_arena_allocate_struct*(arena: ptr YR_ARENA; buffer_id: uint32; size: uint;
-                              `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl,
-    impyaraHdr, varargs.}
+proc yr_arena_allocate_zeroed_memory*(arena: ptr YR_ARENA; buffer_id: uint32;
+                                      size: uint; `ref`: ptr YR_ARENA_REF): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_arena_allocate_struct*(arena: ptr YR_ARENA; buffer_id: uint32;
+                               size: uint; `ref`: ptr YR_ARENA_REF): cint {.
+    importc, cdecl, impyaraHdr, varargs.}
 proc yr_arena_make_ptr_relocatable*(arena: ptr YR_ARENA; buffer_id: uint32): cint {.
     importc, cdecl, impyaraHdr, varargs.}
 proc yr_arena_write_data*(arena: ptr YR_ARENA; buffer_id: uint32; data: pointer;
-                         size: uint; `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_arena_write_string*(arena: ptr YR_ARENA; buffer_id: uint32; string: cstring;
-                           `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl, impyaraHdr.}
-proc yr_arena_write_uint32*(arena: ptr YR_ARENA; buffer_id: uint32; integer: uint32;
-                           `ref`: ptr YR_ARENA_REF): cint {.importc, cdecl, impyaraHdr.}
+                          size: uint; `ref`: ptr YR_ARENA_REF): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_arena_write_string*(arena: ptr YR_ARENA; buffer_id: uint32;
+                            string: cstring; `ref`: ptr YR_ARENA_REF): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_arena_write_uint32*(arena: ptr YR_ARENA; buffer_id: uint32;
+                            integer: uint32; `ref`: ptr YR_ARENA_REF): cint {.
+    importc, cdecl, impyaraHdr.}
 proc yr_arena_load_stream*(stream: ptr YR_STREAM; arena: ptr ptr YR_ARENA): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_arena_save_stream*(arena: ptr YR_ARENA; stream: ptr YR_STREAM): cint {.importc,
+proc yr_arena_save_stream*(arena: ptr YR_ARENA; stream: ptr YR_STREAM): cint {.
+    importc, cdecl, impyaraHdr.}
+  ## ```
+                                ##   Copyright (c) 2007-2014. The YARA Authors. All Rights Reserved.
+                                ##   
+                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                ##   are permitted provided that the following conditions are met:
+                                ##   
+                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                ##   list of conditions and the following disclaimer.
+                                ##   
+                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                ##   other materials provided with the distribution.
+                                ##   
+                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                ##   may be used to endorse or promote products derived from this software without
+                                ##   specific prior written permission.
+                                ##   
+                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                ## ```
+proc ss_compare*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): cint {.importc,
     cdecl, impyaraHdr.}
-proc yr_bitmask_find_non_colliding_offset*(a: ptr culong; b: ptr culong; len_a: uint32;
-    len_b: uint32; off_a: ptr uint32): uint32 {.importc, cdecl, impyaraHdr.}
-proc yr_hash*(seed: uint32; buffer: pointer; len: uint): uint32 {.importc, cdecl,
+proc ss_icompare*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): cint {.importc,
+    cdecl, impyaraHdr.}
+proc ss_contains*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc,
+    cdecl, impyaraHdr.}
+proc ss_icontains*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc,
+    cdecl, impyaraHdr.}
+proc ss_startswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc,
+    cdecl, impyaraHdr.}
+proc ss_istartswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.
+    importc, cdecl, impyaraHdr.}
+proc ss_endswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc,
+    cdecl, impyaraHdr.}
+proc ss_iendswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc,
+    cdecl, impyaraHdr.}
+proc ss_dup*(s: ptr SIZED_STRING): ptr SIZED_STRING {.importc, cdecl, impyaraHdr.}
+proc ss_new*(s: cstring): ptr SIZED_STRING {.importc, cdecl, impyaraHdr.}
+proc ss_convert_to_wide*(s: ptr SIZED_STRING): ptr SIZED_STRING {.importc,
+    cdecl, impyaraHdr.}
+  ## ```
+                       ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ## ```
+proc yr_bitmask_find_non_colliding_offset*(a: ptr culong; b: ptr culong;
+    len_a: uint32; len_b: uint32; off_a: ptr uint32): uint32 {.importc, cdecl,
     impyaraHdr.}
-proc yr_hash_table_create*(size: cint; table: ptr ptr YR_HASH_TABLE): cint {.importc,
+proc yr_hash*(seed: uint32; buffer: pointer; len: uint): uint32 {.importc,
     cdecl, impyaraHdr.}
+proc yr_hash_table_create*(size: cint; table: ptr ptr YR_HASH_TABLE): cint {.
+    importc, cdecl, impyaraHdr.}
 proc yr_hash_table_clean*(table: ptr YR_HASH_TABLE;
-                         free_value: YR_HASH_TABLE_FREE_VALUE_FUNC) {.importc,
+                          free_value: YR_HASH_TABLE_FREE_VALUE_FUNC) {.importc,
     cdecl, impyaraHdr.}
 proc yr_hash_table_destroy*(table: ptr YR_HASH_TABLE;
-                           free_value: YR_HASH_TABLE_FREE_VALUE_FUNC) {.importc,
-    cdecl, impyaraHdr.}
+                            free_value: YR_HASH_TABLE_FREE_VALUE_FUNC) {.
+    importc, cdecl, impyaraHdr.}
+proc yr_hash_table_iterate*(table: ptr YR_HASH_TABLE; ns: cstring;
+                            iterate_func: YR_HASH_TABLE_ITERATE_FUNC;
+                            data: pointer): cint {.importc, cdecl, impyaraHdr.}
 proc yr_hash_table_lookup*(table: ptr YR_HASH_TABLE; key: cstring; ns: cstring): pointer {.
     importc, cdecl, impyaraHdr.}
 proc yr_hash_table_remove*(table: ptr YR_HASH_TABLE; key: cstring; ns: cstring): pointer {.
     importc, cdecl, impyaraHdr.}
 proc yr_hash_table_add*(table: ptr YR_HASH_TABLE; key: cstring; ns: cstring;
-                       value: pointer): cint {.importc, cdecl, impyaraHdr.}
-proc yr_hash_table_add_uint32*(table: ptr YR_HASH_TABLE; key: cstring; ns: cstring;
-                              value: uint32): cint {.importc, cdecl, impyaraHdr.}
-proc yr_hash_table_lookup_uint32*(table: ptr YR_HASH_TABLE; key: cstring; ns: cstring): uint32 {.
-    importc, cdecl, impyaraHdr.}
+                        value: pointer): cint {.importc, cdecl, impyaraHdr.}
+proc yr_hash_table_add_uint32*(table: ptr YR_HASH_TABLE; key: cstring;
+                               ns: cstring; value: uint32): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_hash_table_lookup_uint32*(table: ptr YR_HASH_TABLE; key: cstring;
+                                  ns: cstring): uint32 {.importc, cdecl,
+    impyaraHdr.}
 proc yr_hash_table_lookup_raw_key*(table: ptr YR_HASH_TABLE; key: pointer;
-                                  key_length: uint; ns: cstring): pointer {.importc,
-    cdecl, impyaraHdr.}
+                                   key_length: uint; ns: cstring): pointer {.
+    importc, cdecl, impyaraHdr.}
 proc yr_hash_table_remove_raw_key*(table: ptr YR_HASH_TABLE; key: pointer;
-                                  key_length: uint; ns: cstring): pointer {.importc,
-    cdecl, impyaraHdr.}
+                                   key_length: uint; ns: cstring): pointer {.
+    importc, cdecl, impyaraHdr.}
 proc yr_hash_table_add_raw_key*(table: ptr YR_HASH_TABLE; key: pointer;
-                               key_length: uint; ns: cstring; value: pointer): cint {.
+                                key_length: uint; ns: cstring; value: pointer): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_hash_table_add_uint32_raw_key*(table: ptr YR_HASH_TABLE; key: pointer;
-                                      key_length: uint; ns: cstring; value: uint32): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_hash_table_lookup_uint32_raw_key*(table: ptr YR_HASH_TABLE; key: pointer;
-    key_length: uint; ns: cstring): uint32 {.importc, cdecl, impyaraHdr.}
-proc ss_compare*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): cint {.importc, cdecl,
+                                       key_length: uint; ns: cstring;
+                                       value: uint32): cint {.importc, cdecl,
     impyaraHdr.}
-proc ss_icompare*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): cint {.importc, cdecl,
+proc yr_hash_table_lookup_uint32_raw_key*(table: ptr YR_HASH_TABLE;
+    key: pointer; key_length: uint; ns: cstring): uint32 {.importc, cdecl,
     impyaraHdr.}
-proc ss_contains*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc, cdecl,
-    impyaraHdr.}
-proc ss_icontains*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc, cdecl,
-    impyaraHdr.}
-proc ss_startswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc, cdecl,
-    impyaraHdr.}
-proc ss_istartswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc, cdecl,
-    impyaraHdr.}
-proc ss_endswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc, cdecl,
-    impyaraHdr.}
-proc ss_iendswith*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): bool {.importc, cdecl,
-    impyaraHdr.}
-proc ss_dup*(s: ptr SIZED_STRING): ptr SIZED_STRING {.importc, cdecl, impyaraHdr.}
-proc ss_new*(s: cstring): ptr SIZED_STRING {.importc, cdecl, impyaraHdr.}
-proc ss_convert_to_wide*(s: ptr SIZED_STRING): ptr SIZED_STRING {.importc, cdecl,
-    impyaraHdr.}
-proc yr_stopwatch_start*(stopwatch: ptr YR_STOPWATCH) {.importc, cdecl, impyaraHdr.}
-  ## ```
-  ##   yr_stopwatch_start starts measuring time.
-  ## ```
-proc yr_stopwatch_elapsed_ns*(stopwatch: ptr YR_STOPWATCH): uint64 {.importc, cdecl,
+proc yr_stopwatch_start*(stopwatch: ptr YR_STOPWATCH) {.importc, cdecl,
     impyaraHdr.}
   ## ```
-  ##   yr_stopwatch_elapsed_ns returns the number of nanoseconds elapsed
-  ##      since the last call to yr_stopwatch_start.
+                ##   yr_stopwatch_start starts measuring time.
+                ## ```
+proc yr_stopwatch_elapsed_ns*(stopwatch: ptr YR_STOPWATCH): uint64 {.importc,
+    cdecl, impyaraHdr.}
   ## ```
+                       ##   yr_stopwatch_elapsed_ns returns the number of nanoseconds elapsed
+                       ##      since the last call to yr_stopwatch_start.
+                       ## ```
 proc yr_current_thread_id*(): YR_THREAD_ID {.importc, cdecl, impyaraHdr.}
 proc yr_mutex_create*(a1: ptr YR_MUTEX): cint {.importc, cdecl, impyaraHdr.}
 proc yr_mutex_destroy*(a1: ptr YR_MUTEX): cint {.importc, cdecl, impyaraHdr.}
 proc yr_mutex_lock*(a1: ptr YR_MUTEX): cint {.importc, cdecl, impyaraHdr.}
 proc yr_mutex_unlock*(a1: ptr YR_MUTEX): cint {.importc, cdecl, impyaraHdr.}
-proc yr_thread_storage_create*(a1: ptr YR_THREAD_STORAGE_KEY): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_thread_storage_destroy*(a1: ptr YR_THREAD_STORAGE_KEY): cint {.importc, cdecl,
-    impyaraHdr.}
+proc yr_thread_storage_create*(a1: ptr YR_THREAD_STORAGE_KEY): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_thread_storage_destroy*(a1: ptr YR_THREAD_STORAGE_KEY): cint {.importc,
+    cdecl, impyaraHdr.}
 proc yr_thread_storage_set_value*(a1: ptr YR_THREAD_STORAGE_KEY; a2: pointer): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_thread_storage_get_value*(a1: ptr YR_THREAD_STORAGE_KEY): pointer {.importc,
-    cdecl, impyaraHdr.}
+proc yr_thread_storage_get_value*(a1: ptr YR_THREAD_STORAGE_KEY): pointer {.
+    importc, cdecl, impyaraHdr.}
   ## ```
-  ##   Created by Victor Manuel Alvarez on 3/4/20.
-  ## ```
-proc yr_notebook_create*(page_size: uint; pool: ptr ptr YR_NOTEBOOK): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_notebook_destroy*(pool: ptr YR_NOTEBOOK): cint {.importc, cdecl, impyaraHdr.}
-proc yr_notebook_alloc*(notebook: ptr YR_NOTEBOOK; size: uint): pointer {.importc,
-    cdecl, impyaraHdr.}
-proc yr_re_ast_create*(re_ast: ptr ptr RE_AST): cint {.importc, cdecl, impyaraHdr.}
+                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                                ##   
+                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                ##   are permitted provided that the following conditions are met:
+                                ##   
+                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                ##   list of conditions and the following disclaimer.
+                                ##   
+                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                ##   other materials provided with the distribution.
+                                ##   
+                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                ##   may be used to endorse or promote products derived from this software without
+                                ##   specific prior written permission.
+                                ##   
+                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                ##   
+                                ##     
+                                ##      Created by Victor Manuel Alvarez on 3/4/20.
+                                ## ```
+proc yr_notebook_create*(page_size: uint; pool: ptr ptr YR_NOTEBOOK): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_notebook_destroy*(pool: ptr YR_NOTEBOOK): cint {.importc, cdecl,
+    impyaraHdr.}
+proc yr_notebook_alloc*(notebook: ptr YR_NOTEBOOK; size: uint): pointer {.
+    importc, cdecl, impyaraHdr.}
+proc yr_re_ast_create*(re_ast: ptr ptr RE_AST): cint {.importc, cdecl,
+    impyaraHdr.}
 proc yr_re_ast_destroy*(re_ast: ptr RE_AST) {.importc, cdecl, impyaraHdr.}
 proc yr_re_ast_print*(re_ast: ptr RE_AST) {.importc, cdecl, impyaraHdr.}
-proc yr_re_ast_extract_literal*(re_ast: ptr RE_AST): ptr SIZED_STRING {.importc, cdecl,
-    impyaraHdr.}
-proc yr_re_ast_contains_dot_star*(re_ast: ptr RE_AST): cint {.importc, cdecl,
-    impyaraHdr.}
+proc yr_re_ast_extract_literal*(re_ast: ptr RE_AST): ptr SIZED_STRING {.importc,
+    cdecl, impyaraHdr.}
+proc yr_re_ast_has_unbounded_quantifier_for_dot*(re_ast: ptr RE_AST): cint {.
+    importc, cdecl, impyaraHdr.}
 proc yr_re_ast_split_at_chaining_point*(re_ast: ptr RE_AST;
-                                       remainder_re_ast: ptr ptr RE_AST;
-                                       min_gap: ptr int32; max_gap: ptr int32): cint {.
+                                        remainder_re_ast: ptr ptr RE_AST;
+                                        min_gap: ptr int32; max_gap: ptr int32): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_re_ast_emit_code*(re_ast: ptr RE_AST; arena: ptr YR_ARENA; backwards_code: cint): cint {.
-    importc, cdecl, impyaraHdr.}
+proc yr_re_ast_emit_code*(re_ast: ptr RE_AST; arena: ptr YR_ARENA;
+                          backwards_code: cint): cint {.importc, cdecl,
+    impyaraHdr.}
 proc yr_re_node_create*(`type`: cint): ptr RE_NODE {.importc, cdecl, impyaraHdr.}
 proc yr_re_node_destroy*(node: ptr RE_NODE) {.importc, cdecl, impyaraHdr.}
-proc yr_re_node_append_child*(node: ptr RE_NODE; child: ptr RE_NODE) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_re_node_prepend_child*(node: ptr RE_NODE; child: ptr RE_NODE) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_re_exec*(context: ptr YR_SCAN_CONTEXT; code: ptr uint8; input_data: ptr uint8;
-                input_forwards_size: uint; input_backwards_size: uint; flags: cint;
-                callback: RE_MATCH_CALLBACK_FUNC; callback_args: pointer;
-                matches: ptr cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_re_node_append_child*(node: ptr RE_NODE; child: ptr RE_NODE) {.importc,
+    cdecl, impyaraHdr.}
+proc yr_re_node_prepend_child*(node: ptr RE_NODE; child: ptr RE_NODE) {.importc,
+    cdecl, impyaraHdr.}
+proc yr_re_exec*(context: ptr YR_SCAN_CONTEXT; code: ptr uint8;
+                 input_data: ptr uint8; input_forwards_size: uint;
+                 input_backwards_size: uint; flags: cint;
+                 callback: RE_MATCH_CALLBACK_FUNC; callback_args: pointer;
+                 matches: ptr cint): cint {.importc, cdecl, impyaraHdr.}
 proc yr_re_fast_exec*(context: ptr YR_SCAN_CONTEXT; code: ptr uint8;
-                     input_data: ptr uint8; input_forwards_size: uint;
-                     input_backwards_size: uint; flags: cint;
-                     callback: RE_MATCH_CALLBACK_FUNC; callback_args: pointer;
-                     matches: ptr cint): cint {.importc, cdecl, impyaraHdr.}
-proc yr_re_parse*(re_string: cstring; re_ast: ptr ptr RE_AST; error: ptr RE_ERROR): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_re_parse_hex*(hex_string: cstring; re_ast: ptr ptr RE_AST; error: ptr RE_ERROR): cint {.
-    importc, cdecl, impyaraHdr.}
+                      input_data: ptr uint8; input_forwards_size: uint;
+                      input_backwards_size: uint; flags: cint;
+                      callback: RE_MATCH_CALLBACK_FUNC; callback_args: pointer;
+                      matches: ptr cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_re_parse*(re_string: cstring; re_ast: ptr ptr RE_AST;
+                  error: ptr RE_ERROR): cint {.importc, cdecl, impyaraHdr.}
+proc yr_re_parse_hex*(hex_string: cstring; re_ast: ptr ptr RE_AST;
+                      error: ptr RE_ERROR): cint {.importc, cdecl, impyaraHdr.}
 proc yr_re_compile*(re_string: cstring; flags: cint; arena: ptr YR_ARENA;
-                   `ref`: ptr YR_ARENA_REF; error: ptr RE_ERROR): cint {.importc, cdecl,
-    impyaraHdr.}
+                    `ref`: ptr YR_ARENA_REF; error: ptr RE_ERROR): cint {.
+    importc, cdecl, impyaraHdr.}
 proc yr_re_match*(context: ptr YR_SCAN_CONTEXT; re: ptr RE; target: cstring): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_atoms_extract_from_re*(config: ptr YR_ATOMS_CONFIG; re_ast: ptr RE_AST;
-                              modifier: YR_MODIFIER;
-                              atoms: ptr ptr YR_ATOM_LIST_ITEM;
-                              min_atom_quality: ptr cint): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_atoms_extract_from_string*(config: ptr YR_ATOMS_CONFIG; string: ptr uint8;
-                                  string_length: cint; modifier: YR_MODIFIER;
-                                  atoms: ptr ptr YR_ATOM_LIST_ITEM;
-                                  min_atom_quality: ptr cint): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_atoms_extract_triplets*(re_node: ptr RE_NODE;
-                               atoms: ptr ptr YR_ATOM_LIST_ITEM): cint {.importc,
+                               modifier: YR_MODIFIER;
+                               atoms: ptr ptr YR_ATOM_LIST_ITEM;
+                               min_atom_quality: ptr cint): cint {.importc,
     cdecl, impyaraHdr.}
+proc yr_atoms_extract_from_string*(config: ptr YR_ATOMS_CONFIG;
+                                   string: ptr uint8; string_length: cint;
+                                   modifier: YR_MODIFIER;
+                                   atoms: ptr ptr YR_ATOM_LIST_ITEM;
+                                   min_atom_quality: ptr cint): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_atoms_extract_triplets*(re_node: ptr RE_NODE;
+                                atoms: ptr ptr YR_ATOM_LIST_ITEM): cint {.
+    importc, cdecl, impyaraHdr.}
 proc yr_atoms_heuristic_quality*(config: ptr YR_ATOMS_CONFIG; atom: ptr YR_ATOM): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_atoms_table_quality*(config: ptr YR_ATOMS_CONFIG; atom: ptr YR_ATOM): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_atoms_min_quality*(config: ptr YR_ATOMS_CONFIG;
-                          atom_list: ptr YR_ATOM_LIST_ITEM): cint {.importc, cdecl,
-    impyaraHdr.}
+                           atom_list: ptr YR_ATOM_LIST_ITEM): cint {.importc,
+    cdecl, impyaraHdr.}
 proc yr_atoms_list_destroy*(list_head: ptr YR_ATOM_LIST_ITEM) {.importc, cdecl,
     impyaraHdr.}
-proc yr_ac_automaton_create*(arena: ptr YR_ARENA; automaton: ptr ptr YR_AC_AUTOMATON): cint {.
+  ## ```
+                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ##   
+                ##     
+                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ##   
+                ##      Number of bits dedicated to store the offset of the slot relative to its
+                ##      own state.
+                ## ```
+proc yr_ac_automaton_create*(arena: ptr YR_ARENA;
+                             automaton: ptr ptr YR_AC_AUTOMATON): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_ac_automaton_destroy*(automaton: ptr YR_AC_AUTOMATON): cint {.importc, cdecl,
-    impyaraHdr.}
+proc yr_ac_automaton_destroy*(automaton: ptr YR_AC_AUTOMATON): cint {.importc,
+    cdecl, impyaraHdr.}
 proc yr_ac_add_string*(automaton: ptr YR_AC_AUTOMATON; string: ptr YR_STRING;
-                      string_idx: uint32; atom: ptr YR_ATOM_LIST_ITEM;
-                      arena: ptr YR_ARENA): cint {.importc, cdecl, impyaraHdr.}
+                       string_idx: uint32; atom: ptr YR_ATOM_LIST_ITEM;
+                       arena: ptr YR_ARENA): cint {.importc, cdecl, impyaraHdr.}
 proc yr_ac_compile*(automaton: ptr YR_AC_AUTOMATON; arena: ptr YR_ARENA): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_ac_print_automaton*(automaton: ptr YR_AC_AUTOMATON) {.importc, cdecl,
     impyaraHdr.}
+  ## ```
+                ##   Copyright (c) 2020. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##     are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##     may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ##   
+                ##     
+                ##   Copyright (c) 2007-2015. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ##   
+                ##     
+                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ##   
+                ##     
+                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ## ```
 proc yr_compiler_push_file_name*(compiler: ptr YR_COMPILER; file_name: cstring): cint {.
     importc: "_yr_compiler_push_file_name", cdecl, impyaraHdr.}
 proc yr_compiler_pop_file_name*(compiler: ptr YR_COMPILER) {.
@@ -1568,43 +1881,47 @@ proc yr_compiler_get_var_frame*(compiler: ptr YR_COMPILER): cint {.
 proc yr_compiler_default_include_callback*(include_name: cstring;
     calling_rule_filename: cstring; calling_rule_namespace: cstring;
     user_data: pointer): cstring {.importc: "_yr_compiler_default_include_callback",
-                                cdecl, impyaraHdr.}
+                                   cdecl, impyaraHdr.}
 proc yr_compiler_get_rule_by_idx*(compiler: ptr YR_COMPILER; rule_idx: uint32): ptr YR_RULE {.
     importc: "_yr_compiler_get_rule_by_idx", cdecl, impyaraHdr.}
 proc yr_compiler_store_string*(compiler: ptr YR_COMPILER; string: cstring;
-                              `ref`: ptr YR_ARENA_REF): cint {.
+                               `ref`: ptr YR_ARENA_REF): cint {.
     importc: "_yr_compiler_store_string", cdecl, impyaraHdr.}
 proc yr_compiler_store_data*(compiler: ptr YR_COMPILER; data: pointer;
-                            data_length: uint; `ref`: ptr YR_ARENA_REF): cint {.
+                             data_length: uint; `ref`: ptr YR_ARENA_REF): cint {.
     importc: "_yr_compiler_store_data", cdecl, impyaraHdr.}
 proc yr_compiler_create*(compiler: ptr ptr YR_COMPILER): cint {.importc, cdecl,
     impyaraHdr.}
-proc yr_compiler_destroy*(compiler: ptr YR_COMPILER) {.importc, cdecl, impyaraHdr.}
+proc yr_compiler_destroy*(compiler: ptr YR_COMPILER) {.importc, cdecl,
+    impyaraHdr.}
 proc yr_compiler_set_callback*(compiler: ptr YR_COMPILER;
-                              callback: YR_COMPILER_CALLBACK_FUNC;
-                              user_data: pointer) {.importc, cdecl, impyaraHdr.}
-proc yr_compiler_set_include_callback*(compiler: ptr YR_COMPILER; include_callback: YR_COMPILER_INCLUDE_CALLBACK_FUNC;
-    include_free: YR_COMPILER_INCLUDE_FREE_FUNC; user_data: pointer) {.importc,
-    cdecl, impyaraHdr.}
+                               callback: YR_COMPILER_CALLBACK_FUNC;
+                               user_data: pointer) {.importc, cdecl, impyaraHdr.}
+proc yr_compiler_set_include_callback*(compiler: ptr YR_COMPILER;
+    include_callback: YR_COMPILER_INCLUDE_CALLBACK_FUNC; include_free: YR_COMPILER_INCLUDE_FREE_FUNC;
+                                       user_data: pointer) {.importc, cdecl,
+    impyaraHdr.}
 proc yr_compiler_set_re_ast_callback*(compiler: ptr YR_COMPILER; re_ast_callback: YR_COMPILER_RE_AST_CALLBACK_FUNC;
-                                     user_data: pointer) {.importc, cdecl,
+                                      user_data: pointer) {.importc, cdecl,
     impyaraHdr.}
-proc yr_compiler_set_atom_quality_table*(compiler: ptr YR_COMPILER; table: pointer;
-                                        entries: cint; warning_threshold: uint8) {.
-    importc, cdecl, impyaraHdr.}
+proc yr_compiler_set_atom_quality_table*(compiler: ptr YR_COMPILER;
+    table: pointer; entries: cint; warning_threshold: uint8) {.importc, cdecl,
+    impyaraHdr.}
 proc yr_compiler_load_atom_quality_table*(compiler: ptr YR_COMPILER;
-    filename: cstring; warning_threshold: uint8): cint {.importc, cdecl, impyaraHdr.}
-proc yr_compiler_add_file*(compiler: ptr YR_COMPILER; rules_file: File;
-                          namespace_g: cstring; file_name: cstring): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_compiler_add_fd*(compiler: ptr YR_COMPILER; rules_fd: cint;
-                        namespace_g: cstring; file_name: cstring): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_compiler_add_string*(compiler: ptr YR_COMPILER; rules_string: cstring;
-                            namespace_g: cstring): cint {.importc, cdecl, impyaraHdr.}
-proc yr_compiler_get_error_message*(compiler: ptr YR_COMPILER; buffer: cstring;
-                                   buffer_size: cint): cstring {.importc, cdecl,
+    filename: cstring; warning_threshold: uint8): cint {.importc, cdecl,
     impyaraHdr.}
+proc yr_compiler_add_file*(compiler: ptr YR_COMPILER; rules_file: File;
+                           namespace: cstring; file_name: cstring): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_compiler_add_fd*(compiler: ptr YR_COMPILER; rules_fd: cint;
+                         namespace: cstring; file_name: cstring): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_compiler_add_string*(compiler: ptr YR_COMPILER; rules_string: cstring;
+                             namespace: cstring): cint {.importc, cdecl,
+    impyaraHdr.}
+proc yr_compiler_get_error_message*(compiler: ptr YR_COMPILER; buffer: cstring;
+                                    buffer_size: cint): cstring {.importc,
+    cdecl, impyaraHdr.}
 proc yr_compiler_get_current_file_name*(compiler: ptr YR_COMPILER): cstring {.
     importc, cdecl, impyaraHdr.}
 proc yr_compiler_define_integer_variable*(compiler: ptr YR_COMPILER;
@@ -1612,71 +1929,327 @@ proc yr_compiler_define_integer_variable*(compiler: ptr YR_COMPILER;
 proc yr_compiler_define_boolean_variable*(compiler: ptr YR_COMPILER;
     identifier: cstring; value: cint): cint {.importc, cdecl, impyaraHdr.}
 proc yr_compiler_define_float_variable*(compiler: ptr YR_COMPILER;
-                                       identifier: cstring; value: cdouble): cint {.
+                                        identifier: cstring; value: cdouble): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_compiler_define_string_variable*(compiler: ptr YR_COMPILER;
-                                        identifier: cstring; value: cstring): cint {.
-    importc, cdecl, impyaraHdr.}
+    identifier: cstring; value: cstring): cint {.importc, cdecl, impyaraHdr.}
 proc yr_compiler_get_rules*(compiler: ptr YR_COMPILER; rules: ptr ptr YR_RULES): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_scan_verify_match*(context: ptr YR_SCAN_CONTEXT; ac_match: ptr YR_AC_MATCH;
-                          data: ptr uint8; data_size: uint; data_base: uint64;
-                          offset: uint): cint {.importc, cdecl, impyaraHdr.}
-proc yr_rules_scan_mem_blocks*(rules: ptr YR_RULES;
-                              `iterator`: ptr YR_MEMORY_BLOCK_ITERATOR;
-                              flags: cint; callback: YR_CALLBACK_FUNC;
-                              user_data: pointer; timeout: cint): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_rules_scan_mem*(rules: ptr YR_RULES; buffer: ptr uint8; buffer_size: uint;
-                       flags: cint; callback: YR_CALLBACK_FUNC; user_data: pointer;
-                       timeout: cint): cint {.importc, cdecl, impyaraHdr.}
-proc yr_rules_scan_file*(rules: ptr YR_RULES; filename: cstring; flags: cint;
-                        callback: YR_CALLBACK_FUNC; user_data: pointer;
-                        timeout: cint): cint {.importc, cdecl, impyaraHdr.}
-proc yr_rules_scan_fd*(rules: ptr YR_RULES; fd: cint; flags: cint;
-                      callback: YR_CALLBACK_FUNC; user_data: pointer; timeout: cint): cint {.
+  ## ```
+                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                                ##   
+                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                ##   are permitted provided that the following conditions are met:
+                                ##   
+                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                ##   list of conditions and the following disclaimer.
+                                ##   
+                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                ##   other materials provided with the distribution.
+                                ##   
+                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                ##   may be used to endorse or promote products derived from this software without
+                                ##   specific prior written permission.
+                                ##   
+                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                ## ```
+proc yr_scanner_create*(rules: ptr YR_RULES; scanner: ptr ptr YR_SCANNER): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_rules_scan_proc*(rules: ptr YR_RULES; pid: cint; flags: cint;
+proc yr_scanner_destroy*(scanner: ptr YR_SCANNER) {.importc, cdecl, impyaraHdr.}
+proc yr_scanner_set_callback*(scanner: ptr YR_SCANNER;
+                              callback: YR_CALLBACK_FUNC; user_data: pointer) {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_set_timeout*(scanner: ptr YR_SCANNER; timeout: cint) {.importc,
+    cdecl, impyaraHdr.}
+proc yr_scanner_set_flags*(scanner: ptr YR_SCANNER; flags: cint) {.importc,
+    cdecl, impyaraHdr.}
+proc yr_scanner_define_integer_variable*(scanner: ptr YR_SCANNER;
+    identifier: cstring; value: int64): cint {.importc, cdecl, impyaraHdr.}
+proc yr_scanner_define_boolean_variable*(scanner: ptr YR_SCANNER;
+    identifier: cstring; value: cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_scanner_define_float_variable*(scanner: ptr YR_SCANNER;
+                                       identifier: cstring; value: cdouble): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_define_string_variable*(scanner: ptr YR_SCANNER;
+                                        identifier: cstring; value: cstring): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_scan_mem_blocks*(scanner: ptr YR_SCANNER;
+                                 `iterator`: ptr YR_MEMORY_BLOCK_ITERATOR): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_scan_mem*(scanner: ptr YR_SCANNER; buffer: ptr uint8;
+                          buffer_size: uint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_scanner_scan_file*(scanner: ptr YR_SCANNER; filename: cstring): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_scan_fd*(scanner: ptr YR_SCANNER; fd: cint): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_scanner_scan_proc*(scanner: ptr YR_SCANNER; pid: cint): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_scanner_last_error_rule*(scanner: ptr YR_SCANNER): ptr YR_RULE {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_last_error_string*(scanner: ptr YR_SCANNER): ptr YR_STRING {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_get_profiling_info*(scanner: ptr YR_SCANNER): ptr YR_RULE_PROFILING_INFO {.
+    importc, cdecl, impyaraHdr.}
+proc yr_scanner_reset_profiling_info*(scanner: ptr YR_SCANNER) {.importc, cdecl,
+    impyaraHdr.}
+proc yr_scanner_print_profiling_info*(scanner: ptr YR_SCANNER): cint {.importc,
+    cdecl, impyaraHdr.}
+  ## ```
+                       ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ## ```
+proc yr_rules_scan_mem_blocks*(rules: ptr YR_RULES;
+                               `iterator`: ptr YR_MEMORY_BLOCK_ITERATOR;
+                               flags: cint; callback: YR_CALLBACK_FUNC;
+                               user_data: pointer; timeout: cint): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_rules_scan_mem*(rules: ptr YR_RULES; buffer: ptr uint8;
+                        buffer_size: uint; flags: cint;
                         callback: YR_CALLBACK_FUNC; user_data: pointer;
                         timeout: cint): cint {.importc, cdecl, impyaraHdr.}
-proc yr_rules_save*(rules: ptr YR_RULES; filename: cstring): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_rules_save_stream*(rules: ptr YR_RULES; stream: ptr YR_STREAM): cint {.importc,
+proc yr_rules_scan_file*(rules: ptr YR_RULES; filename: cstring; flags: cint;
+                         callback: YR_CALLBACK_FUNC; user_data: pointer;
+                         timeout: cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_rules_scan_fd*(rules: ptr YR_RULES; fd: cint; flags: cint;
+                       callback: YR_CALLBACK_FUNC; user_data: pointer;
+                       timeout: cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_rules_scan_proc*(rules: ptr YR_RULES; pid: cint; flags: cint;
+                         callback: YR_CALLBACK_FUNC; user_data: pointer;
+                         timeout: cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_rules_save*(rules: ptr YR_RULES; filename: cstring): cint {.importc,
     cdecl, impyaraHdr.}
-proc yr_rules_load*(filename: cstring; rules: ptr ptr YR_RULES): cint {.importc, cdecl,
-    impyaraHdr.}
+proc yr_rules_save_stream*(rules: ptr YR_RULES; stream: ptr YR_STREAM): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_rules_load*(filename: cstring; rules: ptr ptr YR_RULES): cint {.importc,
+    cdecl, impyaraHdr.}
 proc yr_rules_load_stream*(stream: ptr YR_STREAM; rules: ptr ptr YR_RULES): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_rules_destroy*(rules: ptr YR_RULES): cint {.importc, cdecl, impyaraHdr.}
 proc yr_rules_define_integer_variable*(rules: ptr YR_RULES; identifier: cstring;
-                                      value: int64): cint {.importc, cdecl,
+                                       value: int64): cint {.importc, cdecl,
     impyaraHdr.}
 proc yr_rules_define_boolean_variable*(rules: ptr YR_RULES; identifier: cstring;
-                                      value: cint): cint {.importc, cdecl, impyaraHdr.}
+                                       value: cint): cint {.importc, cdecl,
+    impyaraHdr.}
 proc yr_rules_define_float_variable*(rules: ptr YR_RULES; identifier: cstring;
-                                    value: cdouble): cint {.importc, cdecl,
+                                     value: cdouble): cint {.importc, cdecl,
     impyaraHdr.}
 proc yr_rules_define_string_variable*(rules: ptr YR_RULES; identifier: cstring;
-                                     value: cstring): cint {.importc, cdecl,
+                                      value: cstring): cint {.importc, cdecl,
     impyaraHdr.}
 proc yr_rules_get_stats*(rules: ptr YR_RULES; stats: ptr YR_RULES_STATS): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_rule_disable*(rule: ptr YR_RULE) {.importc, cdecl, impyaraHdr.}
 proc yr_rule_enable*(rule: ptr YR_RULE) {.importc, cdecl, impyaraHdr.}
-proc yr_rules_from_arena*(arena: ptr YR_ARENA; rules: ptr ptr YR_RULES): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_execute_code*(context: ptr YR_SCAN_CONTEXT): cint {.importc, cdecl, impyaraHdr.}
-proc yr_object_create*(`type`: int8; identifier: cstring; parent: ptr YR_OBJECT;
-                      `object`: ptr ptr YR_OBJECT): cint {.importc, cdecl, impyaraHdr.}
-proc yr_object_set_canary*(`object`: ptr YR_OBJECT; canary: cint) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_object_function_create*(identifier: cstring; arguments_fmt: cstring;
-                               return_fmt: cstring; `func`: YR_MODULE_FUNC;
-                               parent: ptr YR_OBJECT; function: ptr ptr YR_OBJECT): cint {.
+proc yr_rules_from_arena*(arena: ptr YR_ARENA; rules: ptr ptr YR_RULES): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_object_from_external_variable*(external: ptr YR_EXTERNAL_VARIABLE;
-                                      `object`: ptr ptr YR_OBJECT): cint {.importc,
+  ## ```
+                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                                ##   
+                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                ##   are permitted provided that the following conditions are met:
+                                ##   
+                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                ##   list of conditions and the following disclaimer.
+                                ##   
+                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                ##   other materials provided with the distribution.
+                                ##   
+                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                ##   may be used to endorse or promote products derived from this software without
+                                ##   specific prior written permission.
+                                ##   
+                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                ## ```
+proc yr_scan_verify_match*(context: ptr YR_SCAN_CONTEXT;
+                           ac_match: ptr YR_AC_MATCH; data: ptr uint8;
+                           data_size: uint; data_base: uint64; offset: uint): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_execute_code*(context: ptr YR_SCAN_CONTEXT): cint {.importc, cdecl,
+    impyaraHdr.}
+  ## ```
+                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                ##   
+                ##   Redistribution and use in source and binary forms, with or without modification,
+                ##   are permitted provided that the following conditions are met:
+                ##   
+                ##   1. Redistributions of source code must retain the above copyright notice, this
+                ##   list of conditions and the following disclaimer.
+                ##   
+                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                ##   this list of conditions and the following disclaimer in the documentation and/or
+                ##   other materials provided with the distribution.
+                ##   
+                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                ##   may be used to endorse or promote products derived from this software without
+                ##   specific prior written permission.
+                ##   
+                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                ## ```
+proc yr_initialize*(): cint {.importc, cdecl, impyaraHdr.}
+proc yr_finalize*(): cint {.importc, cdecl, impyaraHdr.}
+proc yr_set_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc,
     cdecl, impyaraHdr.}
+proc yr_set_configuration_uint32*(a1: YR_CONFIG_NAME; a2: uint32): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_set_configuration_uint64*(a1: YR_CONFIG_NAME; a2: uint64): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_get_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_get_configuration_uint32*(a1: YR_CONFIG_NAME; a2: ptr uint32): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_get_configuration_uint64*(a1: YR_CONFIG_NAME; a2: ptr uint64): cint {.
+    importc, cdecl, impyaraHdr.}
+  ## ```
+                                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                                ##   
+                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                ##   are permitted provided that the following conditions are met:
+                                ##   
+                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                ##   list of conditions and the following disclaimer.
+                                ##   
+                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                ##   other materials provided with the distribution.
+                                ##   
+                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                ##   may be used to endorse or promote products derived from this software without
+                                ##   specific prior written permission.
+                                ##   
+                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                ##   
+                                ##     
+                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                                ##   
+                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                ##   are permitted provided that the following conditions are met:
+                                ##   
+                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                ##   list of conditions and the following disclaimer.
+                                ##   
+                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                ##   other materials provided with the distribution.
+                                ##   
+                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                ##   may be used to endorse or promote products derived from this software without
+                                ##   specific prior written permission.
+                                ##   
+                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                ## ```
+proc yr_object_create*(`type`: int8; identifier: cstring; parent: ptr YR_OBJECT;
+                       `object`: ptr ptr YR_OBJECT): cint {.importc, cdecl,
+    impyaraHdr.}
+proc yr_object_set_canary*(`object`: ptr YR_OBJECT; canary: cint) {.importc,
+    cdecl, impyaraHdr.}
+proc yr_object_function_create*(identifier: cstring; arguments_fmt: cstring;
+                                return_fmt: cstring; `func`: YR_MODULE_FUNC;
+                                parent: ptr YR_OBJECT;
+                                function: ptr ptr YR_OBJECT): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_object_from_external_variable*(external: ptr YR_EXTERNAL_VARIABLE;
+                                       `object`: ptr ptr YR_OBJECT): cint {.
+    importc, cdecl, impyaraHdr.}
 proc yr_object_destroy*(`object`: ptr YR_OBJECT) {.importc, cdecl, impyaraHdr.}
 proc yr_object_copy*(`object`: ptr YR_OBJECT; object_copy: ptr ptr YR_OBJECT): cint {.
     importc, cdecl, impyaraHdr.}
@@ -1686,102 +2259,278 @@ proc yr_object_lookup*(root: ptr YR_OBJECT; flags: cint; pattern: cstring): ptr 
     importc, cdecl, impyaraHdr, varargs.}
 proc yr_object_has_undefined_value*(`object`: ptr YR_OBJECT; field: cstring): bool {.
     importc, cdecl, impyaraHdr, varargs.}
-proc yr_object_get_float*(`object`: ptr YR_OBJECT; field: cstring): cdouble {.importc,
-    cdecl, impyaraHdr, varargs.}
-proc yr_object_get_integer*(`object`: ptr YR_OBJECT; field: cstring): int64 {.importc,
-    cdecl, impyaraHdr, varargs.}
+proc yr_object_get_float*(`object`: ptr YR_OBJECT; field: cstring): cdouble {.
+    importc, cdecl, impyaraHdr, varargs.}
+proc yr_object_get_integer*(`object`: ptr YR_OBJECT; field: cstring): int64 {.
+    importc, cdecl, impyaraHdr, varargs.}
 proc yr_object_get_string*(`object`: ptr YR_OBJECT; field: cstring): ptr SIZED_STRING {.
     importc, cdecl, impyaraHdr, varargs.}
-proc yr_object_set_integer*(value: int64; `object`: ptr YR_OBJECT; field: cstring): cint {.
-    importc, cdecl, impyaraHdr, varargs.}
-proc yr_object_set_float*(value: cdouble; `object`: ptr YR_OBJECT; field: cstring): cint {.
-    importc, cdecl, impyaraHdr, varargs.}
+proc yr_object_set_integer*(value: int64; `object`: ptr YR_OBJECT;
+                            field: cstring): cint {.importc, cdecl, impyaraHdr,
+    varargs.}
+proc yr_object_set_float*(value: cdouble; `object`: ptr YR_OBJECT;
+                          field: cstring): cint {.importc, cdecl, impyaraHdr,
+    varargs.}
 proc yr_object_set_string*(value: cstring; len: uint; `object`: ptr YR_OBJECT;
-                          field: cstring): cint {.importc, cdecl, impyaraHdr, varargs.}
+                           field: cstring): cint {.importc, cdecl, impyaraHdr,
+    varargs.}
 proc yr_object_array_length*(`object`: ptr YR_OBJECT): cint {.importc, cdecl,
     impyaraHdr.}
 proc yr_object_array_get_item*(`object`: ptr YR_OBJECT; flags: cint; index: cint): ptr YR_OBJECT {.
     importc, cdecl, impyaraHdr.}
 proc yr_object_array_set_item*(`object`: ptr YR_OBJECT; item: ptr YR_OBJECT;
-                              index: cint): cint {.importc, cdecl, impyaraHdr.}
+                               index: cint): cint {.importc, cdecl, impyaraHdr.}
 proc yr_object_dict_get_item*(`object`: ptr YR_OBJECT; flags: cint; key: cstring): ptr YR_OBJECT {.
     importc, cdecl, impyaraHdr.}
 proc yr_object_dict_set_item*(`object`: ptr YR_OBJECT; item: ptr YR_OBJECT;
-                             key: cstring): cint {.importc, cdecl, impyaraHdr.}
-proc yr_object_structure_set_member*(`object`: ptr YR_OBJECT; member: ptr YR_OBJECT): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_object_get_root*(`object`: ptr YR_OBJECT): ptr YR_OBJECT {.importc, cdecl,
-    impyaraHdr.}
+                              key: cstring): cint {.importc, cdecl, impyaraHdr.}
+proc yr_object_structure_set_member*(`object`: ptr YR_OBJECT;
+                                     member: ptr YR_OBJECT): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_object_get_root*(`object`: ptr YR_OBJECT): ptr YR_OBJECT {.importc,
+    cdecl, impyaraHdr.}
 proc yr_object_print_data*(`object`: ptr YR_OBJECT; indent: cint;
-                          print_identifier: cint) {.importc, cdecl, impyaraHdr.}
-proc yr_initialize*(): cint {.importc, cdecl, impyaraHdr.}
-proc yr_finalize*(): cint {.importc, cdecl, impyaraHdr.}
-proc yr_set_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_get_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc, cdecl,
-    impyaraHdr.}
+                           print_identifier: cint) {.importc, cdecl, impyaraHdr.}
 proc yr_modules_initialize*(): cint {.importc, cdecl, impyaraHdr.}
 proc yr_modules_finalize*(): cint {.importc, cdecl, impyaraHdr.}
 proc yr_modules_do_declarations*(module_name: cstring;
-                                main_structure: ptr YR_OBJECT): cint {.importc,
+                                 main_structure: ptr YR_OBJECT): cint {.importc,
     cdecl, impyaraHdr.}
 proc yr_modules_load*(module_name: cstring; context: ptr YR_SCAN_CONTEXT): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_modules_unload_all*(context: ptr YR_SCAN_CONTEXT): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_create*(rules: ptr YR_RULES; scanner: ptr ptr YR_SCANNER): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_scanner_destroy*(scanner: ptr YR_SCANNER) {.importc, cdecl, impyaraHdr.}
-proc yr_scanner_set_callback*(scanner: ptr YR_SCANNER; callback: YR_CALLBACK_FUNC;
-                             user_data: pointer) {.importc, cdecl, impyaraHdr.}
-proc yr_scanner_set_timeout*(scanner: ptr YR_SCANNER; timeout: cint) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_set_flags*(scanner: ptr YR_SCANNER; flags: cint) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_define_integer_variable*(scanner: ptr YR_SCANNER;
-                                        identifier: cstring; value: int64): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_scanner_define_boolean_variable*(scanner: ptr YR_SCANNER;
-                                        identifier: cstring; value: cint): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_scanner_define_float_variable*(scanner: ptr YR_SCANNER; identifier: cstring;
-                                      value: cdouble): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_define_string_variable*(scanner: ptr YR_SCANNER;
-                                       identifier: cstring; value: cstring): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_scanner_scan_mem_blocks*(scanner: ptr YR_SCANNER;
-                                `iterator`: ptr YR_MEMORY_BLOCK_ITERATOR): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_scanner_scan_file*(scanner: ptr YR_SCANNER; filename: cstring): cint {.importc,
+proc yr_modules_unload_all*(context: ptr YR_SCAN_CONTEXT): cint {.importc,
     cdecl, impyaraHdr.}
-proc yr_scanner_scan_fd*(scanner: ptr YR_SCANNER; fd: cint): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_scan_proc*(scanner: ptr YR_SCANNER; pid: cint): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_last_error_rule*(scanner: ptr YR_SCANNER): ptr YR_RULE {.importc,
-    cdecl, impyaraHdr.}
-proc yr_scanner_last_error_string*(scanner: ptr YR_SCANNER): ptr YR_STRING {.importc,
-    cdecl, impyaraHdr.}
-proc yr_scanner_get_profiling_info*(scanner: ptr YR_SCANNER): ptr YR_RULE_PROFILING_INFO {.
-    importc, cdecl, impyaraHdr.}
-proc yr_scanner_reset_profiling_info*(scanner: ptr YR_SCANNER) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_scanner_print_profiling_info*(scanner: ptr YR_SCANNER): cint {.importc, cdecl,
-    impyaraHdr.}
+  ## ```
+                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2015. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2018. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ##   
+                       ##     
+                       ##   Copyright (c) 2007. The YARA Authors. All Rights Reserved.
+                       ##   
+                       ##   Redistribution and use in source and binary forms, with or without modification,
+                       ##   are permitted provided that the following conditions are met:
+                       ##   
+                       ##   1. Redistributions of source code must retain the above copyright notice, this
+                       ##   list of conditions and the following disclaimer.
+                       ##   
+                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                       ##   this list of conditions and the following disclaimer in the documentation and/or
+                       ##   other materials provided with the distribution.
+                       ##   
+                       ##   3. Neither the name of the copyright holder nor the names of its contributors
+                       ##   may be used to endorse or promote products derived from this software without
+                       ##   specific prior written permission.
+                       ##   
+                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                       ## ```
 proc yr_calloc*(count: uint; size: uint): pointer {.importc, cdecl, impyaraHdr.}
+  ## ```
+                                                                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+                                                                                ##   
+                                                                                ##   Redistribution and use in source and binary forms, with or without modification,
+                                                                                ##   are permitted provided that the following conditions are met:
+                                                                                ##   
+                                                                                ##   1. Redistributions of source code must retain the above copyright notice, this
+                                                                                ##   list of conditions and the following disclaimer.
+                                                                                ##   
+                                                                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
+                                                                                ##   this list of conditions and the following disclaimer in the documentation and/or
+                                                                                ##   other materials provided with the distribution.
+                                                                                ##   
+                                                                                ##   3. Neither the name of the copyright holder nor the names of its contributors
+                                                                                ##   may be used to endorse or promote products derived from this software without
+                                                                                ##   specific prior written permission.
+                                                                                ##   
+                                                                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                                                                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                                                                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                                                                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+                                                                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                                                                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                                                                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+                                                                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                                                                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                                                                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                                                                ## ```
 proc yr_malloc*(size: uint): pointer {.importc, cdecl, impyaraHdr.}
-proc yr_realloc*(`ptr`: pointer; size: uint): pointer {.importc, cdecl, impyaraHdr.}
-proc yr_free*(`ptr`: pointer) {.importc, cdecl, impyaraHdr.}
+proc yr_realloc*(`ptr`: pointer; size: uint): pointer {.importc, cdecl,
+    impyaraHdr.}
 proc yr_strdup*(str: cstring): cstring {.importc, cdecl, impyaraHdr.}
 proc yr_strndup*(str: cstring; n: uint): cstring {.importc, cdecl, impyaraHdr.}
+proc yr_free*(`ptr`: pointer) {.importc, cdecl, impyaraHdr.}
 proc yr_heap_alloc*(): cint {.importc, cdecl, impyaraHdr.}
 proc yr_heap_free*(): cint {.importc, cdecl, impyaraHdr.}
 {.pop.}
-
-# # Custom procs for easier life
-
-# {.compile: "yr_helpers.c".}
-# proc yr_rule_count_strings*(rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
-# proc yr_scan_count_strings_m*(context: ptr YR_SCAN_CONTEXT, rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
-# proc yr_rule_is_weight*(rule: ptr YR_RULE): cint {.importc, impyaraHdr.}
