@@ -14,8 +14,6 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     ctx = cast[ptr FileScanner](user_data)
     rule = cast[ptr YR_RULE](message_data)
 
-  progress_bar_flush()
-
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
     return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)

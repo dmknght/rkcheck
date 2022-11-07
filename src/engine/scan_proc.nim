@@ -10,9 +10,7 @@ proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
   #[
     Print virus found message with file path
   ]#
-  progress_bar_flush()
   proc_scanner_on_scan_matched($rule.ns.name, $rule.identifier, ctx.proc_binary, ctx.proc_id)
-  progress_bar_flush()
   ctx.sumary_infected += 1
 
   return CALLBACK_ABORT
@@ -61,7 +59,6 @@ proc pscanner_process_pid*(ctx: var ProcScanner, pid: uint) =
     progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary)
     ctx.sumary_scanned += 1
     discard pscanner_cb_scan_proc(ctx)
-    progress_bar_flush()
   except:
     # Do not scan if has error. For example: Permission Denied when read /proc/1/exe
     discard
