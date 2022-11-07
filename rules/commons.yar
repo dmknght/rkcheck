@@ -201,11 +201,11 @@ rule Flooder_Gen1 {
     date = "12/11/2021"
     target = "File, memory"
   strings:
-    $1 = "JUNK Flooding %s:%d"
-    $2 = "UDP Flooding %s"
-    $3 = "TCP Flooding %s"
-    $4 = "LOLNOGTFO"
-    $5 = "KILLATTK"
+    $1 = "JUNK Flooding %s:%d" fullword ascii
+    $2 = "UDP Flooding %s" fullword ascii
+    $3 = "TCP Flooding %s" fullword ascii
+    $4 = "LOLNOGTFO" fullword ascii
+    $5 = "KILLATTK" fullword ascii
   condition:
   (
     is_elf and for any i in (0 .. elf.number_of_sections):
@@ -226,9 +226,9 @@ rule Flooder_Gen2 {
     email = "dmknght@parrotsec.org"
     date = "19/10/2022"
   strings:
-    $1 = "[UDP] Failed to ddos" ascii
-    $2 = "[HTTP] Flooding" ascii
-    $3 = "[UDP] Flooding Rooted Spoof" ascii
+    $1 = "[UDP] Failed to ddos" fullword ascii
+    $2 = "[HTTP] Flooding" fullword ascii
+    $3 = "[UDP] Flooding Rooted Spoof" fullword ascii
   condition:
   (
     is_elf and for any i in (0 .. elf.number_of_sections):
@@ -251,8 +251,8 @@ rule Flooder_Gen3 {
     target = "File, Memory"
     hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
   strings:
-    $1 = "Opening sockets"
-    $2 = "Sending attack"
+    $1 = "Opening sockets" fullword ascii
+    $2 = "Sending attack" fullword ascii
   condition:
   (
     is_elf and for any i in (0 .. elf.number_of_sections):
@@ -273,9 +273,9 @@ rule Netscan_Gen1 {
     email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "[i] Scanning:"
-    $2 = "Usage: %s <b-block> <port> [c-block]"
-    $3 = "Portscan completed in"
+    $1 = "[i] Scanning:" fullword ascii
+    $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
+    $3 = "Portscan completed in" fullword ascii
   condition:
   (
     is_elf and for any i in (0 .. elf.number_of_sections):
@@ -296,8 +296,8 @@ rule SshBrute_Gen1 {
     email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "FOUND: %s with port %s open"
-    $2 = "%s:%s %s port: %s --> %s"
+    $1 = "FOUND: %s with port %s open" fullword ascii
+    $2 = "%s:%s %s port: %s --> %s" fullword ascii
   condition:
   (
     is_elf and for any i in (0 .. elf.number_of_sections):
