@@ -159,6 +159,10 @@ rule SusELF_BackdoorImp {
   strings:
     $exec_1 = "execl" fullword ascii
     $exec_2 = "execv" fullword ascii
+    $exec_3 = "execle" fullword ascii
+    $exec_4 = "execvp" fullword ascii
+    $exec_5 = "execve" fullword ascii
+    $exec_6 = "execlp" fullword ascii
     $dup_1 = "dup" fullword ascii
     $dup_2 = "dup2" fullword ascii
     $conn_1 = "htons" fullword ascii // Socket
