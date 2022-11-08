@@ -21,6 +21,10 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
+proc fscanner_cb_msg_dummy*(severity: cl_msg, fullmsg: cstring, msg: cstring, context: pointer) {.cdecl.} =
+  discard
+
+
 proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   #[
     Print virus found message with file path

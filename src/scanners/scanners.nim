@@ -28,6 +28,7 @@ proc create_task_file_scan(yara_engine: YrEngine, options: ScanOptions, result_c
   ]#
   cl_engine_set_clcb_post_scan(file_scanner.engine, fscanner_cb_scan_file)
   cl_engine_set_clcb_virus_found(file_scanner.engine, fscanner_cb_virus_found)
+  cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
   if len(options.list_dirs) != 0:
     for dir_path in options.list_dirs:
