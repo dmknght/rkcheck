@@ -162,6 +162,7 @@ rule SusELF_BackdoorImp {
     $dup_1 = "dup" fullword ascii
     $dup_2 = "dup2" fullword ascii
     $conn_1 = "htons" fullword ascii // Socket
+    // Doesn't work when scan processes
   condition:
     is_elf and for any i in (0 .. elf.number_of_sections):
     (
@@ -169,7 +170,6 @@ rule SusELF_BackdoorImp {
         any of ($exec_*) and any of ($dup_*) and any of ($conn_*)
       )
     )
-    // TODO runtime scan
 }
 
 rule ShellExec_UserAdd {
