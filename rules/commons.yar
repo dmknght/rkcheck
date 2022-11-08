@@ -382,6 +382,22 @@ rule SshBrute_Gen1 {
 }
 
 
+rule Backdoor_Gen1 {
+  strings:
+    $ = "Starting backdoor daemon" fullword ascii
+  condition:
+    is_elf_file and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
 // rule SusElf_PyCompiled {
 //   meta:
 //     author = "Nong Hoang Tu"
