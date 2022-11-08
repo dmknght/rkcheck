@@ -159,7 +159,7 @@ rule SusELF_BackdoorImp {
   strings:
     $exec_1 = "execl" fullword ascii
     $exec_2 = "execv" fullword ascii
-    $dup_1 = "dup2" fullword ascii
+    $dup_1 = "dup" fullword ascii
     $dup_2 = "dup2" fullword ascii
     $conn_1 = "htons" fullword ascii // Socket
   condition:
@@ -170,7 +170,7 @@ rule SusELF_BackdoorImp {
       )
     )
     // TODO runtime scan
-
+}
 
 rule ShellExec_UserAdd {
   meta:
