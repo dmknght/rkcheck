@@ -54,7 +54,7 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
-    elf_exec and
+    elf.type == elf.ET_EXEC and
     (
       for any i in (0 .. elf.number_of_sections):
       (
