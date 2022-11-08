@@ -387,21 +387,29 @@ rule Excedoor_Generic {
 //     all of them
 // }
 
-// rule Sckit_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "ELF:Sckit-A, Unix.Trojan.Suki-1, Backdoor:Linux/Rooter"
-//     date = "13/11/2021"
-//     refrence = "https://otx.alienvault.com/indicator/file/db4c0fe28e8fdce6f7b7e2e12738ff84f084667e07b408dc04dc92bd074bc0e2"
-//     target = "File, memory"
-//   strings:
-//     $1 = "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:./bin:/etc/.MG:/etc/.MG/bin"
-//     $2 = "HOME=/etc/.MG"
-//     $3 = "HISTFILE=/dev/null"
-//   condition:
-//     2 of them
-// }
+rule Sckit_Generic {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    description = "ELF:Sckit-A, Unix.Trojan.Suki-1, Backdoor:Linux/Rooter"
+    refrence = "https://otx.alienvault.com/indicator/file/db4c0fe28e8fdce6f7b7e2e12738ff84f084667e07b408dc04dc92bd074bc0e2"
+    md5 = "03d83a8223fe5dd37346c897a7f1ade5"
+  strings:
+    $ = "Can't execve shell" fullword ascii
+    $ = "Failed to hide pid" fullword ascii
+  condition:
+    is_elf_file and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
 
 // rule Earthworm_Generic {
 //   meta:
