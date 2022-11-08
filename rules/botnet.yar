@@ -103,7 +103,7 @@ rule Tsunami_de1b {
     $1 = "Tsunami successfully deployed!" ascii
     $2 = ".tsunami -l .t -g" fullword ascii
   condition:
-    is_elf_file or
+    is_elf_file and
     (
       for any i in (0 .. elf.number_of_sections):
       (
