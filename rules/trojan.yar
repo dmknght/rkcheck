@@ -561,20 +561,16 @@ rule Keylog_Xspy {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
+    descriptions = "Rule to detect X11 Keylogger"
+    // Yara failed to detect running process because it can't load elf information such as elf.type
   strings:
-    $str_1 = "DISPLAY" fullword ascii
-    $str_2 = "for snoopng" fullword ascii
+    $ = "DISPLAY" fullword ascii
+    $ = "for snoopng" fullword ascii
   condition:
     is_elf_file and
+    for any i in (0 .. elf.number_of_sections):
     (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
     )
 }
 
