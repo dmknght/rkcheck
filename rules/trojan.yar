@@ -21,26 +21,26 @@ rule Agent_4b06
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    hash = "4b060ab45f7acc1b2959dd5969f97a45d6fecd06f311763afbb864eaea4161e4"
+    description = "Unknown malware could be similar to Metasploit"
+    sha256 = "4b060ab45f7acc1b2959dd5969f97a45d6fecd06f311763afbb864eaea4161e4"
+    sha256 = "de595779400e250b2275e7ecf9291879d26b29a71868984491b633f5de1362b8"
+    sha256 = "eac3bb07ccd2e505af4bc74b9bef2886bf82b37c5820d9fcef673b4e246b2308"
     vrt_report = "https://www.virustotal.com/gui/file/4b060ab45f7acc1b2959dd5969f97a45d6fecd06f311763afbb864eaea4161e4"
-    /*
-      Uncommon imports: fexecve, syscall, getpid)
-      Uncommon strings: "pid,%d", "no_elf",
-      Code (function main):
-        uVar1 = getpid();
-        printf("pid,%d", uVar1);
-        uVar1 = syscall(0x13f, "no_elf", 1);
-        write(uVar1, 0x400988, 0x100);
-        fexecve(uVar1, &var_20h, &var_10h);
-    */
   strings:
-    $str1 = "pid,%d"
-    $str2 = "no_elf"
-    $str3 = "completed.7594"
+    $ = "AYPj)X" fullword ascii
+    $ = "Wj#Xj" fullword ascii
   condition:
-    (is_elf and elf.symtab[62].name == "fexecve@@GLIBC_2.2.5" and elf.symtab[63].name == "syscall@@GLIBC_2.2.5" and
-      elf.symtab[54].name == "getpid@@GLIBC_2.2.5")
-    or all of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
