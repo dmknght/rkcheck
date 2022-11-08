@@ -645,39 +645,39 @@ rule STEELCORGI_packed {
 }
 
 
-rule STEELCORGI_generic{
-  meta:
-    description = "Yara Rule for unpacked ELF backdoor of UNC1945"
-    author = "Yoroi Malware Zlab"
-    last_updated = "2020_12_21"
-    tlp = "white"
-    category = "informational"
-    reference = "https://yoroi.company/research/opening-steelcorgi-a-sophisticated-apt-swiss-army-knife/"
-  strings:
-    $s1 = "MCARC"
-    $s2 = "833fc0088ea41bc3331db60ae2.debug"
-    $s3 = "PORA1022"
-    $s4 = "server"
-    $s5 = "test"
-    $s6 = "no ejecutar git-update-server-info"
-    $s7 = "dlopen"
-    $s8 = "dlsym"
-    $s9 = "5d5c6da19e62263f67ca63f8bedeb6.debug"
-    $s10 = {72 69 6E 74 20 22 5B 56 5D 20 41 74 74 65 6D 70 74 69 6E 67 20 74 6F 20 67 65 74 20 4F 53 20 69 6E 66 6F 20 77 69 74 68 20 63 6F 6D 6D 61 6E 64 3A 20 24 63 6F 6D 6D 61 6E 64 5C 6E 22 20 69 66 20 24 76 65 72 62 6F 73 65 3B}
+// rule STEELCORGI_generic{
+//   meta:
+//     description = "Yara Rule for unpacked ELF backdoor of UNC1945"
+//     author = "Yoroi Malware Zlab"
+//     last_updated = "2020_12_21"
+//     tlp = "white"
+//     category = "informational"
+//     reference = "https://yoroi.company/research/opening-steelcorgi-a-sophisticated-apt-swiss-army-knife/"
+//   strings:
+//     $s1 = "MCARC"
+//     $s2 = "833fc0088ea41bc3331db60ae2.debug"
+//     $s3 = "PORA1022"
+//     $s4 = "server"
+//     $s5 = "test"
+//     $s6 = "no ejecutar git-update-server-info"
+//     $s7 = "dlopen"
+//     $s8 = "dlsym"
+//     $s9 = "5d5c6da19e62263f67ca63f8bedeb6.debug"
+//     $s10 = {72 69 6E 74 20 22 5B 56 5D 20 41 74 74 65 6D 70 74 69 6E 67 20 74 6F 20 67 65 74 20 4F 53 20 69 6E 66 6F 20 77 69 74 68 20 63 6F 6D 6D 61 6E 64 3A 20 24 63 6F 6D 6D 61 6E 64 5C 6E 22 20 69 66 20 24 76 65 72 62 6F 73 65 3B}
 
-  condition:
-    is_elf_file and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size) and #s4 > 50 and #s5 > 20
-      ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size) and #s4 > 50 and #s5 > 20
-      )
-    )
-}
+//   condition:
+//     is_elf_file and
+//     (
+//       for any i in (0 .. elf.number_of_sections):
+//       (
+//         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size) and #s4 > 50 and #s5 > 20
+//       ) or
+//       for any i in (0 .. elf.number_of_segments):
+//       (
+//         all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size) and #s4 > 50 and #s5 > 20
+//       )
+//     )
+// }
 
 // rule Gasit_ada7 {
 //   meta:
