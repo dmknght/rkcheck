@@ -3,10 +3,10 @@ import "math"
 include "rules/magics.yar"
 
 
-private rule elf_no_sections {
-  condition:
-    is_elf and elf.number_of_sections == 0
-}
+// private rule elf_no_sections {
+//   condition:
+//     is_elf and elf.number_of_sections == 0
+// }
 
 rule SusELF_ShlCodeExe
 {
@@ -19,7 +19,7 @@ rule SusELF_ShlCodeExe
     // any object name contains "buf" like "xxxbuf"
     // False positive: /usr/lib/debug/.build-id/2e/5abcee94f3bcbed7bba094f341070a2585a2ba.debug
     // False positive /usr/lib/modules/5.16.0-12parrot1-amd64/kernel/drivers/accessibility/speakup/speakup.ko
-    is_elf and for any i in (0 .. elf.symtab_entries): (
+    elf_exec and for any i in (0 .. elf.symtab_entries): (
       (elf.symtab[i].name == "shellcode" or elf.symtab[i].name == "code") and elf.symtab[i].type == elf.STT_OBJECT
     )
 }
@@ -59,7 +59,7 @@ rule SusELF_FkSectHdrs {
     reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L17"
     target = "File, memory"
   condition:
-    elf.type == elf.ET_EXEC and
+    elf_exec and
     elf.entry_point < filesize and // file scanning only
     elf.number_of_segments > 0 and
     elf.number_of_sections > 0 and
@@ -89,7 +89,7 @@ rule SusELF_FkDynSym {
     reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L47"
     target = "File, memory"
   condition:
-    elf.type == elf.ET_EXEC and
+    elf_exec and
     elf.entry_point < filesize and // file scanning only
     elf.number_of_sections > 0 and
     elf.dynamic_section_entries > 0 and
@@ -132,7 +132,7 @@ rule SusELF_SegOffset {
     email = "dmknght@parrotsec.org"
     description = "Segment offset + size exceeds the size of the file"
   condition:
-    is_elf and
+    is_elf_file and
     for any i in (0 .. elf.number_of_segments):
     (
       // elf.segments[i].type == elf.PT_DYNAMIC and
@@ -148,7 +148,7 @@ rule SusELF_BrokenExecutable {
     descriptions = "Try to simulate ELF Heuristic feature of ClamAV with Yara"
     // TODO elf.entry_point = YR_UNDEFINED
   condition:
-    is_elf and elf.type != elf.ET_DYN and elf.sh_entry_size == 0
+    elf_exec and elf.sh_entry_size == 0
 }
 
 // rule SusELF_BackdoorImp {
@@ -249,17 +249,17 @@ rule Flooder_Gen1 {
     $4 = "LOLNOGTFO" fullword ascii
     $5 = "KILLATTK" fullword ascii
   condition:
-  (
-    is_elf and for any i in (0 .. elf.number_of_sections):
+    is_elf_file and
     (
-      2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      for any i in (0 .. elf.number_of_sections):
+      (
+        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
     )
-  )
-  or
-  for any i in (0 .. elf.number_of_segments):
-  (
-    2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-  )
 }
 
 rule Flooder_Gen2 {
@@ -272,17 +272,17 @@ rule Flooder_Gen2 {
     $2 = "[HTTP] Flooding" fullword ascii
     $3 = "[UDP] Flooding Rooted Spoof" fullword ascii
   condition:
-  (
-    is_elf and for any i in (0 .. elf.number_of_sections):
+    is_elf_file and
     (
-      2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      for any i in (0 .. elf.number_of_sections):
+      (
+        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
     )
-  )
-  or
-  for any i in (0 .. elf.number_of_segments):
-  (
-    2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-  )
 }
 
 rule Flooder_Gen3 {
@@ -296,17 +296,17 @@ rule Flooder_Gen3 {
     $1 = "Opening sockets" fullword ascii
     $2 = "Sending attack" fullword ascii
   condition:
-  (
-    is_elf and for any i in (0 .. elf.number_of_sections):
+    is_elf_file and
     (
-      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
     )
-  )
-  or
-  for any i in (0 .. elf.number_of_segments):
-  (
-    all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-  )
 }
 
 
@@ -322,16 +322,16 @@ rule Flooder_Gen4 {
     $ = "SYNFLOOD" fullword ascii
     $ = "ACKFLOOD" fullword ascii
   condition:
+    is_elf_file and
     (
-    is_elf and for any i in (0 .. elf.number_of_sections):
-    (
-      any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-    )
-    )
-    or
-    for any i in (0 .. elf.number_of_segments):
-    (
-      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
     )
 }
 
@@ -346,17 +346,17 @@ rule Netscan_Gen1 {
     $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
     $3 = "Portscan completed in" fullword ascii
   condition:
-  (
-    is_elf and for any i in (0 .. elf.number_of_sections):
+    is_elf_file and
     (
-      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
     )
-  )
-  or
-  for any i in (0 .. elf.number_of_segments):
-  (
-    all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-  )
 }
 
 rule SshBrute_Gen1 {
@@ -368,17 +368,17 @@ rule SshBrute_Gen1 {
     $1 = "FOUND: %s with port %s open" fullword ascii
     $2 = "%s:%s %s port: %s --> %s" fullword ascii
   condition:
-  (
-    is_elf and for any i in (0 .. elf.number_of_sections):
+    is_elf_file and
     (
-      all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
     )
-  )
-  or
-  for any i in (0 .. elf.number_of_segments):
-  (
-    all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-  )
 }
 
 

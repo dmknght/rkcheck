@@ -1,8 +1,28 @@
-//TODO env python3
+import "elf"
 
-private rule is_elf {
+private rule elf_magic {
   condition:
     uint32(0) == 0x464c457f
+}
+
+
+private rule is_elf_file {
+  condition:
+    elf_magic or
+    elf.type == elf.ET_REL or
+    elf.type == elf.ET_EXEC or
+    elf.type == elf.ET_DYN or
+    elf.type == elf.ET_CORE
+}
+
+private rule elf_exec {
+  condition:
+    elf_magic or elf.type == elf.ET_EXEC
+}
+
+private rule elf_dyn {
+  condition:
+    elf_magic or elf.type == elf.ET_DYN
 }
 
 

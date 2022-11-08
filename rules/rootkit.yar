@@ -3,32 +3,32 @@ import "elf"
 import "hash"
 
 
-rule HCRootkit_Generic {
-  meta:
-    description = "Detects Linux HCRootkit, as reported by Avast"
-    description = "Modified from original LaceworkLabs's rules"
-    author = "Lacework Labs"
-    ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
-  strings:
-    $a1 = "/tmp/.tmp_XXXXXX"
-    $a2 = "/proc/.inl"
-    $a3 = "rootkit"
+// rule HCRootkit_Generic {
+//   meta:
+//     description = "Detects Linux HCRootkit, as reported by Avast"
+//     description = "Modified from original LaceworkLabs's rules"
+//     author = "Lacework Labs"
+//     ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
+//   strings:
+//     $a1 = "/tmp/.tmp_XXXXXX"
+//     $a2 = "/proc/.inl"
+//     $a3 = "rootkit"
 
-    $s1 = "s_hide_pids"
-    $s2 = "handler_kallsyms_lookup_name"
-    $s3 = "s_proc_ino"
-    $s4 = "n_filldir"
-    $s5 = "s_hide_tcp4_ports"
-    $s6 = "s_hide_strs"
-    $s7 = "kp_kallsyms_lookup_name"
-    $s8 = "s_hook_remote_ip"
-    $s9 = "s_hook_remote_port"
-    $s10 = "s_hook_local_port"
-    $s11 = "s_hook_local_ip"
-    $s12 = "nf_hook_pre_routing"
-  condition:
-    all of ($a*) or 5 of ($s*)
-}
+//     $s1 = "s_hide_pids"
+//     $s2 = "handler_kallsyms_lookup_name"
+//     $s3 = "s_proc_ino"
+//     $s4 = "n_filldir"
+//     $s5 = "s_hide_tcp4_ports"
+//     $s6 = "s_hide_strs"
+//     $s7 = "kp_kallsyms_lookup_name"
+//     $s8 = "s_hook_remote_ip"
+//     $s9 = "s_hook_remote_port"
+//     $s10 = "s_hook_local_port"
+//     $s11 = "s_hook_local_ip"
+//     $s12 = "nf_hook_pre_routing"
+//   condition:
+//     all of ($a*) or 5 of ($s*)
+// }
 
 
 rule Suterusu_Generic {
@@ -44,7 +44,7 @@ rule Suterusu_Generic {
     $a4 = "Hiding PID"
     $a5 = "/proc/net/tcp"
   condition:
-    is_elf and all of them
+    is_elf_file and all of them
 }
 
 
@@ -61,8 +61,7 @@ rule Umbreon_Generic {
 		$ = "rkit" fullword
 
 	condition:
-		is_elf // Generic ELF header
-		and elf.type == elf.ET_DYN // Shared object file
+		elf_dyn
 		and all of them
 }
 
@@ -81,8 +80,7 @@ rule Umbreon_Strace {
 		$ = "fputs_unlocked" fullword
 
 	condition:
-		is_elf // Generic ELF header
-		and elf.type == elf.ET_DYN // Shared object file
+		elf_dyn
 		and all of them
 }
 
@@ -103,278 +101,277 @@ rule Umbreon_Espeon {
 		$ = "error: unrecognized command-line options" fullword
 
 	condition:
-		is_elf // Generic ELF header
-		and elf.type == elf.ET_EXEC // Executable file
+		elf_dyn
 		and all of them
 }
 
 
-rule Knark_Generic {
-  meta:
-		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
-		date = "17/11/2021"
-	strings:
-		$path_1 = "/usr/lib/.hax0r/sshd_trojan"
-    $path_2 = "/usr/local/sbin/sshd"
-    $path_3 = "/usr/lib/.hax0r"
-    $cmd_1 = "hidef"
-    $cmd_2 = "unhidef"
-    $cmd_3 = "nethides"
-    $cmd_4 = "verify_rexec"
-    $s1 = "Knark rexec verify-packet must be one of:"
-    $s2 = "nark %s by Creed @"
-    $s3 = "fikadags?"
-    $s4 = "%s -c (clear nethide-list)"
-    $s5 = "ex: %s www.microsoft.com 192.168.1.77 /bin/rm -fr /"
-    $s6 = "Have you really loaded knark.o?!"
-    $s7 = "alluid or allgid can be used to specify all *uid's or *gid's"
-	condition:
-		any of ($s*) or (
-      any of ($path*) and any of ($cmd*)
-    )
-}
+// rule Knark_Generic {
+//   meta:
+// 		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
+// 		date = "17/11/2021"
+// 	strings:
+// 		$path_1 = "/usr/lib/.hax0r/sshd_trojan"
+//     $path_2 = "/usr/local/sbin/sshd"
+//     $path_3 = "/usr/lib/.hax0r"
+//     $cmd_1 = "hidef"
+//     $cmd_2 = "unhidef"
+//     $cmd_3 = "nethides"
+//     $cmd_4 = "verify_rexec"
+//     $s1 = "Knark rexec verify-packet must be one of:"
+//     $s2 = "nark %s by Creed @"
+//     $s3 = "fikadags?"
+//     $s4 = "%s -c (clear nethide-list)"
+//     $s5 = "ex: %s www.microsoft.com 192.168.1.77 /bin/rm -fr /"
+//     $s6 = "Have you really loaded knark.o?!"
+//     $s7 = "alluid or allgid can be used to specify all *uid's or *gid's"
+// 	condition:
+// 		any of ($s*) or (
+//       any of ($path*) and any of ($cmd*)
+//     )
+// }
 
 
-rule Ark_AR {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "06d8660ace1f3ef557a7df2e85623cce"
-  strings:
-    $1 = "Mmmkay.. Time to backdoor thiz slut.."
-    $2 = "Backdooring Completed"
-    $3 = "ARK-[ You may want to supply a password"
-    $4 = "ARK-[ Welcome to ARK"
-  condition:
-    2 of them
-}
+// rule Ark_AR {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "06d8660ace1f3ef557a7df2e85623cce"
+//   strings:
+//     $1 = "Mmmkay.. Time to backdoor thiz slut.."
+//     $2 = "Backdooring Completed"
+//     $3 = "ARK-[ You may want to supply a password"
+//     $4 = "ARK-[ Welcome to ARK"
+//   condition:
+//     2 of them
+// }
 
 
-rule Ark_DU {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "58f6c91ca922aa3d6f6b79b218e62b46"
-  strings:
-    $path_1 = "/usr/lib/.ark"
-    $s1 = "ptyxx"
-    $s2 = "SUBJECT: `/sbin/ifconfig eth0 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
-    $mail_1 = "tuiqoitu039t09q3@bigfoot.com"
-    $mail_2 = "bnadfjg9023@hotmail.com"
-    $mail_3 = "t391u9t0qit@end-war.com"
-    $mail_4 = "mki62969o@yahoo.com"
-  condition:
-    (is_elf and $path_1 and $s1) or $s2 or any of ($mail*)
-}
+// rule Ark_DU {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "58f6c91ca922aa3d6f6b79b218e62b46"
+//   strings:
+//     $path_1 = "/usr/lib/.ark"
+//     $s1 = "ptyxx"
+//     $s2 = "SUBJECT: `/sbin/ifconfig eth0 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
+//     $mail_1 = "tuiqoitu039t09q3@bigfoot.com"
+//     $mail_2 = "bnadfjg9023@hotmail.com"
+//     $mail_3 = "t391u9t0qit@end-war.com"
+//     $mail_4 = "mki62969o@yahoo.com"
+//   condition:
+//     (is_elf and $path_1 and $s1) or $s2 or any of ($mail*)
+// }
 
 
-rule Lrk_B_Fix {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "a29f6927825c948c5df847505fe2dd11"
-  strings:
-    $1 = "fix original replacement [backup]"
-    $2 = "Last 17 bytes not zero"
-    $3 = "Can't fix checksum"
-  condition:
-    $1 or ($2 and $3)
-}
+// rule Lrk_B_Fix {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "a29f6927825c948c5df847505fe2dd11"
+//   strings:
+//     $1 = "fix original replacement [backup]"
+//     $2 = "Last 17 bytes not zero"
+//     $3 = "Can't fix checksum"
+//   condition:
+//     $1 or ($2 and $3)
+// }
 
 
-rule Lrk_B_Lled {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "bf10ff4214716f20bcd23227c6b6c0bb"
-  strings:
-    $1 = "/var/adm/lastlog"
-    $2 = "lastlog.tmp"
-    $3 = "Erase entry (y/n/f(astforward))?"
-    $4 = "/var/adm/wtmp"
-    $5 = "wtmp.tmp"
-  condition:
-    ($1 and $2) or ($4 and $5) and $3
-}
+// rule Lrk_B_Lled {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "bf10ff4214716f20bcd23227c6b6c0bb"
+//   strings:
+//     $1 = "/var/adm/lastlog"
+//     $2 = "lastlog.tmp"
+//     $3 = "Erase entry (y/n/f(astforward))?"
+//     $4 = "/var/adm/wtmp"
+//     $5 = "wtmp.tmp"
+//   condition:
+//     ($1 and $2) or ($4 and $5) and $3
+// }
 
 
-rule Lrk_B_Z2 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "0181b03af8360480baf346007ec76849"
-  strings:
-    $1 = "/etc/utmp"
-    $2 = "/usr/adm/wtmp"
-    $3 = "/usr/adm/lastlog"
-    $4 = /Zap[\d]/
-  condition:
-    all of them
-}
+// rule Lrk_B_Z2 {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "0181b03af8360480baf346007ec76849"
+//   strings:
+//     $1 = "/etc/utmp"
+//     $2 = "/usr/adm/wtmp"
+//     $3 = "/usr/adm/lastlog"
+//     $4 = /Zap[\d]/
+//   condition:
+//     all of them
+// }
 
 
-rule Lrk_E_Sniffchk {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "82a61d8b23956703f164b06968a8e599"
-  strings:
-    $1 = "The_l0gz"
-    $3 = "Sniffer running"
-    $4 = "Restarting sniffer..."
-  condition:
-    is_elf and any of them
-}
+// rule Lrk_E_Sniffchk {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "82a61d8b23956703f164b06968a8e599"
+//   strings:
+//     $1 = "The_l0gz"
+//     $3 = "Sniffer running"
+//     $4 = "Restarting sniffer..."
+//   condition:
+//     is_elf and any of them
+// }
 
 
-rule Lrk_E_BindhShell {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-    hash = "96702b7180082a00b2ced1a243360ed6"
-  strings:
-    $1 = "(nfsiod)"
-    $2 = "/bin/sh"
-  condition:
-    is_elf and all of them
-}
+// rule Lrk_E_BindhShell {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//     hash = "96702b7180082a00b2ced1a243360ed6"
+//   strings:
+//     $1 = "(nfsiod)"
+//     $2 = "/bin/sh"
+//   condition:
+//     is_elf and all of them
+// }
 
 
-rule Rkit_A {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-  strings:
-    $1 = "rootkit() failed!"
-    $2 = "password guesses exhausted"
-    $3 = "rkit by Deathr0w"
-    $4 = "deathr0w.speckz.com"
-  condition:
-    is_elf and any of them
-}
+// rule Rkit_A {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//   strings:
+//     $1 = "rootkit() failed!"
+//     $2 = "password guesses exhausted"
+//     $3 = "rkit by Deathr0w"
+//     $4 = "deathr0w.speckz.com"
+//   condition:
+//     is_elf and any of them
+// }
 
 
-rule Rkit_Pwd {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-  strings:
-    $1 = "./.rkpass"
-    $2 = "Enter a new password [1-8 characters]"
-    $3 = "Writing to file: %s failed! Exiting..."
-    $4 = "Opening of file: %s failed! Exiting..."
-    $5 = "Saved new password to file: %"
-  condition:
-    (is_elf and $1) or ($2 and $3 and $4 and $5)
-}
+// rule Rkit_Pwd {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//   strings:
+//     $1 = "./.rkpass"
+//     $2 = "Enter a new password [1-8 characters]"
+//     $3 = "Writing to file: %s failed! Exiting..."
+//     $4 = "Opening of file: %s failed! Exiting..."
+//     $5 = "Saved new password to file: %"
+//   condition:
+//     (is_elf and $1) or ($2 and $3 and $4 and $5)
+// }
 
 
-rule Suckit_B {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-  strings:
-    $1 = "FUCK: Can't allocate raw socket"
-    $2 = "FUCK: Can't fork child"
-    $3 = "BD_Init: Starting backdoor daemon..."
-    $4 = "Suckit uninstalled sucesfully!"
-    $5 = "Please enter new rootkit password:"
-  condition:
-    is_elf and any of them
-}
+// rule Suckit_B {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//   strings:
+//     $1 = "FUCK: Can't allocate raw socket"
+//     $2 = "FUCK: Can't fork child"
+//     $3 = "BD_Init: Starting backdoor daemon..."
+//     $4 = "Suckit uninstalled sucesfully!"
+//     $5 = "Please enter new rootkit password:"
+//   condition:
+//     is_elf and any of them
+// }
 
 
-rule Urk_Generic {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "17/11/2021"
-  strings:
-    $1 = "Inverses the bit's in a file to make it unreadable."
-    $2 = "@(#)log"
-    $3 = " (Berkeley) "
-    $4 = "UX:login: ERROR: Login incorrect"
-    $5 = "User %s (gid %d) from %s: %s"
-  condition:
-    is_elf and any of them
-}
+// rule Urk_Generic {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "17/11/2021"
+//   strings:
+//     $1 = "Inverses the bit's in a file to make it unreadable."
+//     $2 = "@(#)log"
+//     $3 = " (Berkeley) "
+//     $4 = "UX:login: ERROR: Login incorrect"
+//     $5 = "User %s (gid %d) from %s: %s"
+//   condition:
+//     is_elf and any of them
+// }
 
 
-rule Ark_Lrkv {
-  strings:
-    $1 = "RadCxmnlogrtucpFbqisfL"
-    $2 = /@\(#\)[w]+.c/
-    $3 = "acCegjklnrStuvwxU"
-    $4 = "usage: du [-ars] [name ...]"
-    $5 = "du: No more processes"
-  condition:
-    any of them
-}
+// rule Ark_Lrkv {
+//   strings:
+//     $1 = "RadCxmnlogrtucpFbqisfL"
+//     $2 = /@\(#\)[w]+.c/
+//     $3 = "acCegjklnrStuvwxU"
+//     $4 = "usage: du [-ars] [name ...]"
+//     $5 = "du: No more processes"
+//   condition:
+//     any of them
+// }
 
 
-rule Phalanx_B6 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "29/11/2021"
-    reference = "https://packetstormsecurity.com/files/download/42556/phalanx-b6.tar.bz2"
-  strings:
-    $1 = "/sbin/ifconfig|grep inet|head -1|awk '{print $2}'|cut -f 2 -d :"
-    $2 = "phalanX beta 6 connected"
-    $4 = "uninstalling phalanx from the kernel"
-    $5 = "testing the userland process spawning code"
-  condition:
-    any of them
-}
+// rule Phalanx_B6 {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "29/11/2021"
+//     reference = "https://packetstormsecurity.com/files/download/42556/phalanx-b6.tar.bz2"
+//   strings:
+//     $1 = "/sbin/ifconfig|grep inet|head -1|awk '{print $2}'|cut -f 2 -d :"
+//     $2 = "phalanX beta 6 connected"
+//     $4 = "uninstalling phalanx from the kernel"
+//     $5 = "testing the userland process spawning code"
+//   condition:
+//     any of them
+// }
 
 
-rule Adore_Generic {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "29/11/2021"
-    reference = "https://github.com/yaoyumeng/adore-ng"
-  strings:
-    $1 = "Failed to run as root. Trying anyway ..."
-    $2 = "Adore 1.%d installed. Good luck."
-    $3 = "Made PID %d invisible."
-    $4 = "ELITE_UID: %u, ELITE_GID=%u, ADORE_KEY=%s"
-    $5 = "Removed PID %d from taskstruct"
-  condition:
-    any of them
-}
+// rule Adore_Generic {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "29/11/2021"
+//     reference = "https://github.com/yaoyumeng/adore-ng"
+//   strings:
+//     $1 = "Failed to run as root. Trying anyway ..."
+//     $2 = "Adore 1.%d installed. Good luck."
+//     $3 = "Made PID %d invisible."
+//     $4 = "ELITE_UID: %u, ELITE_GID=%u, ADORE_KEY=%s"
+//     $5 = "Removed PID %d from taskstruct"
+//   condition:
+//     any of them
+// }
 
 
-rule Bvp47_A {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "24/02/2022"
-    description = "NSA-linked Bvp47 Linux backdoor"
-    md5 = "58b6696496450f254b1423ea018716dc"
-    reference = "https://bazaar.abuse.ch/sample/7989032a5a2baece889100c4cfeca81f1da1241ab47365dad89107e417ce7bac/"
-  strings:
-    // Encrypted strings from binary
-    $long_1 = "e86dd99a33cb9df96e793518f659746f8cc3d9ac39413871f5afd58d7d00685ab0c449d62aa35c865a133dff"
-    $short_1 = "NWlas"
-    $short_2 = "qKizlbKRbFdM"
-    $short_3 = "xdkzVqtnab"
-    $short_4 = "ihRCzr"
-    $short_5 = "dXRuFsbUutDV"
-    $short_6 = "NcGNaOrdVC"
-  condition:
-    $long_1 or 4 of ($short_*)
-}
+// rule Bvp47_A {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "24/02/2022"
+//     description = "NSA-linked Bvp47 Linux backdoor"
+//     md5 = "58b6696496450f254b1423ea018716dc"
+//     reference = "https://bazaar.abuse.ch/sample/7989032a5a2baece889100c4cfeca81f1da1241ab47365dad89107e417ce7bac/"
+//   strings:
+//     // Encrypted strings from binary
+//     $long_1 = "e86dd99a33cb9df96e793518f659746f8cc3d9ac39413871f5afd58d7d00685ab0c449d62aa35c865a133dff"
+//     $short_1 = "NWlas"
+//     $short_2 = "qKizlbKRbFdM"
+//     $short_3 = "xdkzVqtnab"
+//     $short_4 = "ihRCzr"
+//     $short_5 = "dXRuFsbUutDV"
+//     $short_6 = "NcGNaOrdVC"
+//   condition:
+//     $long_1 or 4 of ($short_*)
+// }
 
 
 // todo atk rootkit https://github.com/millken/kdev/tree/master/4atk%201.05new
@@ -396,47 +393,47 @@ rule Bvp47_A {
 // }
 // TODO add https://github.com/peondusud/lin.rootkit
 
-rule Chsh_Generic {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "28/12/2021"
-    description = "Detect Chsh rootkit and its variant Chfn. This method uses string matching for memory. File matching matched the LOAD rule"
-    hash = "3e296bbbd4d1e7ae5f538e86c2b99d01" // chfn
-    hash = "49b2fdd337a155029ef379b10032751a" // chsh
-  strings:
-    $ = "chsh 0.9a beta"
-    $ = "setpwnam"
-    $ = "*nazgul*"
-  condition:
-    2 of them
-}
+// rule Chsh_Generic {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     date = "28/12/2021"
+//     description = "Detect Chsh rootkit and its variant Chfn. This method uses string matching for memory. File matching matched the LOAD rule"
+//     hash = "3e296bbbd4d1e7ae5f538e86c2b99d01" // chfn
+//     hash = "49b2fdd337a155029ef379b10032751a" // chsh
+//   strings:
+//     $ = "chsh 0.9a beta"
+//     $ = "setpwnam"
+//     $ = "*nazgul*"
+//   condition:
+//     2 of them
+// }
 
 
-rule Boopkit_Generic {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    reference = "https://github.com/kris-nova/boopkit/"
-  strings:
-    $1 = "cat /sys/kernel/tracing/trace_pipe"
-    $2 = "eBPF Probe Loaded:"
-  condition:
-    all of them
-}
+// rule Boopkit_Generic {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     reference = "https://github.com/kris-nova/boopkit/"
+//   strings:
+//     $1 = "cat /sys/kernel/tracing/trace_pipe"
+//     $2 = "eBPF Probe Loaded:"
+//   condition:
+//     all of them
+// }
 
 
-rule Agent_ed80 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    hash = "ed80f05f474ba2471e5dc5611a900f4a"
-  strings:
-    $1 = "USAGE: %s dst-net-addr dst-port src-addr usleep-time"
-    $2 = "Randomizing port numbers"
-  condition:
-    all of them
-}
+// rule Agent_ed80 {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     hash = "ed80f05f474ba2471e5dc5611a900f4a"
+//   strings:
+//     $1 = "USAGE: %s dst-net-addr dst-port src-addr usleep-time"
+//     $2 = "Randomizing port numbers"
+//   condition:
+//     all of them
+// }
 
 
 rule Agent_4d1e {
@@ -464,13 +461,11 @@ rule Rkit_a669 {
     $ = "%d (%[^)]s" fullword ascii
     $ = "Error in dlsym: %s" fullword ascii
   condition:
-    elf.type == elf.ET_DYN and
+    elf_dyn and
     (
+      for any i in (0 .. elf.number_of_sections):
       (
-        is_elf and for any i in (0 .. elf.number_of_sections):
-        (
-          all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-        )
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
       for any i in (0 .. elf.number_of_segments):
       (
