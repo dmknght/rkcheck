@@ -126,19 +126,19 @@ rule SusELF_FkDynSym {
 //     // )
 // }
 
-rule SusELF_SegOffset {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Segment offset + size exceeds the size of the file"
-  condition:
-    is_elf_file and
-    for any i in (0 .. elf.number_of_segments):
-    (
-      // elf.segments[i].type == elf.PT_DYNAMIC and
-      elf.segments[i].offset + elf.segments[i].file_size > filesize
-    )
-}
+// rule SusELF_SegOffset {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Segment offset + size exceeds the size of the file"
+//   condition:
+//     is_elf_file and
+//     for any i in (0 .. elf.number_of_segments):
+//     (
+//       // elf.segments[i].type == elf.PT_DYNAMIC and
+//       elf.segments[i].offset + elf.segments[i].file_size > filesize
+//     )
+// }
 
 
 // rule SusELF_BrokenExecutable {
