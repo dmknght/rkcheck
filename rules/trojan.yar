@@ -221,17 +221,23 @@ rule Excedoor_Generic {
     hash = "3d06f85ac19dc1a6f678aa4e28ce5c42"
     file_type = "ELF32"
   strings:
-    $s_1 = "passwdforyababe"
-    $s_2 = "shadowforyababe"
-    $s_3 = "gayz0r@boi.org.ie"
-    $s_4 = "Brand new TCP root shell!"
+    $ = "/bin/sh" fullword ascii
+    $ = "rm -rf /var/log/*" fullword ascii
+    $ = "Brand new TCP root shell!" fullword ascii
   condition:
-    (is_elf and for any i in (0 .. elf.symtab_entries - 1): ( // Detect file by function name / obj names
-      (elf.symtab[i].type == elf.STT_OBJECT and (elf.symtab[i].name == "mailpasswd" or elf.symtab[i].name == "mailshadow")) or
-      (elf.symtab[i].type == elf.STT_FUNC and elf.symtab[i].name == "bindshell")
-    )) or
-    ($s_1 and $s_2 and $s_3) or // Detect strings in memory / file
-    $s_4 // Heuristic level
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    (
+      elf.type == elf.ET_EXEC and for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
 }
 
 rule EkoBackdoor_Generic {
