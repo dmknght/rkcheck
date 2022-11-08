@@ -557,20 +557,26 @@ rule Excedoor_Generic {
 //     all of them
 // }
 
-// rule Xspy_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "15/12/2021"
-//     target = "File, memory"
-//   strings:
-//     // string from dumped mem + source code
-//     $str_1 = "blah...."
-//     $str_2 = "opened %s for snoopng"
-//     $str_3 = "can't open display"
-//   condition:
-//     all of them
-// }
+rule Keylog_Xspy {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+  strings:
+    $str_1 = "DISPLAY" fullword ascii
+    $str_2 = "for snoopng" fullword ascii
+  condition:
+    elf_file and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
 
 
 rule Exploit_DirtyCow {
