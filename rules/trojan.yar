@@ -3,18 +3,27 @@ import "hash"
 include "rules/magics.yar"
 
 
-// rule Trojan_3
-// {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Linux Trojan. Some AV vendors can't detect. https://www.virustotal.com/gui/file/6469fcee5ede17375b74557cdd18ef6335c517a4cccfff86288f07ff1761eaa7"
-//   condition:
-//     is_elf and
-//     for any i in (0 .. elf.number_of_sections - 1): (
-//       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "bbe7d25b87e2b810db57b6d532b10d09"
-//     )
-// }
+rule Agent_9db6 {
+  meta:
+    descriptions = "A shellcode executor"
+    md5 = "9db6918b94456e4f7fc981b5e3cf289e"
+  strings:
+    // Value in shellcode
+    $ = "kl q60?"
+    $ = "&'Qm"
+  condition:
+    elf_exec and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
 
 
 rule SSHD_95d7 {
