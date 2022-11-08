@@ -24,14 +24,14 @@ rule SusELF_ShlCodeExe
     )
 }
 
-rule SusELF_NoSects {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Suspicious ELF files. File has no section and file size < 1KB. Usually see by Metasploit's stageless payloads"
-  condition:
-    elf_no_sections and filesize < 1KB
-}
+// rule SusELF_NoSects {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Suspicious ELF files. File has no section and file size < 1KB. Usually see by Metasploit's stageless payloads"
+//   condition:
+//     elf_no_sections and filesize < 1KB
+// }
 
 rule SusELF_SegLoadRWE
 {
@@ -112,19 +112,19 @@ rule SusELF_FkDynSym {
     )
 }
 
-rule SusELF_SectHighEntropy {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Check high entropy in file's section"
-  condition:
-    is_elf and
-    math.entropy(elf.sections[0].offset, elf.sections[elf.number_of_sections - 1].offset + elf.sections[elf.number_of_sections - 1].size) >= 7.4
-    // for any i in (0 .. elf.number_of_sections):
-    // (
-    //   math.entropy(elf.sections[i].offset, elf.sections[i].size) >= 7.4
-    // )
-}
+// rule SusELF_SectHighEntropy {
+//   meta:
+//     author = "Nong Hoang Tu"
+//     email = "dmknght@parrotsec.org"
+//     description = "Check high entropy in file's section"
+//   condition:
+//     is_elf and
+//     math.entropy(elf.sections[0].offset, elf.sections[elf.number_of_sections - 1].offset + elf.sections[elf.number_of_sections - 1].size) >= 7.4
+//     // for any i in (0 .. elf.number_of_sections):
+//     // (
+//     //   math.entropy(elf.sections[i].offset, elf.sections[i].size) >= 7.4
+//     // )
+// }
 
 rule SusELF_SegOffset {
   meta:
