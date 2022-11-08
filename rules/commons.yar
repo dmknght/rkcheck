@@ -299,6 +299,33 @@ rule Flooder_Gen3 {
   )
 }
 
+
+rule Flooder_Gen4 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    descriptions = "Some suspicious strings from Mirai's processes"
+  strings:
+    $ = "Flooding with" fullword ascii
+    $ = "HACKPGK" fullword ascii
+    $ = "RANDOMFLOOD" fullword ascii
+    $ = "SYNFLOOD" fullword ascii
+    $ = "ACKFLOOD" fullword ascii
+  condition:
+    (
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+    )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
+}
+
+
 rule Netscan_Gen1 {
   meta:
     author = "Nong Hoang Tu"
