@@ -160,6 +160,26 @@ rule Mirai_9c77 {
     )
 }
 
+
+rule Mirai_92a0 {
+  meta:
+    md5 = "92a049c55539666bebc68c1a5d9d86ef"
+  strings:
+    $1 = "4r3s b0tn3t" fullword ascii
+  condition:
+    is_elf_file and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
+
 // rule Mirai_Gen2 {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -176,22 +196,6 @@ rule Mirai_9c77 {
 //     $5 = "EcstasyCode#0420 | Famy#2900" // d8878a0593c1920571afaa2c024d8d4589f13b334c064200b35af0cff20de3e5
 //   condition:
 //     any of them
-// }
-
-// rule Mirai_Gen3 {
-//   // FIXME multiple false positive
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Unique strings of Mirai samples for memory scan"
-//   strings:
-//     $ = "__vdso_clock_gettime" fullword ascii
-//     $ = "ATUSH" fullword ascii
-//   condition:
-//     (is_elf and all of them) or for any i in (0 .. elf.number_of_segments):
-//     (
-//       all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-//     )
 // }
 
 
