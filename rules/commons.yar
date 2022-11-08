@@ -148,7 +148,7 @@ rule SusELF_BrokenExecutable {
     descriptions = "Try to simulate ELF Heuristic feature of ClamAV with Yara"
     // TODO elf.entry_point = YR_UNDEFINED
   condition:
-    is_elf and elf.sh_entry_size == 0
+    is_elf and elf.type != elf.ET_DYN elf.sh_entry_size == 0
 }
 
 // rule SusELF_BackdoorImp {
