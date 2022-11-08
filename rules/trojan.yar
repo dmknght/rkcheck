@@ -565,7 +565,7 @@ rule Keylog_Xspy {
     $str_1 = "DISPLAY" fullword ascii
     $str_2 = "for snoopng" fullword ascii
   condition:
-    elf_file and
+    is_elf_file and
     (
       for any i in (0 .. elf.number_of_sections):
       (
