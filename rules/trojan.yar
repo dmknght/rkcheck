@@ -165,7 +165,7 @@ rule Metasploit_Stageless {
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     date = "08/11/2022"
-    description = "Scan Metasploit's Linux Stageless by checking strings or section hash. Current rule doesn't match encoded malware"
+    description = "Metasploit's stageless payload (no encoders)"
   strings:
     $ = "MSF_LICENSE" fullword ascii
     $ = "mettle_get_procmgr" fullword ascii
@@ -189,7 +189,7 @@ rule Metasploit_Staged
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    description = "Metasploit staged payload"
+    description = "Metasploit staged payload (no encoders)"
   strings:
     $ = "AYPj)X" fullword ascii
     $ = "Wj#Xj" fullword ascii
