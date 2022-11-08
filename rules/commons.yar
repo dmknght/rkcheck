@@ -151,6 +151,26 @@ rule SusELF_BrokenExecutable {
     is_elf and elf.sh_entry_size == 0
 }
 
+rule SusELF_BackdoorImp {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    descriptions = "Common imports by remote shell"
+  strings:
+    $exec_1 = "execl" fullword ascii
+    $exec_2 = "execv" fullword ascii
+    $dup_1 = "dup2" fullword ascii
+    $dup_2 = "dup2" fullword ascii
+    $conn_1 = "htons" fullword ascii // Socket
+  condition:
+    is_elf and for any i in (0 .. elf.number_of_sections):
+    (
+      elf.sections[i].type == elf.SHT_STRTAB and (
+        any of ($exec_*) and any of ($dup_*) and any of ($conn_*)
+      )
+    )
+    // TODO runtime scan
+
 
 rule ShellExec_UserAdd {
   meta:
