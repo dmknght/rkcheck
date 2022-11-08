@@ -30,7 +30,7 @@ proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object:
 
 
 proc proc_scanner_on_binary_deleted*(virus_name: var cstring, binary_path: var string) =
-  virus_name = "Heur:DeletedProcess"
+  virus_name = "Heur:ProcDeletedBin"
   binary_path.removeSuffix(" (deleted)")
 
 
