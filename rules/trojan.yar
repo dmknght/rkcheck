@@ -86,7 +86,8 @@ rule Agent_849b {
       $1 in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
     )
   )
-  or ($2 and $3)
+  // When file is loaded to memory, segments addresses are not there for some reason
+  or (elf.type == elf.ET_EXEC and ($2 and $3))
 }
 
 
@@ -190,20 +191,23 @@ rule Metasploit_Stageless {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
-    date = "26/12/2021"
+    date = "08/11/2022"
     description = "Scan Metasploit's Linux Stageless by checking strings or section hash. Current rule doesn't match encoded malware"
   strings:
-    $ = "manage persistence"
-    $ = "session-guid"
-    $ = "MSF_LICENSE"
-    $ = "mettle_get_machine_id"
-    $ = "mettle_get_procmgr"
-    $ = "/mettle/mettle/src/"
+    $ = "MSF_LICENSE" fullword ascii
+    $ = "mettle_get_procmgr" fullword ascii
   condition:
-    // Check for file only
-    (is_elf and hash.md5(elf.sections[21].offset, elf.sections[21].size) == "fbeb0b6fd7a7f78a880f68c413893f36") or
-    // Check file or memory's strings
-    3 of them
+    (
+      is_elf and for any i in (0 .. elf.number_of_sections):
+      (
+        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      )
+    )
+    or
+    for any i in (0 .. elf.number_of_segments):
+    (
+      any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+    )
 }
 
 
