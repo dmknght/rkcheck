@@ -106,6 +106,23 @@ rule Umbreon_Espeon {
 }
 
 
+rule Chfn_Generic {
+  strings:
+    $ = "setpwnam" fullword ascii
+  condition:
+    is_elf_file and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
+
 // rule Knark_Generic {
 //   meta:
 // 		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
@@ -392,23 +409,6 @@ rule Umbreon_Espeon {
 //     all of them
 // }
 // TODO add https://github.com/peondusud/lin.rootkit
-
-// rule Chsh_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "28/12/2021"
-//     description = "Detect Chsh rootkit and its variant Chfn. This method uses string matching for memory. File matching matched the LOAD rule"
-//     hash = "3e296bbbd4d1e7ae5f538e86c2b99d01" // chfn
-//     hash = "49b2fdd337a155029ef379b10032751a" // chsh
-//   strings:
-//     $ = "chsh 0.9a beta"
-//     $ = "setpwnam"
-//     $ = "*nazgul*"
-//   condition:
-//     2 of them
-// }
-
 
 // rule Boopkit_Generic {
 //   meta:
