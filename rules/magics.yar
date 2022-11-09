@@ -25,6 +25,10 @@ private rule elf_dyn {
     elf_magic or elf.type == elf.ET_DYN
 }
 
+private rule elf_rel {
+  condition:
+    elf_magic or elf.type == elf.ET_REL
+}
 
 private rule xdg_desktop_entry {
   condition:

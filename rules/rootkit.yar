@@ -3,6 +3,28 @@ import "elf"
 import "hash"
 
 
+rule Diamorphine_Gen1 {
+  meta:
+    description = "Detect open source Rootkit Diamorphine"
+    github = "https://github.com/m0nad/Diamorphine/"
+    md5 = "ede0f3dc66c6ec8c1ec9648e8118bced"
+  strings:
+    $ = "diamorphine_secret" fullword ascii
+    $ = "include/linux/thread_info.h" fullword ascii
+    $ = "kallsyms_lookup_name" fullword ascii
+  condition:
+    elf_rel and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      for any i in (0 .. elf.number_of_segments):
+      (
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
 // rule HCRootkit_Generic {
 //   meta:
 //     description = "Detects Linux HCRootkit, as reported by Avast"
