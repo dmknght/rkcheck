@@ -19,7 +19,6 @@ type
     list_procs*: seq[uint]
     scan_all_procs*: bool
     is_clam_debug*: bool
-    use_clam_parser*: bool
     use_clam_db*: bool
     db_path_clamav*: string
     db_path_yara*: string
@@ -29,7 +28,6 @@ type
     options*: cl_scan_options
     database*: string
     debug_mode*: bool
-    clam_parser*: bool
   #[
     engine: Pointer to YR_RULES
     database: path to yara compiled signatures
@@ -84,40 +82,9 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
     return result
 
   f_engine.engine = cl_engine_new()
-  #[
-    More flags are at https://docs.clamav.net/manual/Development/libclamav.html
-    We only enable some specific ClamAV modules if use ClamAV's signatures is true
-    so we can improve scan speed. ClamAV engine won't do metadata mapping
-    Modules that always enable:
-      - CL_SCAN_PARSE_ARCHIVE -> Handle compressed file. The whole point of this scanner
-      - CL_SCAN_PARSE_OLE2 -> Doc files are compressed files with xml settings
-    Modules that enable when use ClamAV signatures only:
-      - CL_SCAN_PARSE_PE -> Windows's executable files
-      - CL_SCAN_PARSE_ELF *nix executable files
-    Some modules here are questionsable. Don't know how it works with Yara's and post-scan.
-    If it's good, then we do force enable
-      - CL_SCAN_PARSE_PDF
-      - CL_SCAN_PARSE_SWF
-      - CL_SCAN_PARSE_HWP
-      - CL_SCAN_PARSE_MAIL
-      - CL_SCAN_PARSE_HTML
-      - CL_SCAN_PARSE_XMLDOCS
-  ]#
 
-  # TODO If engine doesn't use ClamAV Signature, try to disable bytecode an all unrequired modules, parsers
-  if not f_engine.use_clam_sigs and not f_engine.clam_parser:
-    # Enable at least Archivie and Ole2 parser.
-    f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_ARCHIVE)
-    f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_OLE2)
-    # Disable parse ELF and parse PE
-    f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_ELF)
-    f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_PE)
-  # Else, we enable all parser modules and some heuristic engines.
-  else:
-    f_engine.options.parse = bitnot(bitor(f_engine.options.parse, 0))
-    # This Heuristic mode requires PE parser and ELF parser
-    f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
-
+  f_engine.options.parse = bitnot(bitor(f_engine.options.parse, 0))
+  f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
   f_engine.options.general = bitor(f_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
   f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
   f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)

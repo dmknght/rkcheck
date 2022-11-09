@@ -22,7 +22,6 @@ proc create_task_file_scan(yara_engine: YrEngine, options: ScanOptions, result_c
   file_scanner.debug_mode = options.is_clam_debug
   file_scanner.database = options.db_path_clamav
   file_scanner.use_clam_sigs = options.use_clam_db
-  file_scanner.clam_parser = options.use_clam_parser
 
   if file_scanner.init_clamav() != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init ClamAV Engine")
