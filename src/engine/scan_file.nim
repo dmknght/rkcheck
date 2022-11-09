@@ -36,7 +36,7 @@ proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
 
 
 proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
-  # TODO try to get inner file name (lib clamav debug mode)
+  # Inner file name can be called via cli_ctx in others.h of ClamAV but it's not callable
   let
     ctx = cast[ptr FileScanner](context)
 

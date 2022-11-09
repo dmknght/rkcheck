@@ -59,8 +59,7 @@ proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param:
     paramValue = paramStr(i + 1)
 
   if not fileExists(paramValue):
-    # Invalid yara path. Raise error.
-    # TODO: we need to define compiled rules and text rule
+    # File doesn't exist
     raise newException(OSError, "Invalid Yara's database file path " & paramValue)
 
   options.db_path_yara = paramValue
