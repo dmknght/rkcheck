@@ -57,9 +57,9 @@ rule Miner_GenC {
     email = "dmknght@parrotsec.org"
     description = "Generic strings for coin miner"
   strings:
-    $ = "Started Mining" ascii
-    $ = "Miner will restart" ascii
-    $ = "Miner not responding" ascii
+    $ = "Started Mining" fullword ascii
+    $ = "Miner will restart" fullword ascii
+    $ = "Miner not responding" fullword ascii
   condition:
     is_elf_file and
     (
@@ -175,7 +175,7 @@ rule NBMiner_682e {
     )
 }
 
-rule Miner_b238 {
+rule GoMiner_b238 {
   meta:
     author = "Nong Hoang Tu"
     description = "A heavily striped Golang coin miner"

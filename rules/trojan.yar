@@ -3,7 +3,7 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Agent_9db6 {
+rule Linux_9db6 {
   meta:
     descriptions = "A shellcode executor"
     md5 = "9db6918b94456e4f7fc981b5e3cf289e"
@@ -50,7 +50,7 @@ rule SSHD_95d7 {
 }
 
 
-rule Agent_849b {
+rule Linux_849b {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -73,7 +73,7 @@ rule Agent_849b {
 }
 
 
-rule Agent_be4d {
+rule Linux_be4d {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
