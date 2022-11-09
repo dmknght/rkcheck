@@ -3,10 +3,12 @@ This tool is a combination of Yara and ClamAV to do malware scanning on Linux sy
 
 # Why is this
 This tool tries to solve problems of major tools
-- chkrootkit and rkhunter do simple checks for malware files inside the systems. The method is not enough (check absolute path -> missing actual malicious files) or very basic string matching (false positives)
+- chkrootkit ~~and rkhunter~~ do simple checks for malware files inside the systems. The method is not enough (check absolute path -> missing actual malicious files) or very basic string matching (false positives)
 - ClamAV has very huge RAM use everytime user runs a scan task (> 1Gb RAM). Too many old signatures are hashes -> missing modified malicious files. The binary's metadata engine lacks of proper metadata for ELF scan. However, the engine has basic unpackers and it can handle archive files, document files, ...
 - Yara is very well known engine with easy to write rules. It has very strong binary's metadata reader. However, it has no archive file handlers nor unpackers.
-=> This tool try to solve the problem by using ClamAV to access files, and then use Yara as ClamAV's post scan to do signature matching. The quality of Yara's rule set is the scope to replace chkrootkit and rkhunter
+=> This tool try to solve the problem by using ClamAV to access files, and then use Yara as ClamAV's post scan to do signature matching. The quality of Yara's rule set is the scope to replace chkrootkit ~~and rkhunter~~
+
+UPDATE: rkhunter actually has good mechanism to detect rootkit. Checked with Diamorphine
 
 # What about rules, signatures?
 The rule is a collection of open source Yara rules that scan Linux's malwares and my custom research. The rule set is not perfect.
