@@ -47,18 +47,17 @@ proc check_hidden(procfs: string): bool =
     return false
 
 var
-    has_hidden_process = false
+  has_hidden_process = false
 
 for i in countup(1, MAX_PID):
   let
     procfs = "/proc/" & $i
 
-  if dirExists(procfs):
-    if check_hidden(procfs):
-      has_hidden_process = true
+  if dirExists(procfs) and check_hidden(procfs):
+    has_hidden_process = true
 
 echo "Checking hidden processes completed"
 if has_hidden_process:
-  echo "No hidden processes found"
-else:
   echo "Found hidden processes. Possibly rootkit?"
+else:
+  echo "No hidden processes found"
