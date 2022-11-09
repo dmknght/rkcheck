@@ -7,6 +7,7 @@ build:
 	nim c -r --nimcache:/tmp -d:release --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
 	nim c --nimcache:/tmp -d:release --out:build/rkscanner src/rkscanner.nim
+	nim c --nimcache:/tmp -d:release --out:build/rkhiddenproc src/tools/unhide_procs.nim
 
 install:
 	mkdir -p /usr/share/rkscanner/
