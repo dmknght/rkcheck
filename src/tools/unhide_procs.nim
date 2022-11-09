@@ -13,6 +13,7 @@ type
     pid: int
     tgid: int
     ppid: int
+    name: string
 
 
 proc map_pid(procfs: string): PidStat =
@@ -20,7 +21,9 @@ proc map_pid(procfs: string): PidStat =
     map_pid: PidStat
 
   for line in lines(procfs & "/status"):
-    if line.startsWith("Pid:"):
+    if line.startsWith("Name:"):
+      map_pid.name = line.split()[^1]
+    elif line.startsWith("Pid:"):
       map_pid.pid = parseInt(line.split()[^1])
     elif line.startsWith("Tgid"):
       map_pid.tgid = parseInt(line.split()[^1])
@@ -38,23 +41,24 @@ proc check_hidden(procfs: string): bool =
       if kind == pcDir and path == procfs:
         # proc is listed
         return false
+    echo "Hidden process: ", pid_stat.pid, " name: ", pid_stat.name
     return true
   else:
     return false
 
-proc readable_pid(procfs: string): bool =
-  try:
-    # TODO read maps is huge. Try faster solution?
-    discard readFile(procfs & "/maps")
-    return true
-  except:
-    return false
+var
+    has_hidden_process = false
 
 for i in countup(1, MAX_PID):
   let
     procfs = "/proc/" & $i
-  if dirExists(procfs) and readable_pid(procfs):
+
+  if dirExists(procfs):
     if check_hidden(procfs):
-      echo "Hidden process: ", i
+      has_hidden_process = true
 
 echo "Checking hidden processes completed"
+if has_hidden_process:
+  echo "No hidden processes found"
+else:
+  echo "Found hidden processes. Possibly rootkit?"
