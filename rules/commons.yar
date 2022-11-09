@@ -151,36 +151,59 @@ rule SusELF_FkDynSym {
 //     elf_magic and elf.type != elf.ET_DYN and elf.sh_entry_size == 0
 // }
 
-// rule SusELF_BackdoorImp {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     descriptions = "Common imports by remote shell"
-//   strings:
-//     $exec_1 = "execl" fullword ascii
-//     $exec_2 = "execv" fullword ascii
-//     $exec_3 = "execle" fullword ascii
-//     $exec_4 = "execvp" fullword ascii
-//     $exec_5 = "execve" fullword ascii
-//     $exec_6 = "execlp" fullword ascii
-//     $exec_7 = "system" fullword ascii
-//     $dup_1 = "dup" fullword ascii
-//     $dup_2 = "dup2" fullword ascii
-//     $dup_3 = "dup3" fullword ascii
-//     $conn_1 = "htons" fullword ascii // Socket
-//     $conn_2 = "htonl" fullword ascii
-//     // bzero is to avoid false positive. However, it decreases detection rate
-//     // $bzero = "bzero" fullword ascii
-//     // $bz_ignore = "__explicit_bzero_chk" fullword ascii
-//     // Doesn't work when scan processes
-//   condition:
-//     is_elf and for any i in (0 .. elf.number_of_sections):
-//     (
-//       elf.sections[i].type == elf.SHT_DYNSYM and (
-//         any of ($exec_*) and any of ($dup_*) and any of ($conn_*)// and ($bzero and not $bz_ignore)
-//       )
-//     )
-// }
+rule SusELF_BackdoorImp {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    descriptions = "Common imports by remote shell. Usually simple reverse tcp"
+    // Doesn't work when scan processes
+    /* Falsee positives
+    SusELF_BackdoorImp /usr/bin//tcpliveplay
+    SusELF_BackdoorImp /usr/bin//tcpprep
+    SusELF_BackdoorImp /usr/bin//tcpbridge
+    SusELF_BackdoorImp /usr/bin//tcpreplay
+    SusELF_BackdoorImp /usr/bin//tcpreplay-edit
+    SusELF_BackdoorImp /usr/bin//tcprewrite
+    */
+  condition:
+    is_elf_file and
+    (
+      for 1 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "execl" or
+          elf.dynsym[i].name == "execve" or
+          elf.dynsym[i].name == "execvle" or
+          elf.dynsym[i].name == "execvp" or
+          elf.dynsym[i].name == "execv" or
+          elf.dynsym[i].name == "execlp" or
+          elf.dynsym[i].name == "system"
+        )
+      )
+    ) and
+    (
+      for 1 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "htons" or
+          elf.dynsym[i].name == "htonl"
+        )
+      )
+    ) and
+    (
+      for 1 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "dup" or
+          elf.dynsym[i].name == "dup2" or
+          elf.dynsym[i].name == "dup3"
+        )
+      )
+    )
+}
 
 rule ShellExec_UserAdd {
   meta:
