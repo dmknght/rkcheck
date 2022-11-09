@@ -461,15 +461,17 @@ rule Sckit_Generic {
 // }
 
 
-rule Agent_4d1e {
+rule Linux_4d1e {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     hash = "4d1e6120a5c05b709435925e967a7e43"
   strings:
+    // Normal strings in /usr/bin/dir, /usr/bin/ls
     $ = "hide-control-chars" fullword ascii
     $ = "ignore-backups" fullword ascii
-    $ = "TABSIZE" fullword ascii
+    // Uniq strings
+    $ = "abcdfgiklmnopqrstuw:xABCDFGI:LNQRST:UX178" fullword ascii
   condition:
     is_elf_file and
     (
@@ -485,7 +487,7 @@ rule Agent_4d1e {
 }
 
 
-rule Rkit_a669 {
+rule Linux_a669 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
