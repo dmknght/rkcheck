@@ -567,12 +567,6 @@ rule Exploit_DirtyCow {
     hash = "0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
     reference = "https://www.virustotal.com/gui/file/0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
   strings:
-    $i_1 = "crypt" fullword ascii
-    $i_2 = "madvise" ascii
-    $i_3 = "pthread_create" ascii
-    $i_4 = "ptrace" ascii
-    $i_5 = "waitpid" fullword ascii
-    $i_6 = "getpass" fullword ascii
     $s_1 = "/tmp/passwd.bak" ascii
     $s_2 = "madvise %d" fullword ascii
     $s_3 = "ptrace %d" fullword ascii
@@ -580,14 +574,20 @@ rule Exploit_DirtyCow {
   condition:
     elf.type == elf.ET_EXEC and
     (
-      for any i in (0 .. elf.number_of_sections):
+      for 6 i in (0 .. elf.dynsym_entries):
       (
-        // Detect by import functions
-        elf.sections[i].type == elf.SHT_STRTAB and all of ($i_*) in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+        elf.dynsym[i].type == elf.STT_FUNC and (
+          elf.dynsym[i].name == "crypt" or
+          elf.dynsym[i].name == "madvise" or
+          elf.dynsym[i].name == "ptrace" or
+          elf.dynsym[i].name == "waitpid" or
+          elf.dynsym[i].name == "getpass" or
+          elf.dynsym[i].name == "pthread_create"
+        )
       ) or
       for any i in (0 .. elf.number_of_segments):
       (
-        all of ($s_*) in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
       )
     )
 }
