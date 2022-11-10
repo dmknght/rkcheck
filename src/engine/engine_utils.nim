@@ -34,6 +34,11 @@ proc proc_scanner_on_binary_deleted*(virus_name: var cstring, binary_path: var s
   binary_path.removeSuffix(" (deleted)")
 
 
+proc proc_scanner_on_memfd_deleted*(virus_name: var cstring, binary_path: var string) =
+  virus_name = "Heur:FilelessMemfd"
+  binary_path = ""
+
+
 proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_error_t): cint =
   virus_name = cstring("Heur:MalCmdExe." & $virus_name)
   scan_result = CL_VIRUS

@@ -17,7 +17,15 @@ proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
 
 
 proc pscanner_on_proc_deleted_binary(virname: var cstring, binary_path: var string, pid: uint, infected: var uint): cint =
-  proc_scanner_on_binary_deleted(virname, binary_path)
+  #[
+    Detect fileless malware attack
+    https://www.sandflysecurity.com/blog/detecting-linux-memfd-create-fileless-malware-with-command-line-forensics/
+    https://www.sandflysecurity.com/blog/basic-linux-malware-process-forensics-for-incident-responders/
+  ]#
+  if binary_path.startsWith("/memfd"):
+    proc_scanner_on_memfd_deleted(virname, binary_path)
+  else:
+    proc_scanner_on_binary_deleted(virname, binary_path)
   proc_scanner_on_scan_heur($virname, binary_path, pid)
   infected += 1
   return CALLBACK_ABORT
