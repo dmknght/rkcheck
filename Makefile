@@ -8,7 +8,7 @@ build:
 	# Generate "build" folder
 	mkdir -p build/database
 	# Compile and run signature compiler
-	$(NIMFLAGS) $(YRFLAGS) --out:build/rkcompiler src/compiler/yr_db_compiler.nim
+	$(NIMFLAGS) $(YRFLAGS) -r --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanner src/rkscanner.nim
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
