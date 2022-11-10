@@ -68,7 +68,6 @@ macro defineEnum(typ: untyped): untyped =
 
 {.pragma: impyaraHdr, header: "yara.h".}
 {.experimental: "codeReordering".}
-{.passL: "-lssl -lcrypto -lpthread -lm -lyara".} # Add nix Lib that yara import
 defineEnum(YR_CONFIG_NAME)    ## ```
                           ##   Enumerated type listing configuration options
                           ## ```

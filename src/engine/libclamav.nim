@@ -55,7 +55,6 @@ macro defineEnum(typ: untyped): untyped =
 
 {.pragma: impclamavHdr, header: "/usr/include/clamav.h".}
 {.experimental: "codeReordering".}
-{.passL: "-lclamav".}
 
 defineEnum(cl_error_t)
 defineEnum(cl_engine_field)
