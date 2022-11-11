@@ -4,7 +4,7 @@ import strutils
 
 const
   f_sys_modules = "/proc/modules"
-  d_sys_modules = "/sys/modules/"
+  d_sys_modules = "/sys/module/"
 
 #[
   f_sys_modules -> /proc/modules is all loaded kernel modules. If a module is hidden, it will not be there.
