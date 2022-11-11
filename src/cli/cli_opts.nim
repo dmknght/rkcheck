@@ -5,11 +5,30 @@ import .. / engine / engine_cores
 import helps
 
 
-proc cliopts_create_default(options: var ScanOptions) =
+proc cli_opt_find_default_ydb(list_paths: openArray[string]): string =
+  for path in list_paths:
+    if fileExists(path):
+      return path
+
+  raise newException(OSError, "Missing Yara's database")
+
+
+proc cliopts_create_default*(options: var ScanOptions, scan_rootkit = false) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
   options.db_path_clamav = "/var/lib/clamav/"
+  let
+    db_path_normal = [
+      "/usr/share/rkscanner/database/signatures.ydb",
+      "/database/signatures.ydb",
+      "database/signatures.ydb"
+    ]
+    db_path_rootkit = [
+      "/usr/share/rkscanner/database/rootkits.ydb",
+      "/database/rootkits.ydb",
+      "database/rootkits.ydb"
+    ]
 
   # Load bytecode signatures by default. Problems: if user pass only --use-clamdb,
   # program must check multiple args to make sure the values are correct
@@ -21,18 +40,10 @@ proc cliopts_create_default(options: var ScanOptions) =
   #   options.db_path_clamav = "/var/lib/clamav/"
   #   options.use_clam_db = false
 
-  if fileExists("/usr/share/rkscanner/database/signatures.ydb"):
-    # If the program is installed to the system
-    # Signature should be absolute path
-    options.db_path_yara = "/usr/share/rkscanner/database/signatures.ydb"
+  if not scan_rootkit:
+    options.db_path_yara = cli_opt_find_default_ydb(db_path_normal)
   else:
-    # Find database that should be located with compiled binary
-    let
-      binaryDir = splitPath(getAppFilename()).head & "/database/signatures.ydb"
-    if fileExists(binaryDir):
-      options.db_path_yara = "database/signatures.ydb"
-    else:
-      raise newException(OSError, "Missing Yara's database")
+    options.db_path_yara = cli_opt_find_default_ydb(db_path_rootkit)
 
 
 proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_param: int) =

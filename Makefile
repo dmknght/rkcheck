@@ -11,6 +11,7 @@ build:
 	$(NIMFLAGS) $(YRFLAGS) -r --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanmal src/rkscanmal.nim
+	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanrootkit src/rkscanrootkit.nim
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
 	$(NIMFLAGS) --out:build/rkhiddenmods src/tools/unhide_sysmodules.nim
 
