@@ -4,7 +4,7 @@ private rule sys_kernel_start {
 }
 
 
-rule KernModul_Diamorphine {
+rule KernModu_Diamorphine {
   strings:
     $ = "module_hide [diamorphine]" fullword ascii
     $ = "hacked_kill [diamorphine]" fullword ascii

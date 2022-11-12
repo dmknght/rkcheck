@@ -55,7 +55,7 @@ proc compile_rootkit_modules_rules(dst: string) =
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(setting_max_string))
   yr_compiler_set_callback(compiler, yr_rules_report_errors, addr(compiler_result))
 
-  discard yr_compiler_add_file(compiler, open("rules/rootkit_modules.yar"), "Rkit", "rootkit_modules.yar")
+  discard yr_compiler_add_file(compiler, open("rules/rootkit_modules.yar"), "RkitModu", "rootkit_modules.yar")
 
   discard yr_compiler_get_rules(compiler, addr(rules))
   discard yr_rules_save(rules, dst)

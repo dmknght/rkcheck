@@ -31,6 +31,10 @@ proc print_yara_version*(version: string) =
   echo "Yara Engine: ", version
 
 
+proc print_found_rootkit_modules*(namespace, id: string) =
+  echo "Kernel@", namespace, id.replace("_", ".")
+
+
 proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
   progress_bar_flush()
   echo "\n===SCAN COMPLETED==="

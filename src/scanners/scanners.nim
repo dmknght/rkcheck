@@ -1,5 +1,5 @@
 import os
-import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
+import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc, scan_sysmodules]
 
 
 type
@@ -92,3 +92,18 @@ proc create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infec
 
   if len(options.list_procs) != 0 or options.scan_all_procs:
     create_task_proc_scan(yara_engine, options, p_count, p_infect)
+
+
+proc create_scan_rootkit_task*(options: ScanOptions, f_infect: var uint) =
+  var
+    engine: KernModuScanner
+
+  engine.database = options.db_path_yara
+  setControlCHook(handle_keyboard_interrupt)
+
+  if engine.init_yara() != ERROR_SUCCESS:
+    raise newException(ValueError, "Failed to init Yara Engine")
+
+  kscanner_scan_start_scan(engine)
+
+  finit_yara(engine)

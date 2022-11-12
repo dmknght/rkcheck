@@ -2140,7 +2140,7 @@ proc yr_rules_scan_mem_blocks*(rules: ptr YR_RULES;
                                flags: cint; callback: YR_CALLBACK_FUNC;
                                user_data: pointer; timeout: cint): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_rules_scan_mem*(rules: ptr YR_RULES; buffer: ptr uint8;
+proc yr_rules_scan_mem*(rules: ptr YR_RULES; buffer: cstring;
                         buffer_size: uint; flags: cint;
                         callback: YR_CALLBACK_FUNC; user_data: pointer;
                         timeout: cint): cint {.importc, cdecl, impyaraHdr.}
