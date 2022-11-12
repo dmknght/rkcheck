@@ -32,7 +32,7 @@ proc print_yara_version*(version: string) =
 
 
 proc print_found_rootkit_modules*(namespace, id: string) =
-  echo "Kernel@", namespace, id.replace("_", ".")
+  echo "KernLoaded@", namespace, ":", id.replace("_", ".")
 
 
 proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
