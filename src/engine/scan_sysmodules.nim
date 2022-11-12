@@ -21,4 +21,4 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
 
 proc kscanner_scan_start_scan*(ctx: var KernModuScanner) =
   let data = readFile("/sys/kernel/tracing/available_filter_functions")
-  discard yr_rules_scan_mem(ctx.engine, cstring(data), uint(len(data)), SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, addr(ctx), YR_SCAN_TIMEOUT)
+  discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](data[0].unsafeAddr), uint(len(data)), SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, addr(ctx), YR_SCAN_TIMEOUT)
