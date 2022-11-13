@@ -1,4 +1,5 @@
 import os
+import posix
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc, scan_sysmodules]
 
 
@@ -58,23 +59,27 @@ proc create_task_file_scan(yara_engine: YrEngine, options: ScanOptions, result_c
 
 proc create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
   var
-    proc_scan_engine: ProcScanner
+    proc_scanner: ProcScanner
 
-  proc_scan_engine.sumary_scanned = 0
-  proc_scan_engine.sumary_infected = 0
-  proc_scan_engine.engine = yara_engine.engine
+  if getuid() != 0:
+    proc_scanner.do_scan_stacks = true
+  else:
+    proc_scanner.do_scan_stacks = false
+  proc_scanner.sumary_scanned = 0
+  proc_scanner.sumary_infected = 0
+  proc_scanner.engine = yara_engine.engine
 
   try:
     if options.scan_all_procs:
-      pscanner_scan_system_procs(proc_scan_engine)
+      pscanner_scan_system_procs(proc_scanner)
     else:
-      pscanner_scan_procs(proc_scan_engine, options.list_procs)
+      pscanner_scan_procs(proc_scanner, options.list_procs)
   except KeyboardInterrupt:
     return
   finally:
-    result_count = proc_scan_engine.sumary_scanned
-    result_infected = proc_scan_engine.sumary_infected
-    finit_yara(proc_scan_engine)
+    result_count = proc_scanner.sumary_scanned
+    result_infected = proc_scanner.sumary_infected
+    finit_yara(proc_scanner)
 
 
 proc create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =

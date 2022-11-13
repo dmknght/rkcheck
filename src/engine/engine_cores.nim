@@ -44,11 +44,12 @@ type
   ProcScanner* = object of YrEngine
     proc_id*: uint
     proc_path*: string
-    # proc_cmdline*: string
+    proc_cmdline*: string
     proc_binary*: string
     scan_virname*: cstring
     sumary_scanned*: uint
     sumary_infected*: uint
+    do_scan_stacks*: bool
   #[
     yr_scanner: YR_RULES
     scan_object: current path / name of object that engine is scanning
