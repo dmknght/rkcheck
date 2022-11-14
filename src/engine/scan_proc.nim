@@ -4,6 +4,7 @@ import engine_utils
 import .. / cli / [progress_bar, print_utils]
 import strutils
 import os
+import posix
 
 
 proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
@@ -107,13 +108,26 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
 
   ctx.proc_pathfs = procfs_path
   ctx.proc_id = pid
+  #[
+    Some rootkits prevents normal process to read process's status
+    However, dirExists (function stat) still shows true
+    Use lstat instead of try catch to improve performance
+    NOTICE: other processes can't access so the scanner can't be used
+  ]#
+  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
+
+  var
+    stat: Stat
+  if lstat(cstring(ctx.proc_pathfs & "status"), stat) == -1:
+    print_process_hidden(ctx.proc_id, "BlockStatusRead")
+    return
+
   pscanner_map_proc_info(ctx, ctx.do_check_hidden_procs)
 
   if ctx.do_check_hidden_procs:
     # Brute force procfs. Slow. Requires a different flag
     pscanner_is_hidden_proc(ctx)
 
-  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
   discard pscanner_cb_scan_proc(ctx)
   ctx.sumary_scanned += 1
 
