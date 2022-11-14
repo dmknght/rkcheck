@@ -79,22 +79,23 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
 
 proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
   # TODO handle parent pid, child pid, ... to do ignore scan
-  try:
-    if ctx.do_check_hidden_procs:
-      # Brute force procfs. Slow. Requires a different flag
-      pscanner_is_hidden_proc(ctx)
+  if ctx.do_check_hidden_procs:
+    # Brute force procfs. Slow. Requires a different flag
+    pscanner_is_hidden_proc(ctx)
 
-    progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
-    discard pscanner_cb_scan_proc(ctx)
-    ctx.sumary_scanned += 1
-  except:
-    # Do not scan if has error. For example: Permission Denied when read /proc/1/exe
-    discard
+  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
+  discard pscanner_cb_scan_proc(ctx)
+  ctx.sumary_scanned += 1
 
 
 proc pscanner_map_proc_info(ctx: var ProcScanner) =
   ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
-  ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
+  try:
+    ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
+  except:
+    # Do not crash if map has error. For example: Permission Denied when read /proc/1/exe
+    ctx.proc_binary_path = ""
+
   for line in lines(ctx.proc_pathfs & "status"):
     if line.startsWith("Name:"):
       ctx.proc_name = line.split()[^1]
