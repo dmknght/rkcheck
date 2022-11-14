@@ -11,7 +11,7 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
-proc create_task_file_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+proc scanners_create_task_file_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
   var
     file_scanner: FileScanner
     scanned: culong
@@ -57,7 +57,7 @@ proc create_task_file_scan(yara_engine: YrEngine, options: ScanOptions, result_c
     finit_clamav(file_scanner)
 
 
-proc create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
+proc scanners_create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
   var
     proc_scanner: ProcScanner
 
@@ -86,7 +86,7 @@ proc create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_c
     finit_yara(proc_scanner)
 
 
-proc create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
+proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
   var
     yara_engine: YrEngine
 
@@ -97,13 +97,13 @@ proc create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infec
     raise newException(ValueError, "Failed to init Yara Engine")
 
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
-    create_task_file_scan(yara_engine, options, f_count, f_infect)
+    scanners_create_task_file_scan(yara_engine, options, f_count, f_infect)
 
   if len(options.list_procs) != 0 or options.scan_all_procs:
-    create_task_proc_scan(yara_engine, options, p_count, p_infect)
+    scanners_create_task_proc_scan(yara_engine, options, p_count, p_infect)
 
 
-proc create_scan_rootkit_task*(options: ScanOptions, f_infect: var uint) =
+proc scanners_create_scan_rootkit_task*(options: ScanOptions, f_infect: var uint) =
   var
     engine: KernModuScanner
 
