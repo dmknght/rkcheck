@@ -84,10 +84,7 @@ proc pscanner_map_proc_info(ctx: var ProcScanner) =
     # Do not crash if map has error. For example: Permission Denied when read /proc/1/exe
     ctx.proc_binary_path = ""
 
-  try:
-    ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
-  except:
-    ctx.proc_cmdline = ""
+  ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
 
   for line in lines(ctx.proc_pathfs & "status"):
     if line.startsWith("Name:"):
