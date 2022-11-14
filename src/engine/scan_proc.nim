@@ -78,7 +78,7 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
     print_process_hidden(ctx.proc_id, ctx.proc_name)
 
 
-proc pscanner_map_proc_info(ctx: var ProcScanner) =
+proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
   try:
     ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
   except:
@@ -87,14 +87,15 @@ proc pscanner_map_proc_info(ctx: var ProcScanner) =
 
   ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
 
-  for line in lines(ctx.proc_pathfs & "status"):
-    if line.startsWith("Name:"):
-      ctx.proc_name = line.split()[^1]
-    elif line.startsWith("Tgid"):
-      ctx.proc_tgid = parseUInt(line.split()[^1])
-    elif line.startsWith("PPid:"):
-      ctx.proc_ppid = parseUInt(line.split()[^1])
-      break
+  if check_hidden:
+    for line in lines(ctx.proc_pathfs & "status"):
+      if line.startsWith("Name:"):
+        ctx.proc_name = line.split()[^1]
+      elif line.startsWith("Tgid"):
+        ctx.proc_tgid = parseUInt(line.split()[^1])
+      elif line.startsWith("PPid:"):
+        ctx.proc_ppid = parseUInt(line.split()[^1])
+        break
 
 
 proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
@@ -107,7 +108,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
 
   ctx.proc_pathfs = procfs_path
   ctx.proc_id = pid
-  pscanner_map_proc_info(ctx)
+  pscanner_map_proc_info(ctx, ctx.do_check_hidden_procs)
 
   if ctx.do_check_hidden_procs:
     # Brute force procfs. Slow. Requires a different flag
