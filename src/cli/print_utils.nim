@@ -15,9 +15,14 @@ proc print_file_infected*(virname, scan_obj: string) =
 proc print_process_infected*(virname, path: string, pid: uint) =
   progress_bar_flush()
   if not isEmptyOrWhitespace(path):
-    echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m pid: \e[95m", pid, "\e[0m ", path
+    echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m ", path
   else:
-    echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m pid: \e[95m", pid, "\e[0m"
+    echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m"
+
+
+proc print_process_hidden*(pid: uint, name: string) =
+  progress_bar_flush()
+  echo "\e[0m Pid: \e[95m", pid, "\e[0m Name: ", name
 
 
 proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
