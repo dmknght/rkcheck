@@ -2,6 +2,7 @@ include "rules/magics.yar"
 import "elf"
 import "hash"
 
+// TODO https://github.com/mav8557/Father
 
 rule Diamorphine_Gen1 {
   meta:
@@ -22,6 +23,34 @@ rule Diamorphine_Gen1 {
       for any i in (0 .. elf.number_of_segments):
       (
         all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
+      )
+    )
+}
+
+rule Father_Gen1 {
+  meta:
+    descriptions = "Detect .so binary file made"
+    github = "https://github.com/mav8557/Father"
+    md5 = "4f90604f04fe12f4e91b2bab13426fc0"
+  strings:
+    $ = "Enjoy the shell" fullword ascii
+    $ = "AUTHENTICATE" fullword ascii
+    $ = "ld.so.preload" fullword ascii
+    $ = "execve" fullword ascii
+  condition:
+    elf_dyn and
+    (
+      for any i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "lpe_drop_shell" or
+          elf.dynsym[i].name == "falsify_tcp"
+        )
+      ) or
+      for any i in (0 .. elf.number_of_sections):
+      (
+        3 of them in (elf.sections[i].address .. elf.sections[i].address + elf.sections[i].size)
       )
     )
 }
