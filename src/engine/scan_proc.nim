@@ -72,7 +72,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
 proc pscanner_is_hidden_proc(ctx: ProcScanner) =
   if ctx.proc_id == ctx.proc_tgid and ctx.proc_ppid > 0:
     for kind, path in walkDir("/proc/"):
-      if kind == pcDir and path == ctx.proc_pathfs:
+      if kind == pcDir and path & "/" == ctx.proc_pathfs:
         return
   print_process_hidden(ctx.proc_id, ctx.proc_name)
 
