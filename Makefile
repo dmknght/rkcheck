@@ -1,6 +1,6 @@
 YRFLAGS = --passL:-lssl --passL:-lcrypto --passL:-lpthread --passL:-lyara
 CLFLAGS = --passL:-lclamav
-NIMFLAGS = nim c --nimcache:/tmp -d:release --opt:size --opt:speed --passL:-s
+NIMFLAGS = nim c --nimcache:/tmp -d:release --opt:speed --passL:-s
 
 all:
 
