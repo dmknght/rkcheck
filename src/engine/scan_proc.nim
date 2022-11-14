@@ -77,17 +77,6 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
     print_process_hidden(ctx.proc_id, ctx.proc_name)
 
 
-proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
-  # TODO handle parent pid, child pid, ... to do ignore scan
-  if ctx.do_check_hidden_procs:
-    # Brute force procfs. Slow. Requires a different flag
-    pscanner_is_hidden_proc(ctx)
-
-  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
-  discard pscanner_cb_scan_proc(ctx)
-  ctx.sumary_scanned += 1
-
-
 proc pscanner_map_proc_info(ctx: var ProcScanner) =
   ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
   try:
@@ -106,17 +95,32 @@ proc pscanner_map_proc_info(ctx: var ProcScanner) =
       break
 
 
+proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
+  # TODO handle parent pid, child pid, ... to do ignore scan
+  let
+    procfs_path = "/proc/" & $pid & "/"
+
+  if not dirExists(procfs_path):
+    return
+
+  ctx.proc_pathfs = procfs_path
+  ctx.proc_id = pid
+  pscanner_map_proc_info(ctx)
+
+  if ctx.do_check_hidden_procs:
+    # Brute force procfs. Slow. Requires a different flag
+    pscanner_is_hidden_proc(ctx)
+
+  progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
+  discard pscanner_cb_scan_proc(ctx)
+  ctx.sumary_scanned += 1
+
+
 proc pscanner_scan_procs*(ctx: var ProcScanner, list_procs: seq[uint]) =
   for pid in list_procs:
-    let
-      procfs_path = "/proc/" & $pid & "/"
-    if dirExists(procfs_path):
-      ctx.proc_pathfs = procfs_path
-      ctx.proc_id = pid
-      pscanner_map_proc_info(ctx)
-      pscanner_process_pid(ctx, pid)
+    pscanner_process_pid(ctx, pid)
 
 
 proc pscanner_scan_system_procs*(ctx: var ProcScanner) =
   for i in countup(1, SCANNER_MAX_PROC_COUNT):
-    pscanner_scan_procs(ctx, @[uint(i)])
+    pscanner_process_pid(ctx, uint(i))
