@@ -118,7 +118,10 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
 
   var
     stat: Stat
-  if lstat(cstring(ctx.proc_pathfs & "status"), stat) == -1:
+  let
+    procfs_path_status = ctx.proc_pathfs & "status"
+
+  if lstat(cstring(procfs_path_status), stat) == -1 and fileExists(procfs_path_status):
     print_process_hidden(ctx.proc_id, "Heur:Process.StatusDenied")
     return
 
