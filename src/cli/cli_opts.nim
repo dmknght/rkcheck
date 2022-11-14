@@ -151,7 +151,7 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         return show_help_banner()
       of "-help":
         return show_help_banner()
-      of "--all-processes":
+      of "--all-procs":
         options.scan_all_procs = true
       of "--check-hidden-proc":
         options.check_hidden_proc = true
