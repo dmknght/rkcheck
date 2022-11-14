@@ -1,7 +1,7 @@
 import libyara
 import engine_cores
 import engine_utils
-import .. / cli / progress_bar
+import .. / cli / [progress_bar, print_utils]
 import strutils
 import os
 
@@ -23,10 +23,10 @@ proc pscanner_on_proc_deleted_binary(virname: var cstring, binary_path: var stri
     https://www.sandflysecurity.com/blog/basic-linux-malware-process-forensics-for-incident-responders/
   ]#
   if binary_path.startsWith("/memfd"):
-    proc_scanner_on_memfd_deleted(virname, binary_path)
+    proc_scanner_on_memfd_deleted(virname, binary_path, pid)
   else:
-    proc_scanner_on_binary_deleted(virname, binary_path)
-  proc_scanner_on_scan_heur($virname, binary_path, pid)
+    proc_scanner_on_binary_deleted(virname, binary_path, pid)
+
   infected += 1
   return CALLBACK_ABORT
 
@@ -69,23 +69,21 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   # TODO: implement entropy scan https://www.sandflysecurity.com/blog/sandfly-linux-file-entropy-scanner-updated/
 
 
-proc pscanner_is_hidden_proc(ctx: ProcScanner): bool =
+proc pscanner_is_hidden_proc(ctx: ProcScanner) =
   if ctx.proc_id == ctx.proc_tgid and ctx.proc_ppid > 0:
     for kind, path in walkDir("/proc/"):
       if kind == pcDir and path == ctx.proc_pathfs:
-        return false
-  return true
+        return
+  print_process_hidden(ctx.proc_id, ctx.proc_name)
 
 
 proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
-  # TODO maybe do findExe for proc_binary
   # TODO handle parent pid, child pid, ... to do ignore scan
   try:
     if ctx.do_check_hidden_procs:
       # Brute force procfs. Slow. Requires a different flag
-      if pscanner_is_hidden_proc(ctx):
-        # TODO show warning here
-        discard
+      pscanner_is_hidden_proc(ctx)
+
     progress_bar_scan_proc(ctx.proc_id, ctx.proc_binary_path)
     discard pscanner_cb_scan_proc(ctx)
     ctx.sumary_scanned += 1
