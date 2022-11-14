@@ -38,6 +38,7 @@ proc check_hidden(procfs: string): bool =
     pid_stat = map_pid(procfs)
   except IOError:
     echo "Hidden process: ", procfs.splitPath().tail, " Prevent reading proc's status"
+    return true
 
   if pid_stat.pid == pid_stat.tgid and pid_stat.ppid > 0:
     for kind, path in walkDir("/proc/"):
