@@ -43,13 +43,17 @@ type
   ]#
   ProcScanner* = object of YrEngine
     proc_id*: uint
-    proc_path*: string
+    proc_tgid*: uint
+    proc_ppid*: uint
+    proc_pathfs*: string
+    proc_name*: string
     proc_cmdline*: string
-    proc_binary*: string
+    proc_binary_path*: string
     scan_virname*: cstring
     sumary_scanned*: uint
     sumary_infected*: uint
     do_scan_stacks*: bool
+    do_check_hidden_procs*: bool
   #[
     yr_scanner: YR_RULES
     scan_object: current path / name of object that engine is scanning
@@ -72,6 +76,7 @@ type
 
 const
   YR_SCAN_TIMEOUT*: cint = 1000000
+  SCANNER_MAX_PROC_COUNT* = 4194304
 
 
 proc init_clamav*(f_engine: var FileScanner): cl_error_t =

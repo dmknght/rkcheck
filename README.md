@@ -34,5 +34,9 @@ To install inside system, run
 To uninstall it, run
 `sudo make uninstall`
 
+# License
+- src/tools/unhide_procs.nim MIT
+- Some rules are under custom licenses
+- TODO update licenses
 # How to use
 TODO complete here with help banner
