@@ -62,8 +62,8 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   discard yr_rules_scan_proc(ctx.engine, cint(ctx.proc_id), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
   # Scan cmdline so we can detect reverse shell
-  if ctx.scan_virname == "" and ctx.proc_cmdline != "":
-    discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.proc_cmdline[0].unsafeAddr), uint(len(ctx.proc_cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
+  # if ctx.scan_virname == "" and ctx.proc_cmdline != "":
+  #   discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.proc_cmdline[0].unsafeAddr), uint(len(ctx.proc_cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
 
   # TODO: scan process's stacks and execfile. Maybe need different ruleset?
   # TODO: implement entropy scan https://www.sandflysecurity.com/blog/sandfly-linux-file-entropy-scanner-updated/
