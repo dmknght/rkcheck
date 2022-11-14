@@ -119,7 +119,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
   var
     stat: Stat
   if lstat(cstring(ctx.proc_pathfs & "status"), stat) == -1:
-    print_process_hidden(ctx.proc_id, "BlockStatusRead")
+    print_process_hidden(ctx.proc_id, "Heur:Process.StatusDenied")
     return
 
   pscanner_map_proc_info(ctx, ctx.do_check_hidden_procs)
