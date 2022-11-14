@@ -65,6 +65,10 @@ proc create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_c
     proc_scanner.do_scan_stacks = true
   else:
     proc_scanner.do_scan_stacks = false
+
+  if options.check_hidden_proc:
+    proc_scanner.do_check_hidden_procs = true
+
   proc_scanner.sumary_scanned = 0
   proc_scanner.sumary_infected = 0
   proc_scanner.engine = yara_engine.engine

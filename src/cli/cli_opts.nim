@@ -17,6 +17,7 @@ proc cliopts_create_default*(options: var ScanOptions, scan_rootkit = false) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
+  options.check_hidden_proc = false
   options.db_path_clamav = "/var/lib/clamav/"
   let
     db_path_normal = [
@@ -152,6 +153,8 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         return show_help_banner()
       of "--all-processes":
         options.scan_all_procs = true
+      of "--check-hidden-proc":
+        options.check_hidden_proc = true
       of "--use-clamdb":
         options.use_clam_db = true
       of "--clam-debug":

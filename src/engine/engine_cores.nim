@@ -18,6 +18,7 @@ type
     list_files*: seq[string]
     list_procs*: seq[uint]
     scan_all_procs*: bool
+    check_hidden_proc*: bool
     is_clam_debug*: bool
     use_clam_db*: bool
     db_path_clamav*: string
