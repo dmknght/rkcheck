@@ -99,7 +99,6 @@ proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
 
 
 proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
-  # TODO handle parent pid, child pid, ... to do ignore scan
   let
     procfs_path = "/proc/" & $pid & "/"
 
