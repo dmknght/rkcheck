@@ -38,7 +38,6 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     rule = cast[ptr YR_RULE](message_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
-    rule.ns.name = cstring("SusCmdline")
     return pscanner_on_process_match(ctx, rule)
   else:
     ctx.scan_virname = ""
@@ -51,6 +50,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
 #     rule = cast[ptr YR_RULE](message_data)
 
 #   if message == CALLBACK_MSG_RULE_MATCHING:
+#     rule.ns.name = cstring("SusCmdline")
 #     return pscanner_on_process_match(ctx, rule)
 #   else:
 #     ctx.scan_virname = ""
@@ -82,9 +82,10 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
 proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
   try:
     ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
-  except:
-    # Do not crash if map has error. For example: Permission Denied when read /proc/1/exe
-    ctx.proc_binary_path = ""
+  except OSError:
+    # If process is a kernel thread or so, it's not posisble to expand /proc/<id>/exe (permission denied)
+    # however, we can get process name from status
+    discard
 
   ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
 
