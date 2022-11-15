@@ -85,7 +85,10 @@ proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
   except OSError:
     # If process is a kernel thread or so, it's not posisble to expand /proc/<id>/exe (permission denied)
     # however, we can get process name from status
-    discard
+    let
+      f = open(ctx.proc_pathfs & "status")
+    ctx.proc_binary_path = f.readLine().split()[^1]
+    f.close()
 
   ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
 
