@@ -47,6 +47,11 @@ proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_e
   return 0
 
 
+proc proc_scanner_on_proccess_masquerading*(pid: uint, binary_path: var string) =
+  let virus_name = "Heur:ProcCloak.Masquerading"
+  print_process_infected(virus_name, binary_path, pid)
+
+
 proc proc_scanner_on_scan_matched*(rule_ns, rule_id, binary_path: string, pid: uint) =
   let
     virus_name = cstring(rule_ns & ":" & replace(rule_id, "_", "."))

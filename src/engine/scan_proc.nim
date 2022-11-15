@@ -67,7 +67,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   #   discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.proc_cmdline[0].unsafeAddr), uint(len(ctx.proc_cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
 
   # TODO: scan process's stacks and execfile. Maybe need different ruleset?
-  # TODO: detect Kernel Process Masquerading https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
   # TODO: implement entropy scan https://www.sandflysecurity.com/blog/sandfly-linux-file-entropy-scanner-updated/
 
 
@@ -82,6 +81,11 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
 proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
   try:
     ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
+    # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
+    let
+      binary_name = ctx.proc_binary_path.splitPath().tail
+    if binary_name.startsWith("[") and tmp_name.endsWith("]"):
+      proc_scanner_on_proccess_masquerading(ctx.proc_id, ctx.proc_binary_path)
   except OSError:
     # If process is a kernel thread or so, it's not posisble to expand /proc/<id>/exe (permission denied)
     # however, we can get process name from status
