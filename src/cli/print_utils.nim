@@ -22,7 +22,7 @@ proc print_process_infected*(virname, path: string, pid: uint) =
 
 proc print_process_hidden*(pid: uint, name: string) =
   progress_bar_flush()
-  echo "Hidden proccess\e[0m Pid: \e[95m", pid, "\e[0m Name: ", name
+  echo "Heur:ProcCloak.ProcfsIv\e[0m Pid: \e[95m", pid, "\e[0m Name: ", name
 
 
 proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
