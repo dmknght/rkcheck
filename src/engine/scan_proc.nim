@@ -23,12 +23,9 @@ proc pscanner_on_proc_deleted_binary(virname: var cstring, binary_path: var stri
     https://www.sandflysecurity.com/blog/detecting-linux-memfd-create-fileless-malware-with-command-line-forensics/
     https://www.sandflysecurity.com/blog/basic-linux-malware-process-forensics-for-incident-responders/
   ]#
-  if binary_path.startsWith("/memfd"):
-    proc_scanner_on_memfd_deleted(virname, binary_path, pid)
-  else:
-    proc_scanner_on_binary_deleted(virname, binary_path, pid)
-
+  proc_scanner_on_binary_deleted(virname, binary_path, pid)
   infected += 1
+
   return CALLBACK_ABORT
 
 
@@ -84,7 +81,7 @@ proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
     # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
     let
       binary_name = ctx.proc_binary_path.splitPath().tail
-    if binary_name.startsWith("[") and tmp_name.endsWith("]"):
+    if binary_name.startsWith("[") and binary_name.endsWith("]"):
       proc_scanner_on_proccess_masquerading(ctx.proc_id, ctx.proc_binary_path)
   except OSError:
     # If process is a kernel thread or so, it's not posisble to expand /proc/<id>/exe (permission denied)

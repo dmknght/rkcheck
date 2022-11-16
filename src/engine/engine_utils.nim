@@ -30,14 +30,12 @@ proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object:
 
 
 proc proc_scanner_on_binary_deleted*(virus_name: var cstring, binary_path: var string, pid: uint) =
-  virus_name = "Heur:Fileless.DeletedBin"
-  binary_path.removeSuffix(" (deleted)")
-  print_process_infected($virus_name, binary_path, pid)
-
-
-proc proc_scanner_on_memfd_deleted*(virus_name: var cstring, binary_path: var string, pid: uint) =
-  virus_name = "Heur:Fileless.DeletedMemfd"
-  binary_path = binary_path.split()[0]
+  if binary_path.startsWith("/memfd"):
+    virus_name = "Heur:Fileless.DeletedMemfd"
+    binary_path = binary_path.split()[0]
+  else:
+    virus_name = "Heur:Fileless.DeletedBin"
+    binary_path.removeSuffix(" (deleted)")
   print_process_infected($virus_name, binary_path, pid)
 
 
