@@ -14,11 +14,17 @@ type
     tgid: int
     ppid: int
     name: string
+    exec: string
 
 
 proc map_pid(procfs: string): PidStat =
   var
     map_pid: PidStat
+
+  try:
+    map_pid.exec = expandSymlink(procfs & "/exe")
+  except:
+    map_pid.exec = ""
 
   for line in lines(procfs & "/status"):
     if line.startsWith("Name:"):
@@ -40,6 +46,8 @@ proc check_hidden(procfs: string): bool =
     echo "Hidden process: ", procfs.splitPath().tail, " Prevent reading proc's status"
     return true
 
+  if pid_stat.exec.endsWith("(deleted)"):
+    echo "Process deleted binary ", pid_stat.pid
   if pid_stat.pid == pid_stat.tgid and pid_stat.ppid > 0:
     for kind, path in walkDir("/proc/"):
       if kind == pcDir and path == procfs:
