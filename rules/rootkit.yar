@@ -65,6 +65,18 @@ rule Symbiote_a0d1 {
     elf_exec and all of them
 }
 
+
+rule Symbiote_0c27 {
+  meta:
+    description = "First DYN file of 5 samples"
+    md5 = "0c278f60cc4d36741e7e4d935fd2972f"
+  strings:
+    $ = "hidden_ports" fullword ascii
+    $ = "suporte42atendimento53log" fullword ascii
+  condition:
+    elf_dyn and all of them
+}
+
 // rule HCRootkit_Generic {
 //   meta:
 //     description = "Detects Linux HCRootkit, as reported by Avast"
