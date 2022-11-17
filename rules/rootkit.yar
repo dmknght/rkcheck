@@ -70,11 +70,18 @@ rule Symbiote_0c27 {
   meta:
     description = "First DYN file of 5 samples"
     md5 = "0c278f60cc4d36741e7e4d935fd2972f"
+    md5 = "59033839c1be695c83a68924979fab58"
+    md5 = "4d8ebed6943ff05118baf30be9515b83"
+    md5 = "87bb1d7e3639be2b21df8a7a273b60c8"
   strings:
-    $ = "hidden_ports" fullword ascii
-    $ = "suporte42atendimento53log" fullword ascii
+    $h1 = "hidden_ports" fullword ascii
+    $h2 = "hidden_address" fullword ascii
+    $h3 = "hidden_file" fullword ascii
+    $h4 = "hidden_proc" fullword ascii
+    $s1 = "suporte42atendimento53log" fullword ascii
+    $s2 = ">g^VI" fullword ascii
   condition:
-    elf_dyn and all of them
+    elf_dyn and any of ($h*) and any of ($s*)
 }
 
 // rule HCRootkit_Generic {
