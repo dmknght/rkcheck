@@ -33,10 +33,10 @@ rule Father_Gen1 {
     github = "https://github.com/mav8557/Father"
     md5 = "4f90604f04fe12f4e91b2bab13426fc0"
   strings:
-    $ = "Enjoy the shell" fullword ascii
-    $ = "AUTHENTICATE" fullword ascii
-    $ = "ld.so.preload" fullword ascii
-    $ = "execve" fullword ascii
+    $ = "o_execve" fullword ascii
+    $ = "lpe_drop_shell" fullword ascii
+    $ = "backconnect" fullword ascii
+    $ = "falsify_tcp" fullword ascii
   condition:
     elf_dyn and
     (
@@ -48,10 +48,7 @@ rule Father_Gen1 {
           elf.dynsym[i].name == "falsify_tcp"
         )
       ) or
-      for any i in (0 .. elf.number_of_sections):
-      (
-        3 of them in (elf.sections[i].address .. elf.sections[i].address + elf.sections[i].size)
-      )
+      all of them
     )
 }
 // rule HCRootkit_Generic {
