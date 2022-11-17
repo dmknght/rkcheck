@@ -51,6 +51,20 @@ rule Father_Gen1 {
       all of them
     )
 }
+
+rule Symbiote_a0d1 {
+  meta:
+    description = "ELF EXE file of 5 samples"
+    md5 = "a0d1e1ec8207c83c7d2d52ff65f0e159"
+  strings:
+    $ = "TUNNEL_CONNECT" fullword ascii
+    $ = "COMMAND_SHELL" fullword ascii
+    $ = "./dnscat" fullword ascii
+    $ = "Type = FIN" fullword ascii
+  condition:
+    elf_exec and all of them
+}
+
 // rule HCRootkit_Generic {
 //   meta:
 //     description = "Detects Linux HCRootkit, as reported by Avast"
