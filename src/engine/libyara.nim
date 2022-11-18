@@ -1,18 +1,22 @@
-# Generated @ 2020-10-07T00:01:26+07:00
+# Generated @ 2022-11-19T03:48:08+07:00
 # Command line:
-#   /home/dmknght/.nimble/pkgs/nimterop-#head/nimterop/toast --preprocess -m:c --recurse --includeDirs+=/home/dmknght/.cache/nim/nimterop/nimyara/libyara/include --passL+=/home/dmknght/.cache/nim/nimterop/nimyara/libyara/.libs/libyara.a --pnim --symOverride=timeval,timespec,pthread_t,pthread_key_t,pthread_mutex_t,jmp_buf --nim:/usr/bin/nim --pluginSourcePath=/home/dmknght/.cache/nim/nimterop/cPlugins/nimterop_2208387551.nim /home/dmknght/.cache/nim/nimterop/nimyara/libyara/include/yara.h -o /home/dmknght/.cache/nim/nimterop/toastCache/nimterop_2867451765.nim
+#   /home/dmknght/.nimble/pkgs/nimterop-#head/nimterop/toast --prefix=_ --suffix=_ -s -G__=_ --preprocess -m:c --recurse --includeDirs+=/usr/include/yara/ --passL+=/usr/lib/x86_64-linux-gnu/libyara.a --pnim --symOverride=timeval,timespec,pthread_t,pthread_key_t,pthread_mutex_t,jmp_buf --nim:/usr/bin/nim /home/dmknght/ParrotProjects/rkcheck/src/engine/yara.h -o /tmp/libyara.nim
 
-# const 'bool' has unsupported value 'int'
-# const 'YR_API' has unsupported value 'EXTERNC __attribute__((visibility ("default")))'
+# const 'bool' has unsupported value '_Bool'
+# const 'YR_API' has unsupported value 'EXTERNC __attribute__((visibility("default")))'
 # const 'YR_DEPRECATED_API' has unsupported value 'YR_API __attribute__((deprecated))'
-# const 'YR_FILE_DESCRIPTOR' has unsupported value 'int'
-# const 'YR_ARENA_NULL_REF' has unsupported value '(YR_ARENA_REF){ UINT32_MAX, UINT32_MAX }'
+# const 'YR_DEPRECATED' has unsupported value '__attribute__((deprecated))'
+# const 'YR_ARENA_NULL_REF' has unsupported value '(YR_ARENA_REF) { UINT32_MAX, UINT32_MAX }'
 # const 'YR_BITMASK' has unsupported value 'unsigned long'
 # const 'YR_BITMASK_SLOT_BITS' has unsupported value '(sizeof(YR_BITMASK) * 8)'
+# const 'YR_TLS' has unsupported value '__thread'
 # const 'OBJECT_COMMON_FIELDS' has unsupported value 'int canary; int8_t type; const char* identifier; YR_OBJECT* parent; void* data;'
+# const 'RE_MAX_RANGE' has unsupported value 'INT16_MAX'
+# const 'YR_VERSION' has unsupported value 'version_str(YR_MAJOR_VERSION) "." version_str( YR_MINOR_VERSION) "." version_str(YR_MICRO_VERSION)'
+# const 'YR_FILE_DESCRIPTOR' has unsupported value 'int'
 # const 'OP_INT_END' has unsupported value 'OP_INT_MINUS'
 # const 'OP_DBL_END' has unsupported value 'OP_DBL_MINUS'
-# const 'YR_VERSION' has unsupported value 'version_str(YR_MAJOR_VERSION) "." version_str(YR_MINOR_VERSION) "." version_str(YR_MICRO_VERSION)'
+# const 'yr_isnan' has unsupported value 'isnan'
 # const 'module_declarations' has unsupported value 'YR_CONCAT(MODULE_NAME, __declarations)'
 # const 'module_load' has unsupported value 'YR_CONCAT(MODULE_NAME, __load)'
 # const 'module_unload' has unsupported value 'YR_CONCAT(MODULE_NAME, __unload)'
@@ -21,6 +25,7 @@
 # const 'begin_declarations' has unsupported value 'int module_declarations(YR_OBJECT* module) { YR_OBJECT* stack[64]; int stack_top = 0; stack[stack_top] = module;'
 # const 'end_declarations' has unsupported value 'return ERROR_SUCCESS; }'
 {.push hint[ConvFromXtoItselfNotNeeded]: off.}
+
 type va_list* {.importc, header:"<stdarg.h>".} = object
 import macros
 
@@ -68,9 +73,7 @@ macro defineEnum(typ: untyped): untyped =
 
 {.pragma: impyaraHdr, header: "yara.h".}
 {.experimental: "codeReordering".}
-defineEnum(YR_CONFIG_NAME)    ## ```
-                          ##   Enumerated type listing configuration options
-                          ## ```
+defineEnum(YR_CONFIG_NAME)
 const
   MAX_PATH* = 1024
   YR_MAX_THREADS* = 32
@@ -198,29 +201,6 @@ const
   YR_AC_SLOT_OFFSET_BITS* = 9
   YR_AC_MAX_TRANSITION_TABLE_SIZE* = 0x00800000
   YR_AC_ROOT_STATE* = 0
-  YARA_ERROR_LEVEL_ERROR* = 0
-  YARA_ERROR_LEVEL_WARNING* = 1
-  EXPRESSION_TYPE_UNKNOWN* = 0
-  EXPRESSION_TYPE_BOOLEAN* = 1
-  EXPRESSION_TYPE_INTEGER* = 2
-  EXPRESSION_TYPE_STRING* = 4
-  EXPRESSION_TYPE_REGEXP* = 8
-  EXPRESSION_TYPE_OBJECT* = 16
-  EXPRESSION_TYPE_FLOAT* = 32
-  YR_NAMESPACES_TABLE* = 0
-  YR_RULES_TABLE* = 1
-  YR_METAS_TABLE* = 2
-  YR_STRINGS_TABLE* = 3
-  YR_EXTERNAL_VARIABLES_TABLE* = 4
-  YR_SZ_POOL* = 5
-  YR_CODE_SECTION* = 6
-  YR_RE_CODE_SECTION* = 7
-  YR_AC_TRANSITION_TABLE* = 8
-  YR_AC_STATE_MATCHES_TABLE* = 9
-  YR_AC_STATE_MATCHES_POOL* = 10
-  YR_SUMMARY_SECTION* = 11
-  YR_NUM_SECTIONS* = 12
-  YR_INTERNAL_LOOP_VARS* = 3
   ERROR_SUCCESS* = 0
   ERROR_INSUFICIENT_MEMORY* = 1
   ERROR_INSUFFICIENT_MEMORY* = 1
@@ -285,6 +265,53 @@ const
   ERROR_BLOCK_NOT_READY* = 61
   ERROR_INVALID_PERCENTAGE* = 62
   ERROR_IDENTIFIER_MATCHES_WILDCARD* = 63
+  YR_MAJOR_VERSION* = 4
+  YR_MINOR_VERSION* = 2
+  YR_MICRO_VERSION* = 3
+  YR_VERSION* = $YR_MAJOR_VERSION & "." & $YR_MINOR_VERSION & "." & $YR_MICRO_VERSION
+  YR_VERSION_HEX* = ((YR_MAJOR_VERSION shl typeof(YR_MAJOR_VERSION)(16)) or
+      typeof(YR_MAJOR_VERSION)((YR_MINOR_VERSION shl typeof(YR_MINOR_VERSION)(8))) or
+      typeof(YR_MAJOR_VERSION)((YR_MICRO_VERSION shl typeof(YR_MICRO_VERSION)(0))))
+  YR_PARANOID_EXEC* = 1
+  YR_CONFIG_STACK_SIZE* = (0).YR_CONFIG_NAME
+  YR_CONFIG_MAX_STRINGS_PER_RULE* = (YR_CONFIG_STACK_SIZE + 1).YR_CONFIG_NAME
+  YR_CONFIG_MAX_MATCH_DATA* = (YR_CONFIG_MAX_STRINGS_PER_RULE + 1).YR_CONFIG_NAME
+  YR_CONFIG_MAX_PROCESS_MEMORY_CHUNK* = (YR_CONFIG_MAX_MATCH_DATA + 1).YR_CONFIG_NAME
+  YR_CONFIG_LAST* = (YR_CONFIG_MAX_PROCESS_MEMORY_CHUNK + 1).YR_CONFIG_NAME ## ```
+                                                                            ##   End-of-enum marker, not a configuration
+                                                                            ## ```
+  DEFAULT_STACK_SIZE* = 16384
+  DEFAULT_MAX_STRINGS_PER_RULE* = 10000
+  DEFAULT_MAX_MATCH_DATA* = 512
+  DEFAULT_MAX_PROCESS_MEMORY_CHUNK* = 1073741824
+  SCAN_FLAGS_FAST_MODE* = 1
+  SCAN_FLAGS_PROCESS_MEMORY* = 2
+  SCAN_FLAGS_NO_TRYCATCH* = 4
+  SCAN_FLAGS_REPORT_RULES_MATCHING* = 8
+  SCAN_FLAGS_REPORT_RULES_NOT_MATCHING* = 16
+  YARA_ERROR_LEVEL_ERROR* = 0
+  YARA_ERROR_LEVEL_WARNING* = 1
+  EXPRESSION_TYPE_UNKNOWN* = 0
+  EXPRESSION_TYPE_BOOLEAN* = 1
+  EXPRESSION_TYPE_INTEGER* = 2
+  EXPRESSION_TYPE_STRING* = 4
+  EXPRESSION_TYPE_REGEXP* = 8
+  EXPRESSION_TYPE_OBJECT* = 16
+  EXPRESSION_TYPE_FLOAT* = 32
+  YR_NAMESPACES_TABLE* = 0
+  YR_RULES_TABLE* = 1
+  YR_METAS_TABLE* = 2
+  YR_STRINGS_TABLE* = 3
+  YR_EXTERNAL_VARIABLES_TABLE* = 4
+  YR_SZ_POOL* = 5
+  YR_CODE_SECTION* = 6
+  YR_RE_CODE_SECTION* = 7
+  YR_AC_TRANSITION_TABLE* = 8
+  YR_AC_STATE_MATCHES_TABLE* = 9
+  YR_AC_STATE_MATCHES_POOL* = 10
+  YR_SUMMARY_SECTION* = 11
+  YR_NUM_SECTIONS* = 12
+  YR_INTERNAL_LOOP_VARS* = 3
   CALLBACK_MSG_RULE_MATCHING* = 1
   CALLBACK_MSG_RULE_NOT_MATCHING* = 2
   CALLBACK_MSG_SCAN_FINISHED* = 3
@@ -295,11 +322,6 @@ const
   CALLBACK_CONTINUE* = 0
   CALLBACK_ABORT* = 1
   CALLBACK_ERROR* = 2
-  SCAN_FLAGS_FAST_MODE* = 1
-  SCAN_FLAGS_PROCESS_MEMORY* = 2
-  SCAN_FLAGS_NO_TRYCATCH* = 4
-  SCAN_FLAGS_REPORT_RULES_MATCHING* = 8
-  SCAN_FLAGS_REPORT_RULES_NOT_MATCHING* = 16
   YR_UNDEFINED* = 0xFFFABADAFABADAFF'i64
   OF_STRING_SET* = 0
   OF_RULE_SET* = 1
@@ -436,23 +458,6 @@ const
   OP_UINT8BE* = (OP_READ_INT + typeof(OP_READ_INT)(9))
   OP_UINT16BE* = (OP_READ_INT + typeof(OP_READ_INT)(10))
   OP_UINT32BE* = (OP_READ_INT + typeof(OP_READ_INT)(11))
-  YR_MAJOR_VERSION* = 4
-  YR_MINOR_VERSION* = 2
-  YR_MICRO_VERSION* = 3
-  YR_VERSION* = $YR_MAJOR_VERSION & "." & $YR_MINOR_VERSION & "." & $YR_MICRO_VERSION
-  YR_VERSION_HEX* = ((YR_MAJOR_VERSION shl typeof(YR_MAJOR_VERSION)(16)) or
-      typeof(YR_MAJOR_VERSION)((YR_MINOR_VERSION shl typeof(YR_MINOR_VERSION)(8))) or
-      typeof(YR_MAJOR_VERSION)((YR_MICRO_VERSION shl typeof(YR_MICRO_VERSION)(0))))
-  YR_PARANOID_EXEC* = 1
-  YR_CONFIG_STACK_SIZE* = (0).YR_CONFIG_NAME
-  YR_CONFIG_MAX_STRINGS_PER_RULE* = (YR_CONFIG_STACK_SIZE + 1).YR_CONFIG_NAME
-  YR_CONFIG_MAX_MATCH_DATA* = (YR_CONFIG_MAX_STRINGS_PER_RULE + 1).YR_CONFIG_NAME
-  YR_CONFIG_MAX_PROCESS_MEMORY_CHUNK* = (YR_CONFIG_MAX_MATCH_DATA + 1).YR_CONFIG_NAME
-  YR_CONFIG_LAST* = (YR_CONFIG_MAX_PROCESS_MEMORY_CHUNK + 1).YR_CONFIG_NAME
-  DEFAULT_STACK_SIZE* = 16384
-  DEFAULT_MAX_STRINGS_PER_RULE* = 10000
-  DEFAULT_MAX_MATCH_DATA* = 512
-  DEFAULT_MAX_PROCESS_MEMORY_CHUNK* = 1073741824
   OBJECT_CREATE* = 1
   OBJECT_TYPE_INTEGER* = 1
   OBJECT_TYPE_STRING* = 2
@@ -468,11 +473,6 @@ type
   pthread_key_t = object
   pthread_mutex_t = object
   jmp_buf = object
-  YR_MAPPED_FILE* {.bycopy, impyaraHdr, importc: "struct _YR_MAPPED_FILE".} = object
-    file*: cint
-    size*: uint
-    data*: ptr uint8
-
   YR_STREAM_READ_FUNC* {.importc, impyaraHdr.} = proc (`ptr`: pointer;
       size: uint; count: uint; user_data: pointer): uint {.cdecl.}
   YR_STREAM_WRITE_FUNC* {.importc, impyaraHdr.} = proc (`ptr`: pointer;
@@ -739,9 +739,7 @@ type
                     ##   Index of the rule containing this string in the array of YR_RULE
                     ##      structures stored in YR_RULES_TABLE.
                     ## ```
-    length*: int32             ## ```
-                 ##   String's length.
-                 ## ```
+    length*: int32 # String's length
     string*: ptr uint8
     string_g*: YR_ARENA_REF
     chained_to*: ptr YR_STRING
@@ -776,16 +774,68 @@ type
 
   YR_RULES* {.importc, impyaraHdr, bycopy.} = object
     arena*: ptr YR_ARENA
-    rules_table*: ptr YR_RULE
-    rules_list_head*: ptr YR_RULE
-    strings_table*: ptr YR_STRING
-    strings_list_head*: ptr YR_STRING
-    ext_vars_table*: ptr YR_EXTERNAL_VARIABLE
-    externals_list_head*: ptr YR_EXTERNAL_VARIABLE
-    ac_transition_table*: ptr YR_AC_TRANSITION
-    ac_match_pool*: ptr YR_AC_MATCH
-    ac_match_table*: ptr uint32
-    code_start*: ptr uint8
+    rules_table*: ptr YR_RULE ## ```
+                              ##   The previous name for rules_table was rules_list_head, because this
+                              ##      was previously a linked list. The old name is maintained but marked as
+                              ##      deprecated, which will raise a warning if used.
+                              ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
+                              ##      after 4.1 has been released.
+                              ## ```
+    rules_list_head*: ptr YR_RULE ## ```
+                                  ##   The previous name for rules_table was rules_list_head, because this
+                                  ##      was previously a linked list. The old name is maintained but marked as
+                                  ##      deprecated, which will raise a warning if used.
+                                  ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
+                                  ##      after 4.1 has been released.
+                                  ## ```
+    strings_table*: ptr YR_STRING ## ```
+                                  ##   The previous name for strings_table was strings_list_head, because this
+                                  ##      was previously a linked list. The old name is maintained but marked as
+                                  ##      deprecated, which will raise a warning if used.
+                                  ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
+                                  ##      after 4.1 has been released.
+                                  ## ```
+    strings_list_head*: ptr YR_STRING ## ```
+                                      ##   The previous name for strings_table was strings_list_head, because this
+                                      ##      was previously a linked list. The old name is maintained but marked as
+                                      ##      deprecated, which will raise a warning if used.
+                                      ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
+                                      ##      after 4.1 has been released.
+                                      ## ```
+    ext_vars_table*: ptr YR_EXTERNAL_VARIABLE ## ```
+                                              ##   The previous name for ext_vars_table was externals_list_head, because
+                                              ##      this was previously a linked list. The old name is maintained but marked
+                                              ##      as deprecated, which will raise a warning if used.
+                                              ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
+                                              ##      after 4.1 has been released.
+                                              ## ```
+    externals_list_head*: ptr YR_EXTERNAL_VARIABLE ## ```
+                                                   ##   The previous name for ext_vars_table was externals_list_head, because
+                                                   ##      this was previously a linked list. The old name is maintained but marked
+                                                   ##      as deprecated, which will raise a warning if used.
+                                                   ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
+                                                   ##      after 4.1 has been released.
+                                                   ## ```
+    ac_transition_table*: ptr YR_AC_TRANSITION ## ```
+                                               ##   Pointer to the Aho-Corasick transition table.
+                                               ## ```
+    ac_match_pool*: ptr YR_AC_MATCH ## ```
+                                    ##   A pointer to the arena where YR_AC_MATCH structures are allocated.
+                                    ## ```
+    ac_match_table*: ptr uint32 ## ```
+                                ##   Table that translates from Aho-Corasick states (which are identified by
+                                ##      numbers 0, 1, 2.. and so on) to the index in ac_match_pool where the
+                                ##      YR_AC_MATCH structures for the corresponding state start.
+                                ##      If the entry corresponding to state N in ac_match_table is zero, it
+                                ##      means that there's no match associated to the state. If it's non-zero,
+                                ##      its value is the 1-based index within ac_match_pool where the first
+                                ##      match resides.
+                                ## ```
+    code_start*: ptr uint8 ## ```
+                           ##   Pointer to the first instruction that is executed whan evaluating the
+                           ##      conditions for all rules. The code is executed by yr_execute_code and
+                           ##      the instructions are defined by the OP_X macros in exec.h.
+                           ## ```
     num_rules*: uint32       ## ```
                              ##   Total number of rules.
                              ## ```
@@ -1194,6 +1244,16 @@ type
 
   YR_ATOMS_QUALITY_FUNC* {.importc, impyaraHdr.} = proc (
       config: ptr YR_ATOMS_CONFIG; atom: ptr YR_ATOM): cint {.cdecl.}
+  BASE64_NODE* {.importc, impyaraHdr, bycopy.} = object
+    str*: ptr SIZED_STRING
+    escaped*: cint
+    next*: ptr BASE64_NODE
+
+  YR_MAPPED_FILE* {.bycopy, impyaraHdr, importc: "struct _YR_MAPPED_FILE".} = object
+    file*: cint
+    size*: uint
+    data*: ptr uint8
+
   Union_yarah25* {.union, bycopy, impyaraHdr, importc: "union Union_yarah25".} = object
     integer*: int64
     `object`*: ptr YR_OBJECT
@@ -1385,6 +1445,29 @@ type
       module_data: pointer; module_data_size: uint): cint {.cdecl.}
   YR_EXT_UNLOAD_FUNC* {.importc, impyaraHdr.} = proc (
       module_object: ptr YR_OBJECT): cint {.cdecl.}
+  YR_PROC_ITERATOR_CTX* {.bycopy, impyaraHdr,
+                          importc: "struct _YR_PROC_ITERATOR_CTX".} = object
+    buffer*: ptr uint8
+    buffer_size*: uint
+    current_block*: YR_MEMORY_BLOCK
+    proc_info*: pointer
+
+  YR_STACK* {.importc, impyaraHdr, bycopy.} = object
+    items*: pointer ## ```
+                    ##   Pointer to a heap-allocated array containing the void* values put in
+                    ##      in the stack. This array starts with a fixed size and it's grown as
+                    ##      required when new items are pushed into the stack.
+                    ## ```
+    capacity*: cint ## ```
+                    ##   Current capacity (i.e: the number of items that fit into the array)
+                    ## ```
+    item_size*: cint         ## ```
+                             ##   Size of each individual item in the stack.
+                             ## ```
+    top*: cint               ## ```
+                             ##   Index of the stack's top in the items array.
+                             ## ```
+  
 proc xtoi*(hexstr: cstring): uint64 {.importc, cdecl, impyaraHdr.}
   ## ```
                                                                   ##   Other "compilers" and later versions of Microsoft Visual Studio C++ and
@@ -1406,46 +1489,6 @@ proc yr_vasprintf*(strp: ptr cstring; fmt: cstring; ap: va_list) {.importc,
     cdecl, impyaraHdr.}
 proc yr_asprintf*(strp: ptr cstring; fmt: cstring) {.importc, cdecl, impyaraHdr,
     varargs.}
-proc yr_filemap_map*(file_path: cstring; pmapped_file: ptr YR_MAPPED_FILE): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_filemap_map_fd*(file: cint; offset: uint64; size: uint;
-                        pmapped_file: ptr YR_MAPPED_FILE): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_filemap_map_ex*(file_path: cstring; offset: uint64; size: uint;
-                        pmapped_file: ptr YR_MAPPED_FILE): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_filemap_unmap*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl,
-    impyaraHdr.}
-proc yr_filemap_unmap_fd*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl,
-    impyaraHdr.}
-  ## ```
-                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ## ```
 proc yr_stream_read*(`ptr`: pointer; size: uint; count: uint;
                      stream: ptr YR_STREAM): uint {.importc, cdecl, impyaraHdr.}
 proc yr_stream_write*(`ptr`: pointer; size: uint; count: uint;
@@ -1520,34 +1563,34 @@ proc yr_arena_load_stream*(stream: ptr YR_STREAM; arena: ptr ptr YR_ARENA): cint
     importc, cdecl, impyaraHdr.}
 proc yr_arena_save_stream*(arena: ptr YR_ARENA; stream: ptr YR_STREAM): cint {.
     importc, cdecl, impyaraHdr.}
-  ## ```
-                                ##   Copyright (c) 2007-2014. The YARA Authors. All Rights Reserved.
-                                ##   
-                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                ##   are permitted provided that the following conditions are met:
-                                ##   
-                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                ##   list of conditions and the following disclaimer.
-                                ##   
-                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                ##   other materials provided with the distribution.
-                                ##   
-                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                ##   may be used to endorse or promote products derived from this software without
-                                ##   specific prior written permission.
-                                ##   
-                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                ## ```
+## ```
+##   Copyright (c) 2007-2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 proc ss_compare*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): cint {.importc,
     cdecl, impyaraHdr.}
 proc ss_icompare*(s1: ptr SIZED_STRING; s2: ptr SIZED_STRING): cint {.importc,
@@ -1568,34 +1611,34 @@ proc ss_dup*(s: ptr SIZED_STRING): ptr SIZED_STRING {.importc, cdecl, impyaraHdr
 proc ss_new*(s: cstring): ptr SIZED_STRING {.importc, cdecl, impyaraHdr.}
 proc ss_convert_to_wide*(s: ptr SIZED_STRING): ptr SIZED_STRING {.importc,
     cdecl, impyaraHdr.}
-  ## ```
-                       ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ## ```
+## ```
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 proc yr_bitmask_find_non_colliding_offset*(a: ptr culong; b: ptr culong;
     len_a: uint32; len_b: uint32; off_a: ptr uint32): uint32 {.importc, cdecl,
     impyaraHdr.}
@@ -1664,37 +1707,37 @@ proc yr_thread_storage_set_value*(a1: ptr YR_THREAD_STORAGE_KEY; a2: pointer): c
     importc, cdecl, impyaraHdr.}
 proc yr_thread_storage_get_value*(a1: ptr YR_THREAD_STORAGE_KEY): pointer {.
     importc, cdecl, impyaraHdr.}
-  ## ```
-                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                                ##   
-                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                ##   are permitted provided that the following conditions are met:
-                                ##   
-                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                ##   list of conditions and the following disclaimer.
-                                ##   
-                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                ##   other materials provided with the distribution.
-                                ##   
-                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                ##   may be used to endorse or promote products derived from this software without
-                                ##   specific prior written permission.
-                                ##   
-                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                ##   
-                                ##     
-                                ##      Created by Victor Manuel Alvarez on 3/4/20.
-                                ## ```
+## ```
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##      Created by Victor Manuel Alvarez on 3/4/20.
+## ```
 proc yr_notebook_create*(page_size: uint; pool: ptr ptr YR_NOTEBOOK): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_notebook_destroy*(pool: ptr YR_NOTEBOOK): cint {.importc, cdecl,
@@ -1764,65 +1807,65 @@ proc yr_atoms_min_quality*(config: ptr YR_ATOMS_CONFIG;
     cdecl, impyaraHdr.}
 proc yr_atoms_list_destroy*(list_head: ptr YR_ATOM_LIST_ITEM) {.importc, cdecl,
     impyaraHdr.}
-  ## ```
-                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ##   
-                ##     
-                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ##   
-                ##      Number of bits dedicated to store the offset of the slot relative to its
-                ##      own state.
-                ## ```
+## ```
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##      Number of bits dedicated to store the offset of the slot relative to its
+##      own state.
+## ```
 proc yr_ac_automaton_create*(arena: ptr YR_ARENA;
                              automaton: ptr ptr YR_AC_AUTOMATON): cint {.
     importc, cdecl, impyaraHdr.}
@@ -1835,118 +1878,308 @@ proc yr_ac_compile*(automaton: ptr YR_AC_AUTOMATON; arena: ptr YR_ARENA): cint {
     importc, cdecl, impyaraHdr.}
 proc yr_ac_print_automaton*(automaton: ptr YR_AC_AUTOMATON) {.importc, cdecl,
     impyaraHdr.}
+## ```
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2018. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
+proc yr_get_entry_point_offset*(buffer: ptr uint8; buffer_length: uint): uint64 {.
+    importc, cdecl, impyaraHdr.}
+proc yr_get_entry_point_address*(buffer: ptr uint8; buffer_length: uint;
+                                 base_address: uint64): uint64 {.importc, cdecl,
+    impyaraHdr.}
+proc yr_initialize*(): cint {.importc, cdecl, impyaraHdr.}
+proc yr_finalize*(): cint {.importc, cdecl, impyaraHdr.}
+proc yr_set_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_set_configuration_uint32*(a1: YR_CONFIG_NAME; a2: uint32): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_set_configuration_uint64*(a1: YR_CONFIG_NAME; a2: uint64): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_get_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_get_configuration_uint32*(a1: YR_CONFIG_NAME; a2: ptr uint32): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_get_configuration_uint64*(a1: YR_CONFIG_NAME; a2: ptr uint64): cint {.
+    importc, cdecl, impyaraHdr.}
+## ```
+##   Copyright (c) 2007. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
+proc yr_calloc*(count: uint; size: uint): pointer {.importc, cdecl, impyaraHdr.}
   ## ```
-                ##   Copyright (c) 2020. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##     are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##     may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ##   
-                ##     
-                ##   Copyright (c) 2007-2015. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ##   
-                ##     
-                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ##   
-                ##     
-                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ## ```
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
+proc yr_malloc*(size: uint): pointer {.importc, cdecl, impyaraHdr.}
+proc yr_realloc*(`ptr`: pointer; size: uint): pointer {.importc, cdecl,
+    impyaraHdr.}
+proc yr_strdup*(str: cstring): cstring {.importc, cdecl, impyaraHdr.}
+proc yr_strndup*(str: cstring; n: uint): cstring {.importc, cdecl, impyaraHdr.}
+proc yr_free*(`ptr`: pointer) {.importc, cdecl, impyaraHdr.}
+proc yr_heap_alloc*(): cint {.importc, cdecl, impyaraHdr.}
+proc yr_heap_free*(): cint {.importc, cdecl, impyaraHdr.}
+## ```
+##   Created by Victor Manuel Alvarez on 3/4/20.
+##     
+##     
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
+proc yr_scan_verify_match*(context: ptr YR_SCAN_CONTEXT;
+                           ac_match: ptr YR_AC_MATCH; data: ptr uint8;
+                           data_size: uint; data_base: uint64; offset: uint): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_base64_ast_from_string*(in_str: ptr SIZED_STRING; modifier: YR_MODIFIER;
+                                re_ast: ptr ptr RE_AST; error: ptr RE_ERROR): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_filemap_map*(file_path: cstring; pmapped_file: ptr YR_MAPPED_FILE): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_filemap_map_fd*(file: cint; offset: uint64; size: uint;
+                        pmapped_file: ptr YR_MAPPED_FILE): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_filemap_map_ex*(file_path: cstring; offset: uint64; size: uint;
+                        pmapped_file: ptr YR_MAPPED_FILE): cint {.importc,
+    cdecl, impyaraHdr.}
+proc yr_filemap_unmap*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl,
+    impyaraHdr.}
+proc yr_filemap_unmap_fd*(pmapped_file: ptr YR_MAPPED_FILE) {.importc, cdecl,
+    impyaraHdr.}
+## ```
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 proc yr_compiler_push_file_name*(compiler: ptr YR_COMPILER; file_name: cstring): cint {.
     importc: "_yr_compiler_push_file_name", cdecl, impyaraHdr.}
 proc yr_compiler_pop_file_name*(compiler: ptr YR_COMPILER) {.
@@ -2010,34 +2243,34 @@ proc yr_compiler_define_string_variable*(compiler: ptr YR_COMPILER;
     identifier: cstring; value: cstring): cint {.importc, cdecl, impyaraHdr.}
 proc yr_compiler_get_rules*(compiler: ptr YR_COMPILER; rules: ptr ptr YR_RULES): cint {.
     importc, cdecl, impyaraHdr.}
-  ## ```
-                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                                ##   
-                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                ##   are permitted provided that the following conditions are met:
-                                ##   
-                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                ##   list of conditions and the following disclaimer.
-                                ##   
-                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                ##   other materials provided with the distribution.
-                                ##   
-                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                ##   may be used to endorse or promote products derived from this software without
-                                ##   specific prior written permission.
-                                ##   
-                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                ## ```
+## ```
+##   Copyright (c) 2013-2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 proc yr_scanner_create*(rules: ptr YR_RULES; scanner: ptr ptr YR_SCANNER): cint {.
     importc, cdecl, impyaraHdr.}
 proc yr_scanner_destroy*(scanner: ptr YR_SCANNER) {.importc, cdecl, impyaraHdr.}
@@ -2079,62 +2312,62 @@ proc yr_scanner_reset_profiling_info*(scanner: ptr YR_SCANNER) {.importc, cdecl,
     impyaraHdr.}
 proc yr_scanner_print_profiling_info*(scanner: ptr YR_SCANNER): cint {.importc,
     cdecl, impyaraHdr.}
-  ## ```
-                       ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ## ```
+## ```
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 proc yr_rules_scan_mem_blocks*(rules: ptr YR_RULES;
                                `iterator`: ptr YR_MEMORY_BLOCK_ITERATOR;
                                flags: cint; callback: YR_CALLBACK_FUNC;
@@ -2180,138 +2413,176 @@ proc yr_rule_disable*(rule: ptr YR_RULE) {.importc, cdecl, impyaraHdr.}
 proc yr_rule_enable*(rule: ptr YR_RULE) {.importc, cdecl, impyaraHdr.}
 proc yr_rules_from_arena*(arena: ptr YR_ARENA; rules: ptr ptr YR_RULES): cint {.
     importc, cdecl, impyaraHdr.}
-  ## ```
-                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                                ##   
-                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                ##   are permitted provided that the following conditions are met:
-                                ##   
-                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                ##   list of conditions and the following disclaimer.
-                                ##   
-                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                ##   other materials provided with the distribution.
-                                ##   
-                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                ##   may be used to endorse or promote products derived from this software without
-                                ##   specific prior written permission.
-                                ##   
-                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                ## ```
-proc yr_scan_verify_match*(context: ptr YR_SCAN_CONTEXT;
-                           ac_match: ptr YR_AC_MATCH; data: ptr uint8;
-                           data_size: uint; data_base: uint64; offset: uint): cint {.
-    importc, cdecl, impyaraHdr.}
+## ```
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 proc yr_execute_code*(context: ptr YR_SCAN_CONTEXT): cint {.importc, cdecl,
     impyaraHdr.}
-  ## ```
-                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                ##   
-                ##   Redistribution and use in source and binary forms, with or without modification,
-                ##   are permitted provided that the following conditions are met:
-                ##   
-                ##   1. Redistributions of source code must retain the above copyright notice, this
-                ##   list of conditions and the following disclaimer.
-                ##   
-                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                ##   this list of conditions and the following disclaimer in the documentation and/or
-                ##   other materials provided with the distribution.
-                ##   
-                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                ##   may be used to endorse or promote products derived from this software without
-                ##   specific prior written permission.
-                ##   
-                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
+##   Copyright (c) 2007-2015. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2007-2015. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 ## ```
-proc yr_initialize*(): cint {.importc, cdecl, impyaraHdr.}
-proc yr_finalize*(): cint {.importc, cdecl, impyaraHdr.}
-proc yr_set_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_set_configuration_uint32*(a1: YR_CONFIG_NAME; a2: uint32): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_set_configuration_uint64*(a1: YR_CONFIG_NAME; a2: uint64): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_get_configuration*(a1: YR_CONFIG_NAME; a2: pointer): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_get_configuration_uint32*(a1: YR_CONFIG_NAME; a2: ptr uint32): cint {.
-    importc, cdecl, impyaraHdr.}
-proc yr_get_configuration_uint64*(a1: YR_CONFIG_NAME; a2: ptr uint64): cint {.
-    importc, cdecl, impyaraHdr.}
-  ## ```
-                                ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                                ##   
-                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                ##   are permitted provided that the following conditions are met:
-                                ##   
-                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                ##   list of conditions and the following disclaimer.
-                                ##   
-                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                ##   other materials provided with the distribution.
-                                ##   
-                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                ##   may be used to endorse or promote products derived from this software without
-                                ##   specific prior written permission.
-                                ##   
-                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                ##   
-                                ##     
-                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                                ##   
-                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                ##   are permitted provided that the following conditions are met:
-                                ##   
-                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                ##   list of conditions and the following disclaimer.
-                                ##   
-                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                ##   other materials provided with the distribution.
-                                ##   
-                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                ##   may be used to endorse or promote products derived from this software without
-                                ##   specific prior written permission.
-                                ##   
-                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                ## ```
 proc yr_object_create*(`type`: int8; identifier: cstring; parent: ptr YR_OBJECT;
                        `object`: ptr ptr YR_OBJECT): cint {.importc, cdecl,
     impyaraHdr.}
@@ -2349,263 +2620,177 @@ proc yr_object_set_float*(value: cdouble; `object`: ptr YR_OBJECT;
 proc yr_object_set_string*(value: cstring; len: uint; `object`: ptr YR_OBJECT;
                            field: cstring): cint {.importc, cdecl, impyaraHdr,
     varargs.}
-proc yr_object_array_length*(`object`: ptr YR_OBJECT): cint {.importc, cdecl,
-    impyaraHdr.}
-proc yr_object_array_get_item*(`object`: ptr YR_OBJECT; flags: cint; index: cint): ptr YR_OBJECT {.
-    importc, cdecl, impyaraHdr.}
-proc yr_object_array_set_item*(`object`: ptr YR_OBJECT; item: ptr YR_OBJECT;
-                               index: cint): cint {.importc, cdecl, impyaraHdr.}
-proc yr_object_dict_get_item*(`object`: ptr YR_OBJECT; flags: cint; key: cstring): ptr YR_OBJECT {.
-    importc, cdecl, impyaraHdr.}
-proc yr_object_dict_set_item*(`object`: ptr YR_OBJECT; item: ptr YR_OBJECT;
-                              key: cstring): cint {.importc, cdecl, impyaraHdr.}
-proc yr_object_structure_set_member*(`object`: ptr YR_OBJECT;
-                                     member: ptr YR_OBJECT): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_object_get_root*(`object`: ptr YR_OBJECT): ptr YR_OBJECT {.importc,
-    cdecl, impyaraHdr.}
-proc yr_object_print_data*(`object`: ptr YR_OBJECT; indent: cint;
-                           print_identifier: cint) {.importc, cdecl, impyaraHdr.}
+proc yr_object_array_length*(`object`: ptr YR_OBJECT): cint {.importc, cdecl, impyaraHdr.}
+proc yr_object_array_get_item*(`object`: ptr YR_OBJECT; flags: cint; index: cint): ptr YR_OBJECT {.importc, cdecl, impyaraHdr.}
+proc yr_object_array_set_item*(`object`: ptr YR_OBJECT; item: ptr YR_OBJECT; index: cint): cint {.importc, cdecl, impyaraHdr.}
+proc yr_object_dict_get_item*(`object`: ptr YR_OBJECT; flags: cint; key: cstring): ptr YR_OBJECT {.importc, cdecl, impyaraHdr.}
+proc yr_object_dict_set_item*(`object`: ptr YR_OBJECT; item: ptr YR_OBJECT; key: cstring): cint {.importc, cdecl, impyaraHdr.}
+proc yr_object_structure_set_member*(`object`: ptr YR_OBJECT; member: ptr YR_OBJECT): cint {.importc, cdecl, impyaraHdr.}
+proc yr_object_get_root*(`object`: ptr YR_OBJECT): ptr YR_OBJECT {.importc, cdecl, impyaraHdr.}
+proc yr_object_print_data*(`object`: ptr YR_OBJECT; indent: cint; print_identifier: cint) {.importc, cdecl, impyaraHdr.}
 proc yr_modules_initialize*(): cint {.importc, cdecl, impyaraHdr.}
 proc yr_modules_finalize*(): cint {.importc, cdecl, impyaraHdr.}
-proc yr_modules_do_declarations*(module_name: cstring;
-                                 main_structure: ptr YR_OBJECT): cint {.importc,
-    cdecl, impyaraHdr.}
-proc yr_modules_load*(module_name: cstring; context: ptr YR_SCAN_CONTEXT): cint {.
+proc yr_modules_do_declarations*(module_name: cstring; main_structure: ptr YR_OBJECT): cint {.importc, cdecl, impyaraHdr.}
+proc yr_modules_load*(module_name: cstring; context: ptr YR_SCAN_CONTEXT): cint {.importc, cdecl, impyaraHdr.}
+proc yr_modules_unload_all*(context: ptr YR_SCAN_CONTEXT): cint {.importc, cdecl, impyaraHdr.}
+
+## ```
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2007. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
+
+proc yr_process_open_iterator*(pid: cint; `iterator`: ptr YR_MEMORY_BLOCK_ITERATOR): cint {.
     importc, cdecl, impyaraHdr.}
-proc yr_modules_unload_all*(context: ptr YR_SCAN_CONTEXT): cint {.importc,
-    cdecl, impyaraHdr.}
-  ## ```
-                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2015. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2013. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2018. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ##   
-                       ##     
-                       ##   Copyright (c) 2007. The YARA Authors. All Rights Reserved.
-                       ##   
-                       ##   Redistribution and use in source and binary forms, with or without modification,
-                       ##   are permitted provided that the following conditions are met:
-                       ##   
-                       ##   1. Redistributions of source code must retain the above copyright notice, this
-                       ##   list of conditions and the following disclaimer.
-                       ##   
-                       ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                       ##   this list of conditions and the following disclaimer in the documentation and/or
-                       ##   other materials provided with the distribution.
-                       ##   
-                       ##   3. Neither the name of the copyright holder nor the names of its contributors
-                       ##   may be used to endorse or promote products derived from this software without
-                       ##   specific prior written permission.
-                       ##   
-                       ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                       ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                       ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                       ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                       ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                       ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                       ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                       ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                       ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                       ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                       ## ```
-proc yr_calloc*(count: uint; size: uint): pointer {.importc, cdecl, impyaraHdr.}
-  ## ```
-                                                                                ##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
-                                                                                ##   
-                                                                                ##   Redistribution and use in source and binary forms, with or without modification,
-                                                                                ##   are permitted provided that the following conditions are met:
-                                                                                ##   
-                                                                                ##   1. Redistributions of source code must retain the above copyright notice, this
-                                                                                ##   list of conditions and the following disclaimer.
-                                                                                ##   
-                                                                                ##   2. Redistributions in binary form must reproduce the above copyright notice,
-                                                                                ##   this list of conditions and the following disclaimer in the documentation and/or
-                                                                                ##   other materials provided with the distribution.
-                                                                                ##   
-                                                                                ##   3. Neither the name of the copyright holder nor the names of its contributors
-                                                                                ##   may be used to endorse or promote products derived from this software without
-                                                                                ##   specific prior written permission.
-                                                                                ##   
-                                                                                ##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-                                                                                ##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-                                                                                ##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                                                                                ##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-                                                                                ##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-                                                                                ##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-                                                                                ##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-                                                                                ##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-                                                                                ##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-                                                                                ##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                                                                                ## ```
-proc yr_malloc*(size: uint): pointer {.importc, cdecl, impyaraHdr.}
-proc yr_realloc*(`ptr`: pointer; size: uint): pointer {.importc, cdecl,
+proc yr_process_close_iterator*(`iterator`: ptr YR_MEMORY_BLOCK_ITERATOR): cint {.
+    importc, cdecl, impyaraHdr.}
+proc yr_process_get_first_memory_block*(`iterator`: ptr YR_MEMORY_BLOCK_ITERATOR): ptr YR_MEMORY_BLOCK {.
+    importc, cdecl, impyaraHdr.}
+proc yr_process_get_next_memory_block*(`iterator`: ptr YR_MEMORY_BLOCK_ITERATOR): ptr YR_MEMORY_BLOCK {.
+    importc, cdecl, impyaraHdr.}
+proc yr_process_fetch_memory_block_data*(`block`: ptr YR_MEMORY_BLOCK): ptr uint8 {.
+    importc, cdecl, impyaraHdr.}
+proc yr_stack_create*(initial_capacity: cint; item_size: cint;
+                      stack: ptr ptr YR_STACK): cint {.importc, cdecl,
     impyaraHdr.}
-proc yr_strdup*(str: cstring): cstring {.importc, cdecl, impyaraHdr.}
-proc yr_strndup*(str: cstring; n: uint): cstring {.importc, cdecl, impyaraHdr.}
-proc yr_free*(`ptr`: pointer) {.importc, cdecl, impyaraHdr.}
-proc yr_heap_alloc*(): cint {.importc, cdecl, impyaraHdr.}
-proc yr_heap_free*(): cint {.importc, cdecl, impyaraHdr.}
+proc yr_stack_destroy*(stack: ptr YR_STACK) {.importc, cdecl, impyaraHdr.}
+proc yr_stack_push*(stack: ptr YR_STACK; item: pointer): cint {.importc, cdecl,
+    impyaraHdr.}
+proc yr_stack_pop*(stack: ptr YR_STACK; item: pointer): cint {.importc, cdecl,
+    impyaraHdr.}
+## ```
+##   Copyright (c) 2015. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2016. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##   
+##     
+##   Copyright (c) 2014. The YARA Authors. All Rights Reserved.
+##   
+##   Redistribution and use in source and binary forms, with or without modification,
+##   are permitted provided that the following conditions are met:
+##   
+##   1. Redistributions of source code must retain the above copyright notice, this
+##   list of conditions and the following disclaimer.
+##   
+##   2. Redistributions in binary form must reproduce the above copyright notice,
+##   this list of conditions and the following disclaimer in the documentation and/or
+##   other materials provided with the distribution.
+##   
+##   3. Neither the name of the copyright holder nor the names of its contributors
+##   may be used to endorse or promote products derived from this software without
+##   specific prior written permission.
+##   
+##   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+##   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+##   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+##   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+##   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+##   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+##   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+##   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+##   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+##   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## ```
 {.pop.}
