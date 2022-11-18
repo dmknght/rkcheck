@@ -17,18 +17,6 @@ proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
   return CALLBACK_ABORT
 
 
-proc pscanner_on_proc_deleted_binary(virname: var cstring, binary_path: var string, pid: uint, infected: var uint): cint =
-  #[
-    Detect fileless malware attack
-    https://www.sandflysecurity.com/blog/detecting-linux-memfd-create-fileless-malware-with-command-line-forensics/
-    https://www.sandflysecurity.com/blog/basic-linux-malware-process-forensics-for-incident-responders/
-  ]#
-  proc_scanner_on_binary_deleted(virname, binary_path, pid)
-  infected += 1
-
-  return CALLBACK_ABORT
-
-
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   let
     ctx = cast[ptr ProcScanner](user_data)
@@ -55,8 +43,6 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
 
 
 proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
-  if ctx.proc_binary_path.endsWith(" (deleted)"):
-    return pscanner_on_proc_deleted_binary(ctx.scan_virname, ctx.proc_binary_path, ctx.proc_id, ctx.sumary_infected)
   discard yr_rules_scan_proc(ctx.engine, cint(ctx.proc_id), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
   # Scan cmdline so we can detect reverse shell
@@ -75,14 +61,17 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
     print_process_hidden(ctx.proc_id, ctx.proc_name)
 
 
-proc pscanner_map_proc_info(ctx: var ProcScanner, check_hidden: bool) =
+proc pscanner_attach_process(ctx: var ProcScanner, check_hidden: bool) =
   try:
     ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
     # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
     let
       binary_name = ctx.proc_binary_path.splitPath().tail
+
     if binary_name.startsWith("[") and binary_name.endsWith("]"):
       proc_scanner_on_proccess_masquerading(ctx.proc_id, ctx.proc_binary_path)
+    elif binary_name.endsWith("(deleted)"):
+      proc_scanner_on_binary_deleted(ctx.proc_binary_path, ctx.proc_id)
   except OSError:
     # If process is a kernel thread or so, it's not posisble to expand /proc/<id>/exe (permission denied)
     # however, we can get process name from status
@@ -130,7 +119,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
     print_process_hidden(ctx.proc_id, "Heur:ProcCloak.StatusDenied")
     return
 
-  pscanner_map_proc_info(ctx, ctx.do_check_hidden_procs)
+  pscanner_attach_process(ctx, ctx.do_check_hidden_procs)
 
   if ctx.do_check_hidden_procs:
     # Brute force procfs. Slow. Requires a different flag
