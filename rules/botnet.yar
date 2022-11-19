@@ -10,7 +10,7 @@ rule Mirai_Hsh1 {
     description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
     // file fa9878*95ec37, compiled Py
   condition:
-    is_elf_file and // Detect hash of .shstrtab
+    elf_magic and // Detect hash of .shstrtab
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
     )
@@ -23,7 +23,7 @@ rule Mirai_Hsh2 {
     email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants (named by ClamAV) using section hash. File only"
   condition:
-    is_elf_file and
+    elf_magic and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1"
     )
@@ -35,7 +35,7 @@ rule Mirai_Hsh3 {
     email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
   condition:
-    is_elf_file and
+    elf_magic and
     for any i in (0 .. elf.number_of_sections - 1): (
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
@@ -79,7 +79,7 @@ rule Mirai_Gen2 {
     $ = "UDPRAW"
     $ = "sendRAW"
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -103,7 +103,7 @@ rule Tsunami_de1b {
     $1 = "Tsunami successfully deployed!" ascii
     $2 = ".tsunami -l .t -g" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -125,7 +125,7 @@ rule Mirai_4c36 {
     $1 = "%9s %3hu %255[^\n]" fullword ascii
     $2 = "oanacroane" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -147,7 +147,7 @@ rule Mirai_9c77 {
   strings:
     $1 = "31mip:%s" ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -167,7 +167,7 @@ rule Mirai_92a0 {
   strings:
     $1 = "4r3s b0tn3t" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (

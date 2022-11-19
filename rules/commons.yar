@@ -132,7 +132,7 @@ rule SusELF_FkDynSym {
 //     email = "dmknght@parrotsec.org"
 //     description = "Segment offset + size exceeds the size of the file"
 //   condition:
-//     is_elf_file and
+//     elf_magic and
 //     for any i in (0 .. elf.number_of_segments):
 //     (
 //       // elf.segments[i].type == elf.PT_DYNAMIC and
@@ -166,7 +166,7 @@ rule SusELF_BackdoorImp {
     SusELF_BackdoorImp /usr/bin//tcprewrite
     */
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for 1 i in (0 .. elf.dynsym_entries):
       (
@@ -272,7 +272,7 @@ rule Flooder_Gen1 {
     $4 = "LOLNOGTFO" fullword ascii
     $5 = "KILLATTK" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -295,7 +295,7 @@ rule Flooder_Gen2 {
     $2 = "[HTTP] Flooding" fullword ascii
     $3 = "[UDP] Flooding Rooted Spoof" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -319,7 +319,7 @@ rule Flooder_Gen3 {
     $1 = "Opening sockets" fullword ascii
     $2 = "Sending attack" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -345,7 +345,7 @@ rule Flooder_Gen4 {
     $ = "SYNFLOOD" fullword ascii
     $ = "ACKFLOOD" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -369,7 +369,7 @@ rule Netscan_Gen1 {
     $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
     $3 = "Portscan completed in" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -391,7 +391,7 @@ rule SshBrute_Gen1 {
     $1 = "FOUND: %s with port %s open" fullword ascii
     $2 = "%s:%s %s port: %s --> %s" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -409,7 +409,7 @@ rule Backdoor_Gen1 {
   strings:
     $ = "Starting backdoor daemon" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (

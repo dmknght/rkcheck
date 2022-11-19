@@ -12,7 +12,7 @@ rule Miner_GenA
     $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" fullword ascii
     $2 = "Block %.4u [%3u]: %016lx" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -37,7 +37,7 @@ rule Miner_GenB {
     $3 = "daemon+https://" ascii
     $4 = "daemon+http://" ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -61,7 +61,7 @@ rule Miner_GenC {
     $ = "Miner will restart" fullword ascii
     $ = "Miner not responding" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -84,7 +84,7 @@ rule Connecticoin_Generic
     $1 = "connecticoin.org" fullword ascii nocase
     $2 = "Connecticoin-Qt" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -109,7 +109,7 @@ rule XMRStak_Generic {
     $3 = "donate.xmr-stak.net" fullword ascii nocase
     $4 = "xmr-stak-rx" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -138,7 +138,7 @@ rule Xmrig_Generic
     $7 = "jcxmrig" ascii
     $8 = "xmrigvertar" ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -162,7 +162,7 @@ rule NBMiner_682e {
     $1 = "/mnt/d/code/NBMiner"
     $2 = "_ZN5Miner10signalStopEv"
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -183,7 +183,7 @@ rule GoMiner_b238 {
   strings:
     $ = "Zpw9qKOmhDOzF3GWwJTB"
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (

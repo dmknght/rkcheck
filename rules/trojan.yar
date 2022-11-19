@@ -36,7 +36,7 @@ rule SSHD_95d7 {
     $1 = "Rhosts Authentication disabled, originating port %d not trusted." ascii
     $2 = "kHgn4vlwonyP" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -63,7 +63,7 @@ rule Linux_849b {
     $3 = "The more you know... :)"
   condition:
   (
-    is_elf_file and for any i in (0 .. elf.number_of_sections):
+    elf_magic and for any i in (0 .. elf.number_of_sections):
     (
       $1 in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
     )
@@ -83,7 +83,7 @@ rule Linux_be4d {
     $2 = "touch /tmp/elevate" fullword ascii
     $3 = "/c.php?authkey=" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -106,7 +106,7 @@ rule Kowai_f06a {
     $1 = "KOWAI-BAdAsV" fullword ascii
     $2 = "KOWAI-d" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -179,7 +179,7 @@ rule Metasploit_Stageless {
     $ = "MSF_LICENSE" fullword ascii
     $ = "mettle_get_procmgr" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -203,7 +203,7 @@ rule Metasploit_Staged
     $ = "AYPj)X" fullword ascii
     $ = "Wj#Xj" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -551,7 +551,7 @@ rule Keylog_Xspy {
     $ = "DISPLAY" fullword ascii
     $ = "for snoopng" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     for any i in (0 .. elf.number_of_sections):
     (
       all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
@@ -607,7 +607,7 @@ rule TinyShell {
     $1 = "s:p:c::" // getopt strings
     $2 = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -636,7 +636,7 @@ rule STEELCORGI_packed {
     $s4 = {01 c6 89 44 ?? ?? 8b 44 ?? ?? 31 f2 89 74 ?? ?? c1}
     $s5 = { 4? 89 d8 4? 31 f2 4? c1 e0 13 4? 01 d7 4? }
   condition:
-    is_elf_file and 3 of them
+    elf_magic and 3 of them
 }
 
 
@@ -661,7 +661,7 @@ rule STEELCORGI_packed {
 //     $s10 = {72 69 6E 74 20 22 5B 56 5D 20 41 74 74 65 6D 70 74 69 6E 67 20 74 6F 20 67 65 74 20 4F 53 20 69 6E 66 6F 20 77 69 74 68 20 63 6F 6D 6D 61 6E 64 3A 20 24 63 6F 6D 6D 61 6E 64 5C 6E 22 20 69 66 20 24 76 65 72 62 6F 73 65 3B}
 
 //   condition:
-//     is_elf_file and
+//     elf_magic and
 //     (
 //       for any i in (0 .. elf.number_of_sections):
 //       (

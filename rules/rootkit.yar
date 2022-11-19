@@ -125,7 +125,7 @@ rule Suterusu_Generic {
     $a4 = "Hiding PID"
     $a5 = "/proc/net/tcp"
   condition:
-    is_elf_file and all of them
+    elf_magic and all of them
 }
 
 
@@ -191,7 +191,7 @@ rule Chfn_Generic {
   strings:
     $ = "setpwnam" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -216,7 +216,7 @@ rule Sckit_Generic {
     $ = "Can't execve shell" fullword ascii
     $ = "Failed to hide pid" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
@@ -554,7 +554,7 @@ rule Linux_4d1e {
     // Uniq strings
     $ = "abcdfgiklmnopqrstuw:xABCDFGI:LNQRST:UX178" fullword ascii
   condition:
-    is_elf_file and
+    elf_magic and
     (
       for any i in (0 .. elf.number_of_sections):
       (
