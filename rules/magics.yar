@@ -1,5 +1,13 @@
 import "elf"
 
+/*
+  https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
+  Rules to detect ELF file.
+  vmem_start is a external variable that is provided by
+  custom compiler and scanner. It should be 0 or start of
+  process's memory block mapped in procfs.
+  elf_type has offset 0x10, size 2
+*/
 
 private rule elf_magic {
   strings:
@@ -8,29 +16,19 @@ private rule elf_magic {
     $header at vmem_start
 }
 
-
-private rule is_elf_file {
-  condition:
-    elf_magic or
-    elf.type == elf.ET_REL or
-    elf.type == elf.ET_EXEC or
-    elf.type == elf.ET_DYN or
-    elf.type == elf.ET_CORE
-}
-
 private rule elf_exec {
   condition:
-    elf_magic or elf.type == elf.ET_EXEC
+    elf_magic and uint8(vmem_start + 0x10) == elf.ET_EXEC
 }
 
 private rule elf_dyn {
   condition:
-    elf_magic or elf.type == elf.ET_DYN
+    elf_magic and uint8(vmem_start + 0x10) == elf.ET_DYN
 }
 
 private rule elf_rel {
   condition:
-    elf_magic or elf.type == elf.ET_REL
+    elf_magic and uint8(vmem_start + 0x10) == elf.ET_REL
 }
 
 private rule xdg_desktop_entry {
