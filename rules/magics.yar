@@ -1,8 +1,11 @@
 import "elf"
 
+
 private rule elf_magic {
+  strings:
+    $header = {7f 45 4c 46}
   condition:
-    uint32(0) == 0x464c457f
+    $header at vmem_start
 }
 
 
