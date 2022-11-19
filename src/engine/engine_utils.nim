@@ -48,13 +48,6 @@ proc proc_scanner_on_proccess_masquerading*(pid: uint, binary_path: var string) 
   print_process_infected(virus_name, binary_path, pid)
 
 
-proc proc_scanner_on_scan_matched*(rule_ns, rule_id, binary_path: string, pid: uint) =
-  let
-    virus_name = cstring(rule_ns & ":" & replace(rule_id, "_", "."))
-
-  print_process_infected($virus_name, binary_path, pid)
-
-
 proc yr_rule_file_is_compiled*(path: string): bool =
   let f = newFileStream(path)
   if f.readStr(4) == "YARA":

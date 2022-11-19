@@ -7,23 +7,16 @@ import os
 import posix
 
 
-proc pscanner_on_process_match(ctx: ptr ProcScanner, rule: ptr YR_RULE): cint =
-  #[
-    Print virus found message with file path
-  ]#
-  proc_scanner_on_scan_matched($rule.ns.name, $rule.identifier, ctx.proc_binary_path, ctx.proc_id)
-  ctx.sumary_infected += 1
-
-  return CALLBACK_ABORT
-
-
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   let
     ctx = cast[ptr ProcScanner](user_data)
     rule = cast[ptr YR_RULE](message_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
-    return pscanner_on_process_match(ctx, rule)
+    ctx.scan_virname = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
+    ctx.sumary_infected += 1
+    print_process_infected(ctx.scan_virname, ctx.proc_binary_path, ctx.proc_id)
+    return CALLBACK_ABORT
   else:
     ctx.scan_virname = ""
     return CALLBACK_CONTINUE
@@ -56,6 +49,9 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
     while mem_block != nil:
       discard yr_rules_define_integer_variable(ctx.engine, "vmem_start", int64(mem_block[].base))
       discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), mem_block[].size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+      # Stop scan if virus matches
+      if isEmptyOrWhitespace(ctx.scan_virname):
+        break
       mem_block = mem_blocks.next(mem_blocks.addr)
     discard yr_process_close_iterator(mem_blocks.addr)
 
@@ -116,6 +112,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
 
   ctx.proc_pathfs = procfs_path
   ctx.proc_id = pid
+  ctx.scan_virname = ""
   #[
     Some rootkits prevents normal process to read process's status
     However, dirExists (function stat) still shows true
