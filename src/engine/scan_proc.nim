@@ -43,7 +43,21 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
 
 
 proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
-  discard yr_rules_scan_proc(ctx.engine, cint(ctx.proc_id), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+  #[
+    Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
+    Then call yr_rules_scan_mem to scan each memory block
+  ]#
+  var
+    mem_blocks: YR_MEMORY_BLOCK_ITERATOR
+    mem_block: ptr YR_MEMORY_BLOCK
+
+  if yr_process_open_iterator(cint(ctx.proc_id), mem_blocks.addr) == ERROR_SUCCESS:
+    mem_block = mem_blocks.first(mem_blocks.addr)
+    while mem_block != nil:
+      discard yr_rules_define_integer_variable(ctx.engine, "vmem_start", int64(mem_block[].base))
+      discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), mem_block[].size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+      mem_block = mem_blocks.next(mem_blocks.addr)
+    discard yr_process_close_iterator(mem_blocks.addr)
 
   # Scan cmdline so we can detect reverse shell
   # if ctx.scan_virname == "" and ctx.proc_cmdline != "":
