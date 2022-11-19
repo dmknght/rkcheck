@@ -18,10 +18,7 @@ rule Miner_GenA
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -43,10 +40,7 @@ rule Miner_GenB {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -67,10 +61,7 @@ rule Miner_GenC {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -90,10 +81,7 @@ rule Connecticoin_Generic
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
@@ -115,10 +103,7 @@ rule XMRStak_Generic {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -144,10 +129,7 @@ rule Xmrig_Generic
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      3 of them
     )
 }
 
@@ -168,10 +150,7 @@ rule NBMiner_682e {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -189,9 +168,6 @@ rule GoMiner_b238 {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }

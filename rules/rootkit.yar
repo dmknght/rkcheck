@@ -20,10 +20,7 @@ rule Diamorphine_Gen1 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
@@ -197,10 +194,7 @@ rule Chfn_Generic {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
@@ -222,10 +216,7 @@ rule Sckit_Generic {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
@@ -542,7 +533,7 @@ rule Sckit_Generic {
 // }
 
 
-rule Linux_4d1e {
+rule Rootkit_4d1e {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -560,15 +551,12 @@ rule Linux_4d1e {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
 
-rule Linux_a669 {
+rule Rootkit_a669 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -587,9 +575,6 @@ rule Linux_a669 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }

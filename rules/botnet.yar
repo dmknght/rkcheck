@@ -54,16 +54,13 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
-    elf.type == elf.ET_EXEC and
+    elf_exec and
     (
       for any i in (0 .. elf.number_of_sections):
       (
         2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -74,9 +71,9 @@ rule Mirai_Gen2 {
     email = "dmknght@parrotsec.org"
     description = "Common strings used in Mirai"
   strings:
-    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii
+    // $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii # TODO this goes to heuristic
     $ = "makeIPPacket" fullword ascii
-    $ = "UDPRAW"
+    $ = "UDPRAW" fullword ascii
     $ = "sendRAW"
   condition:
     elf_magic and
@@ -85,10 +82,7 @@ rule Mirai_Gen2 {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -109,10 +103,7 @@ rule Tsunami_de1b {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -131,10 +122,7 @@ rule Mirai_4c36 {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      any of them
     )
 }
 
@@ -153,10 +141,7 @@ rule Mirai_9c77 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
@@ -173,10 +158,7 @@ rule Mirai_92a0 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      all of them
     )
 }
 
