@@ -42,6 +42,15 @@ private rule is_xml {
     uint32(0) == 0x6d783f3c
 }
 
+/*
+  Scan system kernel modules
+*/
+
+private rule sys_kernel_magic {
+  condition:
+    uint16(0) == 0x5f5f
+}
+
 // private rule is_shebang {
 //   condition:
 //     uint32(0) == 0x752F2123 // "#!/u". Meant to detect "#!/usr/bin/"

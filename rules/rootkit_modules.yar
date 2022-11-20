@@ -1,8 +1,3 @@
-private rule sys_kernel_start {
-  condition:
-    uint16(0) == 0x5f5f
-}
-
 
 rule Diamorphine_Generic {
   strings:
@@ -10,5 +5,5 @@ rule Diamorphine_Generic {
     $ = "hacked_kill [diamorphine]" fullword ascii
     $ = "give_root [diamorphine]" fullword ascii
   condition:
-    sys_kernel_start and all of them
+    sys_kernel_magic and all of them
 }
