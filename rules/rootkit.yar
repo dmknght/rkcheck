@@ -147,7 +147,7 @@ rule Boopkit_bfdf {
     $ = "boopkit.h" fullword ascii
     $ = "Failed to hide PID" fullword ascii
   condition:
-    elf_rel and
+    (elf_rel or elf_exec) and
     (
       for 2 i in (0 .. elf.dynsym_entries):
       (
