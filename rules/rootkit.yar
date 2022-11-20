@@ -146,6 +146,7 @@ rule Boopkit_bfdf {
     $ = "__packed" fullword ascii
     $ = "boopkit.h" fullword ascii
     $ = "Failed to hide PID" fullword ascii
+    $ = "U>Fc" fullword ascii
   condition:
     (elf_rel or elf_exec) and
     (
