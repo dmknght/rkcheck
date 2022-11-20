@@ -133,9 +133,10 @@ rule Boopkit_BoopExec {
 rule Boopkit_bfdf {
   meta:
     github = "https://github.com/krisnova/boopkit"
-    description = "pr0be.safe.o"
+    description = "Boopkit's object files and an other exe file"
     md5 = "bfdfd5d8f11cbc262e5698e90a2b4f88"
     md5 = "3408129bbb1de313d986dc3577f267cb"
+    md5 = "e1b4ef86cc780c40dad08d58d5bf6b99"
   strings:
     $ = "pr0be.boop.c" fullword ascii
     $ = "pr0be.safe.c" fullword ascii
@@ -144,19 +145,25 @@ rule Boopkit_bfdf {
     $ = "pid_to_hide" fullword ascii
     $ = "__packed" fullword ascii
     $ = "boopkit.h" fullword ascii
+    $ = "Failed to hide PID" fullword ascii
   condition:
     elf_rel and
     (
       for 2 i in (0 .. elf.dynsym_entries):
       (
         (
-          elf.dynsym[i].type == elf.STT_FUNC and elf.dynsym[i].name == "pid_to_hide"
+          elf.dynsym[i].type == elf.STT_FUNC and
+          (
+            elf.dynsym[i].name == "pid_to_hide" or
+            elf.dynsym[i].name == "boopprintf"
+          )
         ) or
         (
           elf.dynsym[i].type == elf.STT_OBJECT and
           (
             elf.dynsym[i].name == "__packed" or
-            elf.dynsym[i].name == "LICENSE"
+            elf.dynsym[i].name == "LICENSE" or
+            elf.dynsym[i].name == "runtime__boopkit"
           )
         )
       ) or
