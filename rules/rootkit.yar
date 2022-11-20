@@ -2,7 +2,6 @@ include "rules/magics.yar"
 import "elf"
 import "hash"
 
-// TODO https://github.com/mav8557/Father
 
 rule Diamorphine_Gen1 {
   meta:
@@ -533,7 +532,6 @@ rule Sckit_Generic {
 //   condition:
 //     all of them
 // }
-// TODO add https://github.com/peondusud/lin.rootkit
 
 // rule Boopkit_Generic {
 //   meta:

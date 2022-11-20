@@ -774,48 +774,12 @@ type
 
   YR_RULES* {.importc, impyaraHdr, bycopy.} = object
     arena*: ptr YR_ARENA
-    rules_table*: ptr YR_RULE ## ```
-                              ##   The previous name for rules_table was rules_list_head, because this
-                              ##      was previously a linked list. The old name is maintained but marked as
-                              ##      deprecated, which will raise a warning if used.
-                              ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
-                              ##      after 4.1 has been released.
-                              ## ```
-    rules_list_head*: ptr YR_RULE ## ```
-                                  ##   The previous name for rules_table was rules_list_head, because this
-                                  ##      was previously a linked list. The old name is maintained but marked as
-                                  ##      deprecated, which will raise a warning if used.
-                                  ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
-                                  ##      after 4.1 has been released.
-                                  ## ```
-    strings_table*: ptr YR_STRING ## ```
-                                  ##   The previous name for strings_table was strings_list_head, because this
-                                  ##      was previously a linked list. The old name is maintained but marked as
-                                  ##      deprecated, which will raise a warning if used.
-                                  ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
-                                  ##      after 4.1 has been released.
-                                  ## ```
-    strings_list_head*: ptr YR_STRING ## ```
-                                      ##   The previous name for strings_table was strings_list_head, because this
-                                      ##      was previously a linked list. The old name is maintained but marked as
-                                      ##      deprecated, which will raise a warning if used.
-                                      ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
-                                      ##      after 4.1 has been released.
-                                      ## ```
-    ext_vars_table*: ptr YR_EXTERNAL_VARIABLE ## ```
-                                              ##   The previous name for ext_vars_table was externals_list_head, because
-                                              ##      this was previously a linked list. The old name is maintained but marked
-                                              ##      as deprecated, which will raise a warning if used.
-                                              ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
-                                              ##      after 4.1 has been released.
-                                              ## ```
-    externals_list_head*: ptr YR_EXTERNAL_VARIABLE ## ```
-                                                   ##   The previous name for ext_vars_table was externals_list_head, because
-                                                   ##      this was previously a linked list. The old name is maintained but marked
-                                                   ##      as deprecated, which will raise a warning if used.
-                                                   ##      TODO(vmalvarez): Remove this field when a reasonable a few versions
-                                                   ##      after 4.1 has been released.
-                                                   ## ```
+    rules_table*: ptr YR_RULE
+    rules_list_head*: ptr YR_RULE
+    strings_table*: ptr YR_STRING
+    strings_list_head*: ptr YR_STRING
+    ext_vars_table*: ptr YR_EXTERNAL_VARIABLE
+    externals_list_head*: ptr YR_EXTERNAL_VARIABLE
     ac_transition_table*: ptr YR_AC_TRANSITION ## ```
                                                ##   Pointer to the Aho-Corasick transition table.
                                                ## ```

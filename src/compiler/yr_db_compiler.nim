@@ -1,6 +1,5 @@
 #[
   Compile rules using yr_compiler. Should be similar to yarac and user can use any (libyara must be the same)
-  TODO take input options so we can use params from make file
 ]#
 
 import .. / engine / libyara
