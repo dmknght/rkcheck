@@ -156,7 +156,7 @@ rule Boopkit_bfdf {
           elf.dynsym[i].type == elf.STT_OBJECT and
           (
             elf.dynsym[i].name == "__packed" or
-            elf.dynsym[i].name == "LICENSE" or
+            elf.dynsym[i].name == "LICENSE"
           )
         )
       ) or
