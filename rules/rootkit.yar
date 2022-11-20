@@ -129,6 +129,42 @@ rule Boopkit_BoopExec {
     )
 }
 
+
+rule Boopkit_bfdf {
+  meta:
+    github = "https://github.com/krisnova/boopkit"
+    description = "pr0be.safe.o"
+    md5 = "bfdfd5d8f11cbc262e5698e90a2b4f88"
+    md5 = "3408129bbb1de313d986dc3577f267cb"
+  strings:
+    $ = "pr0be.boop.c" fullword ascii
+    $ = "pr0be.safe.c" fullword ascii
+    $ = "pr0be.xdp.c" fullword ascii
+    $ = "event_boop_t" fullword ascii
+    $ = "pid_to_hide" fullword ascii
+    $ = "__packed" fullword ascii
+    $ = "boopkit.h" fullword ascii
+  condition:
+    elf_rel and
+    (
+      for 2 i in (0 .. elf.dynsym_entries):
+      (
+        (
+          elf.dynsym[i].type == elf.STT_FUNC and elf.dynsym[i].name == "pid_to_hide"
+        ) or
+        (
+          elf.dynsym[i].type == elf.STT_OBJECT and
+          (
+            elf.dynsym[i].name == "__packed" or
+            elf.dynsym[i].name == "LICENSE" or
+          )
+        )
+      ) or
+      any of them
+    )
+}
+
+
 // rule HCRootkit_Generic {
 //   meta:
 //     description = "Detects Linux HCRootkit, as reported by Avast"
