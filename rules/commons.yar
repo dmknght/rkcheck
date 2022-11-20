@@ -278,10 +278,7 @@ rule Flooder_Gen1 {
       (
         2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -301,10 +298,7 @@ rule Flooder_Gen2 {
       (
         2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        2 of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -325,10 +319,7 @@ rule Flooder_Gen3 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -351,10 +342,7 @@ rule Flooder_Gen4 {
       (
         any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        any of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -375,10 +363,7 @@ rule Netscan_Gen1 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -397,10 +382,7 @@ rule SshBrute_Gen1 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 
@@ -415,10 +397,7 @@ rule Backdoor_Gen1 {
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      )
+      2 of them
     )
 }
 // rule SusElf_PyCompiled {
