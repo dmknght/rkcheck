@@ -13,7 +13,6 @@ build:
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanmal src/rkscanmal.nim
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanrootkit src/rkscanrootkit.nim
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
-	$(NIMFLAGS) --out:build/rkhiddenmods src/tools/unhide_sysmodules.nim
 
 install:
 	mkdir -p /usr/share/rkscanner/
