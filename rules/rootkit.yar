@@ -148,7 +148,7 @@ rule Boopkit_bfdf {
     $ = "Failed to hide PID" fullword ascii
     $ = "U>Fc" fullword ascii
   condition:
-    (elf_rel or elf_exec) and
+    (elf_rel or elf_exec or elf.type == elf.ET_EXEC) and
     (
       for 2 i in (0 .. elf.dynsym_entries):
       (
@@ -594,18 +594,6 @@ rule Sckit_Generic {
 //     $1 = "TORNDIR=/usr/src/.puta"
 //     $2 = "THEDIR=/usr/lib/$THEPASS"
 //     $3 = "if ! test \"$(whoami)\" = \"root\"; then"
-//   condition:
-//     all of them
-// }
-
-// rule Boopkit_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     reference = "https://github.com/kris-nova/boopkit/"
-//   strings:
-//     $1 = "cat /sys/kernel/tracing/trace_pipe"
-//     $2 = "eBPF Probe Loaded:"
 //   condition:
 //     all of them
 // }
