@@ -30,7 +30,7 @@ proc progress_bar_fush() =
 
 proc show_process_status(pid_stat: PidStat, reason: string) =
   progress_bar_fush()
-  echo "Reason: "
+  echo "Reason: ", reason
   echo " PID: ", pid_stat.pid, " name: ", pid_stat.name
   echo " Binary: ", pid_stat.exec
 
