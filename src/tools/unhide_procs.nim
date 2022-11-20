@@ -1,5 +1,6 @@
 import os
 import strutils
+import strformat
 
 #[
   Fork version of https://github.com/sandflysecurity/sandfly-processdecloak/ in Nim
@@ -17,7 +18,24 @@ type
     exec: string
 
 
-proc map_pid(procfs: string): PidStat =
+proc progress_bar_print(pid: int) =
+  let progress = float(pid) / float(MAX_PID) * 100
+  stdout.write(fmt"{progress:<2.2f}%")
+  stdout.flushFile()
+
+
+proc progress_bar_fush() =
+  stdout.write("\e[2K\r")
+
+
+proc show_process_status(pid_stat: PidStat, reason: string) =
+  progress_bar_fush()
+  echo "Reason: "
+  echo " PID: ", pid_stat.pid, " name: ", pid_stat.name
+  echo " Binary: ", pid_stat.exec
+
+
+proc attach_process(procfs: string): PidStat =
   var
     map_pid: PidStat
 
@@ -41,19 +59,19 @@ proc map_pid(procfs: string): PidStat =
 proc check_hidden(procfs: string): bool =
   var pid_stat: PidStat
   try:
-    pid_stat = map_pid(procfs)
+    pid_stat = attach_process(procfs)
   except IOError:
-    echo "Hidden process: ", procfs.splitPath().tail, " Prevent reading proc's status"
+    show_process_status(pid_stat, "Hidden process: Prevent attaching status")
     return true
 
   if pid_stat.exec.endsWith("(deleted)"):
-    echo "Process deleted binary ", pid_stat.pid
+    show_process_status(pid_stat, "Fileless process: Binary was removed")
   if pid_stat.pid == pid_stat.tgid and pid_stat.ppid > 0:
     for kind, path in walkDir("/proc/"):
       if kind == pcDir and path == procfs:
         # proc is listed
         return false
-    echo "Hidden process: ", pid_stat.pid, " name: ", pid_stat.name
+    show_process_status(pid_stat, "Hidden process: Hide from ProcFS")
     return true
   else:
     return false
@@ -65,9 +83,13 @@ for i in countup(1, MAX_PID):
   let
     procfs = "/proc/" & $i
 
+  progress_bar_print(i)
   if dirExists(procfs) and check_hidden(procfs):
     has_hidden_process = true
+  progress_bar_fush()
 
+
+progress_bar_fush()
 echo "Checking hidden processes completed"
 if has_hidden_process:
   echo "Found hidden processes. Possibly rootkit?"
