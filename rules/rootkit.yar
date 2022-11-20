@@ -108,6 +108,27 @@ rule Symbiote_0c27 {
     elf_dyn and any of ($h*) and any of ($s*)
 }
 
+
+rule Boopkit_BoopExec {
+  meta:
+    github = "https://github.com/krisnova/boopkit"
+    description = "Exec file of the toolkit"
+    md5 = "7a00da9408fb313c09bb2208f2745354"
+  strings:
+    $ = "boopkit" fullword ascii
+    $ = "[RCE]" fullword ascii
+    $ = "X*x.HALT.x*X" fullword ascii
+  condition:
+    elf_exec and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      all of them
+    )
+}
+
 // rule HCRootkit_Generic {
 //   meta:
 //     description = "Detects Linux HCRootkit, as reported by Avast"
