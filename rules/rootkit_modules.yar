@@ -1,4 +1,4 @@
-import "magics"
+include "rules/magics.yar"
 
 
 rule BrokePkg_Generic {
