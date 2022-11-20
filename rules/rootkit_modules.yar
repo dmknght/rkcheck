@@ -17,7 +17,7 @@ rule Diamorphine_Generic {
 }
 
 
-rule SusModules_Generic {
+rule SusFunctions_Heuristic {
   strings:
     $ = "hook kill" fullword ascii
     $ = "pid_hide" fullword ascii
