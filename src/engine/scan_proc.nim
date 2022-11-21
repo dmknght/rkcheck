@@ -15,7 +15,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
   if message == CALLBACK_MSG_RULE_MATCHING:
     ctx.scan_virname = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
     ctx.sumary_infected += 1
-    print_process_infected(ctx.proc_id, ctx.scan_virname, ctx.virtual_binary_path, ctx.proc_name)
+    print_process_infected(ctx.proc_id, ctx.scan_virname, ctx.proc_binary_path, ctx.virtual_binary_path, ctx.proc_name)
     return CALLBACK_ABORT
   else:
     ctx.scan_virname = ""

@@ -12,14 +12,18 @@ proc print_file_infected*(virname, scan_obj: string) =
   echo "[\e[91m!\e[0m] \e[101m", virname, "\e[0m ", scan_obj
 
 
-proc print_process_infected*(pid: uint, virname, path, name: string) =
+proc print_process_infected*(pid: uint, virname, run_path, map_path, name: string) =
   progress_bar_flush()
   echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
   echo " Name: ", name
-  if not isEmptyOrWhitespace(path):
-    echo " Path: " & path
+
+  if not isEmptyOrWhitespace(map_path):
+    echo " Exec: ", run_path
   else:
-    echo " Path: \e[91mUnknowne[0m"
+    echo " Exec: \e[91mUnknown\e[0m"
+
+  if not isEmptyOrWhitespace(map_path):
+    echo " Mapped: " & map_path
 
 
 proc print_process_hidden*(pid: uint, name: string) =

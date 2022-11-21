@@ -31,15 +31,15 @@ proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object:
 
 proc proc_scanner_on_binary_deleted*(pid: uint, binary_path, proc_name: var string) =
   if binary_path.startsWith("/memfd"):
-    print_process_infected(pid, "Heur:Fileless.DeletedMemfd", binary_path.split()[0], proc_name)
+    print_process_infected(pid, "Heur:Fileless.DeletedMemfd", binary_path.split()[0], "", proc_name)
   else:
     binary_path.removeSuffix(" (deleted)")
-    print_process_infected(pid, "Heur:Fileless.DeletedBin", binary_path, proc_name)
+    print_process_infected(pid, "Heur:Fileless.DeletedBin", binary_path, "", proc_name)
 
 
 proc proc_scanner_on_proccess_masquerading*(pid: uint, binary_path, proc_name: string) =
   let virus_name = "Heur:ProcCloak.Masquerading"
-  print_process_infected(pid, virus_name, binary_path, proc_name)
+  print_process_infected(pid, virus_name, binary_path, "", proc_name)
 
 
 proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_error_t): cint =
