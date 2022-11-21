@@ -15,7 +15,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
   if message == CALLBACK_MSG_RULE_MATCHING:
     ctx.scan_virname = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
     ctx.sumary_infected += 1
-    print_process_infected(ctx.scan_virname, ctx.proc_binary_path, ctx.proc_id)
+    print_process_infected(ctx.scan_virname, ctx.virtual_binary_path, ctx.proc_id)
     return CALLBACK_ABORT
   else:
     ctx.scan_virname = ""
@@ -43,10 +43,28 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
+    offset_start, offset_end, mapped_binary: string
 
   if yr_process_open_iterator(cint(ctx.proc_id), mem_blocks.addr) == ERROR_SUCCESS:
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
+      # Calculate mapped binary
+      offset_start = toHex(mem_block[].base).toLowerAscii()
+      offset_start.removePrefix('0')
+      offset_end = toHex(mem_block[].base + mem_block[].size).toLowerAscii()
+      offset_end.removePrefix('0')
+      mapped_binary = "/proc/" & $ctx.proc_id & "/map_files/" & offset_start & "-" & offset_end
+
+      if fileExists(mapped_binary):
+        try:
+          ctx.virtual_binary_path = expandSymlink(mapped_binary)
+        except:
+          # Failed to map. Need root permission? Do not crash
+          ctx.virtual_binary_path = ctx.proc_binary_path
+      else:
+        # Process's memory range
+        ctx.virtual_binary_path = ctx.proc_binary_path
+
       discard yr_rules_define_integer_variable(ctx.engine, "vmem_start", int64(mem_block[].base))
       discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), mem_block[].size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
       # Stop scan if virus matches

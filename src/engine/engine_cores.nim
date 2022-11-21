@@ -50,6 +50,7 @@ type
     proc_name*: string
     proc_cmdline*: string
     proc_binary_path*: string
+    virtual_binary_path*: string
     scan_virname*: string
     sumary_scanned*: uint
     sumary_infected*: uint
