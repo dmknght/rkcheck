@@ -18,7 +18,7 @@ proc print_process_infected*(pid: uint, virname, exec_path, map_path, name: stri
   echo " Name: ", name
 
   if not isEmptyOrWhitespace(exec_path):
-    echo " Exec: \e[104m", exec_path, "\e[0m"
+    echo " Exec: \e[44m", exec_path, "\e[0m"
   else:
     echo " Exec: \e[93mUnknown\e[0m"
 
