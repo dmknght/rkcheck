@@ -118,6 +118,11 @@ proc pscanner_attach_process(ctx: var ProcScanner, check_hidden: bool) =
       elif line.startsWith("PPid:"):
         ctx.proc_ppid = parseUInt(line.split()[^1])
         break
+  else:
+    for line in lines(ctx.proc_pathfs & "status"):
+      if line.startsWith("Name:"):
+        ctx.proc_name = line.split()[^1]
+        break
 
 
 proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
