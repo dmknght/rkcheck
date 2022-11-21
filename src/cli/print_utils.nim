@@ -12,25 +12,17 @@ proc print_file_infected*(virname, scan_obj: string) =
   echo "[\e[91m!\e[0m] \e[101m", virname, "\e[0m ", scan_obj
 
 
-proc print_process_infected*(pid: uint, virname, run_path, map_path, name: string) =
+proc print_process_infected*(pid: uint, virname, exec_path, map_path, name: string) =
   progress_bar_flush()
   echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
   echo " Name: ", name
 
-  # Infected object is mapped binary.
-  if not isEmptyOrWhitespace(map_path):
-    if not isEmptyOrWhitespace(map_path):
-      echo " Exec: ", run_path
-    else:
-      echo " Exec: \e[93mUnknown\e[0m"
-
-    echo " Mapped: \e[91m", map_path, "\e[0m"
-  # Infected is the Exec file.
+  if not isEmptyOrWhitespace(exec_path):
+    echo " Exec: \e[104m", exec_path, "\e[0m"
   else:
-    if not isEmptyOrWhitespace(map_path):
-      echo " Exec: \e[91m", run_path, "\e[0m"
-    else:
-      echo " Exec: \e[93mUnknown\e[0m"
+    echo " Exec: \e[93mUnknown\e[0m"
+
+  echo " Infected: \e[91m", map_path, "\e[0m"
 
 
 proc print_process_hidden*(pid: uint, name: string) =
