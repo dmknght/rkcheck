@@ -15,7 +15,7 @@ proc print_file_infected*(virname, scan_obj: string) =
 proc print_process_infected*(pid: uint, virname, path, name: string) =
   progress_bar_flush()
   echo "[\e[91m!\e[0m] \e[105m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
-  echo "  Name: ", name
+  echo " Name: ", name
   if not isEmptyOrWhitespace(path):
     echo " Path: " & path
   else:
