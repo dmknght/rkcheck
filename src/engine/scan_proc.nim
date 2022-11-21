@@ -49,9 +49,13 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
       # Calculate mapped binary
-      offset_start = toHex(mem_block[].base).toLowerAscii()
+      let
+        base_offset = mem_block[].base
+        base_size = mem_block[].size
+
+      offset_start = toHex(base_offset).toLowerAscii()
       offset_start.removePrefix('0')
-      offset_end = toHex(mem_block[].base + mem_block[].size).toLowerAscii()
+      offset_end = toHex(base_offset + base_size).toLowerAscii()
       offset_end.removePrefix('0')
       mapped_binary = "/proc/" & $ctx.proc_id & "/map_files/" & offset_start & "-" & offset_end
 
@@ -65,8 +69,8 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
         # Process's memory range
         ctx.virtual_binary_path = ctx.proc_binary_path
 
-      discard yr_rules_define_integer_variable(ctx.engine, "vmem_start", int64(mem_block[].base))
-      discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), mem_block[].size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+      discard yr_rules_define_integer_variable(ctx.engine, "vmem_start", int64(base_offset))
+      discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
       # Stop scan if virus matches
       if not isEmptyOrWhitespace(ctx.scan_virname):
         break
