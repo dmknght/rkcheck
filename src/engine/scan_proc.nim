@@ -15,7 +15,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
   if message == CALLBACK_MSG_RULE_MATCHING:
     ctx.scan_virname = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
     ctx.sumary_infected += 1
-    print_process_infected(ctx.scan_virname, ctx.virtual_binary_path, ctx.proc_id)
+    print_process_infected(ctx.proc_id, ctx.scan_virname, ctx.virtual_binary_path, ctx.proc_name)
     return CALLBACK_ABORT
   else:
     ctx.scan_virname = ""
@@ -96,9 +96,9 @@ proc pscanner_attach_process(ctx: var ProcScanner, check_hidden: bool) =
       binary_name = ctx.proc_binary_path.splitPath().tail
 
     if binary_name.startsWith("[") and binary_name.endsWith("]"):
-      proc_scanner_on_proccess_masquerading(ctx.proc_id, ctx.proc_binary_path)
+      proc_scanner_on_proccess_masquerading(ctx.proc_id, ctx.proc_binary_path, ctx.proc_name)
     elif binary_name.endsWith("(deleted)"):
-      proc_scanner_on_binary_deleted(ctx.proc_binary_path, ctx.proc_id)
+      proc_scanner_on_binary_deleted(ctx.proc_id, ctx.proc_binary_path, ctx.proc_name)
   except OSError:
     # If process is a kernel thread or so, it's not posisble to expand /proc/<id>/exe (permission denied)
     # however, we can get process name from status

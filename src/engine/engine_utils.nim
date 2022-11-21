@@ -29,23 +29,23 @@ proc file_scanner_on_malware_found*(virname, vir_detected: cstring, scan_object:
   print_file_infected($virus_name, $scan_object)
 
 
-proc proc_scanner_on_binary_deleted*(binary_path: var string, pid: uint) =
+proc proc_scanner_on_binary_deleted*(pid: uint, binary_path, proc_name: var string) =
   if binary_path.startsWith("/memfd"):
-    print_process_infected("Heur:Fileless.DeletedMemfd", binary_path.split()[0], pid)
+    print_process_infected(pid, "Heur:Fileless.DeletedMemfd", binary_path.split()[0], proc_name)
   else:
     binary_path.removeSuffix(" (deleted)")
-    print_process_infected("Heur:Fileless.DeletedBin", binary_path, pid)
+    print_process_infected(pid, "Heur:Fileless.DeletedBin", binary_path, proc_name)
+
+
+proc proc_scanner_on_proccess_masquerading*(pid: uint, binary_path, proc_name: string) =
+  let virus_name = "Heur:ProcCloak.Masquerading"
+  print_process_infected(pid, virus_name, binary_path, proc_name)
 
 
 proc proc_scanner_on_cmd_matched*(virus_name: var cstring, scan_result: var cl_error_t): cint =
-  virus_name = cstring("Heur:MalCmdExe." & $virus_name)
+  virus_name = cstring("SusCmd:" & $virus_name)
   scan_result = CL_VIRUS
   return 0
-
-
-proc proc_scanner_on_proccess_masquerading*(pid: uint, binary_path: var string) =
-  let virus_name = "Heur:ProcCloak.Masquerading"
-  print_process_infected(virus_name, binary_path, pid)
 
 
 proc yr_rule_file_is_compiled*(path: string): bool =
