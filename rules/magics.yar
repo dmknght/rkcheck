@@ -10,10 +10,12 @@ import "elf"
 */
 
 private rule elf_magic {
-  strings:
-    $header = {7f 45 4c 46}
+  // strings:
+  //   $header = {7f 45 4c 46}
+  // condition:
+  //   $header at vmem_start
   condition:
-    $header at vmem_start
+    uint32(vmem_start) == 0x464c457f
 }
 
 private rule elf_exec {
