@@ -104,8 +104,7 @@ rule Symbiote_0c27 {
     $h4 = "hidden_proc" fullword ascii
     $s1 = "suporte42atendimento53log" fullword ascii
     $s2 = ">g^VI" fullword ascii
-    $s3 = "suporte42atendimento53log" fullword ascii
-    $s4 = "px32.nss.atendimento-estilo.com" fullword ascii
+    $s3 = "px32.nss.atendimento-estilo.com" fullword ascii
   condition:
     elf_dyn and any of ($h*) and any of ($s*)
 }
