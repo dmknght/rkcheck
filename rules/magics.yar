@@ -7,28 +7,28 @@ import "elf"
 
 private rule elf_magic {
   strings:
-    $magic = {7f 45 4c 46 [16] (01 | 02 | 03 | 04 )}
+    $magic = {7f 45 4c 46 [12] (01 | 02 | 03 | 04 )}
   condition:
     #magic == 1
 }
 
 private rule elf_rel {
   strings:
-    $magic = {7f 45 4c 46 [16] 01}
+    $magic = {7f 45 4c 46 [12] 01}
   condition:
     #magic == 1
 }
 
 private rule elf_exec {
   strings:
-    $magic = {7f 45 4c 46 [16] 02}
+    $magic = {7f 45 4c 46 [12] 02}
   condition:
     #magic == 1
 }
 
 private rule elf_dyn {
   strings:
-    $magic = {7f 45 4c 46 [16] 03}
+    $magic = {7f 45 4c 46 [12] 03}
   condition:
     #magic == 1
 }
