@@ -5,10 +5,10 @@ import .. / cli / print_utils
 import streams
 
 
-proc file_scanner_on_matched*(scan_result: var cl_error_t, virus_name: var cstring, rule_name_space, rule_identifier: string): cint =
+proc file_scanner_on_matched*(scan_result: var cl_error_t, virus_name: var cstring, rule_name_space, rule_identifier: string, return_code: cint): cint =
   scan_result = CL_VIRUS
   virus_name = cstring($rule_name_space & ":" & replace($rule_identifier, "_", "."))
-  return CALLBACK_ABORT
+  return return_code
 
 
 proc file_scanner_on_clean*(scan_result: var cl_error_t, virus_name: var cstring): cint =
