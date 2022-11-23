@@ -3,40 +3,37 @@ import "elf"
 /*
   https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
   Rules to detect ELF file.
-  vmem_start is a external variable that is provided by
-  custom compiler and scanner. It should be 0 or start of
-  process's memory block mapped in procfs.
-  elf_type has offset 0x10, size 2
 */
 
 private rule elf_magic {
-  condition:
-    uint32(vmem_start) == 0x464c457f
-}
-
-private rule elf_exec {
   strings:
-    $magic = "\x7fELF"
+    $magic = {7f 45 4c 46 [16] (01 | 02 | 03 | 04 )}
   condition:
-    (elf_magic and uint8(vmem_start + 0x10) == elf.ET_EXEC) or
-    ($magic and uint8(@magic[1] + 0x10) == elf.ET_EXEC)
-}
-
-private rule elf_dyn {
-  strings:
-    $magic = "\x7fELF"
-  condition:
-    (elf_magic and uint8(vmem_start + 0x10) == elf.ET_DYN) or
-    ($magic and uint8(@magic[1] + 0x10) == elf.ET_DYN)
+    #magic == 1
 }
 
 private rule elf_rel {
   strings:
-    $magic = "\x7fELF"
+    $magic = {7f 45 4c 46 [16] 01}
   condition:
-    (elf_magic and uint8(vmem_start + 0x10) == elf.ET_REL) or
-    ($magic and uint8(@magic[1] + 0x10) == elf.ET_REL)
+    #magic == 1
 }
+
+private rule elf_exec {
+  strings:
+    // $magic = "\x7fELF"
+    $magic = {7f 45 4c 46 [16] 02}
+  condition:
+    #magic == 1
+}
+
+private rule elf_dyn {
+  strings:
+    $magic = {7f 45 4c 46 [16] 03}
+  condition:
+    #magic == 1
+}
+
 
 private rule xdg_desktop_entry {
   condition:
