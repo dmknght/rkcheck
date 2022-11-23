@@ -15,18 +15,27 @@ private rule elf_magic {
 }
 
 private rule elf_exec {
+  strings:
+    $magic = "\x74ELF"
   condition:
-    elf_magic and uint8(vmem_start + 0x10) == elf.ET_EXEC
+    (elf_magic and uint8(vmem_start + 0x10) == elf.ET_EXEC) or
+    ($magic and uint8(@magic[1] + 0x10) == elf.ET_EXEC)
 }
 
 private rule elf_dyn {
+  strings:
+    $magic = "\x74ELF"
   condition:
-    elf_magic and uint8(vmem_start + 0x10) == elf.ET_DYN
+    (elf_magic and uint8(vmem_start + 0x10) == elf.ET_DYN) or
+    ($magic and uint8(@magic[1] + 0x10) == elf.ET_DYN)
 }
 
 private rule elf_rel {
+  strings:
+    $magic = "\x74ELF"
   condition:
-    elf_magic and uint8(vmem_start + 0x10) == elf.ET_REL
+    (elf_magic and uint8(vmem_start + 0x10) == elf.ET_REL) or
+    ($magic and uint8(@magic[1] + 0x10) == elf.ET_REL)
 }
 
 private rule xdg_desktop_entry {
