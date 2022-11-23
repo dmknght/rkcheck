@@ -187,7 +187,14 @@ rule Orbit_ba61 {
     $4 = "ld.so.nohwcap" fullword ascii
     $5 = "patch_ld" fullword ascii
   condition:
-    elf_dyn and 3 of them
+    elf_dyn and
+    (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        3 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      3 of them
+    )
 }
 
 
