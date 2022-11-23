@@ -37,6 +37,7 @@ type
   YrEngine* = object of RootObj
     engine*: ptr YR_RULES
     database*: string
+    err_code_rule_match*: cint
   #[
     The ProcScanner (Process Scanner) will use only Yara's Engine
       proc_id: The ID number of process (pid)
