@@ -725,20 +725,21 @@ rule STEELCORGI_packed {
 // }
 
 
-// rule Orbit_ac89 {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     hash = "ac89d638cb6912b58de47ac2a274b2fb"
-//   strings:
-//     $1 = "HTTP_X_MAGICAL_PONIES"
-//     $2 = "/dev/shm/.lck"
-//     $3 = "/tmp/.orbit"
-//     $4 = "ld.so.nohwcap"
-//     $5 = "setegid"
-//   condition:
-//     3 of them
-// }
+rule Orbit_ba61 {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "ba61e17c5fbcd6288081b31210f6cae6"
+    description = "Orbit library file"
+  strings:
+    $1 = "load_hidden_ports" fullword ascii
+    $2 = "tcp_port_hidden"  fullword ascii
+    $3 = "sniff_ssh_session" fullword ascii
+    $4 = "ld.so.nohwcap" fullword ascii
+    $5 = "patch_ld" fullword ascii
+  condition:
+    elf_dyn and 3 of them
+}
 
 
 rule Metasploit_Maldoc1 {
