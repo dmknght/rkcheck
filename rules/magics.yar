@@ -21,7 +21,6 @@ private rule elf_rel {
 
 private rule elf_exec {
   strings:
-    // $magic = "\x7fELF"
     $magic = {7f 45 4c 46 [16] 02}
   condition:
     #magic == 1
