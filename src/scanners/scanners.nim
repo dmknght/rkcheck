@@ -38,11 +38,6 @@ proc scanners_create_task_file_scan(yara_engine: YrEngine, options: ScanOptions,
   cl_engine_set_clcb_virus_found(file_scanner.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
-  if options.match_all:
-    file_scanner.yr_scanner.err_code_rule_match = CALLBACK_CONTINUE
-  else:
-    file_scanner.yr_scanner.err_code_rule_match = CALLBACK_ABORT
-
   try:
     if len(options.list_dirs) != 0:
       for dir_path in options.list_dirs:
@@ -75,9 +70,9 @@ proc scanners_create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions,
     proc_scanner.do_check_hidden_procs = true
 
   if options.match_all:
-    proc_scanner.err_code_rule_match = CALLBACK_CONTINUE
+    proc_scanner.match_all_rules = true
   else:
-    proc_scanner.err_code_rule_match = CALLBACK_ABORT
+    proc_scanner.match_all_rules = false
 
   proc_scanner.sumary_scanned = 0
   proc_scanner.sumary_infected = 0
