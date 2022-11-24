@@ -737,3 +737,25 @@ rule Metasploit_Maldoc1 {
   condition:
     is_xml and all of them
 }
+
+
+rule Lightning_Downloader {
+  meta:
+    description = "Downloader of lightning framework"
+    md5 = "204728fb1878b9f4f83c110e7cf6b5b5"
+    sha256 = "48f9471c20316b295704e6f8feb2196dd619799edec5835734fc24051f45c5b7"
+    url = "https://www.intezer.com/blog/research/lightning-framework-new-linux-threat/"
+  strings:
+    $ = "kkdmflush" fullword ascii
+    $ = "sleep 60 && ./%s &" fullword ascii
+    $ = "TCPvfA" ascii
+    $ = "UH-`0a" fullword ascii
+  condition:
+    elf_exec and (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      2 of them
+    )
+}
