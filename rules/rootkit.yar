@@ -726,7 +726,10 @@ rule Winnti_1acb {
     sha256 = "3b378846bc429fdf9bec08b9635885267d8d269f6d941ab1d6e526a03304331b"
   strings:
     $ = "Yi-!*" fullword ascii
-    $ = "|BfK" fullword ascii
+    $ = {(7c | 3d) (42 | 43) 66 4b}
+    $ = "get_our_sockets" fullword ascii
+    $ = "cmdlineH" fullword ascii
+    $ = "is_invisible_with_pids" fullword ascii
   condition:
     elf_dyn and
     (
@@ -740,6 +743,6 @@ rule Winnti_1acb {
           elf.dynsym[i].name == "check_is_our_proc_dir"
         )
       ) or
-      all of them
+      2 of them
     )
 }
