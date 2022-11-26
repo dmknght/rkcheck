@@ -729,7 +729,8 @@ rule Winnti_1acb {
     $ = "UC[[pIBstuvwxyz{" fullword ascii
     $ = "_0aSSWKTR]G[" fullword ascii
   condition:
-    elf_dyn and (
+    elf_dyn and
+    (
       for 2 i in (0 .. elf.dynsym_entries):
       (
         elf.dynsym[i].type == elf.STT_FUNC and
@@ -739,7 +740,7 @@ rule Winnti_1acb {
           elf.dynsym[i].name == "get_our_sockets" or
           elf.dynsym[i].name == "check_is_our_proc_dir"
         )
-      )
-      or all of them
+      ) or
+      2 of them
     )
 }
