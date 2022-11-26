@@ -725,9 +725,8 @@ rule Winnti_1acb {
     md5 = "1acb326773d6ba28d916871cb91af844"
     sha256 = "3b378846bc429fdf9bec08b9635885267d8d269f6d941ab1d6e526a03304331b"
   strings:
-    $ = "EAEC2CA4-AF8D-4F61-8115-9EC26F6BF4E1" fullword ascii
-    $ = "UC[[pIBstuvwxyz{" fullword ascii
-    $ = "_0aSSWKTR]G[" fullword ascii
+    $ = "Yi-!*" fullword ascii
+    $ = "|BfK" fullword ascii
   condition:
     elf_dyn and
     (
@@ -741,6 +740,6 @@ rule Winnti_1acb {
           elf.dynsym[i].name == "check_is_our_proc_dir"
         )
       ) or
-      2 of them
+      all of them
     )
 }
