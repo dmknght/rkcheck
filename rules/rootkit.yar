@@ -286,7 +286,6 @@ rule Umbreon_Espeon {
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
 		author = "Fernando Merces, FTR, Trend Micro"
 		date = "2016-08"
-
 	strings:
 		$ = "Usage: %s [interface]" fullword
 		$ = "Options:" fullword
@@ -294,7 +293,6 @@ rule Umbreon_Espeon {
 		$ = "/bin/espeon-shell %s %hu"
 		$ = { 66 75 63 6b 20 6f 66 66 20 63 75 6e 74 }
 		$ = "error: unrecognized command-line options" fullword
-
 	condition:
 		elf_dyn
 		and all of them
@@ -678,6 +676,32 @@ rule Rootkit_a669 {
       for any i in (0 .. elf.number_of_sections):
       (
         all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      all of them
+    )
+}
+
+
+rule Kinsing_ccef {
+  meta:
+    md5 = "ccef46c7edf9131ccffc47bd69eb743b"
+    sha256 = "c38c21120d8c17688f9aeb2af5bdafb6b75e1d2673b025b720e50232f888808a"
+    description = "Kinsing rootkit from malwareBazaar"
+  strings:
+    $ = "is_hidden_file.c" fullword ascii
+    $ = "%d (%[^)]s" fullword ascii
+    $ = "chopN" fullword ascii
+  condition:
+    elf_dyn and
+    (
+      for 2 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "is_hidden_file" or
+          elf.dynsym[i].name == "is_attacker" or
+          elf.dynsym[i].name == "hide_tcp_ports"
+        )
       ) or
       all of them
     )
