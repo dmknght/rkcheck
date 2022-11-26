@@ -720,7 +720,7 @@ rule Winnti_7f47 {
 }
 
 
-rule Winnti_ {
+rule Winnti_1acb {
   meta:
     md5 = "1acb326773d6ba28d916871cb91af844"
     sha256 = "3b378846bc429fdf9bec08b9635885267d8d269f6d941ab1d6e526a03304331b"
