@@ -28,16 +28,20 @@ proc find_hidden_kernel_modules() =
     if kind == pcDir:
       let
         state_path = path & "/initstate"
-      if fileExists(state_path):
-        let
-          current_module_name = splitPath(path).tail
-        if current_module_name notin kernel_modules:
-          let
-            current_module_state = readFile(state_path)
-          if current_module_state.startsWith("live"):
-            echo "Hidden kernel module: ", current_module_name
-          else:
-            echo "Not a live module: ", current_module_name
+      if not fileExists(state_path):
+        continue
+
+      let
+        current_module_name = splitPath(path).tail
+      if current_module_name in kernel_modules:
+        continue
+
+      let
+        current_module_state = readFile(state_path)
+      if current_module_state.startsWith("live"):
+        echo "Hidden kernel module: ", current_module_name
+      else:
+        echo "Not a live module: ", current_module_name
 
 
 find_hidden_kernel_modules()
