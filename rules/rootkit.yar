@@ -706,3 +706,15 @@ rule Kinsing_ccef {
       all of them
     )
 }
+
+
+rule Winnti_7f47 {
+  meta:
+    md5 = "7f4764c6e6dabd262341fd23a9b105a3"
+    sha256 = "ae9d6848f33644795a0cc3928a76ea194b99da3c10f802db22034d9f695a0c23"
+  strings:
+    $ = "HIDE_THIS_SHELL" fullword ascii
+    $ = "10CSocks5Mgr" fullword ascii
+  condition:
+    elf_exec and all of them
+}
