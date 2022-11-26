@@ -718,3 +718,28 @@ rule Winnti_7f47 {
   condition:
     elf_exec and all of them
 }
+
+
+rule Winnti_ {
+  meta:
+    md5 = "1acb326773d6ba28d916871cb91af844"
+    sha256 = "3b378846bc429fdf9bec08b9635885267d8d269f6d941ab1d6e526a03304331b"
+  strings:
+    $ = "EAEC2CA4-AF8D-4F61-8115-9EC26F6BF4E1" fullword ascii
+    $ = "UC[[pIBstuvwxyz{" fullword ascii
+    $ = "_0aSSWKTR]G[" fullword ascii
+  condition:
+    elf_dyn and (
+      for 2 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "is_invisible_with_pids" or
+          elf.dynsym[i].name == "get_our_pids" or
+          elf.dynsym[i].name == "get_our_sockets" or
+          elf.dynsym[i].name == "check_is_our_proc_dir"
+        )
+      )
+      or all of them
+    )
+}
