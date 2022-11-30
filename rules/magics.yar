@@ -50,8 +50,19 @@ private rule is_xml {
 */
 
 private rule sys_kernel_magic {
+  meta:
+    description = "First line of /sys/kernel/tracing/available_filter_functions starts with __traceiter_initcall_level"
   condition:
     uint16(0) == 0x5f5f
+}
+
+private rule procfs_stack_magic {
+  meta:
+    description = "All lines in /proc/<id>/stack starts with [<0>]"
+  strings:
+    $magic = "[<0>]"
+  condition:
+    $magic at 0
 }
 
 // private rule is_shebang {
