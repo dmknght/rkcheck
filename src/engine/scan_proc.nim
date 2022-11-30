@@ -86,7 +86,7 @@ proc pscanner_is_hidden_proc(ctx: ProcScanner) =
     print_process_hidden(ctx.proc_id, ctx.proc_name)
 
 
-proc pscanner_attach_process(ctx: var ProcScanner, check_hidden: bool) =
+proc pscanner_attach_process(ctx: var ProcScanner) =
   try:
     ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
     # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
@@ -107,20 +107,10 @@ proc pscanner_attach_process(ctx: var ProcScanner, check_hidden: bool) =
 
   ctx.proc_cmdline = readFile(ctx.proc_pathfs & "cmdline").replace("\x00", " ")
 
-  if check_hidden:
-    for line in lines(ctx.proc_pathfs & "status"):
-      if line.startsWith("Name:"):
-        ctx.proc_name = line.split()[^1]
-      elif line.startsWith("Tgid"):
-        ctx.proc_tgid = parseUInt(line.split()[^1])
-      elif line.startsWith("PPid:"):
-        ctx.proc_ppid = parseUInt(line.split()[^1])
-        break
-  else:
-    for line in lines(ctx.proc_pathfs & "status"):
-      if line.startsWith("Name:"):
-        ctx.proc_name = line.split()[^1]
-        break
+  for line in lines(ctx.proc_pathfs & "status"):
+    if line.startsWith("Name:"):
+      ctx.proc_name = line.split()[^1]
+      break
 
 
 proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
@@ -150,11 +140,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
     print_process_hidden(ctx.proc_id, "Heur:ProcCloak.StatusDenied")
     return
 
-  pscanner_attach_process(ctx, ctx.do_check_hidden_procs)
-
-  if ctx.do_check_hidden_procs:
-    # Brute force procfs. Slow. Requires a different flag
-    pscanner_is_hidden_proc(ctx)
+  pscanner_attach_process(ctx)
 
   discard pscanner_cb_scan_proc(ctx)
   ctx.sumary_scanned += 1

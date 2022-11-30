@@ -7,7 +7,6 @@ proc show_help_banner*(): bool =
   echo " --path-clamdb  <file or dir>  Set custom ClamAV's signatures"
   echo " --path-yaradb  <file>         Set custom Yara's rules"
   echo "\nScan options:"
-  echo "  --check-hidden-proc          Check if processes are hidden"
   echo "  --all-procs                  Scan all running proccesses"
   echo "  --match-all                  Match all rules (process scan only)"
   echo "  --list-dirs   <dir1 dir2>    Scan directories"

@@ -66,9 +66,6 @@ proc scanners_create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions,
   else:
     proc_scanner.do_scan_stacks = false
 
-  if options.check_hidden_proc:
-    proc_scanner.do_check_hidden_procs = true
-
   if options.match_all:
     proc_scanner.match_all_rules = true
   else:

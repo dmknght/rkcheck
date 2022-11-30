@@ -18,7 +18,6 @@ type
     list_files*: seq[string]
     list_procs*: seq[uint]
     scan_all_procs*: bool
-    check_hidden_proc*: bool
     is_clam_debug*: bool
     use_clam_db*: bool
     match_all*: bool
@@ -57,7 +56,6 @@ type
     sumary_scanned*: uint
     sumary_infected*: uint
     do_scan_stacks*: bool
-    do_check_hidden_procs*: bool
   #[
     yr_scanner: YR_RULES
     scan_object: current path / name of object that engine is scanning

@@ -60,9 +60,6 @@ Process scanner doesn't use ClamAV engine so using custom ClamAV engine will not
 ## Enable ClamAV Debug mode (file scan only)
 To enable LibClamAV debug mode, user can add `--clam-debug`
 
-## Detect hidden process
-`--check-hidden-proc` will check if process is hidden from listing ProcFS data. It will slow down the process scanner.
-
 # How about Rootkit detection?
 Current engine has some Rootkit signatures. However I need to do more researches and tests to make sure it's able to detect Rootkits in the infected system. Detecting hidden files / directories wasn't tested
 
