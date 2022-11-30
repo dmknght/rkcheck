@@ -1,8 +1,8 @@
 # This is the make file to build static binaries. The idea is to have binary not being hooked by LD_PRELOAD rootkits
 # This file doesn't work beecause -lclamav doesn't work with static build
 YRFLAGS = --passL:-lssl --passL:-lcrypto --passL:-lpthread --passL:-lyara
-YRFLAGS_STATIC = --passL:-static --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-lm
-CLFLAGS = --passL:-lclamav
+YRFLAGS_STATIC = --passL:-static --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-lm
+CLFLAGS = --passL:-Wl,-Bdynamic --passL:-lclamav --passL:-lgcc_s
 NIMFLAGS = nim c --nimcache:/tmp -d:release --opt:speed --passL:-s
 
 all:
@@ -14,7 +14,7 @@ build:
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
 	$(NIMFLAGS) $(YRFLAGS) -r --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
-	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS_STATIC) --out:build/rkscanmal src/rkscanmal.nim
+	$(NIMFLAGS) $(YRFLAGS_STATIC) $(CLFLAGS) --out:build/rkscanmal src/rkscanmal.nim
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS_STATIC) --out:build/rkscanrootkit src/rkscanrootkit.nim
 
 install:
