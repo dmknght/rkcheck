@@ -765,7 +765,7 @@ rule vbackdoor_generic {
         elf.dynsym[i].type == elf.STT_FUNC and
         (
           elf.dynsym[i].name == "forge_proc_net_tcp" or
-          elf.dynsym[i].name == "dlopen" or
+          elf.dynsym[i].name == "dlopen"
         )
       ) or
       3 of them
