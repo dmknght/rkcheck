@@ -78,14 +78,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   # TODO: scan process's stacks and execfile. Maybe need different ruleset?
 
 
-proc pscanner_is_hidden_proc(ctx: ProcScanner) =
-  if ctx.proc_id == ctx.proc_tgid and ctx.proc_ppid > 0:
-    for kind, path in walkDir("/proc/"):
-      if kind == pcDir and path & "/" == ctx.proc_pathfs:
-        return
-    print_process_hidden(ctx.proc_id, ctx.proc_name)
-
-
 proc pscanner_attach_process(ctx: var ProcScanner) =
   try:
     ctx.proc_binary_path = expandSymlink(ctx.proc_pathfs & "exe")
