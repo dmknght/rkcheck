@@ -746,3 +746,28 @@ rule Winnti_1acb {
       2 of them
     )
 }
+
+
+rule vbackdoor_generic {
+  meta:
+    md5 = "b3a0336574fed5bdcd08668074922fcb"
+    sha256 = "b33b3f3a6b85be99b02118b28ce34ad239705ce578e9da19db3c25e255dded78"
+  strings:
+    $ = "forge_proc_net_tcp" fullword ascii
+    $ = "dlopen" fullword ascii
+    $ = "#$&(" fullword ascii
+    $ = "W @j" fullword ascii
+  condition:
+    elf_dyn and
+    (
+      for 2 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "forge_proc_net_tcp" or
+          elf.dynsym[i].name == "dlopen" or
+        )
+      ) or
+      3 of them
+    )
+}
