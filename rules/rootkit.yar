@@ -13,14 +13,7 @@ rule Diamorphine_Gen1 {
     $ = "include/linux/thread_info.h" fullword ascii
     $ = "kallsyms_lookup_name" fullword ascii
   condition:
-    elf_rel and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_rel and all of them
 }
 
 rule Father_Gen1 {
@@ -34,18 +27,7 @@ rule Father_Gen1 {
     $ = "lpe_drop_shell" fullword ascii
     $ = "falsify_tcp" fullword ascii
   condition:
-    elf_dyn and
-    (
-      for any i in (0 .. elf.dynsym_entries):
-      (
-        elf.dynsym[i].type == elf.STT_FUNC and
-        (
-          elf.dynsym[i].name == "lpe_drop_shell" or
-          elf.dynsym[i].name == "falsify_tcp"
-        )
-      ) or
-      2 of them
-    )
+    elf_dyn and 2 of them
 }
 
 
@@ -120,14 +102,7 @@ rule Boopkit_BoopExec {
     $ = "[RCE]" fullword ascii
     $ = "X*x.HALT.x*X" fullword ascii
   condition:
-    elf_exec and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_exec and all of them
 }
 
 
@@ -187,14 +162,7 @@ rule Orbit_ba61 {
     $4 = "ld.so.nohwcap" fullword ascii
     $5 = "patch_ld" fullword ascii
   condition:
-    elf_dyn and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        3 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      3 of them
-    )
+    elf_dyn and 3 of them
 }
 
 
@@ -303,14 +271,7 @@ rule Chfn_Generic {
   strings:
     $ = "setpwnam" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -325,14 +286,7 @@ rule Sckit_Generic {
     $ = "Can't execve shell" fullword ascii
     $ = "Failed to hide pid" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 // rule Knark_Generic {
@@ -647,14 +601,7 @@ rule Rootkit_4d1e {
     // Uniq strings
     $ = "abcdfgiklmnopqrstuw:xABCDFGI:LNQRST:UX178" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -671,14 +618,7 @@ rule Rootkit_a669 {
     $ = "%d (%[^)]s" fullword ascii
     $ = "Error in dlsym: %s" fullword ascii
   condition:
-    elf_dyn and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_dyn and all of them
 }
 
 

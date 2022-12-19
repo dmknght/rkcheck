@@ -12,14 +12,7 @@ rule Agent_9db6 {
     $ = "kl q60?"
     $ = "&'Qm"
   condition:
-    elf_exec and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_exec and all of them
 }
 
 
@@ -33,14 +26,7 @@ rule SSHD_95d7 {
     $1 = "Rhosts Authentication disabled, originating port %d not trusted." ascii
     $2 = "kHgn4vlwonyP" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -76,14 +62,7 @@ rule Agent_be4d {
     $2 = "touch /tmp/elevate" fullword ascii
     $3 = "/c.php?authkey=" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
 
 
@@ -96,14 +75,7 @@ rule Kowai_f06a {
     $1 = "KOWAI-BAdAsV" fullword ascii
     $2 = "KOWAI-d" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
 
 
@@ -166,14 +138,7 @@ rule Metasploit_Stageless {
     $ = "MSF_LICENSE" fullword ascii
     $ = "mettle_get_procmgr" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
 
 
@@ -187,14 +152,7 @@ rule Metasploit_Staged
     $ = "AYPj)X" fullword ascii
     $ = "Wj#Xj" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -212,14 +170,7 @@ rule Excedoor_Generic {
     $ = "rm -rf /var/log/*" fullword ascii
     $ = "Brand new TCP root shell!" fullword ascii
   condition:
-    elf_exec and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_exec and all of them
 }
 
 // rule EkoBackdoor_Generic {
@@ -525,14 +476,7 @@ rule Keylog_Xspy {
     $ = "DISPLAY" fullword ascii
     $ = "for snoopng" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -562,10 +506,6 @@ rule Exploit_DirtyCow {
           elf.dynsym[i].name == "pthread_create"
         )
       ) or
-      for any i in (0 .. elf.number_of_segments):
-      (
-        all of them in (elf.segments[i].virtual_address .. elf.segments[i].virtual_address + elf.segments[i].memory_size)
-      ) or
       all of them
     )
 }
@@ -585,14 +525,7 @@ rule TinyShell {
     $1 = "s:p:c::" // getopt strings
     $2 = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -751,11 +684,5 @@ rule Lightning_Downloader {
     $ = "TCPvfA" ascii
     $ = "UH-`0a" fullword ascii
   condition:
-    elf_exec and (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_exec and 2 of them
 }

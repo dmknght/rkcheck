@@ -54,14 +54,7 @@ rule Mirai_Gen1
     $ = "NICK %s" fullword ascii
     $ = "JOIN %s" fullword ascii
   condition:
-    elf_exec and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_exec and 2 of them
 }
 
 
@@ -76,14 +69,7 @@ rule Mirai_Gen2 {
     $ = "UDPRAW" fullword ascii
     $ = "sendRAW"
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
 
 
@@ -97,14 +83,7 @@ rule Tsunami_de1b {
     $1 = "Tsunami successfully deployed!" ascii
     $2 = ".tsunami -l .t -g" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
 
 rule Mirai_4c36 {
@@ -116,14 +95,7 @@ rule Mirai_4c36 {
     $1 = "%9s %3hu %255[^\n]" fullword ascii
     $2 = "oanacroane" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
 
 
@@ -135,14 +107,7 @@ rule Mirai_9c77 {
   strings:
     $1 = "31mip:%s" ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and any of them
 }
 
 
@@ -152,14 +117,7 @@ rule Mirai_92a0 {
   strings:
     $1 = "4r3s b0tn3t" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      all of them
-    )
+    elf_magic and any of them
 }
 
 // rule Mirai_Gen2 {

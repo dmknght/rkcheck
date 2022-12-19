@@ -272,14 +272,7 @@ rule Flooder_Gen1 {
     $4 = "LOLNOGTFO" fullword ascii
     $5 = "KILLATTK" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 
 rule Flooder_Gen2 {
@@ -292,14 +285,7 @@ rule Flooder_Gen2 {
     $2 = "[HTTP] Flooding" fullword ascii
     $3 = "[UDP] Flooding Rooted Spoof" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        2 of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 
 rule Flooder_Gen3 {
@@ -313,14 +299,7 @@ rule Flooder_Gen3 {
     $1 = "Opening sockets" fullword ascii
     $2 = "Sending attack" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 
 
@@ -336,14 +315,7 @@ rule Flooder_Gen4 {
     $ = "SYNFLOOD" fullword ascii
     $ = "ACKFLOOD" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        any of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 
 
@@ -357,14 +329,7 @@ rule Netscan_Gen1 {
     $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
     $3 = "Portscan completed in" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 
 rule SshBrute_Gen1 {
@@ -376,14 +341,7 @@ rule SshBrute_Gen1 {
     $1 = "FOUND: %s with port %s open" fullword ascii
     $2 = "%s:%s %s port: %s --> %s" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 
 
@@ -391,14 +349,7 @@ rule Backdoor_Gen1 {
   strings:
     $ = "Starting backdoor daemon" fullword ascii
   condition:
-    elf_magic and
-    (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        all of them in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_magic and 2 of them
 }
 // rule SusElf_PyCompiled {
 //   meta:
