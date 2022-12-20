@@ -119,10 +119,9 @@ proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count
     scanners_create_task_proc_scan(yara_engine, options, p_count, p_infect)
 
 
-proc scanners_create_scan_preload*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
+proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
   var
     yara_engine: YrEngine
-    preload_libs: seq[string]
   const
     ld_preload_path = "/etc/ld.so.preload"
 
@@ -135,7 +134,7 @@ proc scanners_create_scan_preload*(options: ScanOptions, f_count, f_infect, p_co
   if fileExists(ld_preload_path):
     for line in lines(ld_preload_path):
       if fileExists(line):
-        preload_libs.add(line)
+        options.list_files.add(line)
 
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
     scanners_create_task_file_scan_yr(yara_engine, options, f_count, f_infect)
