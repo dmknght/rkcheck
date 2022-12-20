@@ -54,3 +54,19 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
   else:
     discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
     return ctx.scan_result
+
+
+proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
+  var
+    ctx = cast[ptr FileScanner](user_data)
+    rule = cast[ptr YR_RULE](message_data)
+
+  # If target matches a rule
+  if message == CALLBACK_MSG_RULE_MATCHING:
+    return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
+  else:
+    return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
+
+
+proc fscanner_yr_scan_file*(yr_scanner: var YrEngine, file_path: string) =
+  discard yr_rules_scan_file(yr_scanner.engine, cstring(file_path), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, yr_scanner.addr, YR_SCAN_TIMEOUT)

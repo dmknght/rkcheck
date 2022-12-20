@@ -1,6 +1,5 @@
 import os
-import posix
-import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc, scan_sysmodules]
+import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 
 
 type
@@ -57,14 +56,29 @@ proc scanners_create_task_file_scan(yara_engine: YrEngine, options: ScanOptions,
     finit_clamav(file_scanner)
 
 
+proc scanners_create_task_file_scan_yr(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+
+  try:
+    if len(options.list_dirs) != 0:
+      for dir_path in options.list_dirs:
+        for path in walkDirRec(dir_path):
+          fscanner_yr_scan_file(yara_engine, path)
+
+    if len(options.list_files) != 0:
+      for path in options.list_files:
+        fscanner_yr_scan_file(yara_engine, path)
+  except KeyboardInterrupt:
+    return
+  finally:
+    discard
+    # result_count = file_scanner.result_scanned
+    # result_infect = file_scanner.result_infected
+
+
+
 proc scanners_create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
   var
     proc_scanner: ProcScanner
-
-  if getuid() != 0:
-    proc_scanner.do_scan_stacks = true
-  else:
-    proc_scanner.do_scan_stacks = false
 
   if options.match_all:
     proc_scanner.match_all_rules = true
@@ -105,16 +119,26 @@ proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count
     scanners_create_task_proc_scan(yara_engine, options, p_count, p_infect)
 
 
-proc scanners_create_scan_rootkit_task*(options: ScanOptions, f_infect: var uint) =
+proc scanners_create_scan_preload*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
   var
-    engine: KernModuScanner
+    yara_engine: YrEngine
+    preload_libs: seq[string]
+  const
+    ld_preload_path = "/etc/ld.so.preload"
 
-  engine.database = options.db_path_yara
+  yara_engine.database = options.db_path_yara
   setControlCHook(handle_keyboard_interrupt)
 
-  if engine.init_yara() != ERROR_SUCCESS:
+  if yara_engine.init_yara() != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init Yara Engine")
 
-  kscanner_scan_start_scan(engine)
+  if fileExists(ld_preload_path):
+    for line in lines(ld_preload_path):
+      if fileExists(line):
+        preload_libs.add(line)
 
-  finit_yara(engine)
+  if len(options.list_files) != 0 or len(options.list_dirs) != 0:
+    scanners_create_task_file_scan_yr(yara_engine, options, f_count, f_infect)
+
+  if len(options.list_procs) != 0 or options.scan_all_procs:
+    scanners_create_task_proc_scan(yara_engine, options, p_count, p_infect)

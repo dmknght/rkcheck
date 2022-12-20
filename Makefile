@@ -1,4 +1,5 @@
 YRFLAGS = --passL:-lssl --passL:-lcrypto --passL:-lpthread --passL:-lyara
+YRFLAGS_STATIC = --passL:-static --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-lm
 CLFLAGS = --passL:-lclamav
 NIMFLAGS = nim c --nimcache:/tmp -d:release --opt:speed --passL:-s
 
@@ -11,7 +12,7 @@ build:
 	$(NIMFLAGS) $(YRFLAGS) -r --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanmal src/rkscanmal.nim
-	# $(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanrootkit src/rkscanrootkit.nim
+	$(NIMFLAGS) $(YRFLAGS_STATIC) --out:build/rkscanpreload src/rkscanpreload.nim
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
 
 install:

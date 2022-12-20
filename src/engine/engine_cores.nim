@@ -55,7 +55,7 @@ type
     scan_virname*: string
     sumary_scanned*: uint
     sumary_infected*: uint
-    do_scan_stacks*: bool
+    # do_scan_stacks*: bool
   #[
     yr_scanner: YR_RULES
     scan_object: current path / name of object that engine is scanning
