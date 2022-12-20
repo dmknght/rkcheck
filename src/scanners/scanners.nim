@@ -73,7 +73,7 @@ proc scanners_create_task_file_scan_yr(yara_engine: var YrFileScanner, options: 
   finally:
     result_count = yara_engine.result_scanned
     result_infect = yara_engine.result_infected
-
+    finit_yara(yara_engine)
 
 
 proc scanners_create_task_proc_scan(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
