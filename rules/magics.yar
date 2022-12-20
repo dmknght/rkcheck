@@ -1,5 +1,3 @@
-import "elf"
-
 /*
   https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
   Rules to detect ELF file.

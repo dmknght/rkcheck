@@ -76,6 +76,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   #   discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.proc_cmdline[0].unsafeAddr), uint(len(ctx.proc_cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
 
   # TODO: scan process's stacks and execfile. Maybe need different ruleset?
+  # https://sandflysecurity.com/blog/bpfdoor-an-evasive-linux-backdoor-technical-analysis/
 
 
 proc pscanner_attach_process(ctx: var ProcScanner) =
