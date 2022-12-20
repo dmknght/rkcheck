@@ -711,3 +711,34 @@ rule Vbackdoor_Generic {
       3 of them
     )
 }
+
+rule LDPre_Imp {
+  meta:
+    description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
+  condition:
+    elf_dyn and (
+      for 12 i in (0 .. elf.dynsym_entries):
+      (
+        /*
+          Some other hooks:
+            "strstr"
+            "tmpfile"
+        */
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "access" or
+          elf.dynsym[i].name == "dlsym" or
+          elf.dynsym[i].name == "fopen" or
+          elf.dynsym[i].name == "fopen64" or
+          elf.dynsym[i].name == "lstat" or
+          elf.dynsym[i].name == "__lxstat" or
+          elf.dynsym[i].name == "__lxstat64" or
+          elf.dynsym[i].name == "open" or
+          elf.dynsym[i].name == "opendir" or
+          elf.dynsym[i].name == "readdir" or
+          elf.dynsym[i].name == "unlink" or
+          elf.dynsym[i].name == "unlinkat"
+        )
+      )
+    )
+}
