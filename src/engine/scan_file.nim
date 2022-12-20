@@ -58,17 +58,19 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
 
 proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
   var
-    ctx = cast[ptr FileScanner](user_data)
+    ctx = cast[ptr YrFileScanner](context)
+    vir_name: cstring
     rule = cast[ptr YR_RULE](message_data)
 
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
-    return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
+    discard file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
+    file_scanner_on_malware_found(vir_name, ctx.scan_virname, ctx.scan_object, ctx.result_infected)
   else:
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
-proc fscanner_yr_scan_file*(yr_scanner: var YrEngine, file_path: string) =
+proc fscanner_yr_scan_file*(yr_scanner: var YrFileScanner, file_path: string) =
   progress_bar_scan_file(file_path)
   discard yr_rules_scan_file(yr_scanner.engine, cstring(file_path), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, yr_scanner.addr, YR_SCAN_TIMEOUT)
   progress_bar_flush()

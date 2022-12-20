@@ -56,7 +56,7 @@ proc scanners_create_task_file_scan(yara_engine: YrEngine, options: ScanOptions,
     finit_clamav(file_scanner)
 
 
-proc scanners_create_task_file_scan_yr(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+proc scanners_create_task_file_scan_yr(yara_engine: var YrFileScanner, options: ScanOptions, result_count, result_infect: var uint) =
 
   try:
     if len(options.list_dirs) != 0:
@@ -121,7 +121,7 @@ proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count
 
 proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
   var
-    yara_engine: YrEngine
+    yara_engine: YrFileScanner
   const
     ld_preload_path = "/etc/ld.so.preload"
 

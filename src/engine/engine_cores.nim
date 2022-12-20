@@ -72,8 +72,12 @@ type
     result_scanned*: uint
     result_infected*: uint
     use_clam_sigs*: bool
-  KernModuScanner* = object of YrEngine
-    infected*: uint
+  YrFileScanner* = object of YrEngine
+    scan_object*: string
+    scan_result*: cl_error_t
+    scan_virname*: cstring
+    result_scanned*: uint
+    result_infected*: uint
 
 
 const
