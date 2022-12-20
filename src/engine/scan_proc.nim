@@ -35,6 +35,16 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
 #     return CALLBACK_CONTINUE
 
 
+proc pscanner_get_mapped_bin(base_offset, base_size: uint64, proc_id: string): string =
+  var
+    offset_start = toHex(base_offset).toLowerAscii()
+    offset_end = toHex(base_offset + base_size).toLowerAscii()
+
+  offset_start.removePrefix('0')
+  offset_end.removePrefix('0')
+  return "/proc/" & proc_id & "/map_files/" & offset_start & "-" & offset_end
+
+
 proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   #[
     Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
@@ -43,7 +53,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
-    offset_start, offset_end, mapped_binary: string
 
   if yr_process_open_iterator(cint(ctx.proc_id), mem_blocks.addr) == ERROR_SUCCESS:
     mem_block = mem_blocks.first(mem_blocks.addr)
@@ -52,12 +61,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
       let
         base_offset = mem_block[].base
         base_size = mem_block[].size
-
-      offset_start = toHex(base_offset).toLowerAscii()
-      offset_start.removePrefix('0')
-      offset_end = toHex(base_offset + base_size).toLowerAscii()
-      offset_end.removePrefix('0')
-      mapped_binary = "/proc/" & $ctx.proc_id & "/map_files/" & offset_start & "-" & offset_end
+        mapped_binary = pscanner_get_mapped_bin(base_offset, base_size, $ctx.proc_id)
 
       try:
         ctx.virtual_binary_path = expandSymlink(mapped_binary)
