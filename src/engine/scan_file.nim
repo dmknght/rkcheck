@@ -69,4 +69,6 @@ proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, messa
 
 
 proc fscanner_yr_scan_file*(yr_scanner: var YrEngine, file_path: string) =
+  progress_bar_scan_file(file_path)
   discard yr_rules_scan_file(yr_scanner.engine, cstring(file_path), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, yr_scanner.addr, YR_SCAN_TIMEOUT)
+  progress_bar_flush()
