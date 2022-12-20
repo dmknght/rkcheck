@@ -70,8 +70,8 @@ proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, messa
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
-proc fscanner_yr_scan_file*(yr_scanner: var YrFileScanner, file_path: string) =
+proc fscanner_yr_scan_file*(context: var YrFileScanner, file_path: string) =
   progress_bar_scan_file(file_path)
-  discard yr_rules_scan_file(yr_scanner.engine, cstring(file_path), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, yr_scanner.addr, YR_SCAN_TIMEOUT)
-  yr_scanner.result_scanned += 1
+  discard yr_rules_scan_file(context.engine, cstring(file_path), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
+  context.result_scanned += 1
   progress_bar_flush()
