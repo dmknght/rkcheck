@@ -62,12 +62,12 @@ proc scanners_create_task_file_scan_yr(yara_engine: var YrFileScanner, options: 
       for dir_path in options.list_dirs:
         for path in walkDirRec(dir_path):
           yara_engine.scan_object = path
-          fscanner_yr_scan_file(yara_engine, yara_engine.scan_object)
+          fscanner_yr_scan_file(yara_engine)
 
     if len(options.list_files) != 0:
       for path in options.list_files:
         yara_engine.scan_object = path
-        fscanner_yr_scan_file(yara_engine, yara_engine.scan_object)
+        fscanner_yr_scan_file(yara_engine)
   except KeyboardInterrupt:
     return
   finally:
