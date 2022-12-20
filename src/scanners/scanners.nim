@@ -56,28 +56,23 @@ proc scanners_create_task_file_scan(yara_engine: YrEngine, options: ScanOptions,
     finit_clamav(file_scanner)
 
 
-proc scanners_create_task_file_scan_yr(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
-  var
-    file_scanner: YrFileScanner
-
-  file_scanner.engine = yara_engine.engine
-
+proc scanners_create_task_file_scan_yr(yara_engine: var YrFileScanner, options: ScanOptions, result_count, result_infect: var uint) =
   try:
     if len(options.list_dirs) != 0:
       for dir_path in options.list_dirs:
         for path in walkDirRec(dir_path):
-          file_scanner.scan_object = path
-          fscanner_yr_scan_file(file_scanner, file_scanner.scan_object)
+          yara_engine.scan_object = path
+          fscanner_yr_scan_file(yara_engine, yara_engine.scan_object)
 
     if len(options.list_files) != 0:
       for path in options.list_files:
-        file_scanner.scan_object = path
-        fscanner_yr_scan_file(file_scanner, file_scanner.scan_object)
+        yara_engine.scan_object = path
+        fscanner_yr_scan_file(yara_engine, yara_engine.scan_object)
   except KeyboardInterrupt:
     return
   finally:
-    result_count = file_scanner.result_scanned
-    result_infect = file_scanner.result_infected
+    result_count = yara_engine.result_scanned
+    result_infect = yara_engine.result_infected
 
 
 
@@ -126,7 +121,7 @@ proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count
 
 proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
   var
-    yara_engine: YrEngine
+    yara_engine: YrFileScanner
   const
     ld_preload_path = "/etc/ld.so.preload"
 
