@@ -688,7 +688,7 @@ rule Winnti_1acb {
 }
 
 
-rule vbackdoor_generic {
+rule Vbackdoor_Generic {
   meta:
     md5 = "b3a0336574fed5bdcd08668074922fcb"
     sha256 = "b33b3f3a6b85be99b02118b28ce34ad239705ce578e9da19db3c25e255dded78"
