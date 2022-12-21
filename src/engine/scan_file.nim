@@ -58,20 +58,20 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
 
 proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
   var
-    ctx = cast[ptr YrFileScanner](context)
+    ctx = cast[ptr YrFileScanner](user_data)
     rule = cast[ptr YR_RULE](message_data)
     vir_name: cstring
 
-  # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
     discard file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
     file_scanner_on_malware_found(vir_name, ctx.scan_virname, ctx.scan_object, ctx.result_infected)
+    return CALLBACK_ABORT # TODO maybe do multiple rules matching?
   else:
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
 proc fscanner_yr_scan_file*(context: var YrFileScanner) =
   progress_bar_scan_file(context.scan_object)
-  echo yr_rules_scan_file(context.engine, cstring(context.scan_object), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
+  discard yr_rules_scan_file(context.engine, cstring(context.scan_object), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
   context.result_scanned += 1
   progress_bar_flush()
