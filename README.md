@@ -6,8 +6,8 @@ This tool tries to solve problems of major (or famous) tools
 | Tool | Scan method | Problem |
 |---|---|---|
 | chkrootkit | Check if absolute paths exist (dirs and files) | - Rootkit hooks stat, lstat could compromise the results |
-| rkhunter | absolute paths (dirs and files) <br> support checking kernel symbols at /proc/ kallsyms | - Rootkit hooks stat lstat could compromise the results <br> - Rootkit hooks program reading kallsysms, compromise the scan results |
-| Yara | Powerful signature based and metadata parsing | No file decompression, No real-time scan |
+| rkhunter | - Check if absolute paths exist (dirs and files) <br> - Support checking kernel symbols at /proc/ kallsyms | - Rootkit hooks stat lstat could compromise the results <br> - Rootkit hooks program reading kallsysms, compromise the scan results |
+| Yara | Powerful signature based and metadata parsing | - No file decompression <br> - No real-time scan <br> - No unpackers |
 | ClamAV | Signature based, support file decompression, document parsers, some basic unpackers, ... | - No process scan on Linux (last time i checked) <br> - Ram usage is very huge (more than 1gb ram after load all DB last time i checked) <br> - Mainly based on string matching and hashing. Lack of metadata parser for ELF file and March-O file. Poor metadata parsing for PE file compare to Yara <br> - Rules are not so user-friendly: custom format with hex encoded strings
 
 
