@@ -19,8 +19,10 @@ install:
 	mkdir -p /usr/share/rkscanner/
 	cp -r build/database /usr/share/rkscanner/
 	cp build/rkscanmal /usr/bin/rkscanmal
+	cp build/rkscanpreload /usr/bin/rkscanpreload
 
 	chmod +x /usr/bin/rkscanmal
+	chmod +x /usr/bin/rkscanpreload
 
 uninstall:
 	rm /usr/bin/rkscanmal
