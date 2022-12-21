@@ -28,20 +28,23 @@ This project is a 1-man-project. I don't have power and resource to keep updatin
 
 # How to build
 The program requires Yara 4.2.3, ClamAV 0.103.7 and Nim 1.6.2. This program was developed and tested on Parrot OS 5.1. I haven't tested the newer versions of either Yara, Nim nor ClamAV. Other Linux distros weren't tested and the result is unknown.
+
 To build this project, developer must install some libraries:
-`sudo apt install libyara-dev libclamav-dev nim`
+- `sudo apt install libyara-dev libclamav-dev nim`
 NOTE: on Parrot OS 5.1, Yara must be installed from backports:
-`sudo apt install libyara-dev libclamav-dev nim -t parrot-backports`
+- `sudo apt install libyara-dev libclamav-dev nim -t parrot-backports`
+
 Then run
-`make build`
-Binary and signatures are at `build/`
+- `make build`
+
+To install inside system, run
+- `sudo make install`
+To uninstall it, run
+- `sudo make uninstall`
+Binary and signatures are in dir `build/`
 
 To run this tool, user must install runtime library:
-`sudo apt install libyara9 libclamav9`
-To install inside system, run
-`sudo make install`
-To uninstall it, run
-`sudo make uninstall`
+- `sudo apt install libyara9 libclamav9`
 
 # How to use
 ## To scan files or dirs
