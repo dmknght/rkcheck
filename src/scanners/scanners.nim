@@ -1,4 +1,5 @@
 import os
+import sequtils
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 
 
@@ -135,6 +136,8 @@ proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, 
     for line in lines(ld_preload_path):
       if fileExists(line):
         options.list_files.add(line)
+
+  options.list_files = deduplicate(options.list_files)
 
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
     scanners_create_task_file_scan_yr(yara_engine, options, f_count, f_infect)
