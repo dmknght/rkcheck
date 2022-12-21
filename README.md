@@ -12,6 +12,7 @@ This tool tries to solve problems of major (or famous) tools
 
 
 p/s: chkrootkit and rkhunter has some more custom functions. This table focused on the malware checking only.
+
 p/s2: all of them don't have advanced technologies compare to modern Antivirus: emulators, behavior analyzer, ....
 
 => This tool try to solve the problem by using ClamAV's engine to handle files, and then use Yara as ClamAV's post scan to do signature matching. To replace chkrootkit and rkhunter, my scope is to learn eBPF scripting to write real-time scanner to detect kernel's hooking and more (similar to tracee).
