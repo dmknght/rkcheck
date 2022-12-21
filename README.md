@@ -91,6 +91,11 @@ Current engine has some Rootkit signatures. However I need to do more researches
 - rkhiddenproc: A quick tool that check if system is having hidden process. It's faster than rkscanmal's process scanner because it has no memory scanning
 - rkscanpreload: A simple scanner, similar to `rkscanmal` which is staticly compiled. This tool has no ClamAV as the file handler. The point of making it was to scan system was infected by LD_PRELOAD rootkit, therefore dynamically linked ELF can't read data hooked by this Rootkit family. The current ClamAV version on Debian has no static lib to do static compile so I have to write this standalone tool. This tool also do parsing `/etc/ld.so.preload` to check libraries in there. (Note: it doesn't support checking ENV right now)
 
+# Roadmaps
+- Update the tool with latest ClamAV and Yara engine
+- Try static build for `rkscanmal` so no need to have `rkscanpreload`.
+- Research eBPF so this project can have proper way to detect Rootkit (LKM and eBPF rootkits)
+
 # License, copyright
 - Reused Yara engine under BSD-3-Clause.
 - Reused ClamAV engine under GPL-2.0
