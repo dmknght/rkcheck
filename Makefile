@@ -18,13 +18,12 @@ build:
 install:
 	mkdir -p /usr/share/rkscanner/
 	cp -r build/database /usr/share/rkscanner/
-	cp build/rkscanner /usr/bin/rkscanner
+	cp build/rkscanmal /usr/bin/rkscanmal
 
-	chmod +x /usr/bin/rkscanner
-	chmod +x /usr/bin/rkcompiler
+	chmod +x /usr/bin/rkscanmal
 
 uninstall:
-	rm /usr/bin/rkscanner
+	rm /usr/bin/rkscanmal
 	rm -rf /usr/share/rkscanner/
 
 clean:
