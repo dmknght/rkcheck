@@ -120,6 +120,17 @@ rule Mirai_92a0 {
     elf_magic and any of them
 }
 
+rule Botnet_1d47 {
+  meta:
+    md5 = "1d4789f3de97c80a4755d7ef2cd844b3"
+  strings:
+    $ = "iceis" fullword ascii
+    $ = "Setting up sockets" fullword ascii
+    $ = "Starting flood" fullword ascii
+  condition:
+    elf_dyn and 2 of them
+}
+
 // rule Mirai_Gen2 {
 //   meta:
 //     author = "Nong Hoang Tu"
