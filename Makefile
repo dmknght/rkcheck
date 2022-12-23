@@ -20,12 +20,16 @@ install:
 	cp -r build/database /usr/share/rkscanner/
 	cp build/rkscanmal /usr/bin/rkscanmal
 	cp build/rkscanpreload /usr/bin/rkscanpreload
+	cp build/rkhiddenproc /usr/bin/rkhiddenproc
 
 	chmod +x /usr/bin/rkscanmal
 	chmod +x /usr/bin/rkscanpreload
+	chmod +x /usr/bin/rkhiddenproc
 
 uninstall:
 	rm /usr/bin/rkscanmal
+	rm /usr/bin/rkhiddenproc
+	rm /usr/bin/rkscanpreload
 	rm -rf /usr/share/rkscanner/
 
 clean:
