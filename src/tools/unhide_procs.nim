@@ -35,33 +35,33 @@ proc show_process_status(pid_stat: PidStat, reason: string) =
   echo " Binary: ", pid_stat.exec
 
 
-proc attach_process(procfs: string): PidStat =
-  var
-    map_pid: PidStat
+proc attach_process(procfs: string, pid_stat: var PidStat): bool =
+  try:
+    pid_stat.exec = expandSymlink(procfs & "/exe")
+  except:
+    pid_stat.exec = ""
 
   try:
-    map_pid.exec = expandSymlink(procfs & "/exe")
-  except:
-    map_pid.exec = ""
-
-  for line in lines(procfs & "/status"):
-    if line.startsWith("Name:"):
-      map_pid.name = line.split()[^1]
-    elif line.startsWith("Pid:"):
-      map_pid.pid = parseUInt(line.split()[^1])
-    elif line.startsWith("Tgid"):
-      map_pid.tgid = parseUInt(line.split()[^1])
-    elif line.startsWith("PPid:"):
-      map_pid.ppid = parseUInt(line.split()[^1])
-      return map_pid
+    for line in lines(procfs & "/status"):
+      if line.startsWith("Name:"):
+        pid_stat.name = line.split()[^1]
+      elif line.startsWith("Pid:"):
+        pid_stat.pid = parseUInt(line.split()[^1])
+      elif line.startsWith("Tgid"):
+        pid_stat.tgid = parseUInt(line.split()[^1])
+      elif line.startsWith("PPid:"):
+        pid_stat.ppid = parseUInt(line.split()[^1])
+        return true
+  except IOError:
+    pid_stat.pid = parseUInt(splitPath(procfs).tail)
+    return false
 
 
 proc check_hidden(procfs: string): bool =
-  var pid_stat: PidStat
-  try:
-    pid_stat = attach_process(procfs)
-  except IOError:
-    pid_stat.pid = parseUInt(splitPath(procfs).tail)
+  var
+    pid_stat: PidStat
+
+  if not attach_process(procfs, pid_stat):
     show_process_status(pid_stat, "Hidden process: Prevent attaching status")
     return true
 
