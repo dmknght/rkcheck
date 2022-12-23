@@ -742,3 +742,16 @@ rule LDPre_Imp {
       )
     )
 }
+
+
+rule NsSploit_Gen1 {
+  meta:
+    url = "https://www.hybrid-analysis.com/sample/6ffbe23565bbd34805d3dc4364110bb9d6d733107f8f02d0cfd38859ab013cf8"
+  strings:
+    $ = "ofs-lib.so" fullword ascii
+    $ = "/tmp/ns_sploit" fullword ascii
+    $ = "cve_2015_1328_binary.c" fullword ascii
+    $ = "e10adc3949ba59abbe56e057f20f883e" fullword ascii
+  condition:
+    elf_exec and 2 of them
+}
