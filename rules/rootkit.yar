@@ -755,3 +755,24 @@ rule NsSploit_Gen1 {
   condition:
     elf_exec and 2 of them
 }
+
+
+rule Statiyicrhge_Gen1 {
+  meta:
+    url = "https://www.hybrid-analysis.com/sample/017a9d7290cf327444d23227518ab612111ca148da7225e64a9f6ebd253449ab"
+  strings:
+    $ = "statiyicrhge" fullword ascii
+    $ = "gsdj500vt" fullword ascii
+    $ = "whoamiqumxyv" fullword ascii
+    $ = "lscpuwbbzeix" fullword ascii
+    $ = "wallpsogjwf" fullword ascii
+    $ = "lscpuwbbzeix" fullword ascii
+    $ = "Unhiding self" fullword ascii
+    $ = "BMCUJDPLBTQWRIED" fullword ascii
+    $ = "path now hidden" fullword ascii
+    $ = "ICMP backdoor" fullword ascii
+    $ = "Accept backdoor port" fullword ascii
+    $ = "sshd: xcfhxar" fullword ascii
+  condition:
+    5 of them
+}
