@@ -61,8 +61,8 @@ proc check_hidden(procfs: string): bool =
   try:
     pid_stat = attach_process(procfs)
   except IOError:
-    show_process_status(pid_stat, "Hidden process: Prevent attaching status")
     pid_stat.pid = parseUInt(splitPath(procfs).tail)
+    show_process_status(pid_stat, "Hidden process: Prevent attaching status")
     return true
 
   if pid_stat.exec.endsWith("(deleted)"):
