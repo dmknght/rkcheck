@@ -11,9 +11,9 @@ const
 
 type
   PidStat = object
-    pid: int
-    tgid: int
-    ppid: int
+    pid: uint
+    tgid: uint
+    ppid: uint
     name: string
     exec: string
 
@@ -48,11 +48,11 @@ proc attach_process(procfs: string): PidStat =
     if line.startsWith("Name:"):
       map_pid.name = line.split()[^1]
     elif line.startsWith("Pid:"):
-      map_pid.pid = parseInt(line.split()[^1])
+      map_pid.pid = parseUInt(line.split()[^1])
     elif line.startsWith("Tgid"):
-      map_pid.tgid = parseInt(line.split()[^1])
+      map_pid.tgid = parseUInt(line.split()[^1])
     elif line.startsWith("PPid:"):
-      map_pid.ppid = parseInt(line.split()[^1])
+      map_pid.ppid = parseUInt(line.split()[^1])
       return map_pid
 
 
@@ -62,6 +62,7 @@ proc check_hidden(procfs: string): bool =
     pid_stat = attach_process(procfs)
   except IOError:
     show_process_status(pid_stat, "Hidden process: Prevent attaching status")
+    pid_stat.pid = parseUInt(splitPath(procfs).tail)
     return true
 
   if pid_stat.exec.endsWith("(deleted)"):
