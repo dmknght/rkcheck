@@ -776,3 +776,18 @@ rule Statiyicrhge_Gen1 {
   condition:
     5 of them
 }
+
+
+rule VnQE6mk_Gen1 {
+  meta:
+    url = "https://www.hybrid-analysis.com/sample/f1612924814ac73339f777b48b0de28b716d606e142d4d3f4308ec648e3f56c8"
+  strings:
+    $ = "libntpVnQE6mk" fullword ascii
+    $ = "chown -R 920366:920366" fullword ascii
+    $ = "exec ~/bin/python ~/bin/escalator" base64
+    $ = "os.setreuid(0,0)" base64
+    $ = "os.execv(\"/bin/bash\", (\"/bin/bash\", \"-i\"))" base64
+    $ = "lib0UZ0LfvWZ.so" fullword ascii
+  condition:
+    3 of them
+}
