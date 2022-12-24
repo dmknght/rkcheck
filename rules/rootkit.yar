@@ -717,7 +717,7 @@ rule LDPre_Imp {
     description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
   condition:
     elf_dyn and (
-      for 12 i in (0 .. elf.dynsym_entries):
+      for 10 i in (0 .. elf.dynsym_entries):
       (
         /*
           Some other hooks:
@@ -735,7 +735,9 @@ rule LDPre_Imp {
           elf.dynsym[i].name == "__lxstat64" or
           elf.dynsym[i].name == "open" or
           elf.dynsym[i].name == "opendir" or
+          elf.dynsym[i].name == "opendir64" or
           elf.dynsym[i].name == "readdir" or
+          elf.dynsym[i].name == "readdir64" or
           elf.dynsym[i].name == "unlink" or
           elf.dynsym[i].name == "unlinkat"
         )
