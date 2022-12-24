@@ -15,6 +15,7 @@ type
     is_clam_debug*: bool
     use_clam_db*: bool
     match_all*: bool
+    scan_preload*: bool
     db_path_clamav*: string
     db_path_yara*: string
   PidInfo* = object

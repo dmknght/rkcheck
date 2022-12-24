@@ -110,7 +110,7 @@ proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_
     result_infected = proc_scanner.proc_infected
 
 
-proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files: proc (engine: var YrEngine, options: ScanOptions, f_count: var uint, f_infect: var uint), scan_preload = false) =
+proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files: proc (engine: var YrEngine, options: ScanOptions, f_count: var uint, f_infect: var uint)) =
   const
     ld_preload_path = "/etc/ld.so.preload"
   var
@@ -123,7 +123,7 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
   if yara_engine.init_yara() != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init Yara Engine")
 
-  if scan_preload and fileExists(ld_preload_path):
+  if options.scan_preload and fileExists(ld_preload_path):
     for line in lines(ld_preload_path):
       if fileExists(line):
         options.list_files.add(line)
