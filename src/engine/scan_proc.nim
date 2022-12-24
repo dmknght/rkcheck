@@ -88,6 +88,9 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
     discard yr_process_close_iterator(mem_blocks.addr)
+  else:
+    # Failed to Iterate memory blocks. Let Yara handles it?
+    discard yr_rules_scan_proc(ctx.engine, cint(ctx.pinfo.pid), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
 
 proc pscanner_heur_proc(pid_stat: var PidInfo) =
