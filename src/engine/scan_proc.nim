@@ -136,6 +136,9 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
   else:
     pscanner_heur_proc(ctx.pinfo)
 
+  if not dirExists(procfs_path):
+    return
+
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.binary_path)
   discard pscanner_cb_scan_proc(ctx)
   ctx.sumary_scanned += 1
