@@ -43,15 +43,17 @@ type
       proc_path: Full path of pid in procfs
       proc_binary: Executable file that started process
   ]#
+  PidInfo* = object
+    pid*: uint
+    tgid*: uint
+    ppid*: uint
+    procfs*: string
+    name*: string
+    cmdline*: string
+    binary_path*: string
+    v_binary_path*: string
   ProcScanner* = object of YrEngine
-    proc_id*: uint
-    proc_tgid*: uint
-    proc_ppid*: uint
-    proc_pathfs*: string
-    proc_name*: string
-    proc_cmdline*: string
-    proc_binary_path*: string
-    virtual_binary_path*: string
+    pinfo*: PidInfo
     scan_virname*: string
     sumary_scanned*: uint
     sumary_infected*: uint
