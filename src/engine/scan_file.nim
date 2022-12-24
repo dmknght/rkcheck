@@ -16,9 +16,9 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
 
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
-    return file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
+    return file_scanner_on_matched(ctx.scan_result, ctx.yr_scanner.scan_virname, $rule.ns.name, $rule.identifier)
   else:
-    return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
+    return file_scanner_on_clean(ctx.scan_result, ctx.yr_scanner.scan_virname)
 
 
 proc fscanner_cb_msg_dummy*(severity: cl_msg, fullmsg: cstring, msg: cstring, context: pointer) {.cdecl.} =
@@ -32,7 +32,7 @@ proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   let
     ctx = cast[ptr FileScanner](context)
 
-  file_scanner_on_malware_found(virname, ctx.scan_virname, ctx.scan_object, ctx.yr_scanner.file_infected)
+  file_scanner_on_malware_found(virname, ctx.yr_scanner.scan_virname, ctx.scan_object, ctx.yr_scanner.file_infected)
 
 
 proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -44,7 +44,7 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
   ctx.yr_scanner.file_scanned += 1
 
   if scan_result == CL_VIRUS:
-    ctx.scan_virname = virname
+    ctx.yr_scanner.scan_virname = virname
     #[
       This is the post-scan step (after scan file)
       So if file is marked as virus, we should return CLEAN

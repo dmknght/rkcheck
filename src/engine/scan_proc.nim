@@ -12,9 +12,9 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     rule = cast[ptr YR_RULE](message_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
-    ctx.scan_virname = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
+    ctx.scan_virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
-    print_process_infected(ctx.pinfo.pid, ctx.scan_virname, ctx.pinfo.binary_path, ctx.pinfo.v_binary_path, ctx.pinfo.name)
+    print_process_infected(ctx.pinfo.pid, $ctx.scan_virname, ctx.pinfo.binary_path, ctx.pinfo.v_binary_path, ctx.pinfo.name)
     return CALLBACK_ABORT
   else:
     ctx.scan_virname = ""
@@ -75,7 +75,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
       pscanner_get_mapped_bin(ctx.pinfo, base_offset, base_size)
       discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
       # Stop scan if virus matches
-      if not ctx.match_all_rules and not isEmptyOrWhitespace(ctx.scan_virname):
+      if not ctx.match_all_rules and not isEmptyOrWhitespace($ctx.scan_virname):
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
     discard yr_process_close_iterator(mem_blocks.addr)

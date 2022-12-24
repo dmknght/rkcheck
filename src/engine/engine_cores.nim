@@ -40,20 +40,18 @@ type
     file_infected*: uint
     proc_scanned*: uint
     proc_infected*: uint
+    scan_virname*: cstring
 
   ProcScanner* = object of YrEngine
     pinfo*: PidInfo
-    scan_virname*: string
   FileScanner* = object of ClEngine
     yr_scanner*: YrEngine
     scan_object*: string
     scan_result*: cl_error_t
-    scan_virname*: cstring
     use_clam_sigs*: bool
   YrFileScanner* = object of YrEngine
     scan_object*: string
     scan_result*: cl_error_t
-    scan_virname*: cstring
 
 const
   YR_SCAN_TIMEOUT*: cint = 1000000
