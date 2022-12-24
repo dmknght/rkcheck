@@ -7,12 +7,6 @@ import .. / compiler / compiler_utils
 
 
 type
-  #[
-    engine: Pointer of ClamAV cl_engine struct
-    options: Struct of ClamAV Scanner's options
-    database: Path to ClamAV signatures
-    debug_mode: Enable debug in libclam
-  ]#
   ScanOptions* = object
     list_dirs*: seq[string]
     list_files*: seq[string]
@@ -29,20 +23,10 @@ type
     options*: cl_scan_options
     database*: string
     debug_mode*: bool
-  #[
-    engine: Pointer to YR_RULES
-    database: path to yara compiled signatures
-  ]#
   YrEngine* = object of RootObj
     engine*: ptr YR_RULES
     database*: string
     match_all_rules*: bool
-  #[
-    The ProcScanner (Process Scanner) will use only Yara's Engine
-      proc_id: The ID number of process (pid)
-      proc_path: Full path of pid in procfs
-      proc_binary: Executable file that started process
-  ]#
   PidInfo* = object
     pid*: uint
     tgid*: uint
@@ -57,15 +41,6 @@ type
     scan_virname*: string
     sumary_scanned*: uint
     sumary_infected*: uint
-    # do_scan_stacks*: bool
-  #[
-    yr_scanner: YR_RULES
-    scan_object: current path / name of object that engine is scanning
-    scan_result: Result (Infected?) of current object
-    scan_virname: Empty if not infected, else signature name
-    result_scanned: Total objects were scanned
-    result_infected: Total objects matched
-  ]#
   FileScanner* = object of ClEngine
     yr_scanner*: YrEngine
     scan_object*: string
