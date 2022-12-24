@@ -21,17 +21,18 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     return CALLBACK_CONTINUE
 
 
-# proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
-#   let
-#     ctx = cast[ptr ProcScanner](user_data)
-#     rule = cast[ptr YR_RULE](message_data)
+proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+  let
+    ctx = cast[ptr ProcScanner](user_data)
+    rule = cast[ptr YR_RULE](message_data)
 
-#   if message == CALLBACK_MSG_RULE_MATCHING:
-#     rule.ns.name = cstring("SusCmdline")
-#     return pscanner_on_process_match(ctx, rule)
-#   else:
-#     ctx.scan_virname = ""
-#     return CALLBACK_CONTINUE
+  if message == CALLBACK_MSG_RULE_MATCHING:
+    rule.ns.name = cstring("SusCmdline")
+    print_process_infected(ctx.pinfo.pid, $ctx.scan_virname, ctx.pinfo.binary_path, ctx.scan_object & "/exe", ctx.pinfo.name)
+    return CALLBACK_ABORT
+  else:
+    ctx.scan_virname = ""
+    return CALLBACK_CONTINUE
 
 
 proc pscanner_get_mapped_mem(base_offset, base_size: uint64, proc_id: uint): string =
@@ -61,6 +62,14 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
     Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
     Then call yr_rules_scan_mem to scan each memory block
   ]#
+  # Scan cmdline so we can detect reverse shell or malicious exec
+  if ctx.pinfo.cmdline != "":
+    discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
+
+  # Malware found by scan cmdline
+  if not isEmptyOrWhitespace($ctx.scan_virname):
+    return 0
+
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
@@ -79,13 +88,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
     discard yr_process_close_iterator(mem_blocks.addr)
-
-  # Scan cmdline so we can detect reverse shell
-  # if ctx.scan_virname == "" and ctx.proc_cmdline != "":
-  #   discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.proc_cmdline[0].unsafeAddr), uint(len(ctx.proc_cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
-
-  # TODO: scan process's stacks and execfile. Maybe need different ruleset?
-  # https://sandflysecurity.com/blog/bpfdoor-an-evasive-linux-backdoor-technical-analysis/
 
 
 proc pscanner_heur_proc(pid_stat: var PidInfo) =
@@ -128,6 +130,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
 
   ctx.scan_virname = ""
   ctx.pinfo.pid = pid
+  ctx.scan_object = procfs_path
 
   #[
     If the process is hidden by LKM / eBPF rootkits, dir stat can be hijacked
