@@ -774,7 +774,7 @@ rule Statiyicrhge_Gen1 {
     $ = "Accept backdoor port" fullword ascii
     $ = "sshd: xcfhxar" fullword ascii
   condition:
-    5 of them
+    elf_dyn and 5 of them
 }
 
 
