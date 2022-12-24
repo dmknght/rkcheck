@@ -129,6 +129,9 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
   ctx.scan_virname = ""
   ctx.pinfo.pid = pid
 
+  if not dirExists(procfs_path):
+    return
+
   if not pscanner_attach_process(procfs_path, ctx.pinfo):
     # TODO print more info?
     # TODO what if process failed to map?
