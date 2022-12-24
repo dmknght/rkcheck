@@ -759,3 +759,15 @@ rule VnQE6mk_Gen1 {
   condition:
     elf_exec and 3 of them
 }
+
+
+rule LDPreload_bc62 {
+  meta:
+    url = "https://www.hybrid-analysis.com/sample/bc62adb9d444542a2206c4fc88f54f032228c480cd35d0be624923e168987a1c/5f5ac948b7b024659c4d9ca8"
+  strings:
+    $ = "LD_PRELOH" fullword ascii
+    $ = "lib0pus.so" fullword ascii
+    $ = "is_file_hidden" fullword ascii
+  condition:
+    elf_dyn and 2 of them
+}
