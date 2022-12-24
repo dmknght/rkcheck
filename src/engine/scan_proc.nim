@@ -129,7 +129,13 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
   ctx.scan_virname = ""
   ctx.pinfo.pid = pid
 
-  if not dirExists(procfs_path):
+  #[
+    If the process is hidden by LKM / eBPF rootkits, dir stat can be hijacked
+    Check status file exists is a temp way to do "double check"
+    TODO find a better way to handle this, otherwise scanner can't scan hidden
+    proccesses
+  ]#
+  if not dirExists(procfs_path) and not fileExists(procfs_path & "/status"):
     return
 
   if not pscanner_attach_process(procfs_path, ctx.pinfo):
