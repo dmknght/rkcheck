@@ -73,7 +73,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
         base_size = mem_block[].size
 
       pscanner_get_mapped_bin(ctx.pinfo, base_offset, base_size)
-      discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx.pinfo), YR_SCAN_TIMEOUT)
+      discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
       # Stop scan if virus matches
       if not ctx.match_all_rules and not isEmptyOrWhitespace(ctx.scan_virname):
         break
