@@ -58,10 +58,6 @@ proc pscanner_get_mapped_bin(pinfo: var PidInfo, base_offset, base_size: uint64)
 
 
 proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
-  #[
-    Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
-    Then call yr_rules_scan_mem to scan each memory block
-  ]#
   # Scan cmdline so we can detect reverse shell or malicious exec
   if not isEmptyOrWhitespace(ctx.pinfo.cmdline):
     discard yr_rules_scan_mem(ctx.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
@@ -70,6 +66,10 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   if not isEmptyOrWhitespace($ctx.scan_virname):
     return 0
 
+  #[
+    Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
+    Then call yr_rules_scan_mem to scan each memory block
+  ]#
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
