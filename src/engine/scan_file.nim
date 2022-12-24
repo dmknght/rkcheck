@@ -32,7 +32,7 @@ proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   let
     ctx = cast[ptr FileScanner](context)
 
-  file_scanner_on_malware_found(virname, ctx.yr_scanner.scan_virname, ctx.scan_object, ctx.yr_scanner.file_infected)
+  file_scanner_on_malware_found(virname, ctx.yr_scanner.scan_virname, ctx.yr_scanner.scan_object, ctx.yr_scanner.file_infected)
 
 
 proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -40,7 +40,7 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
   let
     ctx = cast[ptr FileScanner](context)
 
-  progress_bar_scan_file(ctx.scan_object)
+  progress_bar_scan_file(ctx.yr_scanner.scan_object)
   ctx.yr_scanner.file_scanned += 1
 
   if scan_result == CL_VIRUS:

@@ -21,7 +21,6 @@ type
     pid*: uint
     tgid*: uint
     ppid*: uint
-    procfs*: string
     name*: string
     cmdline*: string
     binary_path*: string
@@ -36,6 +35,7 @@ type
     engine*: ptr YR_RULES
     database*: string
     match_all_rules*: bool
+    scan_object*: string
     file_scanned*: uint
     file_infected*: uint
     proc_scanned*: uint
@@ -46,11 +46,9 @@ type
     pinfo*: PidInfo
   FileScanner* = object of ClEngine
     yr_scanner*: YrEngine
-    scan_object*: string
     scan_result*: cl_error_t
     use_clam_sigs*: bool
   YrFileScanner* = object of YrEngine
-    scan_object*: string
     scan_result*: cl_error_t
 
 const

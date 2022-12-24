@@ -46,12 +46,12 @@ proc scanners_cl_scan_files(yara_engine: YrEngine, options: ScanOptions, result_
     if len(options.list_dirs) != 0:
       for dir_path in options.list_dirs:
         for path in walkDirRec(dir_path):
-          file_scanner.scan_object = path
+          file_scanner.yr_scanner.scan_object = path
           discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
 
     if len(options.list_files) != 0:
       for path in options.list_files:
-        file_scanner.scan_object = path
+        file_scanner.yr_scanner.scan_object = path
         discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
   except KeyboardInterrupt:
     return
