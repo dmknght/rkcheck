@@ -119,7 +119,6 @@ proc pscanner_attach_process(procfs: string, pid_stat: var PidInfo): bool =
         pid_stat.ppid = parseUInt(line.split()[^1])
         return true
   except IOError:
-    pid_stat.pid = parseUInt(splitPath(procfs).tail)
     return false
 
 
@@ -128,6 +127,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
     procfs_path = "/proc/" & $pid & "/"
 
   ctx.scan_virname = ""
+  ctx.pinfo.pid = pid
 
   if not pscanner_attach_process(procfs_path, ctx.pinfo):
     # TODO print more info?
