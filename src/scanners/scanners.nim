@@ -100,7 +100,7 @@ proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_
 
   try:
     if options.scan_all_procs:
-      pscanner_scan_system_procs(proc_scanner)
+      pscanner_scan_procs(proc_scanner)
     else:
       pscanner_scan_procs(proc_scanner, options.list_procs)
   except KeyboardInterrupt:

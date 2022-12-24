@@ -141,12 +141,11 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
   ctx.proc_scanned += 1
 
 
-# TODO rewrite these 2 functions to 1 that use the same code structure
 proc pscanner_scan_procs*(ctx: var ProcScanner, list_procs: seq[uint]) =
   for pid in list_procs:
     pscanner_process_pid(ctx, pid)
 
 
-proc pscanner_scan_system_procs*(ctx: var ProcScanner) =
-  for i in countup(1, SCANNER_MAX_PROC_COUNT):
+proc pscanner_scan_procs*(ctx: var ProcScanner) =
+  for i in (1 .. SCANNER_MAX_PROC_COUNT):
     pscanner_process_pid(ctx, uint(i))
