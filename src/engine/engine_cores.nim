@@ -36,6 +36,7 @@ type
     database*: string
     match_all_rules*: bool
     scan_object*: string
+    scan_result*: cl_error_t
     file_scanned*: uint
     file_infected*: uint
     proc_scanned*: uint
@@ -46,10 +47,7 @@ type
     pinfo*: PidInfo
   FileScanner* = object of ClEngine
     yr_scanner*: YrEngine
-    scan_result*: cl_error_t
     use_clam_sigs*: bool
-  YrFileScanner* = object of YrEngine
-    scan_result*: cl_error_t
 
 const
   YR_SCAN_TIMEOUT*: cint = 1000000

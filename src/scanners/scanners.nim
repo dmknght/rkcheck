@@ -34,7 +34,7 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
 
-proc scanners_cl_scan_files(yara_engine: YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+proc scanners_cl_scan_files*(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
   var
     file_scanner: FileScanner
     scanned: culong
@@ -61,7 +61,7 @@ proc scanners_cl_scan_files(yara_engine: YrEngine, options: ScanOptions, result_
     finit_clamav(file_scanner)
 
 
-proc scanners_yr_scan_files(yara_engine: var YrFileScanner, options: ScanOptions, result_count, result_infect: var uint) =
+proc scanners_yr_scan_files*(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
   try:
     if len(options.list_dirs) != 0:
       for dir_path in options.list_dirs:
@@ -109,7 +109,9 @@ proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_
     result_infected = proc_scanner.proc_infected
 
 
-proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
+proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files: proc (engine: var YrEngine, options: ScanOptions, f_count: var uint, f_infect: var uint), f_count, f_infect, p_count, p_infect: var uint, scan_preload = false) =
+  const
+    ld_preload_path = "/etc/ld.so.preload"
   var
     yara_engine: YrEngine
 
@@ -119,28 +121,7 @@ proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count
   if yara_engine.init_yara() != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init Yara Engine")
 
-  if len(options.list_files) != 0 or len(options.list_dirs) != 0:
-    scanners_cl_scan_files(yara_engine, options, f_count, f_infect)
-
-  if len(options.list_procs) != 0 or options.scan_all_procs:
-    scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
-
-  finit_yara(yara_engine)
-
-
-proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
-  var
-    yara_engine: YrFileScanner
-  const
-    ld_preload_path = "/etc/ld.so.preload"
-
-  yara_engine.database = options.db_path_yara
-  setControlCHook(handle_keyboard_interrupt)
-
-  if yara_engine.init_yara() != ERROR_SUCCESS:
-    raise newException(ValueError, "Failed to init Yara Engine")
-
-  if fileExists(ld_preload_path):
+  if scan_preload and fileExists(ld_preload_path):
     for line in lines(ld_preload_path):
       if fileExists(line):
         options.list_files.add(line)
@@ -148,7 +129,7 @@ proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, 
   options.list_files = deduplicate(options.list_files)
 
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
-    scanners_yr_scan_files(yara_engine, options, f_count, f_infect)
+    scanner_cb_scan_files(yara_engine, options, f_count, f_infect)
 
   if len(options.list_procs) != 0 or options.scan_all_procs:
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)

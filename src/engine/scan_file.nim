@@ -16,9 +16,9 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
 
   # If target matches a rule
   if message == CALLBACK_MSG_RULE_MATCHING:
-    return file_scanner_on_matched(ctx.scan_result, ctx.yr_scanner.scan_virname, $rule.ns.name, $rule.identifier)
+    return file_scanner_on_matched(ctx.yr_scanner.scan_result, ctx.yr_scanner.scan_virname, $rule.ns.name, $rule.identifier)
   else:
-    return file_scanner_on_clean(ctx.scan_result, ctx.yr_scanner.scan_virname)
+    return file_scanner_on_clean(ctx.yr_scanner.scan_result, ctx.yr_scanner.scan_virname)
 
 
 proc fscanner_cb_msg_dummy*(severity: cl_msg, fullmsg: cstring, msg: cstring, context: pointer) {.cdecl.} =
@@ -53,12 +53,12 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
     return CL_CLEAN
   else:
     discard yr_rules_scan_fd(ctx.yr_scanner.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
-    return ctx.scan_result
+    return ctx.yr_scanner.scan_result
 
 
 proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
   var
-    ctx = cast[ptr YrFileScanner](user_data)
+    ctx = cast[ptr YrEngine](user_data)
     rule = cast[ptr YR_RULE](message_data)
     vir_name: cstring
 
@@ -70,7 +70,7 @@ proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, messa
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
 
 
-proc fscanner_yr_scan_file*(context: var YrFileScanner) =
+proc fscanner_yr_scan_file*(context: var YrEngine) =
   progress_bar_scan_file(context.scan_object)
   discard yr_rules_scan_file(context.engine, cstring(context.scan_object), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
   context.file_scanned += 1
