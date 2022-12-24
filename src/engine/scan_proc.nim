@@ -13,7 +13,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
 
   if message == CALLBACK_MSG_RULE_MATCHING:
     ctx.scan_virname = $rule.ns.name & ":" & replace($rule.identifier, "_", ".")
-    ctx.sumary_infected += 1
+    ctx.proc_infected += 1
     print_process_infected(ctx.pinfo.pid, ctx.scan_virname, ctx.pinfo.binary_path, ctx.pinfo.v_binary_path, ctx.pinfo.name)
     return CALLBACK_ABORT
   else:
@@ -138,9 +138,10 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
 
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.binary_path)
   discard pscanner_cb_scan_proc(ctx)
-  ctx.sumary_scanned += 1
+  ctx.proc_scanned += 1
 
 
+# TODO rewrite these 2 functions to 1 that use the same code structure
 proc pscanner_scan_procs*(ctx: var ProcScanner, list_procs: seq[uint]) =
   for pid in list_procs:
     pscanner_process_pid(ctx, pid)

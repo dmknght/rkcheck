@@ -32,7 +32,7 @@ proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   let
     ctx = cast[ptr FileScanner](context)
 
-  file_scanner_on_malware_found(virname, ctx.scan_virname, ctx.scan_object, ctx.result_infected)
+  file_scanner_on_malware_found(virname, ctx.scan_virname, ctx.scan_object, ctx.yr_scanner.file_infected)
 
 
 proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
@@ -41,7 +41,7 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
     ctx = cast[ptr FileScanner](context)
 
   progress_bar_scan_file(ctx.scan_object)
-  ctx.result_scanned += 1
+  ctx.yr_scanner.file_scanned += 1
 
   if scan_result == CL_VIRUS:
     ctx.scan_virname = virname
@@ -64,7 +64,7 @@ proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, messa
 
   if message == CALLBACK_MSG_RULE_MATCHING:
     discard file_scanner_on_matched(ctx.scan_result, ctx.scan_virname, $rule.ns.name, $rule.identifier)
-    file_scanner_on_malware_found(vir_name, ctx.scan_virname, ctx.scan_object, ctx.result_infected)
+    file_scanner_on_malware_found(vir_name, ctx.scan_virname, ctx.scan_object, ctx.file_infected)
     return CALLBACK_ABORT # TODO maybe do multiple rules matching?
   else:
     return file_scanner_on_clean(ctx.scan_result, ctx.scan_virname)
@@ -73,5 +73,5 @@ proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, messa
 proc fscanner_yr_scan_file*(context: var YrFileScanner) =
   progress_bar_scan_file(context.scan_object)
   discard yr_rules_scan_file(context.engine, cstring(context.scan_object), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
-  context.result_scanned += 1
+  context.file_scanned += 1
   progress_bar_flush()

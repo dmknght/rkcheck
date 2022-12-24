@@ -17,6 +17,15 @@ type
     match_all*: bool
     db_path_clamav*: string
     db_path_yara*: string
+  PidInfo* = object
+    pid*: uint
+    tgid*: uint
+    ppid*: uint
+    procfs*: string
+    name*: string
+    cmdline*: string
+    binary_path*: string
+    v_binary_path*: string
 
   ClEngine* = object of RootObj
     engine*: ptr cl_engine
@@ -27,35 +36,24 @@ type
     engine*: ptr YR_RULES
     database*: string
     match_all_rules*: bool
-  PidInfo* = object
-    pid*: uint
-    tgid*: uint
-    ppid*: uint
-    procfs*: string
-    name*: string
-    cmdline*: string
-    binary_path*: string
-    v_binary_path*: string
+    file_scanned*: uint
+    file_infected*: uint
+    proc_scanned*: uint
+    proc_infected*: uint
+
   ProcScanner* = object of YrEngine
     pinfo*: PidInfo
     scan_virname*: string
-    sumary_scanned*: uint
-    sumary_infected*: uint
   FileScanner* = object of ClEngine
     yr_scanner*: YrEngine
     scan_object*: string
     scan_result*: cl_error_t
     scan_virname*: cstring
-    result_scanned*: uint
-    result_infected*: uint
     use_clam_sigs*: bool
   YrFileScanner* = object of YrEngine
     scan_object*: string
     scan_result*: cl_error_t
     scan_virname*: cstring
-    result_scanned*: uint
-    result_infected*: uint
-
 
 const
   YR_SCAN_TIMEOUT*: cint = 1000000

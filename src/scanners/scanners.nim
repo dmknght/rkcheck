@@ -13,8 +13,8 @@ proc handle_keyboard_interrupt() {.noconv.} =
 
 proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine, options: ScanOptions) =
   scanner.yr_scanner = yara_engine
-  scanner.result_infected = 0
-  scanner.result_scanned = 0
+  scanner.yr_scanner.file_infected = 0
+  scanner.yr_scanner.file_scanned = 0
   scanner.debug_mode = options.is_clam_debug
   scanner.database = options.db_path_clamav
   scanner.use_clam_sigs = options.use_clam_db
@@ -56,8 +56,8 @@ proc scanners_cl_scan_files(yara_engine: YrEngine, options: ScanOptions, result_
   except KeyboardInterrupt:
     return
   finally:
-    result_count = file_scanner.result_scanned
-    result_infect = file_scanner.result_infected
+    result_count = file_scanner.yr_scanner.file_scanned
+    result_infect = file_scanner.yr_scanner.file_infected
     finit_clamav(file_scanner)
 
 
@@ -76,8 +76,8 @@ proc scanners_yr_scan_files(yara_engine: var YrFileScanner, options: ScanOptions
   except KeyboardInterrupt:
     return
   finally:
-    result_count = yara_engine.result_scanned
-    result_infect = yara_engine.result_infected
+    result_count = yara_engine.file_scanned
+    result_infect = yara_engine.file_infected
 
 
 proc scanners_set_proc_scan_values(scanner: var ProcScanner, options: ScanOptions, engine: ptr YR_RULES) =
@@ -86,8 +86,8 @@ proc scanners_set_proc_scan_values(scanner: var ProcScanner, options: ScanOption
   else:
     scanner.match_all_rules = false
 
-  scanner.sumary_scanned = 0
-  scanner.sumary_infected = 0
+  scanner.proc_scanned = 0
+  scanner.proc_infected = 0
   scanner.engine = engine
 
 
@@ -105,8 +105,8 @@ proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_
   except KeyboardInterrupt:
     return
   finally:
-    result_count = proc_scanner.sumary_scanned
-    result_infected = proc_scanner.sumary_infected
+    result_count = proc_scanner.proc_scanned
+    result_infected = proc_scanner.proc_infected
 
 
 proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
