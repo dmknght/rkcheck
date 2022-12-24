@@ -34,7 +34,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
 #     return CALLBACK_CONTINUE
 
 
-proc pscanner_get_mapped_bin(base_offset, base_size: uint64, proc_id: uint): string =
+proc pscanner_get_mapped_mem(base_offset, base_size: uint64, proc_id: uint): string =
   var
     offset_start = toHex(base_offset).toLowerAscii()
     offset_end = toHex(base_offset + base_size).toLowerAscii()
@@ -42,6 +42,18 @@ proc pscanner_get_mapped_bin(base_offset, base_size: uint64, proc_id: uint): str
   offset_start.removePrefix('0')
   offset_end.removePrefix('0')
   return "/proc/" & $proc_id & "/map_files/" & offset_start & "-" & offset_end
+
+
+proc pscanner_get_mapped_bin(pinfo: var PidInfo, base_offset, base_size: uint64) =
+  # Calculate mapped binary
+  let
+    mapped_binary = pscanner_get_mapped_mem(base_offset, base_size, pinfo.pid)
+
+  try:
+    pinfo.v_binary_path = expandSymlink(mapped_binary)
+  except:
+    # Failed to map. File not found or requires permission
+    pinfo.v_binary_path = pinfo.binary_path
 
 
 proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
@@ -56,17 +68,11 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
-      # Calculate mapped binary
       let
         base_offset = mem_block[].base
         base_size = mem_block[].size
-        mapped_binary = pscanner_get_mapped_bin(base_offset, base_size, ctx.pinfo.pid)
 
-      try:
-        ctx.pinfo.v_binary_path = expandSymlink(mapped_binary)
-      except:
-        # Failed to map. File not found or requires permission
-        ctx.pinfo.v_binary_path = ctx.pinfo.binary_path
+      pscanner_get_mapped_bin(ctx.pinfo, base_offset, base_size)
       discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx.pinfo), YR_SCAN_TIMEOUT)
       # Stop scan if virus matches
       if not ctx.match_all_rules and not isEmptyOrWhitespace(ctx.scan_virname):
