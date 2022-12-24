@@ -145,9 +145,7 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
     return
 
   if not pscanner_attach_process(procfs_path, ctx.pinfo):
-    # TODO print more info?
-    # TODO what if process failed to map?
-    print_process_hidden(ctx.pinfo.pid, "Heur:ProcCloak.StatusDenied")
+    print_process_infected(ctx.pinfo.pid, "Heur:ProcCloak.StatusDenied", ctx.pinfo.binary_path, ctx.scan_object & "/status", ctx.pinfo.name)
   else:
     pscanner_heur_proc(ctx.pinfo)
 

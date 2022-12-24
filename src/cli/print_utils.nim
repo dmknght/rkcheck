@@ -25,11 +25,6 @@ proc print_process_infected*(pid: uint, virname, exec_path, map_path, name: stri
   echo " Infected: \e[91m", map_path, "\e[0m"
 
 
-proc print_process_hidden*(pid: uint, name: string) =
-  progress_bar_flush()
-  echo "Heur:ProcCloak.ProcfsIv\e[0m Pid: \e[95m", pid, "\e[0m Name: ", name
-
-
 proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
   if is_yara:
     echo "Loaded ", num_loaded, " Yara rules"
