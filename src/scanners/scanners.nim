@@ -1,6 +1,7 @@
 import os
 import sequtils
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
+import .. / cli / print_utils
 
 
 type
@@ -109,11 +110,12 @@ proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_
     result_infected = proc_scanner.proc_infected
 
 
-proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files: proc (engine: var YrEngine, options: ScanOptions, f_count: var uint, f_infect: var uint), f_count, f_infect, p_count, p_infect: var uint, scan_preload = false) =
+proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files: proc (engine: var YrEngine, options: ScanOptions, f_count: var uint, f_infect: var uint), scan_preload = false) =
   const
     ld_preload_path = "/etc/ld.so.preload"
   var
     yara_engine: YrEngine
+    f_count, f_infect, p_count, p_infect: uint
 
   yara_engine.database = options.db_path_yara
   setControlCHook(handle_keyboard_interrupt)
@@ -135,3 +137,4 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
 
   finit_yara(yara_engine)
+  print_sumary(f_count, f_infect, p_count, p_infect)
