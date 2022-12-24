@@ -28,27 +28,27 @@ proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint
 
   if message == CALLBACK_MSG_RULE_MATCHING:
     rule.ns.name = cstring("SusCmdline")
-    print_process_infected(ctx.pinfo.pid, $ctx.scan_virname, ctx.pinfo.binary_path, ctx.scan_object & "/exe", ctx.pinfo.name)
+    print_process_infected(ctx.pinfo.pid, $ctx.scan_virname, ctx.pinfo.binary_path, ctx.scan_object & "exe", ctx.pinfo.name)
     return CALLBACK_ABORT
   else:
     ctx.scan_virname = ""
     return CALLBACK_CONTINUE
 
 
-proc pscanner_get_mapped_mem(base_offset, base_size: uint64, proc_id: uint): string =
+proc pscanner_get_mapped_mem(procfs: string, base_offset, base_size: uint64, proc_id: uint): string =
   var
     offset_start = toHex(base_offset).toLowerAscii()
     offset_end = toHex(base_offset + base_size).toLowerAscii()
 
   offset_start.removePrefix('0')
   offset_end.removePrefix('0')
-  return "/proc/" & $proc_id & "/map_files/" & offset_start & "-" & offset_end
+  return procfs & "map_files/" & offset_start & "-" & offset_end
 
 
-proc pscanner_get_mapped_bin(pinfo: var PidInfo, base_offset, base_size: uint64) =
+proc pscanner_get_mapped_bin(pinfo: var PidInfo, procfs: string, base_offset, base_size: uint64) =
   # Calculate mapped binary
   let
-    mapped_binary = pscanner_get_mapped_mem(base_offset, base_size, pinfo.pid)
+    mapped_binary = pscanner_get_mapped_mem(procfs, base_offset, base_size, pinfo.pid)
 
   try:
     pinfo.v_binary_path = expandSymlink(mapped_binary)
@@ -81,7 +81,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanner): cint =
         base_offset = mem_block[].base
         base_size = mem_block[].size
 
-      pscanner_get_mapped_bin(ctx.pinfo, base_offset, base_size)
+      pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
       discard yr_rules_scan_mem(ctx.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
       # Stop scan if virus matches
       if not ctx.match_all_rules and not isEmptyOrWhitespace($ctx.scan_virname):
@@ -103,17 +103,17 @@ proc pscanner_heur_proc(pid_stat: var PidInfo) =
 
 proc pscanner_attach_process(procfs: string, pid_stat: var PidInfo): bool =
   try:
-    pid_stat.binary_path = expandSymlink(procfs & "/exe")
+    pid_stat.binary_path = expandSymlink(procfs & "exe")
   except:
     pid_stat.binary_path = ""
 
   try:
-    pid_stat.cmdline = readFile(procfs & "/cmdline").replace("\x00", " ")
+    pid_stat.cmdline = readFile(procfs & "cmdline").replace("\x00", " ")
   except:
     pid_stat.cmdline = ""
 
   try:
-    for line in lines(procfs & "/status"):
+    for line in lines(procfs & "status"):
       if line.startsWith("Name:"):
         pid_stat.name = line.split()[^1]
       elif line.startsWith("Pid:"):
@@ -141,11 +141,11 @@ proc pscanner_process_pid(ctx: var ProcScanner, pid: uint) =
     TODO find a better way to handle this, otherwise scanner can't scan hidden
     proccesses
   ]#
-  if not dirExists(procfs_path) and not fileExists(procfs_path & "/status"):
+  if not dirExists(procfs_path) and not fileExists(procfs_path & "status"):
     return
 
   if not pscanner_attach_process(procfs_path, ctx.pinfo):
-    print_process_infected(ctx.pinfo.pid, "Heur:ProcCloak.StatusDenied", ctx.pinfo.binary_path, ctx.scan_object & "/status", ctx.pinfo.name)
+    print_process_infected(ctx.pinfo.pid, "Heur:ProcCloak.StatusDenied", ctx.pinfo.binary_path, ctx.scan_object & "status", ctx.pinfo.name)
   else:
     pscanner_heur_proc(ctx.pinfo)
 
