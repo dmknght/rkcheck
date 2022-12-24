@@ -789,5 +789,5 @@ rule VnQE6mk_Gen1 {
     $ = "os.execv(\"/bin/bash\", (\"/bin/bash\", \"-i\"))" base64
     $ = "lib0UZ0LfvWZ.so" fullword ascii
   condition:
-    3 of them
+    elf_exec and 3 of them
 }
