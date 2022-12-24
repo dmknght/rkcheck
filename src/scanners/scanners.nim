@@ -78,7 +78,6 @@ proc scanners_yr_scan_files(yara_engine: var YrFileScanner, options: ScanOptions
   finally:
     result_count = yara_engine.result_scanned
     result_infect = yara_engine.result_infected
-    finit_yara(yara_engine)
 
 
 proc scanners_set_proc_scan_values(scanner: var ProcScanner, options: ScanOptions, engine: ptr YR_RULES) =
@@ -108,7 +107,6 @@ proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_
   finally:
     result_count = proc_scanner.sumary_scanned
     result_infected = proc_scanner.sumary_infected
-    finit_yara(proc_scanner)
 
 
 proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
@@ -126,6 +124,8 @@ proc scanners_create_scan_task*(options: ScanOptions, f_count, f_infect, p_count
 
   if len(options.list_procs) != 0 or options.scan_all_procs:
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
+
+  finit_yara(yara_engine)
 
 
 proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, p_count, p_infect: var uint) =
@@ -152,3 +152,5 @@ proc scanners_create_scan_preload*(options: var ScanOptions, f_count, f_infect, 
 
   if len(options.list_procs) != 0 or options.scan_all_procs:
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
+
+  finit_yara(yara_engine)
