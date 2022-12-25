@@ -1,0 +1,4 @@
+build/database usr/share/rkcheck
+build/rkscanmal usr/bin/
+build/rkscanpreload usr/bin/
+build/rkhiddenproc usr/bin/
