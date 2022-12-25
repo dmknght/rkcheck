@@ -2,7 +2,7 @@ Source: rkcheck
 Section: admin
 Priority: optional
 Maintainer: Nong Hoang Tu <dmknght@parrotsec.org>
-Build-Depends: debhelper-compat (= 13), libyara-dev, libclamav-dev, nim
+Build-Depends: debhelper-compat (= 13), libyara-dev, libclamav-dev, nim, libyara9
 Standards-Version: 4.5.1
 Homepage: https://github.com/dmknght/rkcheck/
 #Vcs-Browser: https://salsa.debian.org/debian/rkcheck
@@ -14,8 +14,8 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libclamav9, libyara9
 Description: A malware scanner with ClamAV and Yara
  Combines ClamAV engine and Yara to scan malware on Linux system
- . rkscanmal: The core tool
- . rkscanpreload: A static build without ClamAV. This tool scan
+ rkscanmal: The core tool
+ rkscanpreload: A static build without ClamAV. This tool scan
  systems (could be) infected by LD_PRELOAD rootkits
- . rkhiddenproc: Show hidden processes. Similar to the tool Unhide
+ rkhiddenproc: Show hidden processes. Similar to the tool Unhide
  but with better performance..
