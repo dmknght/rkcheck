@@ -16,8 +16,8 @@ build:
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
 
 install:
-	mkdir -p /usr/share/rkscanner/
-	cp -r build/database /usr/share/rkscanner/
+	mkdir -p /usr/share/rkcheck/
+	cp -r build/database /usr/share/rkcheck/
 	cp build/rkscanmal /usr/bin/rkscanmal
 	cp build/rkscanpreload /usr/bin/rkscanpreload
 	cp build/rkhiddenproc /usr/bin/rkhiddenproc
@@ -30,7 +30,7 @@ uninstall:
 	rm /usr/bin/rkscanmal
 	rm /usr/bin/rkhiddenproc
 	rm /usr/bin/rkscanpreload
-	rm -rf /usr/share/rkscanner/
+	rm -rf /usr/share/rkcheck/
 
 clean:
 	rm -rf build/

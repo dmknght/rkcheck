@@ -21,12 +21,12 @@ proc cliopts_create_default*(options: var ScanOptions, scan_rootkit = false) =
   options.db_path_clamav = "/var/lib/clamav/"
   let
     db_path_normal = [
-      "/usr/share/rkscanner/database/signatures.ydb",
+      "/usr/share/rkcheck/database/signatures.ydb",
       "/database/signatures.ydb",
       "database/signatures.ydb"
     ]
     db_path_rootkit = [
-      "/usr/share/rkscanner/database/rootkits.ydb",
+      "/usr/share/rkcheck/database/rootkits.ydb",
       "/database/rootkits.ydb",
       "database/rootkits.ydb"
     ]
