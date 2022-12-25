@@ -1,3 +1,11 @@
+rkcheck (0.2.0-2) parrot-updates; urgency=medium
+
+  * Add installation files
+  * Fix some syntax error cause failed to build on Debian
+  * Use only the name `rkcheck` for install target
+
+ -- Nong Hoang Tu <dmknght@parrotsec.org>  Mon, 26 Dec 2022 06:50:42 +0700
+
 rkcheck (0.2.0-1) unstable; urgency=medium
 
   * Initial release
