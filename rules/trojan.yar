@@ -142,7 +142,7 @@ rule Metasploit_Stageless {
 }
 
 
-rule Metasploit_Staged
+rule Metasploit_RevTCPShellcode
 {
   meta:
     author = "Nong Hoang Tu"
