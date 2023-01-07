@@ -185,6 +185,18 @@ rule Explodor_Generic {
     elf_exec and any of them
 }
 
+rule Earthworm_Generic {
+  meta:
+    description = "Earthworm backdoor"
+  strings:
+    $ = "rootkiter" fullword ascii
+    $ = "darksn0w" fullword ascii
+    $ = "zhuanjia" fullword ascii
+    $ = "syc4mor3" fullword ascii
+    $ = "init cmd_server_for_rc here" fullword ascii
+  condition:
+    elf_exec and 3 of them
+}
 // rule EkoBackdoor_Generic {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -309,21 +321,7 @@ rule Explodor_Generic {
 //     all of them
 // }
 
-// rule Earthworm_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "13/11/2021"
-//     target = "File, memory"
-//   strings:
-//     $1 = "Earthworm"
-//     $2 = "rootkiter"
-//     $3 = "darksn0w"
-//     $4 = "zhuanjia"
-//     $5 = "syc4mor3"
-//   condition:
-//     3 of them
-// }
+
 
 // rule BashDoor_Generic {
 //   meta:
