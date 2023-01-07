@@ -233,10 +233,11 @@ rule Earthworm_Generic {
   meta:
     description = "Earthworm backdoor"
   strings:
-    $ = "rootkiter" fullword ascii
+    $ = "rootkiter" fullword ascii nocase
     $ = "darksn0w" fullword ascii
     $ = "zhuanjia" fullword ascii
     $ = "syc4mor3" fullword ascii
+    $ = " Wooyaa" fullword ascii
     $ = "init cmd_server_for_rc here" fullword ascii
   condition:
     elf_exec and 3 of them
