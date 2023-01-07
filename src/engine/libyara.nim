@@ -265,13 +265,6 @@ const
   ERROR_BLOCK_NOT_READY* = 61
   ERROR_INVALID_PERCENTAGE* = 62
   ERROR_IDENTIFIER_MATCHES_WILDCARD* = 63
-  YR_MAJOR_VERSION* = 4
-  YR_MINOR_VERSION* = 2
-  YR_MICRO_VERSION* = 3
-  YR_VERSION* = $YR_MAJOR_VERSION & "." & $YR_MINOR_VERSION & "." & $YR_MICRO_VERSION
-  YR_VERSION_HEX* = ((YR_MAJOR_VERSION shl typeof(YR_MAJOR_VERSION)(16)) or
-      typeof(YR_MAJOR_VERSION)((YR_MINOR_VERSION shl typeof(YR_MINOR_VERSION)(8))) or
-      typeof(YR_MAJOR_VERSION)((YR_MICRO_VERSION shl typeof(YR_MICRO_VERSION)(0))))
   YR_PARANOID_EXEC* = 1
   YR_CONFIG_STACK_SIZE* = (0).YR_CONFIG_NAME
   YR_CONFIG_MAX_STRINGS_PER_RULE* = (YR_CONFIG_STACK_SIZE + 1).YR_CONFIG_NAME
@@ -2673,6 +2666,8 @@ proc yr_stack_push*(stack: ptr YR_STACK; item: pointer): cint {.importc, cdecl,
     impyaraHdr.}
 proc yr_stack_pop*(stack: ptr YR_STACK; item: pointer): cint {.importc, cdecl,
     impyaraHdr.}
+
+proc yr_get_version*(): cstring {.importc, cdecl, impyaraHdr.}
 ## ```
 ##   Copyright (c) 2015. The YARA Authors. All Rights Reserved.
 ##   
