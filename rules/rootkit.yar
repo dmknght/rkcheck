@@ -3,7 +3,7 @@ import "elf"
 import "hash"
 
 
-rule Diamorphine_Gen1 {
+rule Diamorphine_Genneric {
   meta:
     description = "Detect open source Rootkit Diamorphine"
     github = "https://github.com/m0nad/Diamorphine/"
@@ -16,7 +16,7 @@ rule Diamorphine_Gen1 {
     elf_rel and all of them
 }
 
-rule Father_Gen1 {
+rule Father_Generic {
   meta:
     descriptions = "Detect .so binary file made"
     github = "https://github.com/mav8557/Father"
@@ -31,7 +31,7 @@ rule Father_Gen1 {
 }
 
 
-rule BrokePkg_Gen1 {
+rule BrokePkg_Generic {
   meta:
     description = "Kernel module file of brokepkg"
     github = "https://github.com/R3tr074/brokepkg"
@@ -217,15 +217,12 @@ rule Umbreon_Generic {
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
 		author = "Fernando Merces, FTR, Trend Micro"
 		date = "2016-08"
-
 	strings:
 		$ = { 75 6e 66 75 63 6b 5f 6c 69 6e 6b 6d 61 70 }
 		$ = "unhide.rb" fullword
 		$ = "rkit" fullword
-
 	condition:
-		elf_dyn
-		and all of them
+		elf_dyn and all of them
 }
 
 
@@ -235,16 +232,13 @@ rule Umbreon_Strace {
 		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
 		author = "Fernando Merces, FTR, Trend Micro"
 		date = "2016-08"
-
 	strings:
 		$ = "LD_PRELOAD" fullword
 		$ = /ld\.so\.[a-zA-Z0-9]{7}/ fullword
 		$ = "\"/etc/ld.so.preload\"" fullword
 		$ = "fputs_unlocked" fullword
-
 	condition:
-		elf_dyn
-		and all of them
+		elf_dyn and all of them
 }
 
 
@@ -262,8 +256,7 @@ rule Umbreon_Espeon {
 		$ = { 66 75 63 6b 20 6f 66 66 20 63 75 6e 74 }
 		$ = "error: unrecognized command-line options" fullword
 	condition:
-		elf_dyn
-		and all of them
+		elf_dyn and all of them
 }
 
 

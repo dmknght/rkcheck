@@ -3,7 +3,7 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Agent_9db6 {
+rule Shellcode_9db6 {
   meta:
     descriptions = "A shellcode executor"
     md5 = "9db6918b94456e4f7fc981b5e3cf289e"
@@ -30,7 +30,7 @@ rule SSHD_95d7 {
 }
 
 
-rule Agent_849b {
+rule Infector_849b {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -128,7 +128,7 @@ rule Kowai_f06a {
 // }
 
 
-rule Metasploit_Stageless {
+rule Meter_Stageless {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -142,8 +142,7 @@ rule Metasploit_Stageless {
 }
 
 
-rule Metasploit_RevTCPShellcode
-{
+rule Meter_RevTCP {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -529,23 +528,23 @@ rule TinyShell {
 }
 
 
-rule STEELCORGI_packed {
-  meta:
-    description = "Yara Rule for packed ELF backdoor of UNC1945"
-    author = "Yoroi Malware Zlab"
-    last_updated = "2020_12_21"
-    tlp = "white"
-    category = "informational"
-    reference = "https://yoroi.company/research/opening-steelcorgi-a-sophisticated-apt-swiss-army-knife/"
-  strings:
-    $s1 = {4? 88 47 3c c1 6c ?4 34 08 8a 54 ?? ?? 4? 88 57 3d c1 6c}
-    $s2 = {0f b6 5? ?? 0f b6 4? ?? 4? c1 e2 18 4? c1 e0 10 4? }
-    $s3 = {8a 03 84 c0 74 ?? 3c 3d 75 ?? 3c 3d 75 ?? c6 03 00 4? 8b 7d 00}
-    $s4 = {01 c6 89 44 ?? ?? 8b 44 ?? ?? 31 f2 89 74 ?? ?? c1}
-    $s5 = { 4? 89 d8 4? 31 f2 4? c1 e0 13 4? 01 d7 4? }
-  condition:
-    elf_magic and 3 of them
-}
+// rule STEELCORGI_packed {
+//   meta:
+//     description = "Yara Rule for packed ELF backdoor of UNC1945"
+//     author = "Yoroi Malware Zlab"
+//     last_updated = "2020_12_21"
+//     tlp = "white"
+//     category = "informational"
+//     reference = "https://yoroi.company/research/opening-steelcorgi-a-sophisticated-apt-swiss-army-knife/"
+//   strings:
+//     $s1 = {4? 88 47 3c c1 6c ?4 34 08 8a 54 ?? ?? 4? 88 57 3d c1 6c}
+//     $s2 = {0f b6 5? ?? 0f b6 4? ?? 4? c1 e2 18 4? c1 e0 10 4? }
+//     $s3 = {8a 03 84 c0 74 ?? 3c 3d 75 ?? 3c 3d 75 ?? c6 03 00 4? 8b 7d 00}
+//     $s4 = {01 c6 89 44 ?? ?? 8b 44 ?? ?? 31 f2 89 74 ?? ?? c1}
+//     $s5 = { 4? 89 d8 4? 31 f2 4? c1 e0 13 4? 01 d7 4? }
+//   condition:
+//     elf_magic and 3 of them
+// }
 
 
 // rule STEELCORGI_generic{
@@ -658,7 +657,7 @@ rule STEELCORGI_packed {
 // }
 
 
-rule Metasploit_Maldoc1 {
+rule Meter_OleFile {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"

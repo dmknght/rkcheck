@@ -3,7 +3,7 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_Hsh1 {
+rule Mirai_TypeA {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -17,7 +17,7 @@ rule Mirai_Hsh1 {
 }
 
 
-rule Mirai_Hsh2 {
+rule Mirai_TypeB {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -29,7 +29,7 @@ rule Mirai_Hsh2 {
     )
 }
 
-rule Mirai_Hsh3 {
+rule Mirai_TypeC {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -42,7 +42,7 @@ rule Mirai_Hsh3 {
     )
 }
 
-rule Mirai_Gen1
+rule Mirai_TypeD
 {
   meta:
     author = "Nong Hoang Tu"
@@ -58,13 +58,13 @@ rule Mirai_Gen1
 }
 
 
-rule Mirai_Gen2 {
+rule Mirai_TypeE {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
     description = "Common strings used in Mirai"
   strings:
-    // $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii # TODO this goes to heuristic
+    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii // TODO this goes to heuristic
     $ = "makeIPPacket" fullword ascii
     $ = "UDPRAW" fullword ascii
     $ = "sendRAW"

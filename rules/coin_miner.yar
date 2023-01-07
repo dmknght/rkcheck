@@ -3,43 +3,21 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Miner_GenA
+rule MineTool_Generic
 {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
   strings:
-    $1 = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" fullword ascii
-    $2 = "Block %.4u [%3u]: %016lx" fullword ascii
-  condition:
-    elf_magic and any of them
-}
-
-
-rule Miner_GenB {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Stratum protocols used in coinminer. Usually in rodata"
-  strings:
-    $1 = "stratum+ssl://" ascii
-    $2 = "stratum+tcp://" ascii
-    $3 = "daemon+https://" ascii
-    $4 = "daemon+http://" ascii
-  condition:
-    elf_magic and any of them
-}
-
-
-rule Miner_GenC {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Generic strings for coin miner"
-  strings:
+    $ = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" fullword ascii
+    $ = "Block %.4u [%3u]: %016lx" fullword ascii
     $ = "Started Mining" fullword ascii
     $ = "Miner will restart" fullword ascii
     $ = "Miner not responding" fullword ascii
+    $ = "stratum+ssl://" ascii
+    $ = "stratum+tcp://" ascii
+    $ = "daemon+https://" ascii
+    $ = "daemon+http://" ascii
   condition:
     elf_magic and any of them
 }
