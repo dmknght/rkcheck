@@ -172,6 +172,19 @@ rule Excedoor_Generic {
     elf_exec and all of them
 }
 
+rule Explodor_Generic {
+  meta:
+    description = "Generic rule for a backdoor that spawns shell and shellcode. Shared string with explodor"
+    url = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
+  strings:
+    $ = "Unable to write shellcode" fullword ascii
+    $ = "Shellcode placed at" fullword ascii
+    $ = "Now wait for suid shell" fullword ascii
+    $ = "Unable to spawn shell" fullword ascii
+  condition:
+    elf_exec and any of them
+}
+
 // rule EkoBackdoor_Generic {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -193,21 +206,6 @@ rule Excedoor_Generic {
 //     any of ($spec_*) or all of ($cmd_*)
 // }
 
-// rule Explodor_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Linux Explodor"
-//     date = "12/11/2021"
-//     refrence = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
-//     target = "File, memory"
-//   strings:
-//     $3 = "Unable to spawn shell"
-//     $4 = "keld@dkuug.dk"
-//     $5 = "PATH=/usr/bin:/bin:/usr/sbin:/sbin"
-//   condition:
-//     all of them
-// }
 
 // rule Homeunix_Generic {
 //   meta:
