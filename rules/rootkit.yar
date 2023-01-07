@@ -266,19 +266,6 @@ rule Chfn_Generic {
 }
 
 
-rule Sckit_Generic {
-  meta:
-    description = "ELF:Sckit-A, Unix.Trojan.Suki-1, Backdoor:Linux/Rooter"
-    refrence = "https://otx.alienvault.com/indicator/file/db4c0fe28e8fdce6f7b7e2e12738ff84f084667e07b408dc04dc92bd074bc0e2"
-    md5 = "03d83a8223fe5dd37346c897a7f1ade5"
-  strings:
-    $ = "Can't execve shell" fullword ascii
-    $ = "Failed to hide pid" fullword ascii
-  condition:
-    elf_magic and all of them
-}
-
-
 rule Brootkit_9659 {
   meta:
     md5 = "96597264b066ed19f273d8bd2e329996"
