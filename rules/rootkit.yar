@@ -151,8 +151,6 @@ rule Boopkit_bfdf {
 
 rule Orbit_ba61 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     hash = "ba61e17c5fbcd6288081b31210f6cae6"
     description = "Orbit library file"
   strings:
@@ -252,7 +250,7 @@ rule Umbreon_Espeon {
 		$ = "Usage: %s [interface]" fullword
 		$ = "Options:" fullword
 		$ = "    interface    Listen on <interface> for packets." fullword
-		$ = "/bin/espeon-shell %s %hu"
+		$ = "/bin/espeon-shell %s %hu" fullword
 		$ = { 66 75 63 6b 20 6f 66 66 20 63 75 6e 74 }
 		$ = "error: unrecognized command-line options" fullword
 	condition:
@@ -270,8 +268,6 @@ rule Chfn_Generic {
 
 rule Sckit_Generic {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "ELF:Sckit-A, Unix.Trojan.Suki-1, Backdoor:Linux/Rooter"
     refrence = "https://otx.alienvault.com/indicator/file/db4c0fe28e8fdce6f7b7e2e12738ff84f084667e07b408dc04dc92bd074bc0e2"
     md5 = "03d83a8223fe5dd37346c897a7f1ade5"

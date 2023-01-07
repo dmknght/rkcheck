@@ -6,8 +6,7 @@ include "rules/magics.yar"
 rule MineTool_Generic
 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
+    description = "Generic strings in coin miner"
   strings:
     $ = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" fullword ascii
     $ = "Block %.4u [%3u]: %016lx" fullword ascii
@@ -26,8 +25,7 @@ rule MineTool_Generic
 rule Connecticoin_Generic
 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
+    description = "Generic strings in connection coin"
   strings:
     $1 = "connecticoin.org" fullword ascii nocase
     $2 = "Connecticoin-Qt" fullword ascii
@@ -38,9 +36,7 @@ rule Connecticoin_Generic
 
 rule XMRStak_Generic {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "13/11/2021"
+    description = "Generic strings in xml stak"
   strings:
     $1 = "XMRSTAK_VERSION" fullword ascii
     $2 = "pool.usxmrpool.com" fullword ascii nocase
@@ -54,8 +50,7 @@ rule XMRStak_Generic {
 rule Xmrig_Generic
 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
+    descriptions = "Generic strings in xmrig"
   strings:
     $1 = "xmrig.com" fullword ascii nocase
     $2 = "cryptonight" fullword ascii
@@ -72,8 +67,6 @@ rule Xmrig_Generic
 
 rule NBMiner_682e {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     hash = "682e9645f289292b12561c3da62a059b"
     reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
   strings:
@@ -85,7 +78,6 @@ rule NBMiner_682e {
 
 rule GoMiner_b238 {
   meta:
-    author = "Nong Hoang Tu"
     description = "A heavily striped Golang coin miner"
     md5 = "b238fe09791e169600fd3dbcdd0018a3"
   strings:

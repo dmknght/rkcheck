@@ -18,8 +18,6 @@ rule Shellcode_9db6 {
 
 rule SSHD_95d7 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "SSH Backdoor"
     md5 = "95d7335fa643949534f128795c8ac21c"
   strings:
@@ -32,8 +30,6 @@ rule SSHD_95d7 {
 
 rule Infector_849b {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "849b45fee92762d2b6ec31a11e1bcd76"
     description = "A Nim infector malware"
   strings:
@@ -54,8 +50,6 @@ rule Infector_849b {
 
 rule Agent_be4d {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "be4d3133afee0f4da853430339ba379f"
   strings:
     $1 = "/tmp/.server.sig" fullword ascii
@@ -68,8 +62,6 @@ rule Agent_be4d {
 
 rule Kowai_f06a {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "f06a780e653c680e2e4ddab4b397ddd2"
   strings:
     $1 = "KOWAI-BAdAsV" fullword ascii
@@ -79,6 +71,71 @@ rule Kowai_f06a {
 }
 
 
+rule ShellCmd_UserAdd {
+  meta:
+    description = "Bash commands to add new user to passwd"
+  strings:
+    $ = /echo[ "]+[\w\d_]+::0:0::\/:\/bin\/[\w"]+[ >]+\/etc\/passwd/
+  condition:
+    (elf_magic or is_shebang) and all of them
+}
+
+rule Dropper_Wget {
+  meta:
+    description = "Bash commands to download and execute binaries using wget"
+    reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
+  strings:
+    $ = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
+  condition:
+    (elf_magic or is_shebang) all of them
+}
+
+rule Dropper_Curl {
+  meta:
+    description = "Bash commands to download and execute binaries using CURL"
+    refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
+  strings:
+    $ = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
+  condition:
+    (elf_magic or is_shebang) all of them
+}
+
+rule Dropper_WgetCurl {
+  meta:
+    description = "Bash commands to download and execute binaries using CURL || Wget"
+    hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
+    hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
+  strings:
+    $ = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
+  condition:
+    (elf_magic or is_shebang) all of them
+}
+
+
+rule PortScan_TypeA {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "946689ba1b22d457be06d95731fcbcac"
+  strings:
+    $1 = "[i] Scanning:" fullword ascii
+    $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
+    $3 = "Portscan completed in" fullword ascii
+  condition:
+    elf_magic and 2 of them
+}
+
+rule PortScan_TypeB {
+  meta:
+    author = "Nong Hoang Tu"
+    email = "dmknght@parrotsec.org"
+    hash = "946689ba1b22d457be06d95731fcbcac"
+  strings:
+    $1 = "FOUND: %s with port %s open" fullword ascii
+    $2 = "%s:%s %s port: %s --> %s" fullword ascii
+  condition:
+    elf_magic and 2 of them
+}
 // rule Agent_2
 // {
 //   meta:
@@ -197,6 +254,10 @@ rule Earthworm_Generic {
   condition:
     elf_exec and 3 of them
 }
+
+// TODO hunt from https://www.hybrid-analysis.com/yara-search/results/e0f6fc9e4611bbff2192b250951d22a73180966f58c2c38e98d48f988246a2e5
+// hunted strings: hlLjztqZ and npxXoudifFeEgGaACScs format of some libs
+
 // rule EkoBackdoor_Generic {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -320,7 +381,6 @@ rule Earthworm_Generic {
 //   condition:
 //     all of them
 // }
-
 
 
 // rule BashDoor_Generic {

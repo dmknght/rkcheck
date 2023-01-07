@@ -5,8 +5,6 @@ include "rules/magics.yar"
 
 rule Mirai_TypeA {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
     // file fa9878*95ec37, compiled Py
   condition:
@@ -19,8 +17,6 @@ rule Mirai_TypeA {
 
 rule Mirai_TypeB {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants (named by ClamAV) using section hash. File only"
   condition:
     elf_magic and
@@ -31,8 +27,6 @@ rule Mirai_TypeB {
 
 rule Mirai_TypeC {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
   condition:
     elf_magic and
@@ -45,8 +39,6 @@ rule Mirai_TypeC {
 rule Mirai_TypeD
 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Common strings used in Mirai"
   strings:
     $ = "WHO %s" fullword ascii
@@ -60,8 +52,6 @@ rule Mirai_TypeD
 
 rule Mirai_TypeE {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Common strings used in Mirai"
   strings:
     $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii // TODO this goes to heuristic
@@ -75,8 +65,6 @@ rule Mirai_TypeE {
 
 rule Tsunami_de1b {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "de1bbb1e4a94de0d047673adaed080c1"
     description = "Tsunami variant"
   strings:
@@ -88,12 +76,10 @@ rule Tsunami_de1b {
 
 rule Mirai_4c36 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "4c366b0552eac10a254ed2d177ba233d"
   strings:
-    $1 = "%9s %3hu %255[^\n]" fullword ascii
-    $2 = "oanacroane" fullword ascii
+    $ = "%9s %3hu %255[^\n]" fullword ascii
+    $ = "oanacroane" fullword ascii
   condition:
     elf_magic and any of them
 }
@@ -101,11 +87,9 @@ rule Mirai_4c36 {
 
 rule Mirai_9c77 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "9c77a9f860f2643dc0cdbcd6bda65140"
   strings:
-    $1 = "31mip:%s" ascii
+    $ = "31mip:%s" ascii
   condition:
     elf_magic and any of them
 }
@@ -115,12 +99,12 @@ rule Mirai_92a0 {
   meta:
     md5 = "92a049c55539666bebc68c1a5d9d86ef"
   strings:
-    $1 = "4r3s b0tn3t" fullword ascii
+    $ = "4r3s b0tn3t" fullword ascii
   condition:
     elf_magic and any of them
 }
 
-rule Botnet_1d47 {
+rule VTFlooder_1d47 {
   meta:
     md5 = "1d4789f3de97c80a4755d7ef2cd844b3"
   strings:
@@ -129,6 +113,52 @@ rule Botnet_1d47 {
     $ = "Starting flood" fullword ascii
   condition:
     elf_dyn and 2 of them
+}
+
+rule Flooder_TypeA {
+  meta:
+    description = "Sample from Botnet.Linux.LizardSquad"
+  strings:
+    $ = "JUNK Flooding %s:%d" fullword ascii
+    $ = "UDP Flooding %s" fullword ascii
+    $ = "TCP Flooding %s" fullword ascii
+    $ = "LOLNOGTFO" fullword ascii
+    $ = "KILLATTK" fullword ascii
+  condition:
+    elf_magic and 2 of them
+}
+
+rule Flooder_TypeB {
+  strings:
+    $ = "[UDP] Failed to ddos" fullword ascii
+    $ = "[HTTP] Flooding" fullword ascii
+    $ = "[UDP] Flooding Rooted Spoof" fullword ascii
+  condition:
+    elf_magic and 2 of them
+}
+
+rule Flooder_TypeC {
+  meta:
+    hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
+  strings:
+    $ = "Opening sockets" fullword ascii
+    $ = "Sending attack" fullword ascii
+  condition:
+    elf_magic and 2 of them
+}
+
+
+rule Flooder_TypeD {
+  meta:
+    descriptions = "Some suspicious strings from Mirai's processes"
+  strings:
+    $ = "Flooding with" fullword ascii
+    $ = "HACKPGK" fullword ascii
+    $ = "RANDOMFLOOD" fullword ascii
+    $ = "SYNFLOOD" fullword ascii
+    $ = "ACKFLOOD" fullword ascii
+  condition:
+    elf_magic and 2 of them
 }
 
 // rule Mirai_Gen2 {
