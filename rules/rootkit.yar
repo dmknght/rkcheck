@@ -289,6 +289,22 @@ rule Sckit_Generic {
     elf_magic and all of them
 }
 
+
+rule Brootkit_9659 {
+  meta:
+    md5 = "96597264b066ed19f273d8bd2e329996"
+    url = "https://bazaar.abuse.ch/sample/371ce879928eb3f35f77bcb8841e90c5e0257638b67989dc3d025823389b3f79/"
+    description = "A Bash script to install rootkit"
+  strings:
+    $ = "br_hide_engine" fullword ascii
+    $ = "brootkit_func" fullword ascii
+    $ = "br_hide_file" fullword ascii
+    $ = "br_hide_proc" fullword ascii
+    $ = "br_hide_port" fullword ascii
+  condition:
+    is_shebang and 3 of them
+}
+
 // rule Knark_Generic {
 //   meta:
 // 		author = "Nong Hoang Tu <dmknght@parrotsec.org>"
