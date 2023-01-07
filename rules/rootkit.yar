@@ -291,8 +291,24 @@ rule Brootkit_9659 {
     $ = "br_hide_proc" fullword ascii
     $ = "br_hide_port" fullword ascii
   condition:
-    is_shebang and 3 of them
+    shebang_magic and 3 of them
 }
+
+
+rule Suckit_Generic {
+  strings:
+    $ = "Starting backdoor daemon" fullword ascii
+    $ = "Backdoor made by" fullword ascii
+    $ = "Can't execve shell" fullword ascii
+    $ = "pqrstuvwxyzabcde" fullword ascii
+    $ = "FUCK: Can't fork child" fullword ascii
+    $ = "Please enter new rootkit password" fullword ascii
+    $ = "Failed to hide pid" fullword ascii
+    $ = "Failed to unhide pid" fullword ascii
+  condition:
+    elf_magic and 3 of them
+}
+
 
 // rule Knark_Generic {
 //   meta:
@@ -463,22 +479,6 @@ rule Brootkit_9659 {
 // }
 
 
-// rule Suckit_B {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "17/11/2021"
-//   strings:
-//     $1 = "FUCK: Can't allocate raw socket"
-//     $2 = "FUCK: Can't fork child"
-//     $3 = "BD_Init: Starting backdoor daemon..."
-//     $4 = "Suckit uninstalled sucesfully!"
-//     $5 = "Please enter new rootkit password:"
-//   condition:
-//     is_elf and any of them
-// }
-
-
 // rule Urk_Generic {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -596,8 +596,6 @@ rule Brootkit_9659 {
 
 rule Rootkit_4d1e {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     hash = "4d1e6120a5c05b709435925e967a7e43"
   strings:
     // Normal strings in /usr/bin/dir, /usr/bin/ls
@@ -612,8 +610,6 @@ rule Rootkit_4d1e {
 
 rule Rootkit_a669 {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     md5 = "1fccc4f70c2c800173b7c56558b74a95"
     md5 = "acf87e0165bc121eb384346d10c74997"
     descriptions = "Unknown Linux rootkit"

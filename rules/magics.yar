@@ -44,7 +44,7 @@ private rule is_xml {
 }
 
 
-private rule is_shebang {
+private rule shebang_magic {
   condition:
     uint16(0) == 0x2123
 }
@@ -68,12 +68,6 @@ private rule is_shebang {
 //   condition:
 //     $magic at 0
 // }
-
-// private rule is_shebang {
-//   condition:
-//     uint32(0) == 0x752F2123 // "#!/u". Meant to detect "#!/usr/bin/"
-// }
-
 
 // private rule is_python {
 //   condition:

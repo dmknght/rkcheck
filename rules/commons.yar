@@ -239,13 +239,6 @@ rule ImportFuncs_PreLRootkit {
     )
 }
 
-
-// rule Backdoor_Gen1 {
-//   strings:
-//     $ = "Starting backdoor daemon" fullword ascii
-//   condition:
-//     elf_magic and 2 of them
-// }
 // rule SusElf_PyCompiled {
 //   meta:
 //     author = "Nong Hoang Tu"

@@ -38,13 +38,13 @@ rule Infector_849b {
     $2 = "/tmp/.host"
     $3 = "The more you know... :)"
   condition:
-  elf_exec and (
-    for any i in (0 .. elf.number_of_sections):
-    (
-      $1 in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-    ) or
-    2 of them
-  )
+    elf_exec and (
+      for any i in (0 .. elf.number_of_sections):
+      (
+        $1 in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
+      ) or
+      2 of them
+    )
 }
 
 
@@ -77,7 +77,7 @@ rule ShellCmd_UserAdd {
   strings:
     $ = /echo[ "]+[\w\d_]+::0:0::\/:\/bin\/[\w"]+[ >]+\/etc\/passwd/
   condition:
-    (elf_magic or is_shebang) and all of them
+    (elf_magic or shebang_magic) and all of them
 }
 
 rule Dropper_Wget {
@@ -87,7 +87,7 @@ rule Dropper_Wget {
   strings:
     $ = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
   condition:
-    (elf_magic or is_shebang) all of them
+    (elf_magic or shebang_magic) and all of them
 }
 
 rule Dropper_Curl {
@@ -97,7 +97,7 @@ rule Dropper_Curl {
   strings:
     $ = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
   condition:
-    (elf_magic or is_shebang) all of them
+    (elf_magic or shebang_magic) and all of them
 }
 
 rule Dropper_WgetCurl {
@@ -108,14 +108,12 @@ rule Dropper_WgetCurl {
   strings:
     $ = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
   condition:
-    (elf_magic or is_shebang) all of them
+    (elf_magic or shebang_magic) and all of them
 }
 
 
 rule PortScan_TypeA {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
     $1 = "[i] Scanning:" fullword ascii
@@ -127,8 +125,6 @@ rule PortScan_TypeA {
 
 rule PortScan_TypeB {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
     $1 = "FOUND: %s with port %s open" fullword ascii
@@ -187,9 +183,6 @@ rule PortScan_TypeB {
 
 rule Meter_Stageless {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "08/11/2022"
     description = "Metasploit's stageless payload (no encoders)"
   strings:
     $ = "MSF_LICENSE" fullword ascii
@@ -201,8 +194,6 @@ rule Meter_Stageless {
 
 rule Meter_RevTCP {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Metasploit staged payload (no encoders)"
   strings:
     $ = "AYPj)X" fullword ascii
@@ -214,13 +205,9 @@ rule Meter_RevTCP {
 
 rule Excedoor_Generic {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Linux Excedoor"
-    date = "28/12/2021"
     refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
     hash = "3d06f85ac19dc1a6f678aa4e28ce5c42"
-    file_type = "ELF32"
   strings:
     $ = "/bin/sh" fullword ascii
     $ = "rm -rf /var/log/*" fullword ascii
@@ -571,8 +558,6 @@ rule Exploit_DirtyCow {
 
 rule TinyShell {
   meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
     description = "Open-source TinyShell backdoor"
     reference = "https://github.com/creaktive/tsh"
     // execl, setsid is in imports, type: func
