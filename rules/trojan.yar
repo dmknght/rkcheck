@@ -229,7 +229,7 @@ rule Explodor_Generic {
     elf_exec and any of them
 }
 
-rule Earthworm_Generic {
+rule EarthWorm_Generic {
   meta:
     description = "Earthworm backdoor"
   strings:
@@ -237,7 +237,7 @@ rule Earthworm_Generic {
     $ = "darksn0w" fullword ascii
     $ = "zhuanjia" fullword ascii
     $ = "syc4mor3" fullword ascii
-    $ = " Wooyaa" fullword ascii
+    $ = "Wooyaa" fullword ascii
     $ = "init cmd_server_for_rc here" fullword ascii
   condition:
     elf_exec and 3 of them
