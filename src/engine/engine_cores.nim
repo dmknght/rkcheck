@@ -121,7 +121,7 @@ proc init_yara*(engine: var YrEngine): int =
     return result
 
   print_loaded_signatures(uint(engine.engine.num_rules), true)
-  # print_yara_version(YR_VERSION)
+  print_yara_version()
 
   discard yr_set_configuration(YR_CONFIG_STACK_SIZE, addr(stack_size))
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(max_strings_per_rule))

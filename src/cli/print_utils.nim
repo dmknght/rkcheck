@@ -1,6 +1,11 @@
 import strutils
 import progress_bar
 
+{.compile: "../engine/get_yr_version.c".}
+
+
+proc yr_get_version(): cstring {.importc.}
+
 
 proc print_file_infected*(virname, scan_obj: string) =
   #[
@@ -32,8 +37,9 @@ proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
     echo "Loaded ", num_loaded, " ClamAV signatures"
 
 
-proc print_yara_version*(version: string) =
-  echo "Yara Engine: ", version
+# proc print_yara_version*(version: string) =
+proc print_yara_version*() =
+  echo "Yara Engine: ", $yr_get_version()
 
 
 proc print_found_rootkit_modules*(namespace, id: string) =
