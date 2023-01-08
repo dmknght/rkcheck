@@ -37,7 +37,6 @@ proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
     echo "Loaded ", num_loaded, " ClamAV signatures"
 
 
-# proc print_yara_version*(version: string) =
 proc print_yara_version*() =
   echo "Yara Engine: ", $yr_get_version()
 
