@@ -686,18 +686,7 @@ rule Vbackdoor_Generic {
     $ = "#$&(" fullword ascii
     $ = "W @j" fullword ascii
   condition:
-    elf_dyn and
-    (
-      for 2 i in (0 .. elf.dynsym_entries):
-      (
-        elf.dynsym[i].type == elf.STT_FUNC and
-        (
-          elf.dynsym[i].name == "forge_proc_net_tcp" or
-          elf.dynsym[i].name == "dlopen"
-        )
-      ) or
-      3 of them
-    )
+    elf_dyn and 3 of them
 }
 
 rule NsSploit_Gen1 {
