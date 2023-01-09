@@ -119,7 +119,7 @@ rule Boopkit_bfdf {
     $ = "pr0be.xdp.c" fullword ascii
     $ = "event_boop_t" fullword ascii
     $ = "pid_to_hide" fullword ascii
-    $ = "__packed" fullword ascii
+    // $ = "__packed" fullword ascii
     $ = "boopkit.h" fullword ascii
     $ = "Failed to hide PID" fullword ascii
     $ = "U>Fc" fullword ascii
@@ -138,13 +138,13 @@ rule Boopkit_bfdf {
         (
           elf.dynsym[i].type == elf.STT_OBJECT and
           (
-            elf.dynsym[i].name == "__packed" or
+            // elf.dynsym[i].name == "__packed" or
             elf.dynsym[i].name == "LICENSE" or
             elf.dynsym[i].name == "runtime__boopkit"
           )
         )
       ) or
-      any of them
+      2 of them
     )
 }
 
