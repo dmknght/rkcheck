@@ -41,8 +41,8 @@ proc print_yara_version*() =
   echo "Yara Engine: ", $yr_get_version()
 
 
-proc print_found_rootkit_modules*(namespace, id: string) =
-  echo "\e[91mKernLoaded@", namespace, ":", id.replace("_", "."), "\e[0m"
+# proc print_found_rootkit_modules*(namespace, id: string) =
+#   echo "\e[91mKernLoaded@", namespace, ":", id.replace("_", "."), "\e[0m"
 
 
 proc print_sumary*(scanned_files, infected_files, scanned_procs, infected_procs: uint) =
