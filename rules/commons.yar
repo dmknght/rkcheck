@@ -129,18 +129,20 @@ rule ELF_FakeSectionHdrs {
 /*
   code from clamav
   1. broken class
-  2. program header > 128
+  2. program header num > 128 (32 bits and 64 bits)
+  3. sizeof(struct elf_program_hdr32)) != sizeof(struct elf_program_hdr32) can't read section header. Same for 64 bits
+  4. Can't calculate entry point
 */
 
-// rule SusELF_BrokenExecutable {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     descriptions = "Try to simulate ELF Heuristic feature of ClamAV with Yara"
-//     // TODO elf.entry_point = YR_UNDEFINED
-//   condition:
-//     elf_magic and elf.type != elf.ET_DYN and elf.sh_entry_size == 0
-// }
+rule ELF_NoEntryPoint {
+  meta:
+    description = "Detect ELF file that has no entry point. Memory scan will not match."
+  strings:
+    // Magic string of ELF type EXEC
+    $magic = {7f 45 4c 46 [12] 02}
+  condition:
+    $magic at 0 and not defined elf.entry_point
+}
 
 rule ImportFuncs_Backdoor {
   meta:
