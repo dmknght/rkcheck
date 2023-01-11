@@ -67,8 +67,22 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
 
   f_engine.engine = cl_engine_new()
 
+  # Enable some parsers
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_ARCHIVE)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_OLE2)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_PDF)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_SWF)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_HWP3)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_XMLDOCS)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_MAIL)
+  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_HTML)
+
+  # Disable parse ELF and parse PE. Handle by Yara only
+  f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_ELF)
+  f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_PE)
+
   f_engine.options.parse = bitnot(bitor(f_engine.options.parse, 0))
-  f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
+  # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
   f_engine.options.general = bitor(f_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
   # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
   # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
