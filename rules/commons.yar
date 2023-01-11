@@ -50,35 +50,6 @@ rule ELF_LoadRWE
     elf.segments[0].flags == elf.PF_R | elf.PF_W | elf.PF_X
 }
 
-// rule SusELF_FkSectHdrs {
-//   meta:
-//     description = "A fake sections header has been added to the binary."
-//     family = "Obfuscation"
-//     filetype = "ELF"
-//     hash = "a2301180df014f216d34cec8a6a6549638925ae21995779c2d7d2827256a8447"
-//     reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L17"
-//     target = "File, memory"
-//   condition:
-//     elf_exec and
-//     elf.entry_point < filesize and // file scanning only
-//     elf.number_of_segments > 0 and
-//     elf.number_of_sections > 0 and
-//     not
-//     (
-//       for any i in (0..elf.number_of_segments):
-//       (
-//         (elf.segments[i].offset <= elf.entry_point) and
-//         ((elf.segments[i].offset + elf.segments[i].file_size) >= elf.entry_point) and
-//         for any j in (0..elf.number_of_sections):
-//         (
-//           elf.sections[j].offset <= elf.entry_point and
-//           ((elf.sections[j].offset + elf.sections[j].size) >= elf.entry_point) and
-//           (elf.segments[i].virtual_address + (elf.entry_point - elf.segments[i].offset)) ==
-//           (elf.sections[j].address + (elf.entry_point - elf.sections[j].offset))
-//         )
-//       )
-//     )
-// }
 
 rule ELF_FakeDynSym {
   meta:
@@ -112,6 +83,35 @@ rule ELF_FakeDynSym {
     )
 }
 
+rule ELF_FakeSectionHdrs {
+  meta:
+    description = "A fake sections header has been added to the binary."
+    family = "Obfuscation"
+    filetype = "ELF"
+    hash = "a2301180df014f216d34cec8a6a6549638925ae21995779c2d7d2827256a8447"
+    reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L17"
+  condition:
+    elf_exec and
+    elf.entry_point < filesize and // file scanning only
+    elf.number_of_segments > 0 and
+    elf.number_of_sections > 0 and
+    not
+    (
+      for any i in (0..elf.number_of_segments):
+      (
+        (elf.segments[i].offset <= elf.entry_point) and
+        ((elf.segments[i].offset + elf.segments[i].file_size) >= elf.entry_point) and
+        for any j in (0..elf.number_of_sections):
+        (
+          elf.sections[j].offset <= elf.entry_point and
+          ((elf.sections[j].offset + elf.sections[j].size) >= elf.entry_point) and
+          (elf.segments[i].virtual_address + (elf.entry_point - elf.segments[i].offset)) ==
+          (elf.sections[j].address + (elf.entry_point - elf.sections[j].offset))
+        )
+      )
+    )
+}
+
 // rule SusELF_SectHighEntropy {
 //   meta:
 //     author = "Nong Hoang Tu"
@@ -126,20 +126,11 @@ rule ELF_FakeDynSym {
 //     // )
 // }
 
-// rule SusELF_SegOffset {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Segment offset + size exceeds the size of the file"
-//   condition:
-//     elf_magic and
-//     for any i in (0 .. elf.number_of_segments):
-//     (
-//       // elf.segments[i].type == elf.PT_DYNAMIC and
-//       elf.segments[i].offset + elf.segments[i].file_size > filesize
-//     )
-// }
-
+/*
+  code from clamav
+  1. broken class
+  2. program header > 128
+*/
 
 // rule SusELF_BrokenExecutable {
 //   meta:
@@ -233,6 +224,7 @@ rule ImportFuncs_PreLRootkit {
   meta:
     description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
   condition:
+    // FIXME false positive libc-2.31.so in libc-i386. This object file doesn't have dlsym and access
     elf_dyn and (
       for 7 i in (0 .. elf.dynsym_entries):
       (
@@ -261,36 +253,33 @@ rule ImportFuncs_PreLRootkit {
 //     )
 // }
 
-// rule Hacktool_LoginBrute {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     date = "12/11/2021"
-//     target = "File, memory"
-//   strings:
-//     $1 = { 70 40 63 6B 33 74 66 33 6E 63 33 }
-//     $2 = { 37 75 6A 4D 6B 6F 30 }
-//     $3 = { 73 34 62 65 42 73 45 51 68 64 }
-//     $4 = { 52 4F 4F 54 35 30 30 }
-//     $5 = { 4C 53 69 75 59 37 70 4F 6D 5A 47 32 73 }
-//     $6 = { 67 77 65 76 72 6B 37 66 40 71 77 53 58 24 66 64 }
-//     $7 = { 68 75 69 67 75 33 30 39 }
-//     $8 = { 74 61 5A 7A 40 32 33 34 39 35 38 35 39 }
-//     $9 = { 68 64 69 70 63 25 4E 6F }
-//     $10 = { 44 46 68 78 64 68 64 66 }
-//     $11 = { 58 44 7A 64 66 78 7A 66 }
-//     $12 = { 55 59 79 75 79 69 6F 79 }
-//     $13 = { 4A 75 59 66 6F 75 79 66 38 37 }
-//     $14 = { 4E 69 47 47 65 52 36 39 78 64 }
-//     $15 = { 4E 69 47 47 65 52 44 30 6E 6B 73 36 39 }
-//     $16 = { 54 59 32 67 44 36 4D 5A 76 4B 63 37 4B 55 36 72 }
-//     $17 = { 41 30 32 33 55 55 34 55 32 34 55 49 55 }
-//     $18 = { 73 63 61 6E 4A 6F 73 68 6F }
-//     $19 = { 53 32 66 47 71 4E 46 73 }
-//     $20 = { 37 75 6A 4D 6B 6F 30 61 64 6D 69 6E }
-//   condition:
-//     any of them
-// }
+rule Hacktool_LoginBrute {
+  // TODO need to verify memory scan
+  meta:
+    descriptions = "Some uniq strings used in password dictionary"
+  strings:
+    $ = "p@ck3tf3nc3" fullword ascii
+    $ = "7ujMko0" fullword ascii
+    $ = "s4beBsEQhd" fullword ascii
+    $ = "ROOT500" fullword ascii 
+    $ = "LSiuY7pOmZG2s" fullword ascii 
+    $ = "gwevrk7f@qwSX$fd" fullword ascii 
+    $ = "huigu309" fullword ascii 
+    $ = "taZz@23495859" fullword ascii 
+    $ = "hdipc%No" fullword ascii 
+    $ = "DFhxdhdf" fullword ascii 
+    $ = "XDzdfxzf" fullword ascii 
+    $ = "UYyuyioy" fullword ascii 
+    $ = "JuYfouyf87" fullword ascii 
+    $ = "NiGGeR69xd" fullword ascii 
+    $ = "NiGGeRD0nks69" fullword ascii 
+    $ = "TY2gD6MZvKc7KU6r" fullword ascii 
+    $ = "A023UU4U24UIU" fullword ascii 
+    $ = "scanJosho" fullword ascii 
+    $ = "S2fGqNFs" fullword ascii 
+  condition:
+    elf_magic and any of them
+}
 
 // rule OSCommand_Syslog_Removal {
 //   meta:
