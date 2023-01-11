@@ -166,7 +166,7 @@ rule ImportFuncs_Backdoor {
     SusELF_BackdoorImp /usr/bin//tcprewrite
     */
   condition:
-    elf_magic and
+    elf_magic and elf.dynsym_entries < 2000 and
     (
       for 1 i in (0 .. elf.dynsym_entries):
       (
