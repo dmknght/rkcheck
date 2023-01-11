@@ -12,24 +12,24 @@ build:
 	$(NIMFLAGS) $(YRFLAGS) -r --out:build/rkcompiler src/compiler/yr_db_compiler.nim
 	# Compile main file
 	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanmal src/rkscanmal.nim
-	$(NIMFLAGS) $(YRFLAGS_STATIC) --out:build/rkscanpreload src/rkscanpreload.nim
+	# $(NIMFLAGS) $(YRFLAGS_STATIC) --out:build/rkscanpreload src/rkscanpreload.nim
 	$(NIMFLAGS) --out:build/rkhiddenproc src/tools/unhide_procs.nim
 
 install:
 	mkdir -p /usr/share/rkcheck/
 	cp -r build/database /usr/share/rkcheck/
 	cp build/rkscanmal /usr/bin/rkscanmal
-	cp build/rkscanpreload /usr/bin/rkscanpreload
+	# cp build/rkscanpreload /usr/bin/rkscanpreload
 	cp build/rkhiddenproc /usr/bin/rkhiddenproc
 
 	chmod +x /usr/bin/rkscanmal
-	chmod +x /usr/bin/rkscanpreload
+	# chmod +x /usr/bin/rkscanpreload
 	chmod +x /usr/bin/rkhiddenproc
 
 uninstall:
 	rm /usr/bin/rkscanmal
 	rm /usr/bin/rkhiddenproc
-	rm /usr/bin/rkscanpreload
+	# rm /usr/bin/rkscanpreload
 	rm -rf /usr/share/rkcheck/
 
 clean:
