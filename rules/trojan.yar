@@ -709,7 +709,7 @@ rule Meter_OleFile {
     $ = "python -c" fullword ascii
     $ = "exec(r.read())" fullword ascii
   condition:
-    is_xml and all of them
+    xml_magic and all of them
 }
 
 

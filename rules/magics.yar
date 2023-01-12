@@ -38,7 +38,7 @@ private rule xdg_desktop_entry {
 }
 
 
-private rule is_xml {
+private rule xml_magic {
   condition:
     uint32(0) == 0x6d783f3c
 }
