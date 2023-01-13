@@ -47,7 +47,12 @@ This tool uses some custom Yara rules to detect malwares. However, there are som
 This project is a 1-man-project. I don't have power and resource to keep updating signatures all over the world like big AV companies. The tool uses ClamAV's engine and Yara's engine so it shares limitations of both engines. There's no real-time protection, behavior analysis, advanced heuristic analysis, advanced unpackers nor custom emulator. It's just a static file scan engine and I'm trying my best to provide signatures to scan malicious files
 
 # How to build
-The program requires Yara 4.2.3, ClamAV 0.103.7 and Nim 1.6.2. This program was developed and tested on Parrot OS 5.1. I haven't tested the newer versions of either Yara, Nim nor ClamAV. Other Linux distros weren't tested and the result is unknown.
+
+Tested platform:
+- Parrot 5.1.2
+- Yara 4.2.3
+- ClamAV 0.103.7
+- Nim 1.6.2
 
 To build this project, developer must install some libraries:
 - `sudo apt install libyara-dev libclamav-dev nim`
