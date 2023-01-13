@@ -64,6 +64,7 @@ Then run
 
 To install inside system, run
 - `sudo make install`
+
 To uninstall it, run
 - `sudo make uninstall`
 Binary and signatures are in dir `build/`
