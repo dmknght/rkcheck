@@ -2,20 +2,40 @@
 This tool is a combination of Yara and ClamAV to do malware scanning on Linux system. It was made as the idea that rkhunter and chkrootkit needs better replacement since both tools check absolute paths exist only.
 
 # Why is this
-This tool tries to solve problems of major (or famous) tools
-| Tool | Scan method | Problem |
+Comparison of ClamAV and Yara
+
+| | ClamAV | Yara |
 |---|---|---|
-| chkrootkit | Check if absolute paths exist (dirs and files) | - Rootkit hooks stat, lstat could compromise the results |
-| rkhunter | - Check if absolute paths exist (dirs and files) <br> - Support checking kernel symbols at /proc/ kallsyms | - Rootkit hooks stat lstat could compromise the results <br> - Rootkit hooks program reading kallsysms, compromise the scan results |
-| Yara | Powerful signature based and metadata parsing | - No file decompression <br> - No real-time scan <br> - No unpackers |
-| ClamAV | Signature based, support file decompression, document parsers, some basic unpackers, ... | - No process scan on Linux (last time i checked) <br> - Ram usage is very huge (more than 1gb ram after load all DB last time i checked) <br> - Mainly based on string matching and hashing. Lack of metadata parser for ELF file and March-O file. Poor metadata parsing for PE file compare to Yara <br> - Rules are not so user-friendly: custom format with hex encoded strings
+| File scan | &#9745; | &#9745; |
+| Memory scan | &#9744; | &#9745; |
+| File parser | &#9745; | &#9744; |
+| Decompresser | &#9745; | &#9744; |
+| Unpacker | Some basic unpackers | &#9744; |
+| Strong metadata matching | Only PE file | &#9745; |
+| Custom signatures | &#9745; | &#9745; |
+| Strong signature syntax | &#9744; | &#9745; |
+| Lightweight runtime | &#9744; | &#9745; |
+| Real-time protection | &#9744; | &#9744;|
+| Emulator | &#9744; | &#9744; |
 
+-> rkcheck combines advantages of 2 engines with Nim lang to provide a strong, easy to maintain and modify open-source malware scanner.
 
-p/s: chkrootkit and rkhunter has some more custom functions. This table focused on the malware checking only.
+Comparison of ckrootkit and rkhunter (scan module only)
 
-p/s2: all of them don't have advanced technologies compare to modern Antivirus: emulators, behavior analyzer, ....
+| | rkhunter | chkrootkit |
+|---|---|---|
+| File / dir scan method | File / dir exists | File / dir exists |
+| Kernel symbol scan | Read `/proc/kallsyms` | &#9744; |
+| Metadata scan | &#9744; | &#9744; |
 
-=> This tool try to solve the problem by using ClamAV's engine to handle files, and then use Yara as ClamAV's post scan to do signature matching. To replace chkrootkit and rkhunter, my scope is to learn eBPF scripting to write real-time scanner to detect kernel's hooking and more (similar to tracee).
+There are multiple ways to bypass these scanners:
+1. Change absolute path of binaries
+2. Hook sys call (LKM / eBPF) or libc functions (LD_PRELOAD) to hijack data
+
+Diamorphine rootkit hides its kernel symbols inside `/proc/kallsyms`. Therefore, the kernel symbols exposed in `/proc/kallsyms`. Rkhunter couldn't detect the rootkit until Diamorphine **unhide** itself.
+Here's my [new method](https://sourceforge.net/p/rkhunter/feature-requests/52/) to detect Diamorphine rootkit requested on rkhunter project.
+
+Since LD_PRELOAD rootkit hooks libc functions, a static binary can defeat this rootkit type easily. However, kernel land rootkit is a harder story. Research a proper way to defeat all rootkit types is a goal of this project
 
 # What about rules, signatures?
 The rule is a collection of open source Yara rules that scan Linux's malwares and my custom research. The rule set is not perfect.
@@ -89,12 +109,11 @@ Current engine has some Rootkit signatures. However I need to do more researches
 # Extra tools
 - rkcompiler is a file to compile all custom Yara rules. This won't be installed into system using `make install`
 - rkhiddenproc: A quick tool that check if system is having hidden process. It's faster than rkscanmal's process scanner because it has no memory scanning
-- rkscanpreload: A simple scanner, similar to `rkscanmal` which is staticly compiled. This tool has no ClamAV as the file handler. The point of making it was to scan system was infected by LD_PRELOAD rootkit, therefore dynamically linked ELF can't read data hooked by this Rootkit family. The current ClamAV version on Debian has no static lib to do static compile so I have to write this standalone tool. This tool also do parsing `/etc/ld.so.preload` to check libraries in there. (Note: it doesn't support checking ENV right now)
+- rkscanpreload: ~~A simple scanner, similar to `rkscanmal` which is staticly compiled. This tool has no ClamAV as the file handler. The point of making it was to scan system was infected by LD_PRELOAD rootkit, therefore dynamically linked ELF can't read data hooked by this Rootkit family. The current ClamAV version on Debian has no static lib to do static compile so I have to write this standalone tool. This tool also do parsing `/etc/ld.so.preload` to check libraries in there. (Note: it doesn't support checking ENV right now)~~. Commented in Makefile. Researching for better solutions that can work on both user-land rootkits and kernel-land rootkits
 
 # Roadmaps
-- Update the tool with latest ClamAV and Yara engine
-- Try static build for `rkscanmal` so no need to have `rkscanpreload`.
-- Research eBPF so this project can have proper way to detect Rootkit (LKM and eBPF rootkits)
+- Update the tool with latest ClamAV and Yara engine. Support static build
+- Research eBPF so this project can have proper way to detect kernel-land and user-land rootkits
 
 # License, copyright
 - Reused Yara engine under BSD-3-Clause.
