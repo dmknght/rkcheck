@@ -1,7 +1,7 @@
 # What is this
-This tool is a combination of Yara and ClamAV to do malware scanning on Linux system. It was made as the idea that rkhunter and chkrootkit needs better replacement since both tools check absolute paths exist only.
+This tool is a combination of Yara and ClamAV to do malware scanning on Linux system. It was made as the idea that rkhunter and chkrootkit need better replacement since both tools check absolute paths exist only.
 
-# Why is this
+# Feature comparison
 Comparison of ClamAV and Yara
 
 | | ClamAV | Yara |
@@ -37,7 +37,7 @@ Here's my [new method](https://sourceforge.net/p/rkhunter/feature-requests/52/) 
 
 Since LD_PRELOAD rootkit hooks libc functions, a static binary can defeat this rootkit type easily. However, kernel land rootkit is a harder story. Research a proper way to defeat all rootkit types is a goal of this project
 
-# What about rules, signatures?
+# What about rules and signatures?
 The rule is a collection of open source Yara rules that scan Linux's malwares and my custom research. The rule set is not perfect.
 
 # What if this tool detects a file as a malware
@@ -82,7 +82,7 @@ To scan directories, run command:
 - `./rkscanmal --list-dirs /path/dir/1 /path/dir/2`
 
 ## To scan processes
-ClamAv has no process scanner. This process scanner is a custom scanner using Yara engine. This custom engine uses the method PID Buster (called by Sandfly Security) which does brute force all possibld PID number to scan hidden ProcFS.
+ClamAv has no process scanner. This process scanner is a custom scanner using Yara engine. This custom engine uses the method PID Buster (called by Sandfly Security) which does brute force all possible PID number to scan hidden ProcFS.
 
 To scan list of processes, run command:
 - `./rkscanmal --list-procs pid1,pid2,pid3`. Pid is process id and must be a number.
@@ -109,7 +109,7 @@ Process scanner doesn't use ClamAV engine so using custom ClamAV engine will not
 To enable LibClamAV debug mode, user can add `--clam-debug`
 
 # How about Rootkit detection?
-Current engine has some Rootkit signatures. However I need to do more researches and tests to make sure it's able to detect Rootkits in the infected system. Detecting hidden files / directories wasn't tested
+Current engine has some Rootkit signatures. However I need to do more researches and tests to make sure it's able to detect Rootkits in the infected system. Detecting hidden files / directories weren't tested
 
 # Extra tools
 - rkcompiler is a file to compile all custom Yara rules. This won't be installed into system using `make install`
