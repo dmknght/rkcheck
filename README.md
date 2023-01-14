@@ -14,7 +14,6 @@ Comparison of ClamAV and Yara
 | Strong metadata matching | Only PE file | &#9745; |
 | Custom signatures | &#9745; | &#9745; |
 | Strong signature syntax | &#9744; | &#9745; |
-| Lightweight runtime | &#9744; | &#9745; |
 | Real-time protection | &#9744; | &#9744;|
 | Emulator | &#9744; | &#9744; |
 
