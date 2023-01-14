@@ -620,18 +620,17 @@ rule TinyShell {
 //     )
 // }
 
-// rule Gasit_ada7 {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     hash = "946689ba1b22d457be06d95731fcbcac"
-//   strings:
-//     $1 = "GASIT"
-//     $3 = "root@haiduc"
-//     $4 = "gasite.txt"
-//   condition:
-//     2 of them
-// }
+rule Gasit_ada7 {
+  // meta:
+  //   hash = "946689ba1b22d457be06d95731fcbcac"
+  //   url = "https://www.hybrid-analysis.com/sample/f4588a114fa72bb3aa7e20cecdac73e3897911605bcc2ec1e894a87bb99c3ff5/61b1afd8d77a530aae03b1fe"
+  strings:
+    // $ = "GASIT" fullword ascii
+    $ = "root@haiduc" fullword ascii
+    $ = "USER: %s PASS: %s HOST: %s PORT: %s --> %s" fullword ascii
+  condition:
+    elf_magic and any of them
+}
 
 // rule Root_Shell {
 //   meta:
