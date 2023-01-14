@@ -332,22 +332,6 @@ rule Backdoor_Generic {
 //     ($entry_1 and $entry_2) // systemd unit, startup as root
 // }
 
-// rule Gbkdoor_Generic {
-//   meta:
-//     author = "Nong Hoang Tu"
-//     email = "dmknght@parrotsec.org"
-//     description = "Linux Gbkdoor"
-//     date = "12/11/2021"
-//     refrence = "https://otx.alienvault.com/indicator/file/a1439937c8a383f010a071130aaae4443de6b7f4f7e71789c9964ea3a9d7f4a8"
-//     target = "File, memory"
-//   strings:
-//     $1 = "mmeneghin@inwind.it"
-//     $2 = "as if you are root, but the file to trojanize must be suidroot!"
-//     $3 = "now, you can easily use the backdoor installed so:"
-//   condition:
-//     $1 or ($2 and $3)
-// }
-
 // rule Gummo_Generic {
 //   meta:
 //     author = "Nong Hoang Tu"
