@@ -243,6 +243,15 @@ rule EarthWorm_Generic {
     elf_exec and 3 of them
 }
 
+
+rule Backdoor_Generic {
+  strings:
+    $ = "connecting to backdoor" fullword ascii nocase
+    $ = "backdoor installed" fullword ascii
+  condition:
+    elf_magic and any of them
+}
+
 // TODO hunt from https://www.hybrid-analysis.com/yara-search/results/e0f6fc9e4611bbff2192b250951d22a73180966f58c2c38e98d48f988246a2e5
 // hunted strings: hlLjztqZ and npxXoudifFeEgGaACScs format of some libs
 
