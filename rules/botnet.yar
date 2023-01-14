@@ -4,8 +4,8 @@ include "rules/magics.yar"
 
 
 rule Mirai_TypeA {
-  meta:
-    description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
+  // meta:
+  //   description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
     // file fa9878*95ec37, compiled Py
   condition:
     elf_magic and // Detect hash of .shstrtab
@@ -16,8 +16,8 @@ rule Mirai_TypeA {
 
 
 rule Mirai_TypeB {
-  meta:
-    description = "Detect some Mirai's variants (named by ClamAV) using section hash. File only"
+  // meta:
+  //   description = "Detect some Mirai's variants (named by ClamAV) using section hash. File only"
   condition:
     elf_magic and
     for any i in (0 .. elf.number_of_sections - 1): (
@@ -26,8 +26,8 @@ rule Mirai_TypeB {
 }
 
 rule Mirai_TypeC {
-  meta:
-    description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
+  // meta:
+  //   description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
   condition:
     elf_magic and
     for any i in (0 .. elf.number_of_sections - 1): (
@@ -38,8 +38,8 @@ rule Mirai_TypeC {
 
 rule Mirai_TypeD
 {
-  meta:
-    description = "Common strings used in Mirai"
+  // meta:
+  //   description = "Common strings used in Mirai"
   strings:
     $ = "WHO %s" fullword ascii
     $ = "PONG %s" fullword ascii
@@ -51,8 +51,8 @@ rule Mirai_TypeD
 
 
 rule Mirai_TypeE {
-  meta:
-    description = "Common strings used in Mirai"
+  // meta:
+  //   description = "Common strings used in Mirai"
   strings:
     $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii // TODO this goes to heuristic
     $ = "makeIPPacket" fullword ascii
@@ -64,9 +64,9 @@ rule Mirai_TypeE {
 
 
 rule Tsunami_de1b {
-  meta:
-    md5 = "de1bbb1e4a94de0d047673adaed080c1"
-    description = "Tsunami variant"
+  // meta:
+  //   md5 = "de1bbb1e4a94de0d047673adaed080c1"
+  //   description = "Tsunami variant"
   strings:
     $1 = "Tsunami successfully deployed!" ascii
     $2 = ".tsunami -l .t -g" fullword ascii
@@ -75,8 +75,8 @@ rule Tsunami_de1b {
 }
 
 rule Mirai_4c36 {
-  meta:
-    md5 = "4c366b0552eac10a254ed2d177ba233d"
+  // meta:
+  //   md5 = "4c366b0552eac10a254ed2d177ba233d"
   strings:
     $ = "%9s %3hu %255[^\n]" fullword ascii
     $ = "oanacroane" fullword ascii
@@ -86,8 +86,8 @@ rule Mirai_4c36 {
 
 
 rule Mirai_9c77 {
-  meta:
-    md5 = "9c77a9f860f2643dc0cdbcd6bda65140"
+  // meta:
+  //   md5 = "9c77a9f860f2643dc0cdbcd6bda65140"
   strings:
     $ = "31mip:%s" ascii
   condition:
@@ -96,8 +96,8 @@ rule Mirai_9c77 {
 
 
 rule Mirai_92a0 {
-  meta:
-    md5 = "92a049c55539666bebc68c1a5d9d86ef"
+  // meta:
+  //   md5 = "92a049c55539666bebc68c1a5d9d86ef"
   strings:
     $ = "4r3s b0tn3t" fullword ascii
   condition:
@@ -105,8 +105,8 @@ rule Mirai_92a0 {
 }
 
 rule VTFlooder_1d47 {
-  meta:
-    md5 = "1d4789f3de97c80a4755d7ef2cd844b3"
+  // meta:
+  //   md5 = "1d4789f3de97c80a4755d7ef2cd844b3"
   strings:
     $ = "iceis" fullword ascii
     $ = "Setting up sockets" fullword ascii
@@ -116,8 +116,8 @@ rule VTFlooder_1d47 {
 }
 
 rule Flooder_TypeA {
-  meta:
-    description = "Sample from Botnet.Linux.LizardSquad"
+  // meta:
+  //   description = "Sample from Botnet.Linux.LizardSquad"
   strings:
     $ = "JUNK Flooding %s:%d" fullword ascii
     $ = "UDP Flooding %s" fullword ascii
@@ -138,8 +138,8 @@ rule Flooder_TypeB {
 }
 
 rule Flooder_TypeC {
-  meta:
-    hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
+  // meta:
+  //   hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
   strings:
     $ = "Opening sockets" fullword ascii
     $ = "Sending attack" fullword ascii
@@ -149,8 +149,8 @@ rule Flooder_TypeC {
 
 
 rule Flooder_TypeD {
-  meta:
-    descriptions = "Some suspicious strings from Mirai's processes"
+  // meta:
+  //   descriptions = "Some suspicious strings from Mirai's processes"
   strings:
     $ = "Flooding with" fullword ascii
     $ = "HACKPGK" fullword ascii

@@ -5,8 +5,8 @@ include "rules/magics.yar"
 
 rule MineTool_Generic
 {
-  meta:
-    description = "Generic strings in coin miner"
+  // meta:
+  //   description = "Generic strings in coin miner"
   strings:
     $ = "Memory: %u KiB, Iterations: %u, Parallelism: %u lanes, Tag length: %u bytes" fullword ascii
     $ = "Block %.4u [%3u]: %016lx" fullword ascii
@@ -24,24 +24,24 @@ rule MineTool_Generic
 
 rule Connecticoin_Generic
 {
-  meta:
-    description = "Generic strings in connection coin"
+  // meta:
+  //   description = "Generic strings in connection coin"
   strings:
-    $1 = "connecticoin.org" fullword ascii nocase
-    $2 = "Connecticoin-Qt" fullword ascii
+    $ = "connecticoin.org" fullword ascii nocase
+    $ = "Connecticoin-Qt" fullword ascii
   condition:
     elf_magic and all of them
 }
 
 
 rule XMRStak_Generic {
-  meta:
-    description = "Generic strings in xml stak"
+  // meta:
+  //   description = "Generic strings in xml stak"
   strings:
-    $1 = "XMRSTAK_VERSION" fullword ascii
-    $2 = "pool.usxmrpool.com" fullword ascii nocase
-    $3 = "donate.xmr-stak.net" fullword ascii nocase
-    $4 = "xmr-stak-rx" fullword ascii
+    $ = "XMRSTAK_VERSION" fullword ascii
+    $ = "pool.usxmrpool.com" fullword ascii nocase
+    $ = "donate.xmr-stak.net" fullword ascii nocase
+    $ = "xmr-stak-rx" fullword ascii
   condition:
     elf_magic and 2 of them
 }
@@ -52,14 +52,14 @@ rule Xmrig_Generic
   meta:
     descriptions = "Generic strings in xmrig"
   strings:
-    $1 = "xmrig.com" fullword ascii nocase
-    $2 = "cryptonight" fullword ascii
-    $3 = "_ZN5xmrig" ascii
-    $4 = "Usage: xmrig [OPTIONS]" ascii
-    $5 = "xmrig.json" fullword ascii
-    $6 = "xmrigMiner" fullword ascii
-    $7 = "jcxmrig" ascii
-    $8 = "xmrigvertar" ascii
+    $ = "xmrig.com" fullword ascii nocase
+    $ = "cryptonight" fullword ascii
+    $ = "_ZN5xmrig" ascii
+    $ = "Usage: xmrig [OPTIONS]" ascii
+    $ = "xmrig.json" fullword ascii
+    $ = "xmrigMiner" fullword ascii
+    $ = "jcxmrig" ascii
+    $ = "xmrigvertar" ascii
   condition:
     elf_magic and 3 of them
 }
@@ -70,16 +70,16 @@ rule NBMiner_682e {
     hash = "682e9645f289292b12561c3da62a059b"
     reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
   strings:
-    $1 = "/mnt/d/code/NBMiner"
-    $2 = "_ZN5Miner10signalStopEv"
+    $ = "/mnt/d/code/NBMiner"
+    $ = "_ZN5Miner10signalStopEv"
   condition:
     elf_magic and any of them
 }
 
 rule GoMiner_b238 {
-  meta:
-    description = "A heavily striped Golang coin miner"
-    md5 = "b238fe09791e169600fd3dbcdd0018a3"
+  // meta:
+  //   description = "A heavily striped Golang coin miner"
+  //   md5 = "b238fe09791e169600fd3dbcdd0018a3"
   strings:
     $ = "Zpw9qKOmhDOzF3GWwJTB"
   condition:

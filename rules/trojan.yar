@@ -4,9 +4,9 @@ include "rules/magics.yar"
 
 
 rule Shellcode_9db6 {
-  meta:
-    descriptions = "A shellcode executor"
-    md5 = "9db6918b94456e4f7fc981b5e3cf289e"
+  // meta:
+  //   descriptions = "A shellcode executor"
+  //   md5 = "9db6918b94456e4f7fc981b5e3cf289e"
   strings:
     // Value in shellcode
     $ = "kl q60?"
@@ -17,21 +17,21 @@ rule Shellcode_9db6 {
 
 
 rule SSHD_95d7 {
-  meta:
-    description = "SSH Backdoor"
-    md5 = "95d7335fa643949534f128795c8ac21c"
+  // meta:
+  //   description = "SSH Backdoor"
+  //   md5 = "95d7335fa643949534f128795c8ac21c"
   strings:
-    $1 = "Rhosts Authentication disabled, originating port %d not trusted." ascii
-    $2 = "kHgn4vlwonyP" fullword ascii
+    $ = "Rhosts Authentication disabled, originating port %d not trusted." ascii
+    $ = "kHgn4vlwonyP" fullword ascii
   condition:
     elf_magic and all of them
 }
 
 
 rule Infector_849b {
-  meta:
-    md5 = "849b45fee92762d2b6ec31a11e1bcd76"
-    description = "A Nim infector malware"
+  // meta:
+  //   md5 = "849b45fee92762d2b6ec31a11e1bcd76"
+  //   description = "A Nim infector malware"
   strings:
     $1 = "akpcTVEZHXJe8ZbbQdHsSA" // Contains in strtab. Static binary only
     // 2 strings should show at runtime.
@@ -49,31 +49,31 @@ rule Infector_849b {
 
 
 rule Agent_be4d {
-  meta:
-    md5 = "be4d3133afee0f4da853430339ba379f"
+  // meta:
+  //   md5 = "be4d3133afee0f4da853430339ba379f"
   strings:
-    $1 = "/tmp/.server.sig" fullword ascii
-    $2 = "touch /tmp/elevate" fullword ascii
-    $3 = "/c.php?authkey=" fullword ascii
+    $ = "/tmp/.server.sig" fullword ascii
+    $ = "touch /tmp/elevate" fullword ascii
+    $ = "/c.php?authkey=" fullword ascii
   condition:
     elf_magic and any of them
 }
 
 
 rule Kowai_f06a {
-  meta:
-    md5 = "f06a780e653c680e2e4ddab4b397ddd2"
+  // meta:
+  //   md5 = "f06a780e653c680e2e4ddab4b397ddd2"
   strings:
-    $1 = "KOWAI-BAdAsV" fullword ascii
-    $2 = "KOWAI-d" fullword ascii
+    $ = "KOWAI-BAdAsV" fullword ascii
+    $ = "KOWAI-d" fullword ascii
   condition:
     elf_magic and any of them
 }
 
 
 rule ShellCmd_UserAdd {
-  meta:
-    description = "Bash commands to add new user to passwd"
+  // meta:
+  //   description = "Bash commands to add new user to passwd"
   strings:
     $ = /echo[ "]+[\w\d_]+::0:0::\/:\/bin\/[\w"]+[ >]+\/etc\/passwd/
   condition:
@@ -81,9 +81,9 @@ rule ShellCmd_UserAdd {
 }
 
 rule Dropper_Wget {
-  meta:
-    description = "Bash commands to download and execute binaries using wget"
-    reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
+  // meta:
+  //   description = "Bash commands to download and execute binaries using wget"
+  //   reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
   strings:
     $ = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
   condition:
@@ -91,9 +91,9 @@ rule Dropper_Wget {
 }
 
 rule Dropper_Curl {
-  meta:
-    description = "Bash commands to download and execute binaries using CURL"
-    refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
+  // meta:
+  //   description = "Bash commands to download and execute binaries using CURL"
+  //   refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
   strings:
     $ = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
   condition:
@@ -101,10 +101,10 @@ rule Dropper_Curl {
 }
 
 rule Dropper_WgetCurl {
-  meta:
-    description = "Bash commands to download and execute binaries using CURL || Wget"
-    hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
-    hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
+  // meta:
+  //   description = "Bash commands to download and execute binaries using CURL || Wget"
+  //   hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
+  //   hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
   strings:
     $ = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
   condition:
@@ -113,22 +113,22 @@ rule Dropper_WgetCurl {
 
 
 rule PortScan_TypeA {
-  meta:
-    hash = "946689ba1b22d457be06d95731fcbcac"
+  // meta:
+  //   hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "[i] Scanning:" fullword ascii
-    $2 = "Usage: %s <b-block> <port> [c-block]" fullword ascii
-    $3 = "Portscan completed in" fullword ascii
+    $ = "[i] Scanning:" fullword ascii
+    $ = "Usage: %s <b-block> <port> [c-block]" fullword ascii
+    $ = "Portscan completed in" fullword ascii
   condition:
     elf_magic and 2 of them
 }
 
 rule PortScan_TypeB {
-  meta:
-    hash = "946689ba1b22d457be06d95731fcbcac"
+  // meta:
+  //   hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
-    $1 = "FOUND: %s with port %s open" fullword ascii
-    $2 = "%s:%s %s port: %s --> %s" fullword ascii
+    $ = "FOUND: %s with port %s open" fullword ascii
+    $ = "%s:%s %s port: %s --> %s" fullword ascii
   condition:
     elf_magic and 2 of them
 }
@@ -182,8 +182,8 @@ rule PortScan_TypeB {
 
 
 rule Meter_Stageless {
-  meta:
-    description = "Metasploit's stageless payload (no encoders)"
+  // meta:
+  //   description = "Metasploit's stageless payload (no encoders)"
   strings:
     $ = "MSF_LICENSE" fullword ascii
     $ = "mettle_get_procmgr" fullword ascii
@@ -193,8 +193,8 @@ rule Meter_Stageless {
 
 
 rule Meter_RevTCP {
-  meta:
-    description = "Metasploit staged payload (no encoders)"
+  // meta:
+  //   description = "Metasploit staged payload (no encoders)"
   strings:
     $ = "AYPj)X" fullword ascii
     $ = "Wj#Xj" fullword ascii
@@ -204,10 +204,10 @@ rule Meter_RevTCP {
 
 
 rule Excedoor_Generic {
-  meta:
-    description = "Linux Excedoor"
-    refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
-    hash = "3d06f85ac19dc1a6f678aa4e28ce5c42"
+  // meta:
+  //   description = "Linux Excedoor"
+  //   refrence = "https://otx.alienvault.com/indicator/file/6138054a7de11c23b5c26755d7548c4096fa547cbb964ac78ef0fbe59d16c2da"
+  //   hash = "3d06f85ac19dc1a6f678aa4e28ce5c42"
   strings:
     $ = "/bin/sh" fullword ascii
     $ = "rm -rf /var/log/*" fullword ascii
@@ -217,9 +217,9 @@ rule Excedoor_Generic {
 }
 
 rule Explodor_Generic {
-  meta:
-    description = "Generic rule for a backdoor that spawns shell and shellcode. Shared string with explodor"
-    url = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
+  // meta:
+  //   description = "Generic rule for a backdoor that spawns shell and shellcode. Shared string with explodor"
+  //   url = "https://otx.alienvault.com/indicator/file/fb5eba7a927ce0513e11cde7a496009453f2d57b72c73fcbe04e9a527a3eabac"
   strings:
     $ = "Unable to write shellcode" fullword ascii
     $ = "Shellcode placed at" fullword ascii
@@ -230,8 +230,8 @@ rule Explodor_Generic {
 }
 
 rule EarthWorm_Generic {
-  meta:
-    description = "Earthworm backdoor"
+  // meta:
+  //   description = "Earthworm backdoor"
   strings:
     $ = "rootkiter" fullword ascii nocase
     $ = "darksn0w" fullword ascii
@@ -524,17 +524,14 @@ rule Keylog_Xspy {
 
 
 rule Exploit_DirtyCow {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    date = "1/11/2022"
-    hash = "0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
-    reference = "https://www.virustotal.com/gui/file/0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
+  // meta:
+  //   hash = "0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
+  //   reference = "https://www.virustotal.com/gui/file/0b22cdc1b1b1f944e4ca8fced2e234d14aeeef830970e8ae7491cbdcb3e11460"
   strings:
-    $s_1 = "/tmp/passwd.bak" ascii
-    $s_2 = "madvise %d" fullword ascii
-    $s_3 = "ptrace %d" fullword ascii
-    $s_4 = "DON'T FORGET TO RESTORE!" ascii
+    $ = "/tmp/passwd.bak" ascii
+    $ = "madvise %d" fullword ascii
+    $ = "ptrace %d" fullword ascii
+    $ = "DON'T FORGET TO RESTORE!" ascii
   condition:
     elf.type == elf.ET_EXEC and
     (
@@ -558,13 +555,13 @@ rule Exploit_DirtyCow {
 // TODO 139b09543494ead859b857961d230a39b9f4fc730f81cf8445b6d83bacf67f3d: malware downloader rule34 python compiled file
 
 rule TinyShell {
-  meta:
-    description = "Open-source TinyShell backdoor"
-    reference = "https://github.com/creaktive/tsh"
+  // meta:
+  //   description = "Open-source TinyShell backdoor"
+  //   reference = "https://github.com/creaktive/tsh"
     // execl, setsid is in imports, type: func
   strings:
-    $1 = "s:p:c::" // getopt strings
-    $2 = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
+    $ = "s:p:c::" // getopt strings
+    $ = "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]" // Usage
   condition:
     elf_magic and all of them
 }
@@ -700,10 +697,8 @@ rule TinyShell {
 
 
 rule Meter_OleFile {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    descriptions = "Generic signature for exploit/multi/misc/openoffice_document_macro"
+  // meta:
+  //   descriptions = "Generic signature for exploit/multi/misc/openoffice_document_macro"
   strings:
     $ = "Sub Exploit" fullword ascii
     $ = "python -c" fullword ascii
@@ -714,11 +709,11 @@ rule Meter_OleFile {
 
 
 rule Lightning_Downloader {
-  meta:
-    description = "Downloader of lightning framework"
-    md5 = "204728fb1878b9f4f83c110e7cf6b5b5"
-    sha256 = "48f9471c20316b295704e6f8feb2196dd619799edec5835734fc24051f45c5b7"
-    url = "https://www.intezer.com/blog/research/lightning-framework-new-linux-threat/"
+  // meta:
+  //   description = "Downloader of lightning framework"
+  //   md5 = "204728fb1878b9f4f83c110e7cf6b5b5"
+  //   sha256 = "48f9471c20316b295704e6f8feb2196dd619799edec5835734fc24051f45c5b7"
+  //   url = "https://www.intezer.com/blog/research/lightning-framework-new-linux-threat/"
   strings:
     $ = "kkdmflush" fullword ascii
     $ = "sleep 60 && ./%s &" fullword ascii
@@ -730,8 +725,8 @@ rule Lightning_Downloader {
 
 
 rule Exploit_NsSploit {
-  meta:
-    url = "https://www.hybrid-analysis.com/sample/6ffbe23565bbd34805d3dc4364110bb9d6d733107f8f02d0cfd38859ab013cf8"
+  // meta:
+  //   url = "https://www.hybrid-analysis.com/sample/6ffbe23565bbd34805d3dc4364110bb9d6d733107f8f02d0cfd38859ab013cf8"
   strings:
     $ = "ofs-lib.so" fullword ascii
     $ = "/tmp/ns_sploit" fullword ascii

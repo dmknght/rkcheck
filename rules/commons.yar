@@ -10,10 +10,8 @@ include "rules/magics.yar"
 
 rule Shellcode_Executor
 {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    description = "Try to detect shellcode executor by exported \"shellcode\" string"
+  // meta:
+  //   description = "Try to detect shellcode executor by exported \"shellcode\" string"
   condition:
     // There is a false positive from yara name matching. Condition elf.symtab[i].name == "buf" matched
     // any object name contains "buf" like "xxxbuf"
@@ -35,15 +33,13 @@ rule Shellcode_Executor
 
 rule ELF_LoadRWE
 {
-  meta:
-    description = "Flags binaries with a single LOAD segment marked as RWE."
-    family = "Stager"
-    filetype = "ELF"
-    hash = "711a06265c71a7157ef1732c56e02a992e56e9d9383ca0f6d98cd96a30e37299"
-    reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L3"
-    reference = "https://www.tenable.com/blog/hunting-linux-malware-with-yara"
-    target = "File, memory"
-
+  // meta:
+  //   description = "Flags binaries with a single LOAD segment marked as RWE."
+  //   family = "Stager"
+  //   filetype = "ELF"
+  //   hash = "711a06265c71a7157ef1732c56e02a992e56e9d9383ca0f6d98cd96a30e37299"
+  //   reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L3"
+  //   reference = "https://www.tenable.com/blog/hunting-linux-malware-with-yara"
   condition:
     elf.number_of_segments == 1 and
     elf.segments[0].type == elf.PT_LOAD and
@@ -52,13 +48,12 @@ rule ELF_LoadRWE
 
 
 rule ELF_FakeDynSym {
-  meta:
-    description = "A fake dynamic symbol table has been added to the binary"
-    family = "Obfuscation"
-    filetype = "ELF"
-    hash = "51676ae7e151a0b906c3a8ad34f474cb5b65eaa3bf40bb09b00c624747bcb241"
-    reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L47"
-    target = "File"
+  // meta:
+  //   description = "A fake dynamic symbol table has been added to the binary"
+  //   family = "Obfuscation"
+  //   filetype = "ELF"
+  //   hash = "51676ae7e151a0b906c3a8ad34f474cb5b65eaa3bf40bb09b00c624747bcb241"
+  //   reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L47"
   condition:
     elf_exec and
     elf.entry_point < filesize and // file scanning only
@@ -84,12 +79,12 @@ rule ELF_FakeDynSym {
 }
 
 rule ELF_FakeSectionHdrs {
-  meta:
-    description = "A fake sections header has been added to the binary."
-    family = "Obfuscation"
-    filetype = "ELF"
-    hash = "a2301180df014f216d34cec8a6a6549638925ae21995779c2d7d2827256a8447"
-    reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L17"
+  // meta:
+  //   description = "A fake sections header has been added to the binary."
+  //   family = "Obfuscation"
+  //   filetype = "ELF"
+  //   hash = "a2301180df014f216d34cec8a6a6549638925ae21995779c2d7d2827256a8447"
+  //   reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L17"
   condition:
     elf_exec and
     elf.entry_point < filesize and // file scanning only
@@ -135,8 +130,8 @@ rule ELF_FakeSectionHdrs {
 */
 
 rule ELF_NoEntryPoint {
-  meta:
-    description = "Detect ELF file that has no entry point. Memory scan will not match."
+  // meta:
+  //   description = "Detect ELF file that has no entry point. Memory scan will not match."
   strings:
     // Magic string of ELF type EXEC
     $magic = {7f 45 4c 46 [12] 02}
@@ -145,10 +140,8 @@ rule ELF_NoEntryPoint {
 }
 
 rule ImportFuncs_Backdoor {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    descriptions = "Common imports by remote shell. Usually simple reverse tcp"
+  // meta:
+  //   descriptions = "Common imports by remote shell. Usually simple reverse tcp"
     // Doesn't work when scan processes
     /* Falsee positives
     SusELF_BackdoorImp /usr/bin//tcpliveplay
@@ -223,8 +216,8 @@ unlinkat
 
 
 rule ImportFuncs_PreLRootkit {
-  meta:
-    description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
+  // meta:
+  //   description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
   condition:
     // FIXME false positive libc-2.31.so in libc-i386. This object file doesn't have dlsym and access
     elf_dyn and (
@@ -257,8 +250,8 @@ rule ImportFuncs_PreLRootkit {
 
 rule Hacktool_LoginBrute {
   // TODO need to verify memory scan
-  meta:
-    descriptions = "Some uniq strings used in password dictionary"
+  // meta:
+  //   descriptions = "Some uniq strings used in password dictionary"
   strings:
     $ = "p@ck3tf3nc3" fullword ascii
     $ = "7ujMko0" fullword ascii

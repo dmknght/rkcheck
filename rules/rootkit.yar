@@ -4,10 +4,10 @@ import "hash"
 
 
 rule Diamorphine_Genneric {
-  meta:
-    description = "Detect open source Rootkit Diamorphine"
-    github = "https://github.com/m0nad/Diamorphine/"
-    md5 = "ede0f3dc66c6ec8c1ec9648e8118bced"
+  // meta:
+  //   description = "Detect open source Rootkit Diamorphine"
+  //   github = "https://github.com/m0nad/Diamorphine/"
+  //   md5 = "ede0f3dc66c6ec8c1ec9648e8118bced"
   strings:
     $ = "diamorphine_secret" fullword ascii
     $ = "include/linux/thread_info.h" fullword ascii
@@ -17,10 +17,10 @@ rule Diamorphine_Genneric {
 }
 
 rule Father_Generic {
-  meta:
-    descriptions = "Detect .so binary file made"
-    github = "https://github.com/mav8557/Father"
-    md5 = "4f90604f04fe12f4e91b2bab13426fc0"
+  // meta:
+  //   descriptions = "Detect .so binary file made"
+  //   github = "https://github.com/mav8557/Father"
+  //   md5 = "4f90604f04fe12f4e91b2bab13426fc0"
   strings:
     $ = "v-pY" fullword ascii
     $ = "^(Hd" fullword ascii
@@ -32,10 +32,10 @@ rule Father_Generic {
 
 
 rule BrokePkg_Generic {
-  meta:
-    description = "Kernel module file of brokepkg"
-    github = "https://github.com/R3tr074/brokepkg"
-    md5 = "bb19d79bc2523ed663ea0c26f49b6425"
+  // meta:
+  //   description = "Kernel module file of brokepkg"
+  //   github = "https://github.com/R3tr074/brokepkg"
+  //   md5 = "bb19d79bc2523ed663ea0c26f49b6425"
   strings:
     $ = "br0k3_n0w_h1dd3n" fullword ascii
     $ = "fh_install_hook" fullword ascii
@@ -59,9 +59,9 @@ rule BrokePkg_Generic {
 }
 
 rule Symbiote_a0d1 {
-  meta:
-    description = "ELF EXE file of 5 samples"
-    md5 = "a0d1e1ec8207c83c7d2d52ff65f0e159"
+  // meta:
+  //   description = "ELF EXE file of 5 samples"
+  //   md5 = "a0d1e1ec8207c83c7d2d52ff65f0e159"
   strings:
     $ = "TUNNEL_CONNECT" fullword ascii
     $ = "COMMAND_SHELL" fullword ascii
@@ -73,12 +73,12 @@ rule Symbiote_a0d1 {
 
 
 rule Symbiote_0c27 {
-  meta:
-    description = "First DYN file of 5 samples"
-    md5 = "0c278f60cc4d36741e7e4d935fd2972f"
-    md5 = "59033839c1be695c83a68924979fab58"
-    md5 = "4d8ebed6943ff05118baf30be9515b83"
-    md5 = "87bb1d7e3639be2b21df8a7a273b60c8"
+  // meta:
+  //   description = "First DYN file of 5 samples"
+  //   md5 = "0c278f60cc4d36741e7e4d935fd2972f"
+  //   md5 = "59033839c1be695c83a68924979fab58"
+  //   md5 = "4d8ebed6943ff05118baf30be9515b83"
+  //   md5 = "87bb1d7e3639be2b21df8a7a273b60c8"
   strings:
     $h1 = "hidden_ports" fullword ascii
     $h2 = "hidden_address" fullword ascii
@@ -93,10 +93,10 @@ rule Symbiote_0c27 {
 
 
 rule Boopkit_BoopExec {
-  meta:
-    github = "https://github.com/krisnova/boopkit"
-    description = "Exec file of the toolkit"
-    md5 = "7a00da9408fb313c09bb2208f2745354"
+  // meta:
+  //   github = "https://github.com/krisnova/boopkit"
+  //   description = "Exec file of the toolkit"
+  //   md5 = "7a00da9408fb313c09bb2208f2745354"
   strings:
     $ = "boopkit" fullword ascii
     $ = "[RCE]" fullword ascii
@@ -107,12 +107,12 @@ rule Boopkit_BoopExec {
 
 
 rule Boopkit_bfdf {
-  meta:
-    github = "https://github.com/krisnova/boopkit"
-    description = "Boopkit's object files and an other exe file"
-    md5 = "bfdfd5d8f11cbc262e5698e90a2b4f88"
-    md5 = "3408129bbb1de313d986dc3577f267cb"
-    md5 = "e1b4ef86cc780c40dad08d58d5bf6b99"
+  // meta:
+  //   github = "https://github.com/krisnova/boopkit"
+  //   description = "Boopkit's object files and an other exe file"
+  //   md5 = "bfdfd5d8f11cbc262e5698e90a2b4f88"
+  //   md5 = "3408129bbb1de313d986dc3577f267cb"
+  //   md5 = "e1b4ef86cc780c40dad08d58d5bf6b99"
   strings:
     $ = "pr0be.boop.c" fullword ascii
     $ = "pr0be.safe.c" fullword ascii
@@ -150,9 +150,9 @@ rule Boopkit_bfdf {
 
 
 rule Orbit_ba61 {
-  meta:
-    hash = "ba61e17c5fbcd6288081b31210f6cae6"
-    description = "Orbit library file"
+  // meta:
+  //   hash = "ba61e17c5fbcd6288081b31210f6cae6"
+  //   description = "Orbit library file"
   strings:
     $1 = "load_hidden_ports" fullword ascii
     $2 = "tcp_port_hidden"  fullword ascii
@@ -193,28 +193,28 @@ rule Orbit_ba61 {
 
 
 rule Suterusu_Generic {
-  meta:
-    description = "Detects open source rootkit named suterusu"
-    hash1 = "7e5b97135e9a68000fd3efee51dc5822f623b3183aecc69b42bde6d4b666cfe1"
-    hash2 = "7b48feabd0ffc72833043b14f9e0976511cfde39fd0174a40d1edb5310768db3"
-    author = "Lacework Labs"
-    ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
+  // meta:
+  //   description = "Detects open source rootkit named suterusu"
+  //   hash1 = "7e5b97135e9a68000fd3efee51dc5822f623b3183aecc69b42bde6d4b666cfe1"
+  //   hash2 = "7b48feabd0ffc72833043b14f9e0976511cfde39fd0174a40d1edb5310768db3"
+  //   author = "Lacework Labs"
+  //   ref = "https://www.lacework.com/blog/hcrootkit-sutersu-linux-rootkit-analysis/"
   strings:
-    $a1 = "suterusu"
-    $a3 = "srcversion="
-    $a4 = "Hiding PID"
-    $a5 = "/proc/net/tcp"
+    $ = "suterusu"
+    $ = "srcversion="
+    $ = "Hiding PID"
+    $ = "/proc/net/tcp"
   condition:
     elf_magic and all of them
 }
 
 
 rule Umbreon_Generic {
-	meta:
-		description = "Catches Umbreon rootkit"
-		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
-		author = "Fernando Merces, FTR, Trend Micro"
-		date = "2016-08"
+	// meta:
+	// 	description = "Catches Umbreon rootkit"
+	// 	reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
+	// 	author = "Fernando Merces, FTR, Trend Micro"
+	// 	date = "2016-08"
 	strings:
 		$ = { 75 6e 66 75 63 6b 5f 6c 69 6e 6b 6d 61 70 }
 		$ = "unhide.rb" fullword
@@ -225,11 +225,11 @@ rule Umbreon_Generic {
 
 
 rule Umbreon_Strace {
-	meta:
-		description = "Catches Umbreon strace rootkit component"
-		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
-		author = "Fernando Merces, FTR, Trend Micro"
-		date = "2016-08"
+	// meta:
+	// 	description = "Catches Umbreon strace rootkit component"
+	// 	reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
+	// 	author = "Fernando Merces, FTR, Trend Micro"
+	// 	date = "2016-08"
 	strings:
 		$ = "LD_PRELOAD" fullword
 		$ = /ld\.so\.[a-zA-Z0-9]{7}/ fullword
@@ -241,11 +241,11 @@ rule Umbreon_Strace {
 
 
 rule Umbreon_Espeon {
-	meta:
-		description = "Catches Umbreon strace rootkit component"
-		reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
-		author = "Fernando Merces, FTR, Trend Micro"
-		date = "2016-08"
+	// meta:
+	// 	description = "Catches Umbreon strace rootkit component"
+	// 	reference = "http://blog.trendmicro.com/trendlabs-security-intelligence/pokemon-themed-umbreon-linux-rootkit-hits-x86-arm-systems"
+	// 	author = "Fernando Merces, FTR, Trend Micro"
+	// 	date = "2016-08"
 	strings:
 		$ = "Usage: %s [interface]" fullword
 		$ = "Options:" fullword
@@ -267,10 +267,10 @@ rule Chfn_Generic {
 
 
 rule Brootkit_9659 {
-  meta:
-    md5 = "96597264b066ed19f273d8bd2e329996"
-    url = "https://bazaar.abuse.ch/sample/371ce879928eb3f35f77bcb8841e90c5e0257638b67989dc3d025823389b3f79/"
-    description = "A Bash script to install rootkit"
+  // meta:
+  //   md5 = "96597264b066ed19f273d8bd2e329996"
+  //   url = "https://bazaar.abuse.ch/sample/371ce879928eb3f35f77bcb8841e90c5e0257638b67989dc3d025823389b3f79/"
+  //   description = "A Bash script to install rootkit"
   strings:
     $ = "br_hide_engine" fullword ascii
     $ = "brootkit_func" fullword ascii
@@ -582,8 +582,8 @@ rule Suckit_Generic {
 
 
 rule Rootkit_4d1e {
-  meta:
-    hash = "4d1e6120a5c05b709435925e967a7e43"
+  // meta:
+  //   hash = "4d1e6120a5c05b709435925e967a7e43"
   strings:
     // Normal strings in /usr/bin/dir, /usr/bin/ls
     $ = "hide-control-chars" fullword ascii
@@ -596,10 +596,10 @@ rule Rootkit_4d1e {
 
 
 rule Rootkit_a669 {
-  meta:
-    md5 = "1fccc4f70c2c800173b7c56558b74a95"
-    md5 = "acf87e0165bc121eb384346d10c74997"
-    descriptions = "Unknown Linux rootkit"
+  // meta:
+  //   md5 = "1fccc4f70c2c800173b7c56558b74a95"
+  //   md5 = "acf87e0165bc121eb384346d10c74997"
+  //   descriptions = "Unknown Linux rootkit"
   strings:
     $ = "/proc/self/fd/%d" fullword ascii
     $ = "/proc/%s/stat" fullword ascii
@@ -611,10 +611,10 @@ rule Rootkit_a669 {
 
 
 rule Kinsing_ccef {
-  meta:
-    md5 = "ccef46c7edf9131ccffc47bd69eb743b"
-    sha256 = "c38c21120d8c17688f9aeb2af5bdafb6b75e1d2673b025b720e50232f888808a"
-    description = "Kinsing rootkit from malwareBazaar"
+  // meta:
+  //   md5 = "ccef46c7edf9131ccffc47bd69eb743b"
+  //   sha256 = "c38c21120d8c17688f9aeb2af5bdafb6b75e1d2673b025b720e50232f888808a"
+  //   description = "Kinsing rootkit from malwareBazaar"
   strings:
     $ = "is_hidden_file.c" fullword ascii
     $ = "%d (%[^)]s" fullword ascii
@@ -637,9 +637,9 @@ rule Kinsing_ccef {
 
 
 rule Winnti_7f47 {
-  meta:
-    md5 = "7f4764c6e6dabd262341fd23a9b105a3"
-    sha256 = "ae9d6848f33644795a0cc3928a76ea194b99da3c10f802db22034d9f695a0c23"
+  // meta:
+  //   md5 = "7f4764c6e6dabd262341fd23a9b105a3"
+  //   sha256 = "ae9d6848f33644795a0cc3928a76ea194b99da3c10f802db22034d9f695a0c23"
   strings:
     $ = "HIDE_THIS_SHELL" fullword ascii
     $ = "10CSocks5Mgr" fullword ascii
@@ -649,9 +649,9 @@ rule Winnti_7f47 {
 
 
 rule Winnti_1acb {
-  meta:
-    md5 = "1acb326773d6ba28d916871cb91af844"
-    sha256 = "3b378846bc429fdf9bec08b9635885267d8d269f6d941ab1d6e526a03304331b"
+  // meta:
+  //   md5 = "1acb326773d6ba28d916871cb91af844"
+  //   sha256 = "3b378846bc429fdf9bec08b9635885267d8d269f6d941ab1d6e526a03304331b"
   strings:
     $ = "Yi-!*" fullword ascii
     $ = {(7c | 3d) (42 | 43) 66 4b}
@@ -677,9 +677,9 @@ rule Winnti_1acb {
 
 
 rule Vbackdoor_Generic {
-  meta:
-    md5 = "b3a0336574fed5bdcd08668074922fcb"
-    sha256 = "b33b3f3a6b85be99b02118b28ce34ad239705ce578e9da19db3c25e255dded78"
+  // meta:
+  //   md5 = "b3a0336574fed5bdcd08668074922fcb"
+  //   sha256 = "b33b3f3a6b85be99b02118b28ce34ad239705ce578e9da19db3c25e255dded78"
   strings:
     $ = "forge_proc_net_tcp" fullword ascii
     $ = "dlopen" fullword ascii
@@ -691,8 +691,8 @@ rule Vbackdoor_Generic {
 
 
 rule Statiyicrhge_Gen1 {
-  meta:
-    url = "https://www.hybrid-analysis.com/sample/017a9d7290cf327444d23227518ab612111ca148da7225e64a9f6ebd253449ab"
+  // meta:
+  //   url = "https://www.hybrid-analysis.com/sample/017a9d7290cf327444d23227518ab612111ca148da7225e64a9f6ebd253449ab"
   strings:
     $ = "statiyicrhge" fullword ascii
     $ = "gsdj500vt" fullword ascii
@@ -712,8 +712,8 @@ rule Statiyicrhge_Gen1 {
 
 
 rule VnQE6mk_Gen1 {
-  meta:
-    url = "https://www.hybrid-analysis.com/sample/f1612924814ac73339f777b48b0de28b716d606e142d4d3f4308ec648e3f56c8"
+  // meta:
+  //   url = "https://www.hybrid-analysis.com/sample/f1612924814ac73339f777b48b0de28b716d606e142d4d3f4308ec648e3f56c8"
   strings:
     $ = "libntpVnQE6mk" fullword ascii
     $ = "chown -R 920366:920366" fullword ascii
@@ -727,8 +727,8 @@ rule VnQE6mk_Gen1 {
 
 
 rule LDPreload_bc62 {
-  meta:
-    url = "https://www.hybrid-analysis.com/sample/bc62adb9d444542a2206c4fc88f54f032228c480cd35d0be624923e168987a1c/5f5ac948b7b024659c4d9ca8"
+  // meta:
+  //   url = "https://www.hybrid-analysis.com/sample/bc62adb9d444542a2206c4fc88f54f032228c480cd35d0be624923e168987a1c/5f5ac948b7b024659c4d9ca8"
   strings:
     $ = "LD_PRELOH" fullword ascii
     $ = "lib0pus.so" fullword ascii
