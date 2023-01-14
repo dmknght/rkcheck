@@ -624,8 +624,9 @@ rule Gasit_ada7 {
   // meta:
   //   hash = "946689ba1b22d457be06d95731fcbcac"
   //   url = "https://www.hybrid-analysis.com/sample/f4588a114fa72bb3aa7e20cecdac73e3897911605bcc2ec1e894a87bb99c3ff5/61b1afd8d77a530aae03b1fe"
+  //   url = "https://www.hybrid-analysis.com/sample/bcc096e218a3dd87c2bb3fab2d31a19121e8614983bd22b7d6741e5d27e4c119/612f215531b5af1d930f1d6c"
   strings:
-    // $ = "GASIT" fullword ascii
+    $ = "halucin0g3n" fullword ascii
     $ = "root@haiduc" fullword ascii
     $ = "USER: %s PASS: %s HOST: %s PORT: %s --> %s" fullword ascii
   condition:
