@@ -155,8 +155,11 @@ rule Flooder_TypeD {
     $ = "Flooding with" fullword ascii
     $ = "HACKPGK" fullword ascii
     $ = "RANDOMFLOOD" fullword ascii
-    $ = "SYNFLOOD" fullword ascii
+    $ = "SYNFLOOD" nocase ascii
+    $ = "SYN_Flood" nocase ascii
     $ = "ACKFLOOD" fullword ascii
+    $ = "udp_flood" nocase ascii
+    $ = "udpflood" nocase ascii
   condition:
     elf_magic and 2 of them
 }
