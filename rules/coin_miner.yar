@@ -85,3 +85,17 @@ rule GoMiner_b238 {
   condition:
     elf_magic and any of them
 }
+
+
+rule Ddgs_d618 {
+  // meta:
+  //   info = "VirusShare_d6187a44abacfb8f167584668e02c918"
+  //   md5 = "VirusShare_d6187a44abacfb8f167584668e02c918"
+  strings:
+    $ = "miner.go" fullword ascii
+    $ = "backdoor.go" fullword ascii
+    $ = "(*backdoor)" fullword ascii
+    $ = "(*miner" ascii
+  condition:
+    elf_magic and 2 of them
+}
