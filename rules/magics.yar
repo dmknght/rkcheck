@@ -5,7 +5,7 @@
 
 private rule elf_magic {
   strings:
-    $magic = {7f 45 4c 46 [12] (01 | 02 | 03 | 04 )}
+    $magic = {7f 45 4c 46 [12] (00 | 01 | 02 | 03 | 04 )}
   condition:
     $magic and not defined uint8(@magic[1] - 1)
 }
