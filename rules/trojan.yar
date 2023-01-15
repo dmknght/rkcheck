@@ -268,6 +268,14 @@ rule SSHDoor_Generic {
     )
 }
 
+
+rule Pupy_Generic {
+  strings:
+    $ = "PUPY_CONFIG_COMES_HERE" fullword ascii
+  condition:
+    elf_magic and all of them
+}
+
 // TODO hunt from https://www.hybrid-analysis.com/yara-search/results/e0f6fc9e4611bbff2192b250951d22a73180966f58c2c38e98d48f988246a2e5
 // hunted strings: hlLjztqZ and npxXoudifFeEgGaACScs format of some libs
 
