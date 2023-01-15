@@ -57,7 +57,7 @@ rule Mirai_TypeE {
     $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" fullword ascii
     $ = "makeIPPacket" fullword ascii
     $ = "UDPRAW" fullword ascii
-    $ = "sendRAW" fullword
+    $ = "sendRAW" fullword ascii
   condition:
     elf_magic and any of them
 }
