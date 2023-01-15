@@ -166,11 +166,18 @@ rule Flooder_TypeD {
 
 
 rule RacismNet_41fa {
-  meta:
-    url = "https://bazaar.abuse.ch/download/d49a93c84e608ea820329306c6fc9dd5e6e027fb2ea996f2a79d12f4626068a5/"
+  // meta:
+  //   url = "https://bazaar.abuse.ch/download/d49a93c84e608ea820329306c6fc9dd5e6e027fb2ea996f2a79d12f4626068a5/"
   strings:
     $ = "RacismNet9" fullword ascii
     $ = "BOTKILL" fullword ascii
+  condition:
+    elf_magic and all of them
+}
+
+rule Zyxel_Generic {
+  strings:
+    $ = "killer_kill_by_port" fullword ascii
   condition:
     elf_magic and all of them
 }
