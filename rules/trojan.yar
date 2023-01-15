@@ -252,6 +252,22 @@ rule Backdoor_Generic {
     elf_magic and any of them
 }
 
+rule SSHDoor_Generic {
+  strings:
+    // TODO need to test runtime
+    $ = "backdoor.h" fullword ascii
+    $ = "backdoor_active" fullword ascii
+  condition:
+    elf_magic and
+    (
+      for 1 i in (0 .. elf.symtab_entries):
+      (
+        elf.symtab[i].name == "backdoor_active" and elf.symtab[i].type == elf.STT_OBJECT
+      ) or
+      all of them
+    )
+}
+
 // TODO hunt from https://www.hybrid-analysis.com/yara-search/results/e0f6fc9e4611bbff2192b250951d22a73180966f58c2c38e98d48f988246a2e5
 // hunted strings: hlLjztqZ and npxXoudifFeEgGaACScs format of some libs
 
