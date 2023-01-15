@@ -54,10 +54,10 @@ rule Mirai_TypeE {
   // meta:
   //   description = "Common strings used in Mirai"
   strings:
-    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" ascii // TODO this goes to heuristic
+    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" fullword ascii
     $ = "makeIPPacket" fullword ascii
     $ = "UDPRAW" fullword ascii
-    $ = "sendRAW"
+    $ = "sendRAW" fullword
   condition:
     elf_magic and any of them
 }
