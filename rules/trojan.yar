@@ -743,3 +743,32 @@ rule Exploit_NsSploit {
   condition:
     elf_exec and 2 of them
 }
+
+rule Hacktool_LoginBrute {
+  // TODO need to verify memory scan
+  // meta:
+  //   descriptions = "Some uniq strings used in password dictionary"
+  strings:
+    $ = "p@ck3tf3nc3" fullword ascii
+    $ = "7ujMko0" fullword ascii
+    $ = "s4beBsEQhd" fullword ascii
+    $ = "ROOT500" fullword ascii 
+    $ = "LSiuY7pOmZG2s" fullword ascii 
+    $ = "gwevrk7f@qwSX$fd" fullword ascii 
+    $ = "huigu309" fullword ascii 
+    $ = "taZz@23495859" fullword ascii 
+    $ = "hdipc%No" fullword ascii 
+    $ = "DFhxdhdf" fullword ascii 
+    $ = "XDzdfxzf" fullword ascii 
+    $ = "UYyuyioy" fullword ascii 
+    $ = "JuYfouyf87" fullword ascii 
+    $ = "NiGGeR69xd" fullword ascii 
+    $ = "NiGGeRD0nks69" fullword ascii 
+    $ = "TY2gD6MZvKc7KU6r" fullword ascii 
+    $ = "A023UU4U24UIU" fullword ascii 
+    $ = "scanJosho" fullword ascii 
+    $ = "S2fGqNFs" fullword ascii
+    $ = "admin:pornhub" base64
+  condition:
+    elf_magic and any of them
+}
