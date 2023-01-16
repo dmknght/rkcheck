@@ -10,33 +10,15 @@ rule Mirai_TypeA {
   condition:
     elf_magic and // Detect hash of .shstrtab
     for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae"
-    )
-}
-
-
-rule Mirai_TypeB {
-  // meta:
-  //   description = "Detect some Mirai's variants (named by ClamAV) using section hash. File only"
-  condition:
-    elf_magic and
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1"
-    )
-}
-
-rule Mirai_TypeC {
-  // meta:
-  //   description = "Detect some Mirai's variants including Gafgyt variants (named by ClamAV) using section hash"
-  condition:
-    elf_magic and
-    for any i in (0 .. elf.number_of_sections - 1): (
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae" or
+      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1" or
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
       hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
     )
 }
 
-rule Mirai_TypeD
+
+rule Mirai_TypeB
 {
   // meta:
   //   description = "Common strings used in Mirai"
@@ -50,7 +32,7 @@ rule Mirai_TypeD
 }
 
 
-rule Mirai_TypeE {
+rule Mirai_TypeC {
   // meta:
   //   description = "Common strings used in Mirai"
   strings:
@@ -115,49 +97,25 @@ rule VTFlooder_1d47 {
     elf_dyn and 2 of them
 }
 
-rule Flooder_TypeA {
-  // meta:
-  //   description = "Sample from Botnet.Linux.LizardSquad"
+rule Flooder_Generic {
   strings:
     $ = "JUNK Flooding %s:%d" fullword ascii
     $ = "UDP Flooding %s" fullword ascii
     $ = "TCP Flooding %s" fullword ascii
     $ = "LOLNOGTFO" fullword ascii
     $ = "KILLATTK" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-rule Flooder_TypeB {
-  strings:
     $ = "[UDP] Failed to ddos" fullword ascii
     $ = "[HTTP] Flooding" fullword ascii
     $ = "[UDP] Flooding Rooted Spoof" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-rule Flooder_TypeC {
-  // meta:
-  //   hash = "123e6d1138bfd58de1173818d82b504ef928d5a3be7756dd627c594de4aad096"
-  strings:
     $ = "Opening sockets" fullword ascii
     $ = "Sending attack" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-
-rule Flooder_TypeD {
-  // meta:
-  //   descriptions = "Some suspicious strings from Mirai's processes"
-  strings:
     $ = "Flooding with" fullword ascii
     $ = "HACKPGK" fullword ascii
     $ = "RANDOMFLOOD" fullword ascii
+    $ = "ACKFLOOD" fullword ascii
+    // TODO better strings
     $ = "SYNFLOOD" nocase ascii
     $ = "SYN_Flood" nocase ascii
-    $ = "ACKFLOOD" fullword ascii
     $ = "udp_flood" nocase ascii
     $ = "udpflood" nocase ascii
   condition:
