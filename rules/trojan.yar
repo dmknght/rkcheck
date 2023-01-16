@@ -520,10 +520,8 @@ rule Pupy_Generic {
 // }
 
 rule Keylog_Xspy {
-  meta:
-    author = "Nong Hoang Tu"
-    email = "dmknght@parrotsec.org"
-    descriptions = "Rule to detect X11 Keylogger"
+  // meta:
+  //   descriptions = "Rule to detect X11 Keylogger"
     // Yara failed to detect running process because it can't load elf information such as elf.type
   strings:
     $ = "DISPLAY" fullword ascii
