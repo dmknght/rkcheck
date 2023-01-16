@@ -49,8 +49,8 @@ rule XMRStak_Generic {
 
 rule Xmrig_Generic
 {
-  meta:
-    descriptions = "Generic strings in xmrig"
+  // meta:
+  //   descriptions = "Generic strings in xmrig"
   strings:
     $ = "xmrig.com" fullword ascii nocase
     $ = "cryptonight" fullword ascii
@@ -66,9 +66,9 @@ rule Xmrig_Generic
 
 
 rule NBMiner_682e {
-  meta:
-    hash = "682e9645f289292b12561c3da62a059b"
-    reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
+  // meta:
+  //   hash = "682e9645f289292b12561c3da62a059b"
+  //   reference = "https://www.virustotal.com/gui/file/a819b4a95f386ae3bd8f0edc64e8e10fae0c21c9ae713b73dfc64033e5a845a1?nocache=1"
   strings:
     $ = "/mnt/d/code/NBMiner"
     $ = "_ZN5Miner10signalStopEv"
