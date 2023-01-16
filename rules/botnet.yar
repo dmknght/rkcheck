@@ -3,22 +3,32 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_TypeA {
+rule Mirai_Generic {
   // meta:
   //   description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
     // file fa9878*95ec37, compiled Py
+  strings:
+    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" fullword ascii
+    $ = "makeIPPacket" fullword ascii
+    $ = "UDPRAW" fullword ascii
+    $ = "sendRAW" fullword ascii
   condition:
-    elf_magic and // Detect hash of .shstrtab
-    for any i in (0 .. elf.number_of_sections - 1): (
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae" or
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1" or
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
-      hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
+    elf_magic and
+    (
+      // Detect hash of .shstrtab
+      for any i in (0 .. elf.number_of_sections - 1): (
+        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae" or
+        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1" or
+        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
+        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
+      ) or
+      any of them
     )
+    
 }
 
 
-rule Mirai_TypeB
+rule IRCBot_Generic
 {
   // meta:
   //   description = "Common strings used in Mirai"
@@ -29,19 +39,6 @@ rule Mirai_TypeB
     $ = "JOIN %s" fullword ascii
   condition:
     elf_exec and 2 of them
-}
-
-
-rule Mirai_TypeC {
-  // meta:
-  //   description = "Common strings used in Mirai"
-  strings:
-    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" fullword ascii
-    $ = "makeIPPacket" fullword ascii
-    $ = "UDPRAW" fullword ascii
-    $ = "sendRAW" fullword ascii
-  condition:
-    elf_magic and any of them
 }
 
 
