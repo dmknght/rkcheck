@@ -139,11 +139,12 @@ rule Zyxel_Generic {
     elf_magic and all of them
 }
 
-rule Kowai_09a0 {
+rule HuaweiExploit_201717215 {
   // meta:
   //   url = "https://securitynews.sonicwall.com/xmlpost/new-wave-of-attacks-attempting-to-exploit-huawei-home-routers/"
   strings:
     $ = "3612f843a42db38f48f59d2a3597e19c" fullword ascii
+    $ = "huawei_scanner.c" fullword ascii
   condition:
     elf_magic and all of them
 }
