@@ -690,7 +690,7 @@ rule Vbackdoor_Generic {
 }
 
 
-rule Statiyicrhge_Gen1 {
+rule Statiyicrhge_Genneric {
   // meta:
   //   url = "https://www.hybrid-analysis.com/sample/017a9d7290cf327444d23227518ab612111ca148da7225e64a9f6ebd253449ab"
   strings:
@@ -711,7 +711,7 @@ rule Statiyicrhge_Gen1 {
 }
 
 
-rule VnQE6mk_Gen1 {
+rule VnQE6mk_Generic {
   // meta:
   //   url = "https://www.hybrid-analysis.com/sample/f1612924814ac73339f777b48b0de28b716d606e142d4d3f4308ec648e3f56c8"
   strings:
