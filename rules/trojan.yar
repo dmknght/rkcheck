@@ -112,26 +112,19 @@ rule Dropper_WgetCurl {
 }
 
 
-rule PortScan_TypeA {
+rule PortScan_Generic {
   // meta:
   //   hash = "946689ba1b22d457be06d95731fcbcac"
   strings:
     $ = "[i] Scanning:" fullword ascii
     $ = "Usage: %s <b-block> <port> [c-block]" fullword ascii
     $ = "Portscan completed in" fullword ascii
-  condition:
-    elf_magic and 2 of them
-}
-
-rule PortScan_TypeB {
-  // meta:
-  //   hash = "946689ba1b22d457be06d95731fcbcac"
-  strings:
     $ = "FOUND: %s with port %s open" fullword ascii
     $ = "%s:%s %s port: %s --> %s" fullword ascii
   condition:
     elf_magic and 2 of them
 }
+
 // rule Agent_2
 // {
 //   meta:
