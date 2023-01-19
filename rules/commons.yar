@@ -129,15 +129,15 @@ rule ELF_FakeSectionHdrs {
   4. Can't calculate entry point
 */
 
-rule ELF_NoEntryPoint {
-  // meta:
-  //   description = "Detect ELF file that has no entry point. Memory scan will not match."
-  strings:
-    // Magic string of ELF type EXEC
-    $magic = {7f 45 4c 46 [12] 02}
-  condition:
-    $magic at 0 and not defined elf.entry_point
-}
+// rule ELF_NoEntryPoint {
+//   // meta:
+//   //   description = "Detect ELF file that has no entry point. Memory scan will not match."
+//   strings:
+//     // Magic string of ELF type EXEC
+//     $magic = {7f 45 4c 46 [12] 02}
+//   condition:
+//     $magic at 0 and not defined elf.entry_point
+// }
 
 rule ImportFuncs_Backdoor {
   // meta:
