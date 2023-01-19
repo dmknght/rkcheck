@@ -1,7 +1,15 @@
 import strutils
 import progress_bar
 
-{.compile: "../engine/get_yr_version.c".}
+{.emit:
+  """
+  #include <yara.h>
+
+  char* yr_get_version() {
+      return YR_VERSION;
+  }
+  """
+  .}
 
 
 proc yr_get_version(): cstring {.importc.}
