@@ -12,6 +12,7 @@ rule Mirai_Generic {
     $ = "makeIPPacket" fullword ascii
     $ = "UDPRAW" fullword ascii
     $ = "sendRAW" fullword ascii
+    $ = "HshrQjzbSjHs" fullword ascii
   condition:
     elf_magic and
     (
@@ -145,6 +146,14 @@ rule HuaweiExploit_201717215 {
   strings:
     $ = "3612f843a42db38f48f59d2a3597e19c" fullword ascii
     $ = "huawei_scanner.c" fullword ascii
+  condition:
+    elf_magic and all of them
+}
+
+
+rule Helios_Generic {
+  strings:
+    $ = "Botnet Made By greek.Helios" fullword ascii nocase
   condition:
     elf_magic and all of them
 }
