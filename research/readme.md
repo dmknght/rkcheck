@@ -1,0 +1,1 @@
+This folder contains some research code to detect hidden procs / modules (possible network connection in the future)
