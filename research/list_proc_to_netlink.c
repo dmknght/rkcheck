@@ -28,7 +28,6 @@ static void get_list_procs(pid_t list_procs[])
       list_procs[proc_count] = task_list->pid;
       proc_count++;
     }
-    list_procs[proc_count + 1] = "\0";
 }
 
 
