@@ -32,34 +32,11 @@ static void get_list_procs(pid_t list_procs[])
 }
 
 
-static void module_handle_connection(struct sk_buff *skb)
+static void module_handle_send_proc_list(struct nlmsghdr *nlh, struct sk_buff *skb_out, int client_pid)
 {
-
-  struct nlmsghdr *nlh;
-  struct sk_buff *skb_out;
-  int resp_err_code;
-  int client_pid;
-  pid_t *list_procs[2048]; // FIXME what if the size is bigger? Maybe use flexible_array from kernel?
+  pid_t list_procs[2048]; // FIXME what if the size is bigger? Maybe use flexible_array from kernel?
   int msg_size;
-
-  // TODO check data to get the actual request: get list of procs / modules?
-  nlh = (struct nlmsghdr *)skb->data;
-  /*
-    if (nlh == GET_PROC) {
-      get_list_procs(list_procs);
-      msg_size = sizeof(list_procs);
-    }
-    elseif (nlh == GET_MODULES) {
-      get_list_modules()
-    }
-    else {
-      return
-    }
-
-    send_message
-  */
-  // printk(KERN_INFO "Netlink received msg payload:%s\n", (char *)nlmsg_data(nlh));
-  client_pid = nlh->nlmsg_pid; /*pid of sending process */
+  int resp_err_code;
 
   get_list_procs(list_procs);
   msg_size = sizeof(list_procs); // TODO is this actual size?
@@ -79,6 +56,34 @@ static void module_handle_connection(struct sk_buff *skb)
 
   if (resp_err_code < 0)
     printk(KERN_INFO "Error while sending bak to user\n");
+}
+
+
+static void module_handle_connection(struct sk_buff *skb)
+{
+
+  struct nlmsghdr *nlh;
+  struct sk_buff *skb_out;
+  int client_pid;
+
+  // TODO check data to get the actual request: get list of procs / modules?
+  nlh = (struct nlmsghdr *)skb->data;
+  /*
+    if (nlh == GET_PROC) {
+      get_list_procs(list_procs);
+      msg_size = sizeof(list_procs);
+    }
+    elseif (nlh == GET_MODULES) {
+      get_list_modules()
+    }
+    else {
+      return
+    }
+
+    send_message
+  */
+  client_pid = nlh->nlmsg_pid;
+  module_handle_send_proc_list(nlh, skb_out, client_pid);
 }
 
 
@@ -104,8 +109,9 @@ static void get_proc_exit(void)
   netlink_kernel_release(nl_sk);
 }
 
+
 module_init(get_proc_init);
 module_exit(get_proc_exit);
 
-
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Nong Hoang Tu");
