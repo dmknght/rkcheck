@@ -18,26 +18,31 @@ struct sock *nl_sk = NULL;
 
 static void get_list_procs(pid_t list_procs[])
 {
-    struct task_struct *task_list;
-    unsigned int proc_count = 0;
+  /*
+    Get the info of running processes from the kernel
+    task_list->pid will get the pid (type: pid_t)
+  */
+  struct task_struct *task_list;
+  unsigned int proc_count = 0;
 
-    for_each_process(task_list) {
-      // task_list->comm (Command?, which should show name)
-      // task_list->pid -> pid
-      // TODO get pid to a list and send to pid
-      list_procs[proc_count] = task_list->pid;
-      proc_count++;
-    }
+  for_each_process(task_list) {
+    list_procs[proc_count] = task_list->pid;
+    proc_count++;
+  }
 }
 
 
 static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
 {
+  /*
+    Send the list of PIDs to client
+  */
   pid_t list_procs[2048]; // FIXME what if the size is bigger? Maybe use flexible_array from kernel?
   int msg_size;
   int resp_err_code;
   struct sk_buff *skb_out;
 
+  // Get the list of PIDs and create new message
   get_list_procs(list_procs);
   msg_size = sizeof(list_procs); // TODO is this actual size?
   skb_out = nlmsg_new(msg_size, 0);
@@ -47,6 +52,7 @@ static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
     return;
   }
 
+  // Send message to netlink buffer
   nlh = nlmsg_put(skb_out, 0, 0, NLMSG_DONE, msg_size, 0);
   NETLINK_CB(skb_out).dst_group = 0; /* not in mcast group */
   // Copy the message to the buffer
@@ -67,13 +73,13 @@ static void module_handle_connection(struct sk_buff *skb)
 
   // TODO check data to get the actual request: get list of procs / modules?
   nlh = (struct nlmsghdr *)skb->data;
+  client_pid = nlh->nlmsg_pid;
   /*
     if (nlh == GET_PROC) {
-      get_list_procs(list_procs);
-      msg_size = sizeof(list_procs);
+      module_handle_send_proc_list(nlh, client_pid);
     }
     elseif (nlh == GET_MODULES) {
-      get_list_modules()
+      module_handle_send_loaded_list(nlh, client_pid);
     }
     else {
       return
@@ -81,7 +87,6 @@ static void module_handle_connection(struct sk_buff *skb)
 
     send_message
   */
-  client_pid = nlh->nlmsg_pid;
   module_handle_send_proc_list(nlh, client_pid);
 }
 
