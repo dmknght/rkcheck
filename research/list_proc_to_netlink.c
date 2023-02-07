@@ -32,11 +32,12 @@ static void get_list_procs(pid_t list_procs[])
 }
 
 
-static void module_handle_send_proc_list(struct nlmsghdr *nlh, struct sk_buff *skb_out, int client_pid)
+static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
 {
   pid_t list_procs[2048]; // FIXME what if the size is bigger? Maybe use flexible_array from kernel?
   int msg_size;
   int resp_err_code;
+  struct sk_buff *skb_out;
 
   get_list_procs(list_procs);
   msg_size = sizeof(list_procs); // TODO is this actual size?
@@ -63,7 +64,6 @@ static void module_handle_connection(struct sk_buff *skb)
 {
 
   struct nlmsghdr *nlh;
-  struct sk_buff *skb_out;
   int client_pid;
 
   // TODO check data to get the actual request: get list of procs / modules?
@@ -83,7 +83,7 @@ static void module_handle_connection(struct sk_buff *skb)
     send_message
   */
   client_pid = nlh->nlmsg_pid;
-  module_handle_send_proc_list(nlh, skb_out, client_pid);
+  module_handle_send_proc_list(nlh, client_pid);
 }
 
 
