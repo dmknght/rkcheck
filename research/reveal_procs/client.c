@@ -58,7 +58,7 @@ int main()
   recvmsg(sock_fd, &msg, 0);
   pid_t *buf = malloc(nlh->nlmsg_len);
   memcpy(buf, NLMSG_DATA(nlh), nlh->nlmsg_len);
-  // find_hidden_proc(buf);
+  find_hidden_proc(buf);
 
   close(sock_fd);
 }
