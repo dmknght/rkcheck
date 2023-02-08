@@ -2,6 +2,7 @@ import os
 import strutils
 import posix
 
+
 proc pid_is_in_procfs(pid: string): bool =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir and path.endsWith(pid):
