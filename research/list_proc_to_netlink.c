@@ -15,7 +15,7 @@
 struct sock *nl_sk = NULL;
 
 
-static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
+static void module_handle_send_proc_list(struct nlmsghdr *netlnk_message, int client_pid)
 {
   /*
     Send the list of PIDs to client
@@ -47,10 +47,10 @@ static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
   }
 
   // Send message to netlink buffer
-  nlh = nlmsg_put(skb_out, 0, 0, NLMSG_DONE, msg_size, 0);
+  netlnk_message = nlmsg_put(skb_out, 0, 0, NLMSG_DONE, msg_size, 0);
   NETLINK_CB(skb_out).dst_group = 0; /* not in mcast group */
   // Copy the message to the buffer
-  memcpy(nlmsg_data(nlh), list_procs, msg_size);
+  memcpy(nlmsg_data(netlnk_message), list_procs, msg_size);
   // Send message to process
   resp_err_code = nlmsg_unicast(nl_sk, skb_out, client_pid);
 
@@ -62,12 +62,12 @@ static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
 static void module_handle_connection(struct sk_buff *skb)
 {
 
-  struct nlmsghdr *nlh;
+  struct nlmsghdr *netlnk_message;
   int client_pid;
 
   // TODO check data to get the actual request: get list of procs / modules?
-  nlh = (struct nlmsghdr *)skb->data;
-  client_pid = nlh->nlmsg_pid;
+  netlnk_message = (struct nlmsghdr *)skb->data;
+  client_pid = netlnk_message->nlmsg_pid;
   /*
     if (nlh == GET_PROC) {
       module_handle_send_proc_list(nlh, client_pid);
@@ -81,7 +81,7 @@ static void module_handle_connection(struct sk_buff *skb)
 
     send_message
   */
-  module_handle_send_proc_list(nlh, client_pid);
+  module_handle_send_proc_list(netlnk_message, client_pid);
 }
 
 
