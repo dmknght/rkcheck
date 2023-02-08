@@ -11,25 +11,8 @@
 #include <net/sock.h>
 
 #define NETLINK_USER 31
-// #define MAX_PID 4194304
 
 struct sock *nl_sk = NULL;
-
-
-static void get_list_procs(pid_t list_procs[])
-{
-  /*
-    Get the info of running processes from the kernel
-    task_list->pid will get the pid (type: pid_t)
-  */
-  struct task_struct *task_list;
-  unsigned int proc_count = 0;
-
-  for_each_process(task_list) {
-    list_procs[proc_count] = task_list->pid;
-    proc_count++;
-  }
-}
 
 
 static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
@@ -37,14 +20,24 @@ static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
   /*
     Send the list of PIDs to client
   */
-  pid_t list_procs[2048]; // FIXME what if the size is bigger? Maybe use flexible_array from kernel?
   int msg_size;
   int resp_err_code;
-  struct sk_buff *skb_out;
 
-  // Get the list of PIDs and create new message
-  get_list_procs(list_procs);
-  msg_size = sizeof(list_procs); // TODO is this actual size?
+  unsigned int proc_count = 0;
+
+  struct sk_buff *skb_out;
+  struct task_struct *task_list;
+
+  pid_t *list_procs = (pid_t *)kmalloc_array(1, sizeof(pid_t), GFP_USER);
+
+  // It's really hard to handle memory passing to a function so use a for loop here instead
+  for_each_process(task_list) {
+    list_procs[proc_count] = task_list->pid;
+    proc_count++;
+    list_procs = (pid_t *)krealloc_array(list_procs, proc_count + 1, sizeof(pid_t), GFP_USER);
+  }
+
+  msg_size = sizeof(proc_count * sizeof(pid_t));
   skb_out = nlmsg_new(msg_size, 0);
 
   if (!skb_out) {
