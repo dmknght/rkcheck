@@ -37,7 +37,8 @@ static void module_handle_send_proc_list(struct nlmsghdr *nlh, int client_pid)
     list_procs = (pid_t *)krealloc_array(list_procs, proc_count + 1, sizeof(pid_t), GFP_USER);
   }
 
-  msg_size = sizeof(proc_count * sizeof(pid_t));
+  // Craft new message
+  msg_size = proc_count * sizeof(pid_t);
   skb_out = nlmsg_new(msg_size, 0);
 
   if (!skb_out) {
