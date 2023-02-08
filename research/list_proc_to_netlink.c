@@ -1,6 +1,16 @@
 /*
   This module is the modificaiton of get_list_of_procs that transfer the result to the Netlink therefore userspace application can get the result
   https://stackoverflow.com/questions/3299386/how-to-use-netlink-socket-to-communicate-with-a-kernel-module
+  Makefile (edit kern.o to the file name of .c source)
+
+obj-m += kern.o
+ 
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+ 
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean:w
+
 */
 
 #include <linux/kernel.h>
