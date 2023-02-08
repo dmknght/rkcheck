@@ -2,7 +2,7 @@ obj-m += unhide_proc.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
-	nim c --app:staticLib --noMain client.nim
+	nim c --app:staticLib --gc:none --noMain client.nim
 	gcc -L. client.c -o client -l:libclient.a
 
 clean:
