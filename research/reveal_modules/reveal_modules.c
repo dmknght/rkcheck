@@ -56,7 +56,6 @@ static void module_handle_send_list_modules(struct nlmsghdr *netlnk_message, pid
   modules_list = THIS_MODULE->list;
 
   list_for_each_entry(mod, &THIS_MODULE->list, list) {
-    // TODO check module state to filter duplicate names
     send_msg_to_client(netlnk_message, mod->name, client_pid);
   }
   send_msg_to_client(netlnk_message, "", client_pid);
