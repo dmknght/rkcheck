@@ -18,19 +18,9 @@ struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
-// struct pid_info {
-//   pid_t pid;
-//   unsigned char comm_len;
-//   char comm[16];
-// };
-
-// extern void find_hidden_proc(pid_t pid, char *comm);
-
 
 int main()
 {
-  char *module_name;
-
   sock_fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_USER);
   if (sock_fd < 0)
     return -1;
@@ -62,30 +52,12 @@ int main()
   msg.msg_iovlen = 1;
 
   sendmsg(sock_fd, &msg, 0);
-  while (1) {
+  recvmsg(sock_fd, &msg, 0);
+  while (strcmp(NLMSG_DATA(nlh), "")) {
+    printf("\"%s\"\n", NLMSG_DATA(nlh));
     recvmsg(sock_fd, &msg, 0);
-    module_name = (char *)realloc(module_name, nlh->nlmsg_len);
-    if (strncmp(module_name, "", strlen(module_name))) {
-      break;
-    }
-    printf("Module %s\n", module_name);
   }
-  /* Read message from kernel */
-  // struct pid_info proc_info;
-  // char *buf;
 
-  // while (1) {
-  //   recvmsg(sock_fd, &msg, 0);
-  //   memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
-
-  //   if (proc_info.pid == 0) {
-  //     break;
-  //   }
-
-  //   buf = (char *)realloc(buf, proc_info.comm_len);
-  //   strncpy(buf, proc_info.comm, proc_info.comm_len);
-  //   find_hidden_proc(proc_info.pid, buf);
-  // }
 
   close(sock_fd);
 }
