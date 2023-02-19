@@ -27,7 +27,7 @@ static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *modu
   int resp_err_code;
   struct sk_buff *skb_out;
 
-  msg_size = strlen(module_name) * sizeof(char);
+  msg_size = strlen(module_name) * sizeof(char) + 1;
   skb_out = nlmsg_new(msg_size, 0);
 
   if (!skb_out) {
@@ -56,6 +56,7 @@ static void module_handle_send_list_modules(struct nlmsghdr *netlnk_message, pid
   modules_list = THIS_MODULE->list;
 
   list_for_each_entry(mod, &THIS_MODULE->list, list) {
+    // TODO check module state to filter duplicate names
     send_msg_to_client(netlnk_message, mod->name, client_pid);
   }
   send_msg_to_client(netlnk_message, "", client_pid);
