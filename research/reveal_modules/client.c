@@ -18,6 +18,8 @@ struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
+extern void find_hidden_module(char *module_name);
+
 
 int main()
 {
@@ -54,7 +56,7 @@ int main()
   sendmsg(sock_fd, &msg, 0);
   recvmsg(sock_fd, &msg, 0);
   while (strcmp(NLMSG_DATA(nlh), "")) {
-    printf("\"%s\"\n", NLMSG_DATA(nlh));
+    find_hidden_module(NLMSG_DATA(nlh));
     recvmsg(sock_fd, &msg, 0);
   }
 
