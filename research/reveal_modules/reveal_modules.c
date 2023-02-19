@@ -27,7 +27,7 @@ static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *modu
   int resp_err_code;
   struct sk_buff *skb_out;
 
-  msg_size = strlen(module_name) * sizeof(char); // FIXME crash here either strlen or count_len (custom function)
+  msg_size = strlen(module_name) * sizeof(char);
   skb_out = nlmsg_new(msg_size, 0);
 
   if (!skb_out) {
@@ -39,7 +39,7 @@ static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *modu
   netlnk_message = nlmsg_put(skb_out, 0, 0, NLMSG_DONE, msg_size, 0);
   NETLINK_CB(skb_out).dst_group = 0; /* not in mcast group */
   // Copy the message to the buffer
-  memcpy(nlmsg_data(netlnk_message), module_name, msg_size); // FIXME crash here
+  memcpy(nlmsg_data(netlnk_message), module_name, msg_size);
   // Send message to process
   resp_err_code = nlmsg_unicast(nl_sk, skb_out, client_pid);
 
@@ -73,7 +73,6 @@ static void module_handle_connection(struct sk_buff *skb)
   client_pid = netlnk_message->nlmsg_pid;
   module_handle_send_list_modules(netlnk_message, client_pid);
 }
-
 
 
 static int init_reveal_module(void)
