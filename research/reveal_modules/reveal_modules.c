@@ -20,21 +20,6 @@ clean:
 #define NETLINK_USER 31
 
 struct sock *nl_sk = NULL;
-static struct kprobe kp = {
-  .symbol_name = "kallsyms_lookup_name"
-};
-
-typedef void *(*kallsyms_lookup_name_t)(const char *name);
-
-
-static unsigned int count_len(const char *string) {
-  unsigned int count = 0;
-  while (string[count]) {
-    count++;
-  }
-
-  return count;
-}
 
 
 static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *module_name, pid_t client_pid) {
@@ -42,7 +27,7 @@ static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *modu
   int resp_err_code;
   struct sk_buff *skb_out;
 
-  msg_size = count_len(module_name) * sizeof(char); // FIXME crash here either strlen or count_len (custom function)
+  msg_size = strlen(module_name) * sizeof(char); // FIXME crash here either strlen or count_len (custom function)
   skb_out = nlmsg_new(msg_size, 0);
 
   if (!skb_out) {
@@ -65,26 +50,14 @@ static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *modu
 
 static void module_handle_send_list_modules(struct nlmsghdr *netlnk_message, pid_t client_pid)
 {
-  struct kobject *kobj_pos, *kobj_tmp;
-  struct kset *mod_kset;
-  kallsyms_lookup_name_t kallsyms_lookup_name;
+  struct module *mod;
+  struct list_head modules_list;
 
-  register_kprobe(&kp);
-  kallsyms_lookup_name = (kallsyms_lookup_name_t) kp.addr;
-  mod_kset = kallsyms_lookup_name("module_kset");
-  unregister_kprobe(&kp);
+  modules_list = THIS_MODULE->list;
 
-  // https://archive.kernel.org/oldlinux/htmldocs/kernel-api/API-list-for-each-entry-safe.html
-  list_for_each_entry_safe(kobj_pos, kobj_tmp, &mod_kset->list, entry) {
-    struct module_kobject *kobj = container_of(kobj_tmp, struct module_kobject, kobj);
-    if (!kobject_name(kobj_tmp))
-    {
-      break;
-    }
-
-    send_msg_to_client(netlnk_message, kobj->mod->name, client_pid);
+  list_for_each_entry(mod, &THIS_MODULE->list, list) {
+    send_msg_to_client(netlnk_message, mod->name, client_pid);
   }
-
   send_msg_to_client(netlnk_message, "", client_pid);
 }
 
