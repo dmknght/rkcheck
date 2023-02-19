@@ -20,6 +20,11 @@ clean:
 #define NETLINK_USER 31
 
 struct sock *nl_sk = NULL;
+static struct kprobe kp = {
+  .symbol_name = "kallsyms_lookup_name"
+};
+
+typedef void *(*kallsyms_lookup_name_t)(const char *name);
 
 
 static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *module_name, pid_t client_pid) {
@@ -50,15 +55,26 @@ static void send_msg_to_client(struct nlmsghdr *netlnk_message, const char *modu
 
 static void module_handle_send_list_modules(struct nlmsghdr *netlnk_message, pid_t client_pid)
 {
-  struct module *mod;
-  struct list_head modules_list;
+  struct kobject *kobj_pos, *kobj_tmp;
+  struct kset *mod_kset;
+  kallsyms_lookup_name_t kallsyms_lookup_name;
 
-  modules_list = THIS_MODULE->list;
+  register_kprobe(&kp);
+  kallsyms_lookup_name = (kallsyms_lookup_name_t) kp.addr;
+  mod_kset = kallsyms_lookup_name("module_kset");
 
-  list_for_each_entry(mod, &THIS_MODULE->list, list) {
-    send_msg_to_client(netlnk_message, mod->name, client_pid);
+  // https://archive.kernel.org/oldlinux/htmldocs/kernel-api/API-list-for-each-entry-safe.html
+  list_for_each_entry_safe(kobj_pos, kobj_tmp, &mod_kset->list, entry) {
+
+    if (!kobject_name(kobj_tmp))
+    {
+      break;
+    }
+    send_msg_to_client(netlnk_message, kobj_tmp->name, client_pid);
   }
+
   send_msg_to_client(netlnk_message, "", client_pid);
+  unregister_kprobe(&kp);
 }
 
 
@@ -68,7 +84,6 @@ static void module_handle_connection(struct sk_buff *skb)
   struct nlmsghdr *netlnk_message;
   pid_t client_pid;
 
-  // TODO check data to get the actual request: get list of procs / modules?
   netlnk_message = (struct nlmsghdr *)skb->data;
   client_pid = netlnk_message->nlmsg_pid;
   module_handle_send_list_modules(netlnk_message, client_pid);
