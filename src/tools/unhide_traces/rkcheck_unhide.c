@@ -55,17 +55,16 @@ int main()
   struct pid_info proc_info;
   char *buf;
 
-  while (1) {
-    recvmsg(sock_fd, &msg, 0);
-    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
+  recvmsg(sock_fd, &msg, 0);
+  memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
 
-    if (proc_info.pid == 0) {
-      break;
-    }
-
+  while (proc_info.pid != 0) {
     buf = (char *)realloc(buf, proc_info.comm_len);
     strncpy(buf, proc_info.comm, proc_info.comm_len);
     rkrev_find_hidden_proc(proc_info.pid, buf);
+
+    recvmsg(sock_fd, &msg, 0);
+    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
   }
 
   recvmsg(sock_fd, &msg, 0);
