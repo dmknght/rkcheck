@@ -65,18 +65,20 @@ static void module_handle_send_list_modules(struct nlmsghdr *netlnk_message, pid
 
   // https://archive.kernel.org/oldlinux/htmldocs/kernel-api/API-list-for-each-entry-safe.html
   list_for_each_entry_safe(kobj_pos, kobj_tmp, &mod_kset->list, entry) {
-    if (!kobject_name(kobj_tmp))
+    if (!kobj_tmp->name)
     {
       break;
     }
-    /*
-      There are some modules are not in procfs (/proc/modules). We ignore them by
-      kernfs_node->count
-    */
-    if (atomic_read(&kobj_tmp->sd->count) > 10)
+    if (atomic_read(&kobj_tmp->sd->count) < 10)
     {
-      send_msg_to_client(netlnk_message, kobj_tmp->name, client_pid);
+      /*
+        There are some modules are not in procfs (/proc/modules). We ignore them by
+        kernfs_node->count
+      */
+      continue;
     }
+
+    send_msg_to_client(netlnk_message, kobj_tmp->name, client_pid);
   }
 
   send_msg_to_client(netlnk_message, "", client_pid);
