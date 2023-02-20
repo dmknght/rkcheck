@@ -1,7 +1,3 @@
-/*
-  gcc <thisfile>.c -o client
-  ./client
-*/
 #include <linux/netlink.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +14,14 @@ struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
-extern void find_hidden_module(char *module_name);
+struct pid_info {
+  pid_t pid;
+  unsigned char comm_len;
+  char comm[16];
+};
+
+extern void revealerk_find_hidden_proc(pid_t pid, char *comm);
+extern void revealerk_find_hidden_module(char *module_name);
 
 
 int main()
@@ -54,12 +57,28 @@ int main()
   msg.msg_iovlen = 1;
 
   sendmsg(sock_fd, &msg, 0);
-  recvmsg(sock_fd, &msg, 0);
-  while (strcmp(NLMSG_DATA(nlh), "")) {
-    find_hidden_module(NLMSG_DATA(nlh));
+  /* Read message from kernel */
+  struct pid_info proc_info;
+  char *buf;
+
+  while (1) {
     recvmsg(sock_fd, &msg, 0);
+    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
+
+    if (proc_info.pid == 0) {
+      break;
+    }
+
+    buf = (char *)realloc(buf, proc_info.comm_len);
+    strncpy(buf, proc_info.comm, proc_info.comm_len);
+    revealerk_find_hidden_proc(proc_info.pid, buf);
   }
 
+  recvmsg(sock_fd, &msg, 0);
+  while (strcmp(NLMSG_DATA(nlh), "")) {
+    revealerk_find_hidden_module(NLMSG_DATA(nlh));
+    recvmsg(sock_fd, &msg, 0);
+  }
 
   close(sock_fd);
 }
