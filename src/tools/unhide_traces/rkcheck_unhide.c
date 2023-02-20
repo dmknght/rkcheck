@@ -21,26 +21,22 @@ void rkrev_check_hidden_procs() {
   struct pid_info proc_info;
   char *buf;
 
-  recvmsg(sock_fd, &msg, 0);
-  memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
-
-  while (proc_info.pid != 0) {
+  do {
+    recvmsg(sock_fd, &msg, 0);
+    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
     buf = (char *)realloc(buf, proc_info.comm_len);
     strncpy(buf, proc_info.comm, proc_info.comm_len);
     rkrev_find_hidden_proc(proc_info.pid, buf);
-
-    recvmsg(sock_fd, &msg, 0);
-    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
   }
+  while (proc_info.pid != 0);
 }
 
 
 void rkrev_check_hidden_mods() {
-  recvmsg(sock_fd, &msg, 0);
-  while (strcmp(NLMSG_DATA(nlh), "")) {
-    rkrev_find_hidden_module(NLMSG_DATA(nlh));
+  do {
     recvmsg(sock_fd, &msg, 0);
-  }
+    rkrev_find_hidden_module(NLMSG_DATA(nlh));
+  } while (strcmp(NLMSG_DATA(nlh), ""));
 }
 
 
