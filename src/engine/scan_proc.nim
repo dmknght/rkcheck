@@ -160,5 +160,10 @@ proc pscanner_scan_procs*(ctx: var ProcScanner, list_procs: seq[uint]) =
 
 
 proc pscanner_scan_procs*(ctx: var ProcScanner) =
-  for i in (1 .. SCANNER_MAX_PROC_COUNT):
-    pscanner_process_pid(ctx, uint(i))
+  for kind, path in walkDir("/proc/"):
+    if kind == pcDir:
+      try:
+        let pid = parseUint(splitPath(path).tail)
+        pscanner_process_pid(ctx, pid)
+      except ValueError:
+        discard
