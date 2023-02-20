@@ -6,6 +6,14 @@ import posix
 const procfs_modules = "/proc/modules"
 
 
+proc rkrev_show_hidden_object(pid, comm: string) =
+  echo " Hidden proccess \e[91m", comm, "\e[0m pid: \e[95m", pid, "\e[0m"
+
+
+proc rkrev_show_hidden_object(mod_name: string) =
+  echo " Hidden module \e[91m", mod_name, "\e[0m"
+
+
 proc rkrev_mod_is_hidden_in_procfs(mod_name: string): bool =
   for line in lines(procfs_modules):
     if line.startsWith(mod_name):
@@ -22,9 +30,9 @@ proc rkrev_pid_is_in_procfs(pid: string): bool =
 
 proc rkrev_find_hidden_module(mod_name: cstring) {.exportc.} =
   if rkrev_mod_is_hidden_in_procfs($mod_name):
-    echo "Hidden module ", $mod_name
+    rkrev_show_hidden_object($mod_name)
 
 
 proc rkrev_find_hidden_proc(pid: Pid, comm: cstring) {.exportc.} =
   if not rkrev_pid_is_in_procfs($pid):
-    echo "Hidden pid ", $pid, " name: ", comm
+    rkrev_show_hidden_object($pid, $comm)
