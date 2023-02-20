@@ -1,6 +1,9 @@
 /*
   A kernel module to get processes and modules from kernel
   Then send the data to client to check if anything is being hidden by rootkit
+  References:
+  https://embeddedguruji.blogspot.com/2018/12/linux-kernel-driver-to-print-all.html
+  https://stackoverflow.com/questions/3299386/how-to-use-netlink-socket-to-communicate-with-a-kernel-module
 */
 
 #include <linux/kernel.h>
