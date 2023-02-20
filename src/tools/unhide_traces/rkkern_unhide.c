@@ -22,7 +22,7 @@ static struct kprobe kp = {
 typedef void *(*kallsyms_lookup_name_t)(const char *name);
 
 
-static void revealer_send_proc_info(struct nlmsghdr *netlnk_message, struct pid_info proc_info, pid_t client_pid) {
+static void rkrev_send_proc_info(struct nlmsghdr *netlnk_message, struct pid_info proc_info, pid_t client_pid) {
   size_t msg_size;
   int resp_err_code;
   struct sk_buff *skb_out;
@@ -44,11 +44,11 @@ static void revealer_send_proc_info(struct nlmsghdr *netlnk_message, struct pid_
   resp_err_code = nlmsg_unicast(nl_sk, skb_out, client_pid);
 
   if (resp_err_code < 0)
-    printk(KERN_INFO "Error while sending bak to user\n");
+    printk(KERN_INFO "Error while sending proccess's info to user\n");
 }
 
 
-static void revealer_send_module_info(struct nlmsghdr *netlnk_message, const char *module_name, pid_t client_pid) {
+static void rkrev_send_module_info(struct nlmsghdr *netlnk_message, const char *module_name, pid_t client_pid) {
   size_t msg_size;
   int resp_err_code;
   struct sk_buff *skb_out;
@@ -70,11 +70,11 @@ static void revealer_send_module_info(struct nlmsghdr *netlnk_message, const cha
   resp_err_code = nlmsg_unicast(nl_sk, skb_out, client_pid);
 
   if (resp_err_code < 0)
-    printk(KERN_INFO "Error while sending back to user\n");
+    printk(KERN_INFO "Error while sending module info to user\n");
 }
 
 
-static void revealer_get_modules(struct nlmsghdr *netlnk_message, pid_t client_pid)
+static void rkrev_get_modules(struct nlmsghdr *netlnk_message, pid_t client_pid)
 {
   struct kobject *kobj_pos, *kobj_tmp;
   struct kset *mod_kset;
@@ -97,15 +97,15 @@ static void revealer_get_modules(struct nlmsghdr *netlnk_message, pid_t client_p
       continue;
     }
 
-    revealer_send_module_info(netlnk_message, kobj_tmp->name, client_pid);
+    rkrev_send_module_info(netlnk_message, kobj_tmp->name, client_pid);
   }
 
-  revealer_send_module_info(netlnk_message, "", client_pid);
+  rkrev_send_module_info(netlnk_message, "", client_pid);
   unregister_kprobe(&kp);
 }
 
 
-static void revealer_get_procs(struct nlmsghdr *netlnk_message, pid_t client_pid)
+static void rkrev_get_procs(struct nlmsghdr *netlnk_message, pid_t client_pid)
 {
   /*
     Send the list of PIDs to client
@@ -118,33 +118,31 @@ static void revealer_get_procs(struct nlmsghdr *netlnk_message, pid_t client_pid
     proc_info.comm_len = strlen(task_list->comm);
     strncpy(proc_info.comm, task_list->comm, proc_info.comm_len);
     // Craft new message and send to the client
-    revealer_send_proc_info(netlnk_message, proc_info, client_pid);
+    rkrev_send_proc_info(netlnk_message, proc_info, client_pid);
   }
   // Send pid = 0 to client so it stops the loop
   proc_info.pid = 0;
-  revealer_send_proc_info(netlnk_message, proc_info, client_pid);
+  rkrev_send_proc_info(netlnk_message, proc_info, client_pid);
 }
 
 
-static void revealer_netlink_handler(struct sk_buff *skb)
+static void rkrev_netlink_handler(struct sk_buff *skb)
 {
-
   struct nlmsghdr *netlnk_message;
   pid_t client_pid;
 
-  // TODO do we need data?
   netlnk_message = (struct nlmsghdr *)skb->data;
   client_pid = netlnk_message->nlmsg_pid;
-  revealer_get_procs(netlnk_message, client_pid);
-  revealer_get_modules(netlnk_message, client_pid);
+  rkrev_get_procs(netlnk_message, client_pid);
+  rkrev_get_modules(netlnk_message, client_pid);
 }
 
 
-static int revealer_module_init(void)
+static int rkrev_module_init(void)
 {
 
   struct netlink_kernel_cfg cfg = {
-    .input = revealer_netlink_handler,
+    .input = rkrev_netlink_handler,
   };
 
   nl_sk = netlink_kernel_create(&init_net, NETLINK_USER, &cfg);
@@ -157,14 +155,14 @@ static int revealer_module_init(void)
 }
 
 
-static void revealer_module_finit(void)
+static void rkrev_module_finit(void)
 {
   netlink_kernel_release(nl_sk);
 }
 
 
-module_init(revealer_module_init);
-module_exit(revealer_module_finit);
+module_init(rkrev_module_init);
+module_exit(rkrev_module_finit);
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Get processes and modules from kernel");
