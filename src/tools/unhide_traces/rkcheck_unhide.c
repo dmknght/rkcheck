@@ -41,7 +41,7 @@ int main()
   nlh->nlmsg_pid = getpid();
   nlh->nlmsg_flags = 0;
 
-  strcpy(NLMSG_DATA(nlh), "Message");
+  strcpy(NLMSG_DATA(nlh), "");
 
   iov.iov_base = (void *)nlh;
   iov.iov_len = nlh->nlmsg_len;
