@@ -6,16 +6,42 @@
 #include <unistd.h>
 #include "unhide_traces.h"
 
-
+// Those variables need to be global, otherwise client crashes
 struct sockaddr_nl src_addr, dest_addr;
 struct nlmsghdr *nlh = NULL;
 struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
-
 extern void rkrev_find_hidden_proc(pid_t pid, char *comm);
 extern void rkrev_find_hidden_module(char *module_name);
+
+
+void rkrev_check_hidden_procs() {
+  struct pid_info proc_info;
+  char *buf;
+
+  recvmsg(sock_fd, &msg, 0);
+  memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
+
+  while (proc_info.pid != 0) {
+    buf = (char *)realloc(buf, proc_info.comm_len);
+    strncpy(buf, proc_info.comm, proc_info.comm_len);
+    rkrev_find_hidden_proc(proc_info.pid, buf);
+
+    recvmsg(sock_fd, &msg, 0);
+    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
+  }
+}
+
+
+void rkrev_check_hidden_mods() {
+  recvmsg(sock_fd, &msg, 0);
+  while (strcmp(NLMSG_DATA(nlh), "")) {
+    rkrev_find_hidden_module(NLMSG_DATA(nlh));
+    recvmsg(sock_fd, &msg, 0);
+  }
+}
 
 
 int main()
@@ -52,26 +78,7 @@ int main()
 
   sendmsg(sock_fd, &msg, 0);
   /* Read message from kernel */
-  struct pid_info proc_info;
-  char *buf;
-
-  recvmsg(sock_fd, &msg, 0);
-  memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
-
-  while (proc_info.pid != 0) {
-    buf = (char *)realloc(buf, proc_info.comm_len);
-    strncpy(buf, proc_info.comm, proc_info.comm_len);
-    rkrev_find_hidden_proc(proc_info.pid, buf);
-
-    recvmsg(sock_fd, &msg, 0);
-    memcpy(&proc_info, NLMSG_DATA(nlh), nlh->nlmsg_len);
-  }
-
-  recvmsg(sock_fd, &msg, 0);
-  while (strcmp(NLMSG_DATA(nlh), "")) {
-    rkrev_find_hidden_module(NLMSG_DATA(nlh));
-    recvmsg(sock_fd, &msg, 0);
-  }
-
+  rkrev_check_hidden_procs();
+  rkrev_check_hidden_mods();
   close(sock_fd);
 }
