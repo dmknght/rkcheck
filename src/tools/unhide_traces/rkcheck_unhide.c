@@ -44,7 +44,10 @@ int main()
 {
   sock_fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_USER);
   if (sock_fd < 0)
+  {
+    printf("Failed to connect to kernel module! Make sure it's loaded!\n");
     return -1;
+  }
 
   memset(&src_addr, 0, sizeof(src_addr));
   src_addr.nl_family = AF_NETLINK;
@@ -72,13 +75,10 @@ int main()
   msg.msg_iov = &iov;
   msg.msg_iovlen = 1;
 
-  if (sendmsg(sock_fd, &msg, 0) != 0) {
-    printf("Failed to connect to kernel module! Make sure it's loaded\n");
-  }
-  else {
-    rkrev_check_hidden_procs();
-    rkrev_check_hidden_mods();
-    printf("Scan completed!\n");
-  }
+  sendmsg(sock_fd, &msg, 0);
+  printf("Checking hidden processes / modules\n");
+  rkrev_check_hidden_procs();
+  rkrev_check_hidden_mods();
+  printf("Scan completed!\n");
   close(sock_fd);
 }
