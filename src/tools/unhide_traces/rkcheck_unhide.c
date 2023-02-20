@@ -4,21 +4,15 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "unhide_traces.h"
 
-#define NETLINK_USER 31
 
-#define MAX_PAYLOAD 1024 /* maximum payload size*/
 struct sockaddr_nl src_addr, dest_addr;
 struct nlmsghdr *nlh = NULL;
 struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
-struct pid_info {
-  pid_t pid;
-  unsigned char comm_len;
-  char comm[16];
-};
 
 extern void rkrev_find_hidden_proc(pid_t pid, char *comm);
 extern void rkrev_find_hidden_module(char *module_name);

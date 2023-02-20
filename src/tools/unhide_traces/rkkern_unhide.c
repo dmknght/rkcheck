@@ -10,17 +10,10 @@
 #include <linux/netlink.h>
 #include <linux/skbuff.h>
 #include <net/sock.h>
+#include "unhide_traces.h"
 
-
-#define NETLINK_USER 31
 
 struct sock *nl_sk = NULL;
-
-struct pid_info {
-  pid_t pid;
-  unsigned char comm_len;
-  char comm[TASK_COMM_LEN]; // 16
-};
 
 static struct kprobe kp = {
   .symbol_name = "kallsyms_lookup_name"
