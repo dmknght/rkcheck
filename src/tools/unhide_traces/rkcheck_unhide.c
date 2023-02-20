@@ -20,8 +20,8 @@ struct pid_info {
   char comm[16];
 };
 
-extern void revealerk_find_hidden_proc(pid_t pid, char *comm);
-extern void revealerk_find_hidden_module(char *module_name);
+extern void rkrev_find_hidden_proc(pid_t pid, char *comm);
+extern void rkrev_find_hidden_module(char *module_name);
 
 
 int main()
@@ -71,12 +71,12 @@ int main()
 
     buf = (char *)realloc(buf, proc_info.comm_len);
     strncpy(buf, proc_info.comm, proc_info.comm_len);
-    revealerk_find_hidden_proc(proc_info.pid, buf);
+    rkrev_find_hidden_proc(proc_info.pid, buf);
   }
 
   recvmsg(sock_fd, &msg, 0);
   while (strcmp(NLMSG_DATA(nlh), "")) {
-    revealerk_find_hidden_module(NLMSG_DATA(nlh));
+    rkrev_find_hidden_module(NLMSG_DATA(nlh));
     recvmsg(sock_fd, &msg, 0);
   }
 
