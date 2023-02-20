@@ -72,9 +72,13 @@ int main()
   msg.msg_iov = &iov;
   msg.msg_iovlen = 1;
 
-  sendmsg(sock_fd, &msg, 0);
-  /* Read message from kernel */
-  rkrev_check_hidden_procs();
-  rkrev_check_hidden_mods();
+  if (sendmsg(sock_fd, &msg, 0) != 0) {
+    printf("Failed to connect to kernel module! Make sure it's loaded\n");
+  }
+  else {
+    rkrev_check_hidden_procs();
+    rkrev_check_hidden_mods();
+    printf("Scan completed!\n");
+  }
   close(sock_fd);
 }
