@@ -1,3 +1,16 @@
+include "rules/magics.yar"
+
+
+rule Buhti_Generic {
+  // https://www.hybrid-analysis.com/yara-search/results/253e29c1998bdf14e711bf2873a464db7ae59d9551e4fdee754e7abe27b56551
+  strings:
+    $ = "Welcome to buhtiRansom" fullword ascii
+    $ = "https://satoshidisk.com/pay/CHfZ5r" fullword ascii
+  condition:
+    elf_magic and all of them
+}
+
+
 // rule Aris_Generic {
 //   meta:
 //     author = "Nong Hoang Tu"
