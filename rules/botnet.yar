@@ -25,7 +25,6 @@ rule Mirai_Generic {
       ) or
       any of them
     )
-    
 }
 
 
@@ -48,8 +47,8 @@ rule Tsunami_de1b {
   //   md5 = "de1bbb1e4a94de0d047673adaed080c1"
   //   description = "Tsunami variant"
   strings:
-    $1 = "Tsunami successfully deployed!" ascii
-    $2 = ".tsunami -l .t -g" fullword ascii
+    $ = "Tsunami successfully deployed!" ascii
+    $ = ".tsunami -l .t -g" fullword ascii
   condition:
     elf_magic and any of them
 }
