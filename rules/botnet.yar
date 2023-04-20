@@ -28,6 +28,15 @@ rule Mirai_Generic {
 }
 
 
+// rule Mirai_Test1 {
+//  alternative rule: calculate checksum based on first character. Need runtime check
+//   strings:
+//     $s = {2e 73 79 6d 74 61 62 00} // Section .shstr, starts with \x2Esymtab
+//   condition:
+//     $s and hash.md5(@s[1], 0x64) == "cfea6ff0b826a05a3c24bd9b4da705c7"
+// }
+
+
 rule IRCBot_Generic
 {
   // meta:
