@@ -3,7 +3,38 @@ import "hash"
 include "rules/magics.yar"
 
 
-rule Mirai_Generic {
+/*
+ Mirai rules based on section hashes. This is a new version that
+ 1. Calculate hashes based on start string of section, and section's size
+ 2. No loop to improve speed
+ 3. Hashes removed some Nullbytes (prefix and suffix)
+ Problem:
+ 1. Some samples has no sections in memory. The other rule handled it
+ 2. I haven't found any sample that changes its section data (changes instead of remove sections)
+   it's possibly some samples can bypass this
+*/
+rule Mirai_Gen1 {
+  strings:
+    $s1 = ".symtab" fullword
+    $s2 = ".shstrtab" fullword
+    $s3 = ".note.gnu.property" fullword
+  condition:
+    elf_magic and
+    (
+      $s1 and hash.md5(@s1[1], 0x64) == "cfea6ff0b826a05a3c24bd9b4da705c7"
+    ) or
+    (
+      $s2 and hash.md5(@s2[1], 0x3C) == "6de76eb8aa868bf6751c01b7d120e909"
+    ) or
+    (
+      $s3 and hash.md5(@s3[1], 0x74) == "5321a249df6dd47fabd3ca3dcc1ed7c9" or
+      hash.md5(@s3[1], 0x74) == "5321a249df6dd47fabd3ca3dcc1ed7c9"
+    )
+}
+
+
+// Use some common strings
+rule Mirai_Gen2 {
   // meta:
   //   description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
     // file fa9878*95ec37, compiled Py
@@ -14,27 +45,8 @@ rule Mirai_Generic {
     $ = "sendRAW" fullword ascii
     $ = "HshrQjzbSjHs" fullword ascii
   condition:
-    elf_magic and
-    (
-      // Detect hash of .shstrtab
-      for any i in (0 .. elf.number_of_sections - 1): (
-        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "b748e0aa34cc3bb4dcf0f803be00e8ae" or
-        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "90d8eebc2a34162c49ec31cfc660cec1" or
-        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "68dd3bd106aab3e99d9a65e4f9bfa7f1" or
-        hash.md5(elf.sections[i].offset, elf.sections[i].size) == "a4b1a9d3f3622ccb54e615de8005f87f"
-      ) or
-      any of them
-    )
+    elf_magic and any of them
 }
-
-
-// rule Mirai_Test1 {
-//  alternative rule: calculate checksum based on first character. Need runtime check
-//   strings:
-//     $s = {2e 73 79 6d 74 61 62 00} // Section .shstr, starts with \x2Esymtab
-//   condition:
-//     $s and hash.md5(@s[1], 0x64) == "cfea6ff0b826a05a3c24bd9b4da705c7"
-// }
 
 
 rule IRCBot_Generic
