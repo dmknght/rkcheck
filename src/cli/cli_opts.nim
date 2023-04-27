@@ -78,7 +78,7 @@ proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param:
   i += 1
 
 
-proc cliopts_set_list_files_or_dirs(list_vars: var seq[string], i: var int, total_param: int) =
+proc cliopts_set_list_files_or_dirs(list_dirs, list_files: var seq[string], i: var int, total_param: int) =
   if i + 1 > total_param:
     # Check if flag has no value behind it, raise value error
     raise newException(ValueError, "Missing values for " & paramStr(i))
@@ -91,13 +91,21 @@ proc cliopts_set_list_files_or_dirs(list_vars: var seq[string], i: var int, tota
       currentParam = paramStr(i)
 
     if currentParam.startsWith("-"):
-      list_vars = deduplicate(list_vars)
+      list_dirs = deduplicate(list_dirs)
+      list_files = deduplicate(list_files)
       i -= 1
       # In the end of the loop (parent function), we increase i by 1
       # This causes missing flag by unexpected offset
       break
     else:
-      list_vars.add(currentParam)
+      try:
+        if getFileInfo(currentParam, true).kind == pcFile:
+          list_files.add(currentParam)
+        else:
+          list_dirs.add(currentParam)
+      except:
+        # File or Dir doesn't exist
+        discard
     i += 1
 
 
@@ -151,7 +159,7 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         return show_help_banner()
       of "-help":
         return show_help_banner()
-      of "--all-procs":
+      of "--scan-mem":
         options.scan_all_procs = true
       of "--use-clamdb":
         options.use_clam_db = true
@@ -163,11 +171,9 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         cliopts_set_db_path_clamav(options, i, total_params_count):
       of "--path-yaradb":
         cliopts_set_db_path_yara(options, i, total_params_count):
-      of "--list-dirs":
-        cliopts_set_list_files_or_dirs(options.list_dirs, i, total_params_count)
-      of "--list-files":
-        cliopts_set_list_files_or_dirs(options.list_files, i, total_params_count)
-      of "--list-procs":
+      of "--scan-files":
+        cliopts_set_list_files_or_dirs(options.list_dirs, options.list_files, i, total_params_count)
+      of "--scan-procs":
         cliopts_set_list_procs(options.list_procs, i, total_params_count)
       else:
         raise newException(ValueError, "Invalid option " & currentParam)
