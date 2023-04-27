@@ -8,17 +8,17 @@ MALWARE_DIR = "/home/dmknght/Desktop/MalwareLab/new_Mirai/"
 
 
 class TlshResult:
-  def __init__(self, hash, file):
+  def __init__(self, hash):
     self.hash = hash
-    self.files = [file]
+    self.count = 1
 
 
-def append_same_hash(hash, file, list_results):
+def append_same_hash(hash, list_results):
   if not list_results:
     return False
   for each_result in list_results:
     if each_result.hash == hash:
-      each_result.files.append(file)
+      each_result.count += 1
       return True
   return False
 
@@ -29,16 +29,16 @@ def main():
     for name in files:
       full_path = root + name
       if os.path.isfile(full_path):
-        newHashObj = TlshResult(tlsh.hash(open(full_path, 'rb').read()), full_path)
+        newHashObj = TlshResult(tlsh.hash(open(full_path, 'rb').read()))
         if newHashObj == "TNULL":
           # File is not valid (not ELF file?). Ignore
           pass
-        elif not append_same_hash(newHashObj.hash, full_path, list_results):
+        elif not append_same_hash(newHashObj.hash, list_results):
           list_results.append(newHashObj)
 
 
   for each_hash in list_results:
-    print(len(each_hash.files), each_hash.hash)
+    print(each_hash.count, each_hash.hash)
 
 main()
 
