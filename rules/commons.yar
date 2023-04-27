@@ -237,6 +237,16 @@ rule ImportFuncs_PreLRootkit {
     )
 }
 
+
+rule Crontab_AddRoot {
+  strings:
+    $ = "* * * * root" fullword ascii
+    $ = "/etc/crontab" fullword ascii
+  condition:
+    elf_magic and all of them
+}
+
+
 // rule SusElf_PyCompiled {
 //   meta:
 //     author = "Nong Hoang Tu"
