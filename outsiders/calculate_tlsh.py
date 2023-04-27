@@ -30,7 +30,7 @@ def main():
       full_path = root + name
       if os.path.isfile(full_path):
         newHashObj = TlshResult(tlsh.hash(open(full_path, 'rb').read()))
-        if newHashObj == "TNULL":
+        if newHashObj.hash == "TNULL":
           # File is not valid (not ELF file?). Ignore
           pass
         elif not append_same_hash(newHashObj.hash, list_results):
