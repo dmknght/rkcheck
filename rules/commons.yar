@@ -310,7 +310,6 @@ rule ML_Gen1 {
 		$s7 = "AWIAVAUIATIUHSLHH" fullword
 		$s8 = "A62E16B33E841BF2D6D976C" fullword
 		$s10 = "AWAVAUIATIUHSHHXDD" fullword
-		$s12 = "RegQueryValueExA" fullword
 		$s13 = "completionCallback" fullword
 		$s14 = "Eh1Zeh9ZVUh5ZnFk" fullword
 		$s15 = "K23456789eyd1XSNQWTZMIRHGVOYLjPJE" fullword
