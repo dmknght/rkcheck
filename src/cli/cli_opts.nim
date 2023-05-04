@@ -13,7 +13,7 @@ proc cli_opt_find_default_ydb(list_paths: openArray[string]): string =
   raise newException(OSError, "Missing Yara's database")
 
 
-proc cliopts_create_default*(options: var ScanOptions, scan_rootkit = false) =
+proc cliopts_create_default*(options: var ScanOptions) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
@@ -24,11 +24,6 @@ proc cliopts_create_default*(options: var ScanOptions, scan_rootkit = false) =
       "/usr/share/rkcheck/database/signatures.ydb",
       "/database/signatures.ydb",
       "database/signatures.ydb"
-    ]
-    db_path_rootkit = [
-      "/usr/share/rkcheck/database/rootkits.ydb",
-      "/database/rootkits.ydb",
-      "database/rootkits.ydb"
     ]
 
   # Load bytecode signatures by default. Problems: if user pass only --use-clamdb,
@@ -41,10 +36,7 @@ proc cliopts_create_default*(options: var ScanOptions, scan_rootkit = false) =
   #   options.db_path_clamav = "/var/lib/clamav/"
   #   options.use_clam_db = false
 
-  if not scan_rootkit:
-    options.db_path_yara = cli_opt_find_default_ydb(db_path_normal)
-  else:
-    options.db_path_yara = cli_opt_find_default_ydb(db_path_rootkit)
+  options.db_path_yara = cli_opt_find_default_ydb(db_path_normal)
 
 
 proc cliopts_set_db_path_clamav(options: var ScanOptions, i: var int, total_param: int) =
