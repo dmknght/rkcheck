@@ -10,8 +10,6 @@ proc cli_opt_find_default_ydb(list_paths: openArray[string]): string =
     if fileExists(path):
       return path
 
-  raise newException(OSError, "Missing Yara's database")
-
 
 proc cliopts_create_default*(options: var ScanOptions) =
   options.is_clam_debug = false
@@ -171,5 +169,9 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         raise newException(ValueError, "Invalid option " & currentParam)
 
     i += 1
+
+  # If there's no valid yara path and no ClamDb is in use, raise error
+  if isEmptyOrWhitespace(options.db_path_yara) and not options.use_clam_db:
+    raise newException(OSError, "No database found")
 
   return true
