@@ -269,6 +269,16 @@ rule Pupy_Generic {
     elf_magic and all of them
 }
 
+
+rule PingPull_Generic {
+  // https://unit42.paloaltonetworks.com/alloy-taurus/
+  // sha256 cb0922d8b130504bf9a3078743294791201789c5a3d7bc0369afd096ea15f0ae
+  strings:
+    $ = "sbd:2345:respawn:%s -f\" >> /etc/inittab"
+  condition:
+    elf_magic and all of them
+}
+
 // TODO hunt from https://www.hybrid-analysis.com/yara-search/results/e0f6fc9e4611bbff2192b250951d22a73180966f58c2c38e98d48f988246a2e5
 // hunted strings: hlLjztqZ and npxXoudifFeEgGaACScs format of some libs
 
