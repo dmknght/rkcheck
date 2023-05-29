@@ -1,5 +1,6 @@
 import os
 import sequtils
+import strutils
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 import .. / cli / print_utils
 
@@ -30,7 +31,9 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
     3. post_scan: after file scan complete
     4. virus_found: only when a virus is found
   ]#
-  cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_scan_file)
+  # Only use Yara's scan engine if the database is available
+  if not isEmptyOrWhitespace(options.db_path_yara):
+    cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_scan_file)
   cl_engine_set_clcb_virus_found(scanner.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
@@ -115,13 +118,14 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
     ld_preload_path = "/etc/ld.so.preload"
   var
     yara_engine: YrEngine
+    use_yara_engine: bool
     f_count, f_infect, p_count, p_infect: uint
 
   yara_engine.database = options.db_path_yara
   setControlCHook(handle_keyboard_interrupt)
 
   if yara_engine.init_yara() != ERROR_SUCCESS:
-    raise newException(ValueError, "Failed to init Yara Engine")
+    use_yara_engine = false
 
   if options.scan_preload and fileExists(ld_preload_path):
     for line in lines(ld_preload_path):
@@ -133,7 +137,7 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
     scanner_cb_scan_files(yara_engine, options, f_count, f_infect)
 
-  if len(options.list_procs) != 0 or options.scan_all_procs:
+  if use_yara_engine and (len(options.list_procs) != 0 or options.scan_all_procs):
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
 
   finit_yara(yara_engine)
