@@ -99,7 +99,7 @@ proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint): cl_err
   if f_engine.use_clam_sigs:
     var
       sig_count: cuint = 0
-    result = cl_load(cstring(f_engine.database), f_engine.engine, addr(sig_count), CL_DB_STDOPT)
+    result = cl_load(cstring(f_engine.database), f_engine.engine, addr(sig_count), bitor(CL_DB_STDOPT, CL_DB_BYTECODE_UNSIGNED))
     loaded_sig_count = uint(sig_count)
 
     if result == CL_SUCCESS:
