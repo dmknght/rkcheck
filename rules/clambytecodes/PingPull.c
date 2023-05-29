@@ -1,4 +1,4 @@
-VIRUSNAME_PREFIX("Trojan.PingPong")
+VIRUSNAME_PREFIX("Trjn.PingPong")
 VIRUSNAMES("Generic")
 TARGET(6) // ELF file
 
