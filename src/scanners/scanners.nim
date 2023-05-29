@@ -23,7 +23,7 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
   var
     loaded_sig_count: uint
 
-  if scanner.init_clamav(loaded_sig_count) != ERROR_SUCCESS:
+  if scanner.init_clamav(loaded_sig_count, scanner.use_clam_sigs) != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init ClamAV Engine")
 
   #[

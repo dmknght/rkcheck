@@ -56,7 +56,7 @@ const
   SCANNER_MAX_PROC_COUNT* = 4194304
 
 
-proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint): cl_error_t =
+proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint, use_clam: bool): cl_error_t =
   #[
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -68,21 +68,23 @@ proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint): cl_err
 
   f_engine.engine = cl_engine_new()
 
+  # ~0 (not 0) is to enable all flags.In this case, we disable flags by default
+  f_engine.options.parse = bitor(f_engine.options.parse, 0)
   # Enable some parsers
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_ARCHIVE)
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_OLE2)
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_PDF)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_SWF)
+  # f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_SWF)
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_HWP3)
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_XMLDOCS)
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_MAIL)
   f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_HTML)
 
-  # Disable parse ELF and parse PE. Handle by Yara only
-  f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_ELF)
-  f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_PE)
+  # Disable ELF parser if we don't use ClamAV Signatures
+  if use_clam:
+    f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_ELF)
+  # f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_PE)
 
-  f_engine.options.parse = bitnot(bitor(f_engine.options.parse, 0))
   # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
   f_engine.options.general = bitor(f_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
   # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
