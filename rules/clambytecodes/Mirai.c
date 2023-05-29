@@ -29,7 +29,7 @@ SIGNATURES_END
 
 bool logical_trigger(void)
 {
-  if (
+  return
       matches(Signatures.SigGenStr0) ||
       matches(Signatures.SigGenStr1) ||
       matches(Signatures.SigGenStr2) ||
@@ -38,12 +38,7 @@ bool logical_trigger(void)
       matches(Signatures.Sig4c36Str1) ||
       matches(Signatures.Sig4c36Str2) ||
       matches(Signatures.Sig9c77Str) ||
-      matches(Signatures.Sig92a0Str)
-  )
-  {
-    return true;
-  }
-  return false;
+      matches(Signatures.Sig92a0Str);
 }
 
 int entrypoint(void)
