@@ -34,19 +34,19 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
     4. virus_found: only when a virus is found
   ]#
   # Only use Yara's scan engine if the init process completed
-  if yara_engine.engine != nil:
-    cl_engine_set_clcb_pre_scan(scanner.engine, fscanner_cb_pre_scan_file)
-  elif loaded_sig_count == 0:
-    raise newException(ValueError, "No valid signatures.")
-  else:
-    cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_inc_count)
-
   # if yara_engine.engine != nil:
-  #   cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_post_scan_file)
+  #   cl_engine_set_clcb_pre_scan(scanner.engine, fscanner_cb_pre_scan_file)
   # elif loaded_sig_count == 0:
   #   raise newException(ValueError, "No valid signatures.")
   # else:
   #   cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_inc_count)
+
+  if yara_engine.engine != nil:
+    cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_post_scan_file)
+  elif loaded_sig_count == 0:
+    raise newException(ValueError, "No valid signatures.")
+  else:
+    cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_inc_count)
 
   cl_engine_set_clcb_virus_found(scanner.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
