@@ -1,6 +1,7 @@
 import libclamav
 import libyara
 import bitops
+import strutils
 import .. / cli / print_utils
 import engine_utils
 import .. / compiler / compiler_utils
@@ -124,6 +125,8 @@ proc init_yara*(engine: var YrEngine): int =
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
 
+  if isEmptyOrWhitespace(engine.database):
+    return ERROR_COULD_NOT_OPEN_FILE
   # If rule is compiled, we load it
   if yr_rule_file_is_compiled(engine.database):
     result = yr_rules_load(cstring(engine.database), addr(engine.engine))
