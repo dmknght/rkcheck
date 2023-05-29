@@ -56,7 +56,7 @@ const
   SCANNER_MAX_PROC_COUNT* = 4194304
 
 
-proc init_clamav*(f_engine: var FileScanner): cl_error_t =
+proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint): cl_error_t =
   #[
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -97,11 +97,13 @@ proc init_clamav*(f_engine: var FileScanner): cl_error_t =
 
   # If database path is not empty, load ClamAV Signatures
   if f_engine.use_clam_sigs:
-    var sig_count: cuint = 0
+    var
+      sig_count: cuint = 0
     result = cl_load(cstring(f_engine.database), f_engine.engine, addr(sig_count), CL_DB_STDOPT)
+    loaded_sig_count = uint(sig_count)
 
     if result == CL_SUCCESS:
-      print_loaded_signatures(uint(sig_count), false)
+      print_loaded_signatures(loaded_sig_count, false)
 
   return cl_engine_compile(f_engine.engine)
 

@@ -21,7 +21,10 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
   scanner.database = options.db_path_clamav
   scanner.use_clam_sigs = options.use_clam_db
 
-  if scanner.init_clamav() != ERROR_SUCCESS:
+  var
+    loaded_sig_count: uint
+
+  if scanner.init_clamav(loaded_sig_count) != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init ClamAV Engine")
 
   #[
@@ -34,6 +37,8 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
   # Only use Yara's scan engine if the database is available
   if not isEmptyOrWhitespace(options.db_path_yara):
     cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_scan_file)
+  elif loaded_sig_count == 0:
+    raise newException(ValueError, "No valid signatures.")
   cl_engine_set_clcb_virus_found(scanner.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
