@@ -35,7 +35,7 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
   ]#
   # Only use Yara's scan engine if the init process completed
   if yara_engine.engine != nil:
-    cl_engine_set_clcb_pre_scan(scanner.engine, fscanner_cb_pre_scan_file)
+    cl_engine_set_clcb_pre_cache(scanner.engine, fscanner_cb_pre_scan_cache)
   elif loaded_sig_count == 0:
     raise newException(ValueError, "No valid signatures.")
   else:

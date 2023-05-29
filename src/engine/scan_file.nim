@@ -59,7 +59,7 @@ proc fscanner_cb_post_scan_file*(fd: cint, scan_result: cint, virname: cstring, 
     return ctx.yr_scanner.scan_result
 
 
-proc fscanner_cb_pre_scan_file*(fd: cint, cl_type: cstring, context: pointer): cl_error_t {.cdecl.} =
+proc fscanner_cb_pre_scan_cache*(fd: cint, cl_type: cstring, context: pointer): cl_error_t {.cdecl.} =
   #[
     Pre-scan callback
   ]#
