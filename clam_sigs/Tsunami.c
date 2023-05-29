@@ -1,0 +1,25 @@
+VIRUSNAME_PREFIX("Botn.Tsunami")
+VIRUSNAMES("de1b")
+TARGET(6) // ELF file
+
+SIGNATURES_DECL_BEGIN
+DECLARE_SIGNATURE(str1)
+DECLARE_SIGNATURE(str2)
+SIGNATURES_DECL_END
+
+SIGNATURES_DEF_BEGIN
+DEFINE_SIGNATURE(str1, "5473756e616d69207375636365737366756c6c79206465706c6f79656421")
+DEFINE_SIGNATURE(str2, "2e7473756e616d69202d6c202e74202d67")
+SIGNATURES_END
+
+
+bool logical_trigger(void)
+{
+  return matches(Signatures.str1) || matches(Signatures.str2);
+}
+
+int entrypoint(void)
+{
+  foundVirus("de1b");
+  return 0;
+}

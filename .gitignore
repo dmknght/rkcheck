@@ -8,3 +8,4 @@ src/main
 .idea/*
 build/*
 .vscode
+clam_sigs/*.cbc
