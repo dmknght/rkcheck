@@ -117,7 +117,7 @@ proc finit_clamav*(f_engine: var FileScanner) =
     discard cl_engine_free(f_engine.engine)
 
 
-proc init_yara*(engine: var YrEngine): int =
+proc init_yara*(engine: var YrEngine, loaded_sigs: var uint): int =
   result = yr_initialize()
 
   if result != ERROR_SUCCESS:
@@ -139,7 +139,9 @@ proc init_yara*(engine: var YrEngine): int =
   if result != ERROR_SUCCESS:
     return result
 
-  print_loaded_signatures(uint(engine.engine.num_rules), true)
+  loaded_sigs = uint(engine.engine.num_rules)
+
+  print_loaded_signatures(loaded_sigs, true)
   print_yara_version()
 
   discard yr_set_configuration(YR_CONFIG_STACK_SIZE, addr(stack_size))

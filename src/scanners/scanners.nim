@@ -1,6 +1,5 @@
 import os
 import sequtils
-import strutils
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 import .. / cli / print_utils
 
@@ -34,8 +33,8 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
     3. post_scan: after file scan complete
     4. virus_found: only when a virus is found
   ]#
-  # Only use Yara's scan engine if the database is available
-  if not isEmptyOrWhitespace(options.db_path_yara):
+  # Do not use Yara's scan engine if it failed to init
+  if yara_engine.engine != nil:
     cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_scan_file)
   elif loaded_sig_count == 0:
     raise newException(ValueError, "No valid signatures.")
@@ -123,14 +122,13 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
     ld_preload_path = "/etc/ld.so.preload"
   var
     yara_engine: YrEngine
-    use_yara_engine: bool
+    loaded_yara_sigs: uint = 0
     f_count, f_infect, p_count, p_infect: uint
 
   yara_engine.database = options.db_path_yara
   setControlCHook(handle_keyboard_interrupt)
 
-  if yara_engine.init_yara() != ERROR_SUCCESS:
-    use_yara_engine = false
+  discard yara_engine.init_yara(loaded_yara_sigs)
 
   if options.scan_preload and fileExists(ld_preload_path):
     for line in lines(ld_preload_path):
@@ -142,8 +140,9 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
     scanner_cb_scan_files(yara_engine, options, f_count, f_infect)
 
-  if use_yara_engine and (len(options.list_procs) != 0 or options.scan_all_procs):
+  if loaded_yara_sigs > 0 and (len(options.list_procs) != 0 or options.scan_all_procs):
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
 
   finit_yara(yara_engine)
+  # FIXME this doesn't work when use ClamAV only
   print_sumary(f_count, f_infect, p_count, p_infect)
