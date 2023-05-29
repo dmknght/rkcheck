@@ -33,11 +33,14 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
     3. post_scan: after file scan complete
     4. virus_found: only when a virus is found
   ]#
-  # Do not use Yara's scan engine if it failed to init
+  # Only use Yara's scan engine if the init process completed
   if yara_engine.engine != nil:
     cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_scan_file)
   elif loaded_sig_count == 0:
     raise newException(ValueError, "No valid signatures.")
+  else:
+    cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_inc_count)
+
   cl_engine_set_clcb_virus_found(scanner.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
@@ -144,5 +147,5 @@ proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files:
     scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
 
   finit_yara(yara_engine)
-  # FIXME this doesn't work when use ClamAV only
+
   print_sumary(f_count, f_infect, p_count, p_infect)

@@ -56,6 +56,18 @@ proc fscanner_cb_scan_file*(fd: cint, scan_result: cint, virname: cstring, conte
     return ctx.yr_scanner.scan_result
 
 
+proc fscanner_cb_inc_count*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
+  #[
+    When Yara failed to init, this function is called instead of fscanner_cb_scan_file
+    This function will count scanned files only
+  ]#
+  let
+    ctx = cast[ptr FileScanner](context)
+
+  progress_bar_scan_file(ctx.yr_scanner.scan_object)
+  ctx.yr_scanner.file_scanned += 1
+
+
 proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
   var
     ctx = cast[ptr YrEngine](user_data)
