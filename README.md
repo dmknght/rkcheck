@@ -2,12 +2,11 @@
 This tool is a combination of Yara and ClamAV to do malware scanning on Linux system. It was made as the idea that rkhunter and chkrootkit need better replacement since both tools check absolute paths exist only.
 
 # Feature comparison
-Comparison of ClamAV and Yara
+Comparison of ClamAV and Yara (CPU and Memory consuption is updated bellow the table)
 
 | | ClamAV | Yara |
 |---|---|---|
 | File scan | &#9745; | &#9745; |
-| Memory scan | &#9744; | &#9745; |
 | File parser | &#9745; | &#9744; |
 | Decompresser | &#9745; | &#9744; |
 | Unpacker | Some basic unpackers | &#9744; |
@@ -18,6 +17,45 @@ Comparison of ClamAV and Yara
 | Emulator | &#9744; | &#9744; |
 
 -> rkcheck combines advantages of 2 engines with Nim lang to provide a strong, easy to maintain and modify open-source malware scanner.
+
+# Peformance comparison
+The result bellow was tested against 215 sample. The ruleset was string matching rules. Some important information before the test result
+
+ClamAV has 2 signature types:
+- Traditional: logical signatures / hash-based signatures, ... in text file
+- Bytecode: Use LLVM to execute bytecodes. The compiled rule has the logical signature (similar to traditional one) **and** the bytecodes (encoded char)
+
+Different signature types could have different time consumption and memory consumption affects by database loading method and signature execution method. In theory, bytecode signature will costs less memory when the database is huge.
+
+Meanwhile, Yara signatures have two different rule types:
+- Text-based rules: The engine will load it into memory and compile.
+- Compiled rules: Pre-compiled rules.
+
+Both rule types are compiled to bytecodes. The load time might be different (small value). Yara engine loads everything in the rules into memory. The memory consumption will be huge if the ruleset is huge. At this point, it's similar to ClamAV's traditional signatures
+
+Memory consumtion is affected by:
+1. Database loading
+2. File processing
+
+Both Yara and ClamAV's traditional signatures load everything into memory. That being said, the bigger database is, the more ram they use. Meanwhile the Bytecode signature of ClamAV supposes to be like a single binary. In theory, bytecode signature won't have the huge memory consumption in term of database loading.
+
+The test used 4 signatures to detect Mirai botnet (Yara rule has 1 extra private rule to detect file magic). At this point, database's time consumption and memory consumption is very small. The result is about file processing's time / memory consumption.
+
+To make a better look, i'll use
+1. Yara text based rule with Yara tool
+2. Yara compiled rule with Yara tool
+3. Logical signature (text file) with clamscan
+4. Bytecode signature with clamscan
+5. Retest all signatures with rkcheck
+
+**Time consumption**
+- 
+
+
+**Memory consumption**
+
+
+
 
 Comparison of ckrootkit and rkhunter (scan module only)
 
