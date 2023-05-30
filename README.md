@@ -39,23 +39,39 @@ Memory consumtion is affected by:
 
 Both Yara and ClamAV's traditional signatures load everything into memory. That being said, the bigger database is, the more ram they use. Meanwhile the Bytecode signature of ClamAV supposes to be like a single binary. In theory, bytecode signature won't have the huge memory consumption in term of database loading.
 
-The test used 4 signatures to detect Mirai botnet (Yara rule has 1 extra private rule to detect file magic). At this point, database's time consumption and memory consumption is very small. The result is about file processing's time / memory consumption.
+The test used 4 signatures to detect Mirai botnet (Yara rule has 1 extra private rule to detect file magic).
 
-To make a better look, i'll use
+To make a better look, I'll use:
 1. Yara text based rule with Yara tool
 2. Yara compiled rule with Yara tool
 3. Logical signature (text file) with clamscan
 4. Bytecode signature with clamscan
-5. Retest all signatures with rkcheck
+5. Re-test all signatures with rkcheck
 
-**Time consumption**
-- 
+clamscan will use flag `-i` to print matched files only. It's sightly faster than print all results to the terminal. The result is calculated by the tool `time`
 
+**Result**
+- **clamav** with **logical signature**. Command `time clamscan -d mirai.ldb ~/Desktop/MalwareLab/LinuxMalwareDetected -i`. Result: `0:05.00 real,	4.75 user,	0.25 sys,	0 amem,	25316 mmem`
+- **clamav** with **bytecode signature**. Command `time clamscan -d Mirai.cbc ~/Desktop/MalwareLab/LinuxMalwareDetected -i --bytecode-unsigned`. Result: `0:04.97 real,	4.73 user,	0.23 sys,	0 amem,	25444 mmem`
+- **Yara** with **compiled rules**. Command `time yara -C compiled_rule.yac ~/Desktop/MalwareLab/LinuxMalwareDetected`. Result: `0:00.10 real,	1.11 user,	0.06 sys,	0 amem,	68640 mmem`
+- **Yara** with **text-based rules**. Command: `time yara rule.yara ~/Desktop/MalwareLab/LinuxMalwareDetected`. Result: `0:00.10 real,	1.11 user,	0.06 sys,	0 amem,	75324 mmem`
 
-**Memory consumption**
+**Conclusions**
+Yara is a lot faster than ClamAV when it processed files (x50). However, the memory consumpting is huge (3x). Yara doesn't have file parsers. So when user uses Yara to scan huge files in the system, memory exhausted could happend. The scan speed of Yara is impressing though.
 
+**The test's result with rkcheck**
+- The time consumption of rkcheck is about 5 secs, similar to ClamAV's result. It's a lot slower than original Yara.
+- The memory using **Yara's compiled rules** costs 24mb, while the **Yara's text-based rules** costs 31mb. That's a big number IMO. The result using **ClamAV's bytecode** costs 26mb. The **logical signature** costs 25mb.
+- An interesting info: when I tested **rkcheck** with ClamAV's **pre-scan** callback and current **Yara rules** of rkcheck, it took 3 secs to complete the scan. The **post-scan** callback took 5 secs. However, the test with current ruleset made no differences.
 
+**Final Conclusions**
+- There's a huge differences between **compiled Yara rules** and **text-based yara rules**. The scan time of **ClamAV** and **Yara** is massive huge too
+- There's no memory consumption tests between **ClamAV's bytecode sigs** and **ClamAV's text-based sig** (yet?). In theory, **bytecode's sigs** should save a lot of memory when the database is huge
+- The memory comparison between **ClamAV** and **Yara** included both *database loading* and *file processing*. There's no clue to tell which one is better in term of memory costs. However, I'd give a point to Yara engine because it supports memory scanning on Linux, and the Yara rule is much easier to write. Yara rule engine is much effectives with the modules as well. The point is for the developers / researcher. In real world scenarios, the user should choose the ruleset carefully instead of run and scan *everything*.
+- It's really hard to improve the scan time of **rkcheck** because it uses ClamAV to process the files. The memory consumption improvement could be able to do using ClamAV's bytecode signatures. However, it requires real test. And using ClamAV's bytecode sigs also means there's no way to scan Linux's memory for now. If ClamAV supports memory scan (and again, the **bytecode sigs** doesn't have memory exhausted problem), I'd use only some specific Yara's rules to use their modules. String matching rules will use ClamAV's Bytecode engine to save memory.
+- Sorry for my bad English and bad markdown fromat
 
+# Feature comparison of some rootkit scanners
 
 Comparison of ckrootkit and rkhunter (scan module only)
 
