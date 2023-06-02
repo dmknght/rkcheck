@@ -49,6 +49,14 @@ private rule shebang_magic {
     uint16(0) == 0x2123
 }
 
+
+private rule pyc_magic {
+  // First 2 bytes: Py version https://github.com/google/pytype/blob/main/pytype/pyc/magic.py
+  condition:
+    uint16(2) == 0x0a0d
+}
+
+
 /*
   Scan system kernel modules
 */
