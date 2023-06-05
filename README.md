@@ -64,6 +64,11 @@ Yara is a lot faster than ClamAV when it processed files (x50). However, the mem
 - The memory using **Yara's compiled rules** costs 24mb, while the **Yara's text-based rules** costs 31mb. That's a big number IMO. The result using **ClamAV's bytecode** costs 26mb. The **logical signature** costs 25mb.
 - An interesting info: when I tested **rkcheck** with ClamAV's **pre-scan** callback and current **Yara rules** of rkcheck, it took 3 secs to complete the scan. The **post-scan** callback took 5 secs. However, the test with current ruleset made no differences.
 
+**Update the test with rkscan** I've commited a change that pre-check the file's magic before scan. If the header is ELF file, it will call the Yara's scan engine directly. It saves a lot of time scanning with the test condition
+- Scan with Yara rules text file `0:00.75 real,   0.71 user,      0.03 sys,       0 amem, 30748 mmem`
+- Compiled Yara rules `0:00.75 real,   0.71 user,      0.03 sys,       0 amem, 23456 mmem`
+- Full DB scan (same target folder) took `0:02.00 real,   1.95 user,      0.04 sys,       0 amem, 40092 mmem` I assume this is the best optimization I can make for now.
+
 **Final Conclusions**
 - There's a huge differences between **compiled Yara rules** and **text-based yara rules**. The scan time of **ClamAV** and **Yara** is massive huge too
 - There's no memory consumption tests between **ClamAV's bytecode sigs** and **ClamAV's text-based sig** (yet?). In theory, **bytecode's sigs** should save a lot of memory when the database is huge
