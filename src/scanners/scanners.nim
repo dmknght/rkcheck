@@ -12,6 +12,36 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
+proc scanners_pre_scan_file(scanner: var FileScanner, virname: var cstring, scanned: var culong) =
+  #[
+    Use Yara's file map to read file in a safe way
+    Then we compare data to check file header
+    If the file header is ELF, we scan the file directly without calling the ClamAV file handler
+    Expecting this will be faster
+  ]#
+
+  var
+    map_file: YR_MAPPED_FILE
+    elf_magic = "\x7F\x45\x4C\x46"
+    is_elf_file: bool
+    # TODO move elf_magic to const
+    # TODO handle other file types like PE, MACH
+
+  if yr_filemap_map(cstring(scanner.yr_scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
+    # Check if the file is ELF file
+    if cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
+      is_elf_file = true
+    # Not ELF file, scan with ClamAV
+    else:
+      is_elf_file = false
+    yr_filemap_unmap(addr(map_file))
+
+  if is_elf_file:
+    fscanner_yr_scan_file(scanner.yr_scanner)
+  else:
+    discard cl_scanfile_callback(cstring(scanner.yr_scanner.scan_object), addr(virname), addr(scanned), scanner.engine, addr(scanner.options), addr(scanner))
+
+
 proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine, options: ScanOptions) =
   scanner.yr_scanner = yara_engine
   scanner.yr_scanner.file_infected = 0
@@ -65,12 +95,13 @@ proc scanners_cl_scan_files*(yara_engine: var YrEngine, options: ScanOptions, re
       for dir_path in options.list_dirs:
         for path in walkDirRec(dir_path):
           file_scanner.yr_scanner.scan_object = path
-          discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
+          scanners_pre_scan_file(file_scanner, virname, scanned)
 
     if len(options.list_files) != 0:
       for path in options.list_files:
         file_scanner.yr_scanner.scan_object = path
-        discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
+        scanners_pre_scan_file(file_scanner, virname, scanned)
+        # discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
   except KeyboardInterrupt:
     return
   finally:
