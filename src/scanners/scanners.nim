@@ -101,7 +101,6 @@ proc scanners_cl_scan_files*(yara_engine: var YrEngine, options: ScanOptions, re
       for path in options.list_files:
         file_scanner.yr_scanner.scan_object = path
         scanners_pre_scan_file(file_scanner, virname, scanned)
-        # discard cl_scanfile_callback(cstring(path), addr(virname), addr(scanned), file_scanner.engine, addr(file_scanner.options), addr(file_scanner))
   except KeyboardInterrupt:
     return
   finally:
