@@ -12,7 +12,7 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
-proc scanners_pre_scan_file(scanner: var FileScanner, virname: var cstring, scanned: var culong) =
+proc scanners_pre_scan_file(scanner: var FileScanCtx, virname: var cstring, scanned: var culong) =
   #[
     Use Yara's file map to read file in a safe way
     Then we compare data to check file header
@@ -27,7 +27,7 @@ proc scanners_pre_scan_file(scanner: var FileScanner, virname: var cstring, scan
     # TODO move elf_magic to const
     # TODO handle other file types like PE, MACH
 
-  if yr_filemap_map(cstring(scanner.yr_scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
+  if yr_filemap_map(cstring(scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
     #[
       The YR_MAPPED_FILE has `file` as a file descriptor value
       However, using yr_rules_scan_fd is slower than accessing file (2.79 when scan fd vs 2.10 when scan file)
@@ -42,23 +42,27 @@ proc scanners_pre_scan_file(scanner: var FileScanner, virname: var cstring, scan
     yr_filemap_unmap(addr(map_file))
 
   if is_elf_file:
-    fscanner_yr_scan_file(scanner.yr_scanner)
+    fscanner_yr_scan_file(scanner)
   else:
-    discard cl_scanfile_callback(cstring(scanner.yr_scanner.scan_object), addr(virname), addr(scanned), scanner.engine, addr(scanner.options), addr(scanner))
+    discard cl_scanfile_callback(cstring(scanner.scan_object), addr(virname), addr(scanned), scanner.clam.engine, addr(scanner.clam.options), addr(scanner))
 
 
-proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine, options: ScanOptions) =
-  scanner.yr_scanner = yara_engine
-  scanner.yr_scanner.file_infected = 0
-  scanner.yr_scanner.file_scanned = 0
-  scanner.debug_mode = options.is_clam_debug
-  scanner.database = options.db_path_clamav
-  scanner.use_clam_sigs = options.use_clam_db
+proc scanners_set_clamav_values(scanner: var FileScanCtx, yara_engine: YrEngine, options: ScanOptions) =
+  #[
+    TODO change name to set file scanner values
+    add descriptions
+  ]#
+  scanner.yara = yara_engine
+  scanner.file_infected = 0
+  scanner.file_scanned = 0
+  scanner.clam.debug_mode = options.is_clam_debug
+  scanner.clam.database = options.db_path_clamav
+  scanner.clam.use_clam = options.use_clam_db
 
   var
     loaded_sig_count: uint
 
-  if scanner.init_clamav(loaded_sig_count, scanner.use_clam_sigs) != ERROR_SUCCESS:
+  if scanner.clam.init_clamav(loaded_sig_count, scanner.clam.use_clam) != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init ClamAV Engine")
 
   #[
@@ -70,26 +74,22 @@ proc scanners_set_clamav_values(scanner: var FileScanner, yara_engine: YrEngine,
   ]#
   # Only use Yara's scan engine if the init process completed
   if yara_engine.engine != nil:
-    cl_engine_set_clcb_pre_cache(scanner.engine, fscanner_cb_pre_scan_cache)
+    cl_engine_set_clcb_pre_cache(scanner.clam.engine, fscanner_cb_pre_scan_cache)
   elif loaded_sig_count == 0:
     raise newException(ValueError, "No valid signatures.")
   else:
-    cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_inc_count)
+    cl_engine_set_clcb_post_scan(scanner.clam.engine, fscanner_cb_inc_count)
 
-  # if yara_engine.engine != nil:
-  #   cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_post_scan_file)
-  # elif loaded_sig_count == 0:
-  #   raise newException(ValueError, "No valid signatures.")
-  # else:
-  #   cl_engine_set_clcb_post_scan(scanner.engine, fscanner_cb_inc_count)
-
-  cl_engine_set_clcb_virus_found(scanner.engine, fscanner_cb_virus_found)
+  cl_engine_set_clcb_virus_found(scanner.clam.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
 
 proc scanners_cl_scan_files*(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+  #[
+    TODO rewrite the structure which does not depend on Yara or ClamAV as root object
+  ]#
   var
-    file_scanner: FileScanner
+    file_scanner: FileScanCtx
     scanned: culong
     virname: cstring
 
@@ -99,54 +99,54 @@ proc scanners_cl_scan_files*(yara_engine: var YrEngine, options: ScanOptions, re
     if len(options.list_dirs) != 0:
       for dir_path in options.list_dirs:
         for path in walkDirRec(dir_path):
-          file_scanner.yr_scanner.scan_object = path
+          file_scanner.scan_object = path
           scanners_pre_scan_file(file_scanner, virname, scanned)
 
     if len(options.list_files) != 0:
       for path in options.list_files:
-        file_scanner.yr_scanner.scan_object = path
+        file_scanner.scan_object = path
         scanners_pre_scan_file(file_scanner, virname, scanned)
   except KeyboardInterrupt:
     return
   finally:
-    result_count = file_scanner.yr_scanner.file_scanned
-    result_infect = file_scanner.yr_scanner.file_infected
-    finit_clamav(file_scanner)
+    result_count = file_scanner.file_scanned
+    result_infect = file_scanner.file_infected
+    finit_clamav(file_scanner.clam)
 
 
-proc scanners_yr_scan_files*(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+proc scanners_yr_scan_files*(scanner: var FileScanCtx, options: ScanOptions, result_count, result_infect: var uint) =
   try:
     if len(options.list_dirs) != 0:
       for dir_path in options.list_dirs:
         for path in walkDirRec(dir_path):
-          yara_engine.scan_object = path
-          fscanner_yr_scan_file(yara_engine)
+          scanner.scan_object = path
+          fscanner_yr_scan_file(scanner)
 
     if len(options.list_files) != 0:
       for path in options.list_files:
-        yara_engine.scan_object = path
-        fscanner_yr_scan_file(yara_engine)
+        scanner.scan_object = path
+        fscanner_yr_scan_file(scanner)
   except KeyboardInterrupt:
     return
   finally:
-    result_count = yara_engine.file_scanned
-    result_infect = yara_engine.file_infected
+    result_count = scanner.file_scanned
+    result_infect = scanner.file_infected
 
 
-proc scanners_set_proc_scan_values(scanner: var ProcScanner, options: ScanOptions, engine: ptr YR_RULES) =
+proc scanners_set_proc_scan_values(scanner: var ProcScanCtx, options: ScanOptions, engine: ptr YR_RULES) =
   if options.match_all:
-    scanner.match_all_rules = true
+    scanner.yara.match_all_rules = true
   else:
-    scanner.match_all_rules = false
+    scanner.yara.match_all_rules = false
 
   scanner.proc_scanned = 0
   scanner.proc_infected = 0
-  scanner.engine = engine
+  scanner.yara.engine = engine
 
 
 proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
   var
-    proc_scanner: ProcScanner
+    proc_scanner: ProcScanCtx
 
   scanners_set_proc_scan_values(proc_scanner, options, yara_engine.engine)
 

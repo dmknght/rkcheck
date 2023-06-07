@@ -19,44 +19,51 @@ type
     scan_preload*: bool
     db_path_clamav*: string
     db_path_yara*: string
-  PidInfo* = object
+
+  ProcInfo* = object
     pid*: uint
     tgid*: uint
     ppid*: uint
-    name*: string
     cmdline*: string
-    binary_path*: string
-    v_binary_path*: string
+    exec_name*: string
+    exec_path*: string
+    mapped_file*: string
+  ScanInfo* = object of RootObj
+    scan_object*: string
+    scan_result*: cl_error_t
+    virname*: cstring
 
-  ClEngine* = object of RootObj
+  ClEngine* = object
     engine*: ptr cl_engine
     options*: cl_scan_options
     database*: string
     debug_mode*: bool
-  YrEngine* = object of RootObj
+    use_clam*: bool
+  YrEngine* = object
     engine*: ptr YR_RULES
     database*: string
     match_all_rules*: bool
-    scan_object*: string
-    scan_result*: cl_error_t
+
+  FileScanCtx* = object of ScanInfo
+    yara*: YrEngine
+    clam*: ClEngine
     file_scanned*: uint
     file_infected*: uint
+
+  ProcScanCtx* = object of ScanInfo
+    yara*: YrEngine
+    # clam*: ClEngine
+    pinfo*: ProcInfo
     proc_scanned*: uint
     proc_infected*: uint
-    scan_virname*: cstring
 
-  ProcScanner* = object of YrEngine
-    pinfo*: PidInfo
-  FileScanner* = object of ClEngine
-    yr_scanner*: YrEngine
-    use_clam_sigs*: bool
 
 const
   YR_SCAN_TIMEOUT*: cint = 1000000
   SCANNER_MAX_PROC_COUNT* = 4194304
 
 
-proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint, use_clam: bool): cl_error_t =
+proc init_clamav*(f_engine: var ClEngine, loaded_sig_count: var uint, use_clam: bool): cl_error_t =
   #[
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -98,7 +105,7 @@ proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint, use_cla
     cl_debug()
 
   # If database path is not empty, load ClamAV Signatures
-  if f_engine.use_clam_sigs:
+  if f_engine.use_clam:
     var
       sig_count: cuint = 0
     result = cl_load(cstring(f_engine.database), f_engine.engine, addr(sig_count), bitor(CL_DB_STDOPT, CL_DB_BYTECODE_UNSIGNED))
@@ -110,7 +117,7 @@ proc init_clamav*(f_engine: var FileScanner, loaded_sig_count: var uint, use_cla
   return cl_engine_compile(f_engine.engine)
 
 
-proc finit_clamav*(f_engine: var FileScanner) =
+proc finit_clamav*(f_engine: var ClEngine) =
   #[
     Give ClamAV Engine's freedom
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
