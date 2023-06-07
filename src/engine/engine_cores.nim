@@ -28,10 +28,6 @@ type
     exec_name*: string
     exec_path*: string
     mapped_file*: string
-  ScanInfo* = object of RootObj
-    scan_object*: string
-    scan_result*: cl_error_t
-    virname*: cstring
 
   ClEngine* = object
     engine*: ptr cl_engine
@@ -44,15 +40,16 @@ type
     database*: string
     match_all_rules*: bool
 
-  FileScanCtx* = object of ScanInfo
+  ScanCtx* = object of RootObj
     yara*: YrEngine
     clam*: ClEngine
+    scan_object*: string
+    scan_result*: cl_error_t
+    virname*: cstring
+  FileScanCtx* = object of ScanCtx
     file_scanned*: uint
     file_infected*: uint
-
-  ProcScanCtx* = object of ScanInfo
-    yara*: YrEngine
-    # clam*: ClEngine
+  ProcScanCtx* = object of ScanCtx
     pinfo*: ProcInfo
     proc_scanned*: uint
     proc_infected*: uint
