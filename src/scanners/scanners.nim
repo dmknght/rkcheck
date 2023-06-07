@@ -29,7 +29,8 @@ proc scanners_pre_scan_file(scanner: var FileScanner, virname: var cstring, scan
 
   if yr_filemap_map(cstring(scanner.yr_scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
     # Check if the file is ELF file
-    if cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
+    # FIXME the file is empty
+    if map_file.size > 4 and cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
       is_elf_file = true
     # Not ELF file, scan with ClamAV
     else:
