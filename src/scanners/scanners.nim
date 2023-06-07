@@ -28,6 +28,10 @@ proc scanners_pre_scan_file(scanner: var FileScanner, virname: var cstring, scan
     # TODO handle other file types like PE, MACH
 
   if yr_filemap_map(cstring(scanner.yr_scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
+    #[
+      The YR_MAPPED_FILE has `file` as a file descriptor value
+      However, using yr_rules_scan_fd is slower than accessing file (2.79 when scan fd vs 2.10 when scan file)
+    ]#
     # Check if the file is ELF file
     if map_file.size > 4 and cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
       is_elf_file = true
