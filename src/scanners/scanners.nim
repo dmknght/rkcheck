@@ -53,15 +53,19 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
     Job: walkDir and call scan
   ]#
   var
-    file_scanner: FileScanCtx
+    file_scanner = FileScanCtx(
+      yara: scan_ctx.yara,
+      clam: scan_ctx.clam,
+      scan_object: scan_ctx.scan_object,
+      scan_result: scan_ctx.scan_result,
+      virname: scan_ctx.virname,
+      file_scanned: 0,
+      file_infected: 0
+    )
     scanned: culong
     virname: cstring
 
   try:
-    # TODO use better method?
-    file_scanner.yara = scan_ctx.yara
-    file_scanner.clam = scan_ctx.clam
-
     if len(list_dirs) != 0:
       for dir_path in list_dirs:
         for path in walkDirRec(dir_path):
@@ -81,13 +85,17 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
 
 proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_procs: bool, result_count, result_infected: var uint) =
   var
-    proc_scanner: ProcScanCtx
+    proc_scanner = ProcScanCtx(
+      yara: scan_ctx.yara,
+      clam: scan_ctx.clam,
+      scan_object: scan_ctx.scan_object,
+      scan_result: scan_ctx.scan_result,
+      virname: scan_ctx.virname,
+      proc_scanned: 0,
+      proc_infected: 0
+    )
 
   try:
-    # TODO use better method
-    proc_scanner.yara = scan_ctx.yara
-    proc_scanner.clam = scan_ctx.clam
-
     if all_procs:
       pscanner_scan_procs(proc_scanner)
     else:
