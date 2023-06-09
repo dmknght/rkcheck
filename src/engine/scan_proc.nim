@@ -1,5 +1,5 @@
 import libyara
-# import libclamav
+import libclamav
 import engine_cores
 import engine_utils
 import .. / cli / [progress_bar, print_utils]
@@ -76,10 +76,10 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
     mem_block: ptr YR_MEMORY_BLOCK
 
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
-    var
-      yr_map_file: YR_MAPPED_FILE
-      # virname: cstring
-      # scanned: culong
+    # TODO rewrite this using the ClamAV engine compatible
+    # var
+    #   virname: cstring
+    #   scanned: culong
 
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
@@ -88,13 +88,12 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
         base_size = mem_block[].size
 
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
-      # yr_filemap_map_ex?
-      if yr_filemap_map_ex(cstring(ctx.pinfo.mapped_file), uint(base_offset), base_size, yr_map_file.addr) == ERROR_SUCCESS: # FIXME int overflow at base_offset? 
-        # var cl_map_file = cl_fmap_open_memory(yr_map_file.data, base_size)
-        # cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.scan_object), virname.addr, scanned.addr)
-        yr_filemap_unmap(yr_map_file.addr)
 
       discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+
+      # Scan mem block with ClamAV
+      # var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
+      # discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
       # Stop scan if virus matches
       if not ctx.yara.match_all_rules and not isEmptyOrWhitespace($ctx.virname):
         break
