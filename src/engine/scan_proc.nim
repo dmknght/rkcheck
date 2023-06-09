@@ -77,9 +77,10 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     # TODO rewrite this using the ClamAV engine compatible
-    # var
-    #   virname: cstring
-    #   scanned: culong
+    # TODO set different callback for ClamAv when rule matches (print event)
+    var
+      virname: cstring
+      scanned: culong
 
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
@@ -92,8 +93,9 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
       # Scan mem block with ClamAV
-      # var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
-      # discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+      var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
+      discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+      cl_fmap_close(cl_map_file)
       # Stop scan if virus matches
       if not ctx.yara.match_all_rules and not isEmptyOrWhitespace($ctx.virname):
         break
