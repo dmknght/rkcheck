@@ -12,7 +12,7 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
-proc scanners_pre_scan_file(scanner: var FileScanCtx, virname: var cstring, scanned: var culong) =
+proc scanners_pre_scan_file(scanner: var FileScanCtx) =
   #[
     Use Yara's file map to read file in a safe way
     Then we compare data to check file header
@@ -24,6 +24,8 @@ proc scanners_pre_scan_file(scanner: var FileScanCtx, virname: var cstring, scan
     map_file: YR_MAPPED_FILE
     elf_magic = "\x7F\x45\x4C\x46"
     is_elf_file: bool
+    scanned: culong
+    virname: cstring
     # TODO move elf_magic to const
     # TODO handle other file types like PE, MACH
 
@@ -62,20 +64,20 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
       file_scanned: 0,
       file_infected: 0
     )
-    scanned: culong
-    virname: cstring
+
+  cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_cb_virus_found)
 
   try:
     if len(list_dirs) != 0:
       for dir_path in list_dirs:
         for path in walkDirRec(dir_path):
           file_scanner.scan_object = path
-          scanners_pre_scan_file(file_scanner, virname, scanned)
+          scanners_pre_scan_file(file_scanner)
 
     if len(list_files) != 0:
       for path in list_files:
         file_scanner.scan_object = path
-        scanners_pre_scan_file(file_scanner, virname, scanned)
+        scanners_pre_scan_file(file_scanner)
   except KeyboardInterrupt:
     return
   finally:
@@ -94,6 +96,9 @@ proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_pr
       proc_scanned: 0,
       proc_infected: 0
     )
+
+  # TODO set different callback when virus is found
+  # cl_engine_set_clcb_virus_found(proc_scanner.clam.engine, fscanner_cb_virus_found)
 
   try:
     if all_procs:
@@ -152,7 +157,7 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
   else:
     cl_engine_set_clcb_post_scan(ctx.clam.engine, fscanner_cb_inc_count)
 
-  cl_engine_set_clcb_virus_found(ctx.clam.engine, fscanner_cb_virus_found)
+  # cl_engine_set_clcb_virus_found(ctx.clam.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
 
