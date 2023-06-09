@@ -98,7 +98,7 @@ proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_pr
     )
 
   # TODO set different callback when virus is found
-  # cl_engine_set_clcb_virus_found(proc_scanner.clam.engine, fscanner_cb_virus_found)
+  cl_engine_set_clcb_virus_found(proc_scanner.clam.engine, fscanner_cb_virus_found)
 
   try:
     if all_procs:
