@@ -43,16 +43,22 @@ type
   ScanCtx* = object of RootObj
     yara*: YrEngine
     clam*: ClEngine
-    scan_object*: string
-    scan_result*: cl_error_t
-    virname*: cstring
+    # scan_object*: string
+    # scan_result*: cl_error_t
+    # virname*: cstring
   FileScanCtx* = object of ScanCtx
     file_scanned*: uint
     file_infected*: uint
+    scan_object*: string
+    scan_result*: cl_error_t
+    virname*: cstring
   ProcScanCtx* = object of ScanCtx
     pinfo*: ProcInfo
     proc_scanned*: uint
     proc_infected*: uint
+    scan_object*: string
+    scan_result*: cl_error_t
+    virname*: cstring
 
 
 const

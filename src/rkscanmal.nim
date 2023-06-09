@@ -6,4 +6,4 @@ import scanners / scanners
 var options: ScanOptions
 
 if cliopts_get_options(options):
-  scanners_create_scan_task(options, scanners_cl_scan_files)
+  scanners_create_scan_task(options)

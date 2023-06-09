@@ -1,5 +1,5 @@
 import os
-import sequtils
+# import sequtils
 import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
 import .. / cli / print_utils
 
@@ -35,6 +35,7 @@ proc scanners_pre_scan_file(scanner: var FileScanCtx, virname: var cstring, scan
     # Check if the file is ELF file
     # The ELF header is 52 or 64 bytes long for 32-bit and 64-bit binaries
     if map_file.size > 52 and cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
+      # TODO check condition. for example: not elf file and size < 52
       is_elf_file = true
     # Not ELF file, scan with ClamAV
     else:
@@ -47,22 +48,85 @@ proc scanners_pre_scan_file(scanner: var FileScanCtx, virname: var cstring, scan
     discard cl_scanfile_callback(cstring(scanner.scan_object), addr(virname), addr(scanned), scanner.clam.engine, addr(scanner.clam.options), addr(scanner))
 
 
-proc scanners_set_clamav_values(scanner: var FileScanCtx, yara_engine: YrEngine, options: ScanOptions) =
+proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[string], result_count, result_infect: var uint) =
   #[
-    TODO change name to set file scanner values
-    add descriptions
+    Job: walkDir and call scan
   ]#
-  scanner.yara = yara_engine
-  scanner.file_infected = 0
-  scanner.file_scanned = 0
-  scanner.clam.debug_mode = options.is_clam_debug
-  scanner.clam.database = options.db_path_clamav
-  scanner.clam.use_clam = options.use_clam_db
-
   var
-    loaded_sig_count: uint
+    file_scanner: FileScanCtx
+    scanned: culong
+    virname: cstring
 
-  if scanner.clam.init_clamav(loaded_sig_count, scanner.clam.use_clam) != ERROR_SUCCESS:
+  try:
+    # TODO use better method?
+    file_scanner.yara = scan_ctx.yara
+    file_scanner.clam = scan_ctx.clam
+
+    if len(list_dirs) != 0:
+      for dir_path in list_dirs:
+        for path in walkDirRec(dir_path):
+          file_scanner.scan_object = path
+          scanners_pre_scan_file(file_scanner, virname, scanned)
+
+    if len(list_files) != 0:
+      for path in list_files:
+        file_scanner.scan_object = path
+        scanners_pre_scan_file(file_scanner, virname, scanned)
+  except KeyboardInterrupt:
+    return
+  finally:
+    result_count = file_scanner.file_scanned
+    result_infect = file_scanner.file_infected
+
+
+proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_procs: bool, result_count, result_infected: var uint) =
+  var
+    proc_scanner: ProcScanCtx
+
+  try:
+    # TODO use better method
+    proc_scanner.yara = scan_ctx.yara
+    proc_scanner.clam = scan_ctx.clam
+
+    if all_procs:
+      pscanner_scan_procs(proc_scanner)
+    else:
+      pscanner_scan_procs(proc_scanner, list_procs)
+  except KeyboardInterrupt:
+    return
+  finally:
+    result_count = proc_scanner.proc_scanned
+    result_infected = proc_scanner.proc_infected
+
+
+# proc scanners_iterate_preload() =
+#   const
+#     ld_preload_path = "/etc/ld.so.preload"
+
+#   if options.scan_preload and fileExists(ld_preload_path):
+#     for line in lines(ld_preload_path):
+#       if fileExists(line):
+#         options.list_files.add(line)
+
+#   options.list_files = deduplicate(options.list_files)
+
+
+proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
+  #[
+    Init Yara and ClamAV
+  ]#
+  var
+    loaded_yara_sigs: uint = 0
+    loaded_clam_sigs: uint = 0
+
+  ctx.yara.database = options.db_path_yara
+  discard ctx.yara.init_yara(loaded_yara_sigs)
+
+  ctx.clam.debug_mode = options.is_clam_debug
+  ctx.clam.database = options.db_path_clamav
+  ctx.clam.use_clam = options.use_clam_db
+
+  if ctx.clam.init_clamav(loaded_clam_sigs, ctx.clam.use_clam) != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init ClamAV Engine")
 
   #[
@@ -73,121 +137,43 @@ proc scanners_set_clamav_values(scanner: var FileScanCtx, yara_engine: YrEngine,
     4. virus_found: only when a virus is found
   ]#
   # Only use Yara's scan engine if the init process completed
-  if yara_engine.engine != nil:
-    cl_engine_set_clcb_pre_cache(scanner.clam.engine, fscanner_cb_pre_scan_cache)
-  elif loaded_sig_count == 0:
+  if ctx.yara.engine != nil:
+    cl_engine_set_clcb_pre_cache(ctx.clam.engine, fscanner_cb_pre_scan_cache)
+  elif loaded_clam_sigs == 0:
     raise newException(ValueError, "No valid signatures.")
   else:
-    cl_engine_set_clcb_post_scan(scanner.clam.engine, fscanner_cb_inc_count)
+    cl_engine_set_clcb_post_scan(ctx.clam.engine, fscanner_cb_inc_count)
 
-  cl_engine_set_clcb_virus_found(scanner.clam.engine, fscanner_cb_virus_found)
+  cl_engine_set_clcb_virus_found(ctx.clam.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
 
-proc scanners_cl_scan_files*(yara_engine: var YrEngine, options: ScanOptions, result_count, result_infect: var uint) =
+proc scanners_finit_engine(ctx: var ScanCtx, f_count, f_infect, p_count, p_infect: uint) =
+  finit_yara(ctx.yara)
+  finit_clamav(ctx.clam)
+  print_sumary(f_count, f_infect, p_count, p_infect)
+
+
+proc scanners_create_scan_task*(options: var ScanOptions) =
   #[
-    TODO rewrite the structure which does not depend on Yara or ClamAV as root object
+    Create a scan task
+    Jobs:
+      1. init ClamAV and Yara
+      2. Call scan task
+      3. finit ClamAV and Yara
   ]#
+
   var
-    file_scanner: FileScanCtx
-    scanned: culong
-    virname: cstring
-
-  scanners_set_clamav_values(file_scanner, yara_engine, options)
-
-  try:
-    if len(options.list_dirs) != 0:
-      for dir_path in options.list_dirs:
-        for path in walkDirRec(dir_path):
-          file_scanner.scan_object = path
-          scanners_pre_scan_file(file_scanner, virname, scanned)
-
-    if len(options.list_files) != 0:
-      for path in options.list_files:
-        file_scanner.scan_object = path
-        scanners_pre_scan_file(file_scanner, virname, scanned)
-  except KeyboardInterrupt:
-    return
-  finally:
-    result_count = file_scanner.file_scanned
-    result_infect = file_scanner.file_infected
-    finit_clamav(file_scanner.clam)
-
-
-proc scanners_yr_scan_files*(scanner: var FileScanCtx, options: ScanOptions, result_count, result_infect: var uint) =
-  try:
-    if len(options.list_dirs) != 0:
-      for dir_path in options.list_dirs:
-        for path in walkDirRec(dir_path):
-          scanner.scan_object = path
-          fscanner_yr_scan_file(scanner)
-
-    if len(options.list_files) != 0:
-      for path in options.list_files:
-        scanner.scan_object = path
-        fscanner_yr_scan_file(scanner)
-  except KeyboardInterrupt:
-    return
-  finally:
-    result_count = scanner.file_scanned
-    result_infect = scanner.file_infected
-
-
-proc scanners_set_proc_scan_values(scanner: var ProcScanCtx, options: ScanOptions, engine: ptr YR_RULES) =
-  if options.match_all:
-    scanner.yara.match_all_rules = true
-  else:
-    scanner.yara.match_all_rules = false
-
-  scanner.proc_scanned = 0
-  scanner.proc_infected = 0
-  scanner.yara.engine = engine
-
-
-proc scanners_yr_scan_procs(yara_engine: YrEngine, options: ScanOptions, result_count, result_infected: var uint) =
-  var
-    proc_scanner: ProcScanCtx
-
-  scanners_set_proc_scan_values(proc_scanner, options, yara_engine.engine)
-
-  try:
-    if options.scan_all_procs:
-      pscanner_scan_procs(proc_scanner)
-    else:
-      pscanner_scan_procs(proc_scanner, options.list_procs)
-  except KeyboardInterrupt:
-    return
-  finally:
-    result_count = proc_scanner.proc_scanned
-    result_infected = proc_scanner.proc_infected
-
-
-proc scanners_create_scan_task*(options: var ScanOptions, scanner_cb_scan_files: proc (engine: var YrEngine, options: ScanOptions, f_count: var uint, f_infect: var uint)) =
-  const
-    ld_preload_path = "/etc/ld.so.preload"
-  var
-    yara_engine: YrEngine
-    loaded_yara_sigs: uint = 0
+    scan_engine: ScanCtx
     f_count, f_infect, p_count, p_infect: uint
 
-  yara_engine.database = options.db_path_yara
   setControlCHook(handle_keyboard_interrupt)
-
-  discard yara_engine.init_yara(loaded_yara_sigs)
-
-  if options.scan_preload and fileExists(ld_preload_path):
-    for line in lines(ld_preload_path):
-      if fileExists(line):
-        options.list_files.add(line)
-
-  options.list_files = deduplicate(options.list_files)
+  scanners_init_engine(scan_engine, options)
 
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
-    scanner_cb_scan_files(yara_engine, options, f_count, f_infect)
+    scanners_cl_scan_files(scan_engine, options.list_files, options.list_dirs, f_count, f_infect)
 
-  if loaded_yara_sigs > 0 and (len(options.list_procs) != 0 or options.scan_all_procs):
-    scanners_yr_scan_procs(yara_engine, options, p_count, p_infect)
+  if len(options.list_procs) != 0 or options.scan_all_procs:
+    scanners_yr_scan_procs(scan_engine, options.list_procs, options.scan_all_procs, p_count, p_infect)
 
-  finit_yara(yara_engine)
-
-  print_sumary(f_count, f_infect, p_count, p_infect)
+  scanners_finit_engine(scan_engine, f_count, f_infect, p_count, p_infect)
