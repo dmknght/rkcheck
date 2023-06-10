@@ -7,6 +7,12 @@ import strutils
 import os
 
 
+proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+  let
+    ctx = cast[ptr ProcScanCtx](context)
+  print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+
+
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   let
     ctx = cast[ptr ProcScanCtx](user_data)
