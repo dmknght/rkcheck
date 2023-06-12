@@ -17,9 +17,9 @@ import os
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   let
     ctx = cast[ptr ProcScanCtx](context)
-    final_virname = if not isEmptyOrWhitespace($virname): virname else: ctx.virname
 
-  print_process_infected(ctx.pinfo.pid, $final_virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+  ctx.scan_result = CL_VIRUS
+  print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -117,7 +117,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
       if ctx.scan_result == CL_CLEAN:
-        # FIXME the virus found was called 2 times
         pscanner_clam_scan_mem(ctx, mem_block, base_size)
       if ctx.scan_result == CL_CLEAN:
         pscanner_scan_cmdline(ctx)
