@@ -15,11 +15,12 @@ import os
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  # TODO fix the malware name
-  # TODO COMBINE with yara scanner
+  # FIXME: scan with clamav doesn't show virus name
   let
     ctx = cast[ptr ProcScanCtx](context)
-  print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+    final_virname = if not isEmptyOrWhitespace($virname): virname else: ctx.virname
+
+  print_process_infected(ctx.pinfo.pid, $final_virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -30,10 +31,12 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
   if message == CALLBACK_MSG_RULE_MATCHING:
     ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
+    ctx.scan_result = CL_VIRUS
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
     return CALLBACK_ABORT
   else:
     ctx.virname = ""
+    ctx.scan_result = CL_CLEAN
     return CALLBACK_CONTINUE
 
 
@@ -43,11 +46,13 @@ proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint
     rule = cast[ptr YR_RULE](message_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
-    rule.ns.name = cstring("SusCmdline")
+    rule.ns.name = cstring("Cmdline")
+    ctx.scan_result = CL_VIRUS
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.scan_object & "exe", ctx.pinfo.exec_name)
     return CALLBACK_ABORT
   else:
     ctx.virname = ""
+    ctx.scan_result = CL_CLEAN
     return CALLBACK_CONTINUE
 
 
@@ -75,12 +80,8 @@ proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, b
 
 proc pscanner_scan_cmdline(ctx: var ProcScanCtx) =
   # Scan cmdline so we can detect reverse shell or malicious exec
-  # TODO handle rule match event
   if not isEmptyOrWhitespace(ctx.pinfo.cmdline):
     discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
-  # Malware found by scan cmdline
-  if not isEmptyOrWhitespace($ctx.virname):
-    return
 
 
 proc pscanner_yara_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
@@ -108,8 +109,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
     mem_block: ptr YR_MEMORY_BLOCK
 
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
-    # TODO rewrite this using the ClamAV engine compatible
-    # TODO set different callback for ClamAv when rule matches (print event)
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
       let
@@ -118,11 +117,14 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
 
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
-      pscanner_clam_scan_mem(ctx, mem_block, base_size)
+      if ctx.scan_result == CL_CLEAN:
+        # FIXME the virus found was called 2 times
+        pscanner_clam_scan_mem(ctx, mem_block, base_size)
+      if ctx.scan_result == CL_CLEAN:
+        pscanner_scan_cmdline(ctx)
 
       # Stop scan if virus matches
-      # TODO change the way to handle virus_found
-      if not ctx.yara.match_all_rules and not isEmptyOrWhitespace($ctx.virname):
+      if not ctx.yara.match_all_rules and ctx.scan_result == CL_VIRUS:
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
     discard yr_process_close_iterator(mem_blocks.addr)
