@@ -7,7 +7,16 @@ import strutils
 import os
 
 
+#[
+  Scan Linux's memory with ClamAV and Yara engine.
+  1. Attach the process: Map all information from procfs
+  2. Scan with Yara and ClamAV
+]#
+
+
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+  # TODO fix the malware name
+  # TODO COMBINE with yara scanner
   let
     ctx = cast[ptr ProcScanCtx](context)
   print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
@@ -64,15 +73,32 @@ proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, b
     pinfo.mapped_file = pinfo.exec_path
 
 
-proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
+proc pscanner_scan_cmdline(ctx: var ProcScanCtx) =
   # Scan cmdline so we can detect reverse shell or malicious exec
+  # TODO handle rule match event
   if not isEmptyOrWhitespace(ctx.pinfo.cmdline):
     discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_cmdline_result, addr(ctx), YR_SCAN_TIMEOUT)
-
   # Malware found by scan cmdline
   if not isEmptyOrWhitespace($ctx.virname):
-    return 0
+    return
 
+
+proc pscanner_yara_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
+  discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+
+
+proc pscanner_clam_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
+  # Scan mem block with ClamAV
+  var
+    virname: cstring
+    scanned: culong
+
+  var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
+  discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+  cl_fmap_close(cl_map_file)
+
+
+proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   #[
     Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
     Then call yr_rules_scan_mem to scan each memory block
@@ -84,25 +110,18 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     # TODO rewrite this using the ClamAV engine compatible
     # TODO set different callback for ClamAv when rule matches (print event)
-    var
-      virname: cstring
-      scanned: culong
-
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
       let
         base_offset = mem_block[].base
         base_size = mem_block[].size
-
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
 
-      discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(mem_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+      pscanner_yara_scan_mem(ctx, mem_block, base_size)
+      pscanner_clam_scan_mem(ctx, mem_block, base_size)
 
-      # Scan mem block with ClamAV
-      var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
-      discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
-      cl_fmap_close(cl_map_file)
       # Stop scan if virus matches
+      # TODO change the way to handle virus_found
       if not ctx.yara.match_all_rules and not isEmptyOrWhitespace($ctx.virname):
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
@@ -164,7 +183,7 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
     return
 
   if not pscanner_attach_process(procfs_path, ctx.pinfo):
-    print_process_infected(ctx.pinfo.pid, "Heur:ProcCloak.StatusDenied", ctx.pinfo.exec_path, ctx.scan_object & "status", ctx.pinfo.exec_name)
+    print_process_infected(ctx.pinfo.pid, "Heur:InvalidProc.StatusDenied", ctx.pinfo.exec_path, ctx.scan_object & "status", ctx.pinfo.exec_name)
   else:
     pscanner_heur_proc(ctx.pinfo)
 
