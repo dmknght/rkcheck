@@ -116,9 +116,10 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
 
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
-      if ctx.scan_result == CL_CLEAN:
+      # Keep scanning if use match_all_rules
+      if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
         pscanner_clam_scan_mem(ctx, mem_block, base_size)
-      if ctx.scan_result == CL_CLEAN:
+      if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
         pscanner_scan_cmdline(ctx)
 
       # Stop scan if virus matches
