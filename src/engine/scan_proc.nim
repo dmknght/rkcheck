@@ -15,7 +15,6 @@ import os
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  # FIXME: scan with clamav doesn't show virus name
   let
     ctx = cast[ptr ProcScanCtx](context)
     final_virname = if not isEmptyOrWhitespace($virname): virname else: ctx.virname
