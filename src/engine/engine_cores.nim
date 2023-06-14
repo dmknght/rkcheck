@@ -147,8 +147,8 @@ proc init_yara*(engine: var YrEngine, loaded_sigs: var uint): int =
 
   loaded_sigs = uint(engine.engine.num_rules)
 
-  print_loaded_signatures(loaded_sigs, true)
   print_yara_version()
+  print_loaded_signatures(loaded_sigs, true)
 
   discard yr_set_configuration(YR_CONFIG_STACK_SIZE, addr(stack_size))
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(max_strings_per_rule))
