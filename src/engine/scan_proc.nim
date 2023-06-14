@@ -210,7 +210,7 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   else:
     pscanner_heur_proc(ctx.pinfo)
 
-  # progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.exec_path)
+  progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.exec_path)
   discard pscanner_cb_scan_proc(ctx)
   ctx.proc_scanned += 1
 
