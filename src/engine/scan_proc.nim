@@ -28,9 +28,14 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     rule = cast[ptr YR_RULE](message_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
+    # If iterator failed to map memblocks, the mapped_file is empty
+    if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
+      ctx.pinfo.mapped_file = ctx.pinfo.exec_path
+
     ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
+
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
     return CALLBACK_ABORT
   else:
@@ -99,11 +104,13 @@ proc pscanner_yara_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK,
 
 proc pscanner_clam_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
   # Scan mem block with ClamAV
+  # FIXME: clamScan caused pid raise result
   var
     virname: cstring
     scanned: culong
 
   var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
+  echo "Process: ", ctx.pinfo.pid, " 0x", toHex(mem_block[].base), " file: ", ctx.pinfo.mapped_file
   discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
   cl_fmap_close(cl_map_file)
 
@@ -117,6 +124,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
 
+  # FIXME: memblock that has ELF header failed to match, however, the yr_rules_scan_proc is fine
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
@@ -131,14 +139,15 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
         mem_block = mem_blocks.next(mem_blocks.addr)
         continue
 
+      # echo "Process: ", ctx.pinfo.pid, " 0x", toHex(mem_block[].base), " file: ", ctx.pinfo.mapped_file
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
-      # Keep scanning if use match_all_rules
+      # # Keep scanning if use match_all_rules
       if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
         pscanner_clam_scan_mem(ctx, mem_block, base_size)
       if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
         pscanner_scan_cmdline(ctx)
 
-      # Stop scan if virus matches
+      # # Stop scan if virus matches
       if not ctx.yara.match_all_rules and ctx.scan_result == CL_VIRUS:
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
@@ -204,7 +213,7 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   else:
     pscanner_heur_proc(ctx.pinfo)
 
-  progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.exec_path)
+  # progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.exec_path)
   discard pscanner_cb_scan_proc(ctx)
   ctx.proc_scanned += 1
 
