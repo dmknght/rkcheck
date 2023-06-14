@@ -104,14 +104,11 @@ proc pscanner_yara_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK,
 
 proc pscanner_clam_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
   # Scan mem block with ClamAV
-  # FIXME: clamScan caused pid raise result
   var
-    virname: cstring
-    scanned: culong
+    tmp_count: culong
 
   var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
-  echo "Process: ", ctx.pinfo.pid, " 0x", toHex(mem_block[].base), " file: ", ctx.pinfo.mapped_file
-  discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), virname.addr, scanned.addr, ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+  discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.exec_path), addr(ctx.virname), addr(tmp_count), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
   cl_fmap_close(cl_map_file)
 
 
