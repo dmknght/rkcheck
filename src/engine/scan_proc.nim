@@ -55,7 +55,11 @@ proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint
     return CALLBACK_CONTINUE
 
 
-proc pscanner_get_mapped_mem(procfs: string, base_offset, base_size: uint64, proc_id: uint): string =
+proc pscanner_mapped_addr_to_file_name(procfs: string, base_offset, base_size: uint64, proc_id: uint): string =
+  #[
+    The procFS has symlink at /proc/<pid>/map_files/<map block here>
+    This function crafts the memory chunk based on offset and size to map the file
+  ]#
   var
     offset_start = toHex(base_offset).toLowerAscii()
     offset_end = toHex(base_offset + base_size).toLowerAscii()
@@ -68,10 +72,16 @@ proc pscanner_get_mapped_mem(procfs: string, base_offset, base_size: uint64, pro
 proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, base_size: uint64) =
   # Calculate mapped binary
   let
-    mapped_binary = pscanner_get_mapped_mem(procfs, base_offset, base_size, pinfo.pid)
+    mapped_binary = pscanner_mapped_addr_to_file_name(procfs, base_offset, base_size, pinfo.pid)
 
   try:
-    pinfo.mapped_file = expandSymlink(mapped_binary)
+    #[
+      The current memory block sometime failed to go to craft the actual file
+    ]#
+    if symlinkExists(mapped_binary):
+      pinfo.mapped_file = expandSymlink(mapped_binary)
+    else:
+      pinfo.mapped_file = ""
   except:
     # Failed to map. File not found or requires permission
     pinfo.mapped_file = pinfo.exec_path
@@ -113,7 +123,13 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       let
         base_offset = mem_block[].base
         base_size = mem_block[].size
+
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
+
+      # If file failed to get the actual file, we should skip the block
+      if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
+        mem_block = mem_blocks.next(mem_blocks.addr)
+        continue
 
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
       # Keep scanning if use match_all_rules
