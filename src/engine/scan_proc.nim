@@ -104,11 +104,9 @@ proc pscanner_yara_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK,
 
 proc pscanner_clam_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
   # Scan mem block with ClamAV
-  var
-    tmp_count: culong
 
   var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
-  discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.exec_path), addr(ctx.virname), addr(tmp_count), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+  discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.exec_path), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
   cl_fmap_close(cl_map_file)
 
 
@@ -116,12 +114,13 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   #[
     Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
     Then call yr_rules_scan_mem to scan each memory block
+    # FIXME: memblock that has ELF header failed to match, however, the yr_rules_scan_proc is fine
+    # TODO: handle if either Yara or ClamAV failed to init
   ]#
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
 
-  # FIXME: memblock that has ELF header failed to match, however, the yr_rules_scan_proc is fine
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
