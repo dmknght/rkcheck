@@ -110,6 +110,7 @@ proc init_clamav*(f_engine: var ClEngine, loaded_sig_count: var uint, use_clam: 
     loaded_sig_count = uint(sig_count)
 
     if result == CL_SUCCESS:
+      echo "Clam Engine: ", cl_retver()
       print_loaded_signatures(loaded_sig_count, false)
 
   return cl_engine_compile(f_engine.engine)
