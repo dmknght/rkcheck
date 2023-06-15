@@ -81,12 +81,12 @@ proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, b
 
   try:
     #[
-      The current memory block sometime failed to go to craft the actual file
+      The current memory block is a symlink, or memory block
     ]#
     if symlinkExists(mapped_binary):
       pinfo.mapped_file = expandSymlink(mapped_binary)
     else:
-      pinfo.mapped_file = ""
+      pinfo.mapped_file = "memory_chunk"
   except:
     # Failed to map. File not found or requires permission
     pinfo.mapped_file = pinfo.exec_path
