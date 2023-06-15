@@ -7,7 +7,8 @@ Comparison of ClamAV and Yara (CPU and Memory consuption is updated bellow the t
 | | ClamAV | Yara |
 |---|---|---|
 | File scan | &#9745; | &#9745; |
-| File parser | &#9745; | &#9744; |
+| File parser | Doc, PDF and various file parsers | PE, ELF, ... as modules. However, the file parsers of Yara are much stronger than ClamAV |
+| Memory scan | N/A on Linux by default | &#9745; |
 | Decompresser | &#9745; | &#9744; |
 | Unpacker | Some basic unpackers | &#9744; |
 | Strong metadata matching | Only PE file | &#9745; |
@@ -16,7 +17,7 @@ Comparison of ClamAV and Yara (CPU and Memory consuption is updated bellow the t
 | Real-time protection | &#9744; | &#9744;|
 | Emulator | &#9744; | &#9744; |
 
--> rkcheck combines advantages of 2 engines with Nim lang to provide a strong, easy to maintain and modify open-source malware scanner.
+-> rkcheck combines advantages of 2 engines with Nim lang to provide a strong, easy to maintain and modify open-source malware scanner. The memory scan with ClamAV is being developed, support different signature writing methods.
 
 # Peformance comparison
 The result bellow was tested against 215 sample. The ruleset was string matching rules. Some important information before the test result
