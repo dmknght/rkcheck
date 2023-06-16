@@ -97,6 +97,13 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_cla
   # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
   # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_MACROS)
 
+  if use_clam:
+    # Enable cache
+    clam_engine.options.general = bitor(clam_engine.options.general, ENGINE_OPTIONS_DISABLE_CACHE)
+  else:
+    # Disable cache
+    clam_engine.options.general = bitand(clam_engine.options.general, ENGINE_OPTIONS_DISABLE_CACHE)
+
   discard clam_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
 
   # Did we set debug?
