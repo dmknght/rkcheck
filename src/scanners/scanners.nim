@@ -65,6 +65,7 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
       file_infected: 0
     )
 
+  file_scanner.clam.options = scan_ctx.clam.options
   cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_cb_virus_found)
 
   try:
@@ -97,7 +98,7 @@ proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_pr
       proc_infected: 0
     )
 
-  # TODO set different callback when virus is found
+  proc_scanner.clam.options = scan_ctx.clam.options
   cl_engine_set_clcb_virus_found(proc_scanner.clam.engine, pscanner_on_virus_found)
 
   try:
@@ -122,7 +123,6 @@ proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_pr
 #         options.list_files.add(line)
 
 #   options.list_files = deduplicate(options.list_files)
-
 
 proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
   #[
@@ -158,7 +158,6 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
   else:
     cl_engine_set_clcb_post_scan(ctx.clam.engine, fscanner_cb_inc_count)
 
-  # cl_engine_set_clcb_virus_found(ctx.clam.engine, fscanner_cb_virus_found)
   cl_set_clcb_msg(fscanner_cb_msg_dummy)
 
 
