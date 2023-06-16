@@ -115,7 +115,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   #[
     Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
     Then call yr_rules_scan_mem to scan each memory block
-    # FIXME: memblock that has ELF header failed to match, however, the yr_rules_scan_proc is fine
     # TODO: handle if either Yara or ClamAV failed to init
   ]#
   var
