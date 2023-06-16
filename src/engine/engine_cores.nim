@@ -61,7 +61,7 @@ const
   SCANNER_MAX_PROC_COUNT* = 4194304
 
 
-proc init_clamav*(f_engine: var ClEngine, loaded_sig_count: var uint, use_clam: bool): cl_error_t =
+proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_clam: bool): cl_error_t =
   #[
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -71,61 +71,62 @@ proc init_clamav*(f_engine: var ClEngine, loaded_sig_count: var uint, use_clam: 
   if result != CL_SUCCESS:
     return result
 
-  f_engine.engine = cl_engine_new()
+  clam_engine.engine = cl_engine_new()
 
   # ~0 (not 0) is to enable all flags.In this case, we disable flags by default
-  f_engine.options.parse = bitor(f_engine.options.parse, 0)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, 0)
   # Enable some parsers
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_ARCHIVE)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_OLE2)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_PDF)
-  # f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_SWF)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_HWP3)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_XMLDOCS)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_MAIL)
-  f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_HTML)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_ARCHIVE)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_OLE2)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_PDF)
+  # clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_SWF)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_HWP3)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_XMLDOCS)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_MAIL)
+  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_HTML)
 
   # Disable ELF parser if we don't use ClamAV Signatures
   if use_clam:
-    f_engine.options.parse = bitor(f_engine.options.parse, CL_SCAN_PARSE_ELF)
-  # f_engine.options.parse = bitand(f_engine.options.parse, CL_SCAN_PARSE_PE)
+    clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_ELF)
+    clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_PE)
+    # Maybe enable macho?
+    # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
 
-  # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
-  f_engine.options.general = bitor(f_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
-  # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
-  # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
-  # f_engine.options.heuristic = bitor(f_engine.options.heuristic, CL_SCAN_HEURISTIC_MACROS)
+  clam_engine.options.general = bitor(clam_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
+  # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
+  # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_DOC)
+  # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_MACROS)
 
-  discard f_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
+  discard clam_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
 
   # Did we set debug?
-  if f_engine.debug_mode:
+  if clam_engine.debug_mode:
     cl_debug()
 
   # If database path is not empty, load ClamAV Signatures
-  if f_engine.use_clam:
+  if clam_engine.use_clam:
     var
       sig_count: cuint = 0
-    result = cl_load(cstring(f_engine.database), f_engine.engine, addr(sig_count), bitor(CL_DB_STDOPT, CL_DB_BYTECODE_UNSIGNED))
+    result = cl_load(cstring(clam_engine.database), clam_engine.engine, addr(sig_count), bitor(CL_DB_STDOPT, CL_DB_BYTECODE_UNSIGNED))
     loaded_sig_count = uint(sig_count)
 
     if result == CL_SUCCESS:
       echo "Clam Engine: ", cl_retver()
       print_loaded_signatures(loaded_sig_count, false)
 
-  return cl_engine_compile(f_engine.engine)
+  return cl_engine_compile(clam_engine.engine)
 
 
-proc finit_clamav*(f_engine: var ClEngine) =
+proc finit_clamav*(clam_engine: var ClEngine) =
   #[
     Give ClamAV Engine's freedom
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
   ]#
-  if f_engine.engine != nil:
-    discard cl_engine_free(f_engine.engine)
+  if clam_engine.engine != nil:
+    discard cl_engine_free(clam_engine.engine)
 
 
-proc init_yara*(engine: var YrEngine, loaded_sigs: var uint): int =
+proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
   result = yr_initialize()
 
   if result != ERROR_SUCCESS:
@@ -135,19 +136,19 @@ proc init_yara*(engine: var YrEngine, loaded_sigs: var uint): int =
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
 
-  if isEmptyOrWhitespace(engine.database):
+  if isEmptyOrWhitespace(yara_engine.database):
     return ERROR_COULD_NOT_OPEN_FILE
   # If rule is compiled, we load it
-  if yr_rule_file_is_compiled(engine.database):
-    result = yr_rules_load(cstring(engine.database), addr(engine.engine))
+  if yr_rule_file_is_compiled(yara_engine.database):
+    result = yr_rules_load(cstring(yara_engine.database), addr(yara_engine.engine))
   else:
     # Need to compile rules
-    yr_rules_compile_custom_rules(engine.engine, engine.database)
+    yr_rules_compile_custom_rules(yara_engine.engine, yara_engine.database)
 
   if result != ERROR_SUCCESS:
     return result
 
-  loaded_sigs = uint(engine.engine.num_rules)
+  loaded_sigs = uint(yara_engine.engine.num_rules)
 
   print_yara_version()
   print_loaded_signatures(loaded_sigs, true)
