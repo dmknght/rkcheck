@@ -19,6 +19,7 @@ proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
     ctx = cast[ptr ProcScanCtx](context)
 
   ctx.scan_result = CL_VIRUS
+  ctx.proc_infected += 1
   print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
 
 
@@ -137,13 +138,14 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 
       # echo "Process: ", ctx.pinfo.pid, " 0x", toHex(mem_block[].base), " file: ", ctx.pinfo.mapped_file
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
-      # # Keep scanning if use match_all_rules
+      # Keep scanning if use match_all_rules
+      # TODO handle the DETECTED_BY_CALLBACK
       if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
         pscanner_clam_scan_mem(ctx, mem_block, base_size)
       if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
         pscanner_scan_cmdline(ctx)
 
-      # # Stop scan if virus matches
+      # Stop scan if virus matches
       if not ctx.yara.match_all_rules and ctx.scan_result == CL_VIRUS:
         break
       mem_block = mem_blocks.next(mem_blocks.addr)
