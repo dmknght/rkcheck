@@ -47,7 +47,7 @@ static void rkrev_send_proc_info(struct nlmsghdr *netlnk_message, struct pid_inf
   resp_err_code = nlmsg_unicast(nl_sk, skb_out, client_pid);
 
   if (resp_err_code < 0)
-    printk(KERN_INFO "Error while sending proccess's info to user\n");
+    printk(KERN_INFO "Error code %d while sending proccess's info to user\n", resp_err_code);
 }
 
 
@@ -73,7 +73,7 @@ static void rkrev_send_module_info(struct nlmsghdr *netlnk_message, const char *
   resp_err_code = nlmsg_unicast(nl_sk, skb_out, client_pid);
 
   if (resp_err_code < 0)
-    printk(KERN_INFO "Error while sending module info to user\n");
+    printk(KERN_INFO "Error code %d while sending module info to user\n", resp_err_code);
 }
 
 
