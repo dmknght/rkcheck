@@ -50,10 +50,9 @@ proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   let
     ctx = cast[ptr ProcScanCtx](context)
 
-  if $virname != "Detected.By.Callback":
-    ctx.scan_result = CL_VIRUS
-    ctx.proc_infected += 1
-    print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+  ctx.scan_result = CL_VIRUS
+  ctx.proc_infected += 1
+  print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -129,6 +128,7 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block: ptr YR_MEMORY_BLOCK): 
   pscanner_yara_scan_mem(ctx, mem_block, base_size)
   # Keep scanning if use match_all_rules
   if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
+    ctx.scan_result = CL_CLEAN
     pscanner_clam_scan_mem(ctx, mem_block, base_size)
   if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
     pscanner_scan_cmdline(ctx)
