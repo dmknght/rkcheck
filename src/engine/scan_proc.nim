@@ -18,9 +18,10 @@ proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   let
     ctx = cast[ptr ProcScanCtx](context)
 
-  ctx.scan_result = CL_VIRUS
-  ctx.proc_infected += 1
-  print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+  if $virname != "Detected.By.Callback":
+    ctx.scan_result = CL_VIRUS
+    ctx.proc_infected += 1
+    print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -76,6 +77,7 @@ proc pscanner_mapped_addr_to_file_name(procfs: string, base_offset, base_size: u
 
 
 proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, base_size: uint64) =
+  # TODO call this when malware is found only, saving scan performance
   # Calculate mapped binary
   let
     mapped_binary = pscanner_mapped_addr_to_file_name(procfs, base_offset, base_size, pinfo.pid)
@@ -131,9 +133,9 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
 
       # If file failed to get the actual file, we should skip the block
-      if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
-        mem_block = mem_blocks.next(mem_blocks.addr)
-        continue
+      # if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
+      #   mem_block = mem_blocks.next(mem_blocks.addr)
+      #   continue
 
       # echo "Process: ", ctx.pinfo.pid, " 0x", toHex(mem_block[].base), " file: ", ctx.pinfo.mapped_file
       pscanner_yara_scan_mem(ctx, mem_block, base_size)
