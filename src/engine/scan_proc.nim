@@ -13,6 +13,38 @@ import os
   2. Scan with Yara and ClamAV
 ]#
 
+proc pscanner_mapped_addr_to_file_name(procfs: string, base_offset, base_size: uint64, proc_id: uint): string =
+  #[
+    The procFS has symlink at /proc/<pid>/map_files/<map block here>
+    This function crafts the memory chunk based on offset and size to map the file
+  ]#
+  var
+    offset_start = toHex(base_offset).toLowerAscii()
+    offset_end = toHex(base_offset + base_size).toLowerAscii()
+
+  offset_start.removePrefix('0')
+  offset_end.removePrefix('0')
+  return procfs & "map_files/" & offset_start & "-" & offset_end
+
+
+proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, base_size: uint64) =
+  # TODO call this when malware is found only, saving scan performance
+  # Calculate mapped binary
+  let
+    mapped_binary = pscanner_mapped_addr_to_file_name(procfs, base_offset, base_size, pinfo.pid)
+
+  try:
+    #[
+      The current memory block is a symlink, or memory block
+    ]#
+    if symlinkExists(mapped_binary):
+      pinfo.mapped_file = expandSymlink(mapped_binary)
+    else:
+      pinfo.mapped_file = "memory_chunk"
+  except:
+    # Failed to map. File not found or requires permission
+    pinfo.mapped_file = pinfo.exec_path
+
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   let
@@ -62,39 +94,6 @@ proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint
     return CALLBACK_CONTINUE
 
 
-proc pscanner_mapped_addr_to_file_name(procfs: string, base_offset, base_size: uint64, proc_id: uint): string =
-  #[
-    The procFS has symlink at /proc/<pid>/map_files/<map block here>
-    This function crafts the memory chunk based on offset and size to map the file
-  ]#
-  var
-    offset_start = toHex(base_offset).toLowerAscii()
-    offset_end = toHex(base_offset + base_size).toLowerAscii()
-
-  offset_start.removePrefix('0')
-  offset_end.removePrefix('0')
-  return procfs & "map_files/" & offset_start & "-" & offset_end
-
-
-proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, base_size: uint64) =
-  # TODO call this when malware is found only, saving scan performance
-  # Calculate mapped binary
-  let
-    mapped_binary = pscanner_mapped_addr_to_file_name(procfs, base_offset, base_size, pinfo.pid)
-
-  try:
-    #[
-      The current memory block is a symlink, or memory block
-    ]#
-    if symlinkExists(mapped_binary):
-      pinfo.mapped_file = expandSymlink(mapped_binary)
-    else:
-      pinfo.mapped_file = "memory_chunk"
-  except:
-    # Failed to map. File not found or requires permission
-    pinfo.mapped_file = pinfo.exec_path
-
-
 proc pscanner_scan_cmdline(ctx: var ProcScanCtx) =
   # Scan cmdline so we can detect reverse shell or malicious exec
   if not isEmptyOrWhitespace(ctx.pinfo.cmdline):
@@ -107,8 +106,9 @@ proc pscanner_yara_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK,
 
 proc pscanner_clam_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK, base_size: uint) =
   # Scan mem block with ClamAV
+  var
+    cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
 
-  var cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(mem_block), base_size)
   discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.exec_path), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
   cl_fmap_close(cl_map_file)
 
