@@ -11,6 +11,10 @@ import os
   Scan Linux's memory with ClamAV and Yara engine.
   1. Attach the process: Map all information from procfs
   2. Scan with Yara and ClamAV
+  Memory blocks of Linux process, could be:
+    A. Memory blocks mapped from a binary file
+    B. Heap, Stack, ...
+  The B. usually contains the data of a child process. Scanner should skip it to avoid false positive
 ]#
 
 proc pscanner_mapped_addr_to_file_name(procfs: string, base_offset, base_size: uint64, proc_id: uint): string =
@@ -27,8 +31,7 @@ proc pscanner_mapped_addr_to_file_name(procfs: string, base_offset, base_size: u
   return procfs & "map_files/" & offset_start & "-" & offset_end
 
 
-proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, base_size: uint64) =
-  # TODO call this when malware is found only, saving scan performance
+proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, base_size: uint64): bool =
   # Calculate mapped binary
   let
     mapped_binary = pscanner_mapped_addr_to_file_name(procfs, base_offset, base_size, pinfo.pid)
@@ -40,10 +43,13 @@ proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, base_offset, b
     if symlinkExists(mapped_binary):
       pinfo.mapped_file = expandSymlink(mapped_binary)
     else:
-      pinfo.mapped_file = "memory_chunk"
+      pinfo.mapped_file = ""
+      return false
   except:
     # Failed to map. File not found or requires permission
     pinfo.mapped_file = pinfo.exec_path
+
+  return true
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
@@ -112,21 +118,10 @@ proc pscanner_clam_scan_mem(ctx: var ProcScanCtx, memblock: ptr YR_MEMORY_BLOCK,
   cl_fmap_close(cl_map_file)
 
 
-proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block: ptr YR_MEMORY_BLOCK): bool =
-  let
-    base_offset = mem_block[].base
-    base_size = mem_block[].size
-
-  pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size)
-
-  # If file failed to get the actual file, we should skip the block
-  # if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
-  #   mem_block = mem_blocks.next(mem_blocks.addr)
-  #   continue
-
+proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
   # echo "Process: ", ctx.pinfo.pid, " 0x", toHex(mem_block[].base), " file: ", ctx.pinfo.mapped_file
   pscanner_yara_scan_mem(ctx, mem_block, base_size)
-  # Keep scanning if use match_all_rules
+  # Keep scanning if user sets match_all_rules
   if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
     ctx.scan_result = CL_CLEAN
     pscanner_clam_scan_mem(ctx, mem_block, base_size)
@@ -152,8 +147,17 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     mem_block = mem_blocks.first(mem_blocks.addr)
     while mem_block != nil:
-      if not pscanner_scan_block(ctx, mem_block):
+      let
+        base_offset = mem_block[].base
+        base_size = mem_block[].size
+
+      # If file failed to get the actual file, we should skip the block
+      if not pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size):
+        mem_block = mem_blocks.next(mem_blocks.addr)
+        continue
+      if not pscanner_scan_block(ctx, mem_block, base_size):
         break
+
       mem_block = mem_blocks.next(mem_blocks.addr)
     discard yr_process_close_iterator(mem_blocks.addr)
   else:
