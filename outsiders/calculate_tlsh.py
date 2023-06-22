@@ -3,8 +3,11 @@ import tlsh
 import os
 
 
-MALWARE_DIR = "/home/dmknght/Desktop/MalwareLab/new_Mirai/"
+# MALWARE_DIR = "/home/dmknght/Desktop/MalwareLab/new_Mirai/"
 # MALWARE_DIR = "/home/dmknght/Desktop/MalwareLab/vbackdoor/"
+# MALWARE_DIR = "/mnt/maintain/VirusCollection/vxheavens-2010-05-18/viruses-2010-05-18/"
+# MALWARE_DIR = "/home/dmknght/Desktop/MalwareLab/Linux-Malware-Samples/"
+MALWARE_DIR = "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/"
 
 
 class TlshResult:
@@ -40,5 +43,16 @@ def main():
   for each_hash in list_results:
     print(each_hash.count, each_hash.hash)
 
-main()
+
+def find_hash(hash = "T158923207B7569A9BC55C8B3044F65330F776FC499B332B273218722E1E73B44AE21A98"):
+  for root, dirs, files in os.walk(MALWARE_DIR, topdown=False):
+    for name in files:
+      full_path = root + name
+      if os.path.isfile(full_path):
+        if hash == tlsh.hash(open(full_path, 'rb').read()):
+          print(full_path)
+
+
+# main()
+find_hash()
 
