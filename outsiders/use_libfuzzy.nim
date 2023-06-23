@@ -17,13 +17,12 @@ proc fuzzy_hash_filename*(filename: cstring, res: cstring): cint {.importc, cdec
 proc fuzzy_hash_stream*(hFile: File, res: cstring): cint {.importc, cdecl.}
 proc fuzzy_compare*(sig1: cstring, sig2: cstring): cint {.importc, cdecl.}
 
-
 let
   testHash = "98304:niKpipomRO262tcubr7zue3EgX5fJo4gRV7CBw5M4b9:nx2hHRo4dBu"
   datasetDir = "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/"
 
 var
-  fileHash = newString(256)
+  fileHash = newString(FUZZY_MAX_RESULT)
 
 for kind, path in walkDir(datasetDir):
   if kind == pcFile:
