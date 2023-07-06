@@ -188,6 +188,12 @@ rule Meter_Stageless {
 rule Meter_RevTCP {
   // meta:
   //   description = "Metasploit staged payload (no encoders)"
+  /*
+    The other rule to detect rev tcp could be code block (x86 and x64 has different opcode)
+    For example, the x64 rule is like this: {5e 6a ?? 5a 0f 05 48 85 c0 78}
+    https://github.com/rapid7/metasploit-framework/blob/master/lib/msf/core/payload/linux/reverse_tcp_x86.rb
+    https://github.com/rapid7/metasploit-framework/blob/master/lib/msf/core/payload/linux/x64/reverse_tcp_x64.rb
+  */
   strings:
     $ = "AYPj)X" fullword ascii
     $ = "Wj#Xj" fullword ascii
