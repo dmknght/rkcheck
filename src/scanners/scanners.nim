@@ -21,33 +21,36 @@ proc scanners_pre_scan_file(scanner: var FileScanCtx) =
   ]#
 
   var
-    map_file: YR_MAPPED_FILE
-    elf_magic = "\x7F\x45\x4C\x46"
-    is_elf_file: bool
+    # map_file: YR_MAPPED_FILE
+    # elf_magic = "\x7F\x45\x4C\x46"
+    # is_elf_file: bool
     scanned: culong
     virname: cstring
     # TODO move elf_magic to const
     # TODO handle other file types like PE, MACH
 
-  if yr_filemap_map(cstring(scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
-    #[
-      The YR_MAPPED_FILE has `file` as a file descriptor value
-      However, using yr_rules_scan_fd is slower than accessing file (2.79 when scan fd vs 2.10 when scan file)
-    ]#
-    # Check if the file is ELF file
-    # The ELF header is 52 or 64 bytes long for 32-bit and 64-bit binaries
-    if map_file.size > 52 and cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
-      # TODO check condition. for example: not elf file and size < 52
-      is_elf_file = true
-    # Not ELF file, scan with ClamAV
-    else:
-      is_elf_file = false
-    yr_filemap_unmap(addr(map_file))
+  # if yr_filemap_map(cstring(scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
+  #   #[
+  #     The YR_MAPPED_FILE has `file` as a file descriptor value
+  #     However, using yr_rules_scan_fd is slower than accessing file (2.79 when scan fd vs 2.10 when scan file)
+  #   ]#
+  #   # Check if the file is ELF file
+  #   # The ELF header is 52 or 64 bytes long for 32-bit and 64-bit binaries
+  #   if map_file.size > 52 and cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
+  #     # TODO check condition. for example: not elf file and size < 52
+  #     is_elf_file = true
+  #   # Not ELF file, scan with ClamAV
+  #   else:
+  #     is_elf_file = false
+  #   yr_filemap_unmap(addr(map_file))
 
-  if is_elf_file:
-    fscanner_yr_scan_file(scanner)
-  else:
-    discard cl_scanfile_callback(cstring(scanner.scan_object), addr(virname), addr(scanned), scanner.clam.engine, addr(scanner.clam.options), addr(scanner))
+  # if is_elf_file:
+  #   # TODO if rule doesn't match, call ClamScan instead. ClamAV must not call Yara again
+  #   fscanner_yr_scan_file(scanner)
+  #   # if scanner.scan_result == CL_CLEAN:
+  # else:
+    # The cl_scanfile_callback will call yara scan again because we already set yr callback
+  discard cl_scanfile_callback(cstring(scanner.scan_object), addr(virname), addr(scanned), scanner.clam.engine, addr(scanner.clam.options), addr(scanner))
 
 
 proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[string], result_count, result_infect: var uint) =
