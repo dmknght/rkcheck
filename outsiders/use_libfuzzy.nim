@@ -17,16 +17,27 @@ proc fuzzy_hash_filename*(filename: cstring, res: cstring): cint {.importc, cdec
 proc fuzzy_hash_stream*(hFile: File, res: cstring): cint {.importc, cdecl.}
 proc fuzzy_compare*(sig1: cstring, sig2: cstring): cint {.importc, cdecl.}
 
-let
-  testHash = "98304:niKpipomRO262tcubr7zue3EgX5fJo4gRV7CBw5M4b9:nx2hHRo4dBu"
-  datasetDir = "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/"
 
-var
-  fileHash = newString(FUZZY_MAX_RESULT)
+proc main() =
+  let
+    # testHash = "98304:niKpipomRO262tcubr7zue3EgX5fJo4gRV7CBw5M4b9:nx2hHRo4dBu"
+    # datasetDir = "/home/dmknght/Desktop/MalwareLab/LinuxMalwareDetected/"
+    datasetDir = "/home/dmknght/Desktop/MalwareLab/msf/"
 
-for kind, path in walkDir(datasetDir):
-  if kind == pcFile:
-    if fuzzy_hash_filename(cstring(path), cstring(fileHash)) == 0:
-      let score = fuzzy_compare(cstring(testHash), cstring(fileHash))
-      if score >= 75:
-        echo "Score: ", score, " ", path
+  var
+    fileHash = newString(FUZZY_MAX_RESULT)
+    testHash = newString(FUZZY_MAX_RESULT)
+
+
+  if fuzzy_hash_filename(cstring("/home/dmknght/Desktop/MalwareLab/msf/meter1"), cstring(testHash)) != 0:
+    echo "Failed to calculate hash to test"
+    return
+
+  for kind, path in walkDir(datasetDir):
+    if kind == pcFile:
+      if fuzzy_hash_filename(cstring(path), cstring(fileHash)) == 0:
+        let score = fuzzy_compare(cstring(testHash), cstring(fileHash))
+        if score >= 75:
+          echo "Score: ", score, " ", path
+
+main()
