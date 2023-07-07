@@ -37,11 +37,11 @@ proc reset*(tlsh: ptr Tlsh): void {.importcpp, impTlsh.}
 
 # Calculate difference
 # int totalDiff(const Tlsh *, bool len_diff=true) const;
-proc totalDiff*(tlsh: ptr Tlsh, len_diff: bool = true): cint {.importcpp, impTlsh.}
+proc totalDiff*(tlsh: ptr Tlsh, compare_hash: ptr Tlsh, len_diff: bool = true): cint {.importcpp, impTlsh.}
 
 # Validate TrendLSH string and reset the hash according to it */
 # int fromTlshStr(const char* str);
-proc fromTlshStr*(tlsh: ptr Tlsh, compare_hash: ptr Tlsh, data: cstring): cint {.importcpp, impTlsh.}
+proc fromTlshStr*(tlsh: ptr Tlsh, data: cstring): cint {.importcpp, impTlsh.}
 
 # Return the version information used to build this library
 # static const char *version();
