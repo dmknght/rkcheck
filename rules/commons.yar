@@ -90,13 +90,14 @@ rule ELF_FakeSectionHdrs {
     elf.entry_point < filesize and // file scanning only
     elf.number_of_segments > 0 and
     elf.number_of_sections > 0 and
-    not
+    not defined elf.symtab_entries and
+    not defined elf.dynsym_entries and not
     (
-      for any i in (0..elf.number_of_segments):
+      for any i in (0 .. elf.number_of_segments):
       (
         (elf.segments[i].offset <= elf.entry_point) and
         ((elf.segments[i].offset + elf.segments[i].file_size) >= elf.entry_point) and
-        for any j in (0..elf.number_of_sections):
+        for any j in (0 .. elf.number_of_sections):
         (
           elf.sections[j].offset <= elf.entry_point and
           ((elf.sections[j].offset + elf.sections[j].size) >= elf.entry_point) and
@@ -139,57 +140,57 @@ rule ELF_FakeSectionHdrs {
 //     $magic at 0 and not defined elf.entry_point
 // }
 
-rule ImportFuncs_Backdoor {
-  // meta:
-  //   descriptions = "Common imports by remote shell. Usually simple reverse tcp"
-    // Doesn't work when scan processes
-    /* Falsee positives
-    SusELF_BackdoorImp /usr/bin//tcpliveplay
-    SusELF_BackdoorImp /usr/bin//tcpprep
-    SusELF_BackdoorImp /usr/bin//tcpbridge
-    SusELF_BackdoorImp /usr/bin//tcpreplay
-    SusELF_BackdoorImp /usr/bin//tcpreplay-edit
-    SusELF_BackdoorImp /usr/bin//tcprewrite
-    */
-  condition:
-    elf_magic and elf.dynsym_entries < 2000 and
-    (
-      for 1 i in (0 .. elf.dynsym_entries):
-      (
-        elf.dynsym[i].type == elf.STT_FUNC and
-        (
-          elf.dynsym[i].name == "execl" or
-          elf.dynsym[i].name == "execve" or
-          elf.dynsym[i].name == "execvle" or
-          elf.dynsym[i].name == "execvp" or
-          elf.dynsym[i].name == "execv" or
-          elf.dynsym[i].name == "execlp" or
-          elf.dynsym[i].name == "system"
-        )
-      )
-    ) and
-    (
-      for 1 i in (0 .. elf.dynsym_entries):
-      (
-        elf.dynsym[i].type == elf.STT_FUNC and
-        (
-          elf.dynsym[i].name == "htons" or
-          elf.dynsym[i].name == "htonl"
-        )
-      )
-    ) and
-    (
-      for 1 i in (0 .. elf.dynsym_entries):
-      (
-        elf.dynsym[i].type == elf.STT_FUNC and
-        (
-          elf.dynsym[i].name == "dup" or
-          elf.dynsym[i].name == "dup2" or
-          elf.dynsym[i].name == "dup3"
-        )
-      )
-    )
-}
+// rule ImportFuncs_Backdoor {
+//   // meta:
+//   //   descriptions = "Common imports by remote shell. Usually simple reverse tcp"
+//     // Doesn't work when scan processes
+//     /* Falsee positives
+//     SusELF_BackdoorImp /usr/bin//tcpliveplay
+//     SusELF_BackdoorImp /usr/bin//tcpprep
+//     SusELF_BackdoorImp /usr/bin//tcpbridge
+//     SusELF_BackdoorImp /usr/bin//tcpreplay
+//     SusELF_BackdoorImp /usr/bin//tcpreplay-edit
+//     SusELF_BackdoorImp /usr/bin//tcprewrite
+//     */
+//   condition:
+//     elf_magic and elf.dynsym_entries < 2000 and
+//     (
+//       for 1 i in (0 .. elf.dynsym_entries):
+//       (
+//         elf.dynsym[i].type == elf.STT_FUNC and
+//         (
+//           elf.dynsym[i].name == "execl" or
+//           elf.dynsym[i].name == "execve" or
+//           elf.dynsym[i].name == "execvle" or
+//           elf.dynsym[i].name == "execvp" or
+//           elf.dynsym[i].name == "execv" or
+//           elf.dynsym[i].name == "execlp" or
+//           elf.dynsym[i].name == "system"
+//         )
+//       )
+//     ) and
+//     (
+//       for 1 i in (0 .. elf.dynsym_entries):
+//       (
+//         elf.dynsym[i].type == elf.STT_FUNC and
+//         (
+//           elf.dynsym[i].name == "htons" or
+//           elf.dynsym[i].name == "htonl"
+//         )
+//       )
+//     ) and
+//     (
+//       for 1 i in (0 .. elf.dynsym_entries):
+//       (
+//         elf.dynsym[i].type == elf.STT_FUNC and
+//         (
+//           elf.dynsym[i].name == "dup" or
+//           elf.dynsym[i].name == "dup2" or
+//           elf.dynsym[i].name == "dup3"
+//         )
+//       )
+//     )
+// }
 
 /* Some common imports used by ld preload by comparing some samples (the -- is the extra functions in the function's family)
 access
@@ -219,8 +220,8 @@ rule ImportFuncs_PreLRootkit {
   // meta:
   //   description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
   condition:
-    // FIXME false positive libc-2.31.so in libc-i386. This object file doesn't have dlsym and access
-    elf_dyn and (
+    // The limitation of dynsym_entries number is to avoid false positive detecting libc
+    elf_dyn and elf.dynsym_entries < 300 and (
       for 7 i in (0 .. elf.dynsym_entries):
       (
         elf.dynsym[i].type == elf.STT_FUNC and
