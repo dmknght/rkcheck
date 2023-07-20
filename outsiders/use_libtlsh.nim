@@ -11,11 +11,11 @@ type
 
 # Allow the user to add data in multiple iterations
 # void update(const unsigned char* data, unsigned int len);
-proc update*(tlsh: Tlsh; data: cstring; len: cuint): cint {.importcpp, impTlsh.}
+proc update*(tlsh: Tlsh, data: cstring, len: cuint): cint {.importcpp, impTlsh.}
 
 # To signal the class there is no more data to be added
 # void final(const unsigned char* data = NULL, unsigned int len = 0);
-proc final*(tlsh: Tlsh; data: cstring = nil; len: cuint = 0): void {.importcpp, impTlsh.}
+proc final*(tlsh: Tlsh, data: cstring = nil, len: cuint = 0): void {.importcpp, impTlsh.}
 
 # To get the hex-encoded hash code
 # const char* getHash() const ;
