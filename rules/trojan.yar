@@ -799,3 +799,13 @@ rule Hacktool_LoginBrute {
   condition:
     elf_magic and any of them
 }
+
+
+rule Ramen_0aa0 {
+  strings:
+    $ = {68 50 86 04 08 e8 6f fe ff ff}
+    $ = "65K.ghcxLunpw"
+    $ = "/usr/lib/ldliblogin.so"
+  condition:
+    elf_magic and any of them
+}
