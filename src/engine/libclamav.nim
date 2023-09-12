@@ -243,6 +243,30 @@ type
       context: pointer): cl_error_t {.cdecl.}
   clcb_pre_scan* {.importc, impclamavHdr.} = proc (fd: cint; `type`: cstring;
       context: pointer): cl_error_t {.cdecl.}
+#[
+ * @brief File inspection callback.
+ *
+ * DISCLAIMER: This interface is to be considered unstable while we continue to evaluate it.
+ * We may change this interface in the future.
+ *
+ * Called for each NEW file (inner and outer).
+ * Provides capability to record embedded file information during a scan.
+ *
+ * @param fd                  Current file descriptor which is about to be scanned.
+ * @param type                Current file type detected via magic - i.e. NOT on the fly - (e.g. "CL_TYPE_MSEXE").
+ * @param ancestors           An array of ancestors filenames of size `recursion_level`. filenames may be NULL.
+ * @param parent_file_size    Parent file size.
+ * @param file_name           Current file name, or NULL if the file does not have a name or ClamAV failed to record the name.
+ * @param file_size           Current file size.
+ * @param file_buffer         Current file buffer pointer.
+ * @param recursion_level     Recursion level / depth of the current file.
+ * @param layer_attributes    See LAYER_ATTRIBUTES_* flags.
+ * @param context             Opaque application provided data.
+ * @return                    CL_CLEAN = File is scanned.
+ * @return                    CL_BREAK = Whitelisted by callback - file is skipped and marked as clean.
+ * @return                    CL_VIRUS = Blacklisted by callback - file is skipped and marked as infected.
+]#
+  clcb_file_inspection* {.importc, impclamavHdr.} = proc (fd: cint; `type`: cstring; ancestors: ptr cstring; parent_file_size: uint; file_name: cstring; file_size: uint; file_buffer: cstring; recursion_level: uint32; layer_attributes: uint32; context: pointer): cl_error_t {.cdecl.}
   clcb_post_scan* {.importc, impclamavHdr.} = proc (fd: cint; result: cint;
       virname: cstring; context: pointer): cl_error_t {.cdecl.}
   clcb_virus_found* {.importc, impclamavHdr.} = proc (fd: cint;
@@ -488,6 +512,9 @@ proc cl_engine_set_clcb_pre_scan*(engine: ptr cl_engine; callback: clcb_pre_scan
                                   ##    @param engine    The initialized scanning engine.
                                   ##    @param callback  The callback function pointer.
                                   ## ```
+
+proc cl_engine_set_clcb_file_inspection*(engine: ptr cl_engine; callback: clcb_file_inspection) {.importc, cdecl, impclamavHdr.}
+
 proc cl_engine_set_clcb_post_scan*(engine: ptr cl_engine;
                                    callback: clcb_post_scan) {.importc, cdecl,
     impclamavHdr.}
