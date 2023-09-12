@@ -151,10 +151,17 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
         base_offset = mem_block[].base
         base_size = mem_block[].size
 
-      # If file failed to get the actual file, we should skip the block
+      #[
+        Check if current memory block is mapped from file
+        If true, set 1
+        Otherwise (HEAP for example), set 0
+      ]#
+      # If the mapped block is not from file
       if not pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, base_offset, base_size):
-        mem_block = mem_blocks.next(mem_blocks.addr)
-        continue
+        discard ctx.yara.engine.yr_rules_define_integer_variable("scan_block_type", 2)
+      else:
+        discard ctx.yara.engine.yr_rules_define_integer_variable("scan_block_type", 1)
+
       if not pscanner_scan_block(ctx, mem_block, base_size):
         break
 

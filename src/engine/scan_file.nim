@@ -55,6 +55,7 @@ proc fscanner_cb_post_scan_file*(fd: cint, scan_result: cint, virname: cstring, 
     ]#
     return CL_CLEAN
   else:
+    discard ctx.yara.engine.yr_rules_define_integer_variable("scan_block_type", 0)
     discard yr_rules_scan_fd(ctx.yara.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
     return ctx.scan_result
 
@@ -69,6 +70,7 @@ proc fscanner_cb_pre_scan_cache*(fd: cint, cl_type: cstring, context: pointer): 
   progress_bar_scan_file(ctx.scan_object)
   ctx.file_scanned += 1
 
+  discard ctx.yara.engine.yr_rules_define_integer_variable("scan_block_type", 0)
   discard yr_rules_scan_fd(ctx.yara.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
   return ctx.scan_result
 
@@ -85,22 +87,22 @@ proc fscanner_cb_inc_count*(fd: cint, scan_result: cint, virname: cstring, conte
   ctx.file_scanned += 1
 
 
-proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
-  var
-    ctx = cast[ptr FileScanCtx](user_data)
-    rule = cast[ptr YR_RULE](message_data)
-    vir_name: cstring
+# proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
+#   var
+#     ctx = cast[ptr FileScanCtx](user_data)
+#     rule = cast[ptr YR_RULE](message_data)
+#     vir_name: cstring
 
-  if message == CALLBACK_MSG_RULE_MATCHING:
-    discard file_scanner_on_matched(ctx.scan_result, ctx.virname, $rule.ns.name, $rule.identifier)
-    file_scanner_on_malware_found(vir_name, ctx.virname, ctx.scan_object, ctx.file_infected)
-    return CALLBACK_ABORT # TODO maybe do multiple rules matching?
-  else:
-    return file_scanner_on_clean(ctx.scan_result, ctx.virname)
+#   if message == CALLBACK_MSG_RULE_MATCHING:
+#     discard file_scanner_on_matched(ctx.scan_result, ctx.virname, $rule.ns.name, $rule.identifier)
+#     file_scanner_on_malware_found(vir_name, ctx.virname, ctx.scan_object, ctx.file_infected)
+#     return CALLBACK_ABORT # TODO maybe do multiple rules matching?
+#   else:
+#     return file_scanner_on_clean(ctx.scan_result, ctx.virname)
 
 
-proc fscanner_yr_scan_file*(context: var FileScanCtx) =
-  progress_bar_scan_file(context.scan_object)
-  discard yr_rules_scan_file(context.yara.engine, cstring(context.scan_object), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
-  context.file_scanned += 1
-  progress_bar_flush()
+# proc fscanner_yr_scan_file*(context: var FileScanCtx) =
+#   progress_bar_scan_file(context.scan_object)
+#   discard yr_rules_scan_file(context.yara.engine, cstring(context.scan_object), SCAN_FLAGS_FAST_MODE, fscanner_yr_scan_file_cb, context.addr, YR_SCAN_TIMEOUT)
+#   context.file_scanned += 1
+#   progress_bar_flush()
