@@ -7,7 +7,7 @@ private rule elf_magic {
   strings:
     $magic = {7f 45 4c 46 [12] (00 | 01 | 02 | 03 | 04 )}
   condition:
-    $magic and not defined uint8(@magic[1] - 1)
+    ($magic and not defined uint8(@magic[1] - 1)) or scan_block_type == 1
 }
 
 private rule elf_rel {
@@ -21,7 +21,7 @@ private rule elf_exec {
   strings:
     $magic = {7f 45 4c 46 [12] 02}
   condition:
-    $magic and not defined uint8(@magic[1] - 1)
+    ($magic and not defined uint8(@magic[1] - 1))  or scan_block_type == 1
 }
 
 private rule elf_dyn {
