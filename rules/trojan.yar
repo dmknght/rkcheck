@@ -779,21 +779,21 @@ rule Hacktool_LoginBrute {
     $ = "p@ck3tf3nc3" fullword ascii
     $ = "7ujMko0" fullword ascii
     $ = "s4beBsEQhd" fullword ascii
-    $ = "ROOT500" fullword ascii 
-    $ = "LSiuY7pOmZG2s" fullword ascii 
-    $ = "gwevrk7f@qwSX$fd" fullword ascii 
-    $ = "huigu309" fullword ascii 
-    $ = "taZz@23495859" fullword ascii 
-    $ = "hdipc%No" fullword ascii 
-    $ = "DFhxdhdf" fullword ascii 
-    $ = "XDzdfxzf" fullword ascii 
-    $ = "UYyuyioy" fullword ascii 
-    $ = "JuYfouyf87" fullword ascii 
-    $ = "NiGGeR69xd" fullword ascii 
-    $ = "NiGGeRD0nks69" fullword ascii 
-    $ = "TY2gD6MZvKc7KU6r" fullword ascii 
-    $ = "A023UU4U24UIU" fullword ascii 
-    $ = "scanJosho" fullword ascii 
+    $ = "ROOT500" fullword ascii
+    $ = "LSiuY7pOmZG2s" fullword ascii
+    $ = "gwevrk7f@qwSX$fd" fullword ascii
+    $ = "huigu309" fullword ascii
+    $ = "taZz@23495859" fullword ascii
+    $ = "hdipc%No" fullword ascii
+    $ = "DFhxdhdf" fullword ascii
+    $ = "XDzdfxzf" fullword ascii
+    $ = "UYyuyioy" fullword ascii
+    $ = "JuYfouyf87" fullword ascii
+    $ = "NiGGeR69xd" fullword ascii
+    $ = "NiGGeRD0nks69" fullword ascii
+    $ = "TY2gD6MZvKc7KU6r" fullword ascii
+    $ = "A023UU4U24UIU" fullword ascii
+    $ = "scanJosho" fullword ascii
     $ = "S2fGqNFs" fullword ascii
     $ = "admin:pornhub" base64
   condition:
@@ -808,4 +808,21 @@ rule Ramen_0aa0 {
     $ = "/usr/lib/ldliblogin.so"
   condition:
     elf_magic and any of them
+}
+
+
+rule FDMgr_c75d2 {
+  /*
+    https://securelist.com/backdoored-free-download-manager-linux-malware/110465/?ref=news.itsfoss.com
+    https://bazaar.abuse.ch/download/2214c7a0256f07ce7b7aab8f61ef9cbaff10a456c8b9f2a97d8f713abd660349/
+    Original file is packed with UPX
+  */
+  strings:
+    $addr = "u.fdmpkg.org" fullword ascii
+    $path_1 = "tmpd819is13" fullword ascii
+    $path_2 = "tmpA81e4gVs" fullword ascii
+    $str_1 = "0000000000000000DNSCACHEIP" fullword ascii
+  condition:
+    elf_magic and ($addr or $str_1 or any of ($path_*))
+
 }
