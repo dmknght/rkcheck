@@ -12,10 +12,19 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
 
   var
     ctx = cast[ptr FileScanCtx](user_data)
-    rule = cast[ptr YR_RULE](message_data)
 
-  # If target matches a rule
+  # if message == CALLBACK_MSG_MODULE_IMPORTED:
+  #   # Prototype ocde of fetching module's data (ELF). CHeck out modules_callback
+  #   # https://yara.readthedocs.io/en/stable/capi.html#c.YR_MODULE_IMPORT
+  #   var
+  #     module = cast[ptr YR_OBJECT_STRUCTURE](message_data)
+
+  #   if module.identifier == "elf":
+  #     echo "\nImported module ELF"
   if message == CALLBACK_MSG_RULE_MATCHING:
+    var
+      rule = cast[ptr YR_RULE](message_data)
+
     return file_scanner_on_matched(ctx.scan_result, ctx.virname, $rule.ns.name, $rule.identifier)
   else:
     return file_scanner_on_clean(ctx.scan_result, ctx.virname)
