@@ -74,7 +74,6 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
-
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
     return CALLBACK_ABORT
   else:
@@ -90,6 +89,7 @@ proc pscanner_cb_scan_cmdline_result(context: ptr YR_SCAN_CONTEXT; message: cint
 
   if message == CALLBACK_MSG_RULE_MATCHING:
     rule.ns.name = cstring("Cmdline")
+    ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.scan_result = CL_VIRUS
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.scan_object & "exe", ctx.pinfo.exec_name)
     return CALLBACK_ABORT
