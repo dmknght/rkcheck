@@ -71,6 +71,7 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
     "CL_TYPE_ELF",
     "CL_TYPE_MACHO_UNIBIN",
     "CL_TYPE_BINARY_DATA",
+    "CL_TYPE_HTML"
   ]:
     let
       ctx = cast[ptr FileScanCtx](context)
