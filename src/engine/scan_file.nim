@@ -78,13 +78,13 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
     if ctx.scan_result == CL_VIRUS:
       return CL_VIRUS
 
-    progress_bar_scan_file(ctx.scan_object)
+    # progress_bar_scan_file(ctx.scan_object)
     ctx.file_scanned += 1
     discard ctx.yara.engine.yr_rules_define_integer_variable("scan_block_type", 0)
     discard yr_rules_scan_fd(ctx.yara.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
     if ctx.scan_result == CL_VIRUS:
       # FIX multiple files marked as previous signature. However, it might raise error using multiple callbacks to detect malware
       ctx.scan_result = CL_CLEAN
-      ctx.vir_name = ""
       return CL_VIRUS
+
   return CL_CLEAN
