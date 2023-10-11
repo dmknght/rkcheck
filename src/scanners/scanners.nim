@@ -12,47 +12,6 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
-proc scanners_pre_scan_file(scanner: var FileScanCtx) =
-  #[
-    Use Yara's file map to read file in a safe way
-    Then we compare data to check file header
-    If the file header is ELF, we scan the file directly without calling the ClamAV file handler
-    Expecting this will be faster
-  ]#
-
-  var
-    # map_file: YR_MAPPED_FILE
-    # elf_magic = "\x7F\x45\x4C\x46"
-    # is_elf_file: bool
-    scanned: culong
-    virname: cstring
-    # TODO move elf_magic to const
-    # TODO handle other file types like PE, MACH
-
-  # if yr_filemap_map(cstring(scanner.scan_object), addr(map_file)) == ERROR_SUCCESS:
-  #   #[
-  #     The YR_MAPPED_FILE has `file` as a file descriptor value
-  #     However, using yr_rules_scan_fd is slower than accessing file (2.79 when scan fd vs 2.10 when scan file)
-  #   ]#
-  #   # Check if the file is ELF file
-  #   # The ELF header is 52 or 64 bytes long for 32-bit and 64-bit binaries
-  #   if map_file.size > 52 and cmpMem(map_file.data, addr(elf_magic[0]), 4) == 0:
-  #     # TODO check condition. for example: not elf file and size < 52
-  #     is_elf_file = true
-  #   # Not ELF file, scan with ClamAV
-  #   else:
-  #     is_elf_file = false
-  #   yr_filemap_unmap(addr(map_file))
-
-  # if is_elf_file:
-  #   # TODO if rule doesn't match, call ClamScan instead. ClamAV must not call Yara again
-  #   fscanner_yr_scan_file(scanner)
-  #   # if scanner.scan_result == CL_CLEAN:
-  # else:
-    # The cl_scanfile_callback will call yara scan again because we already set yr callback
-  discard cl_scanfile_callback(cstring(scanner.scan_object), addr(virname), addr(scanned), scanner.clam.engine, addr(scanner.clam.options), addr(scanner))
-
-
 proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[string], result_count, result_infect: var uint) =
   #[
     Job: walkDir and call scan
@@ -67,6 +26,8 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
       file_scanned: 0,
       file_infected: 0
     )
+    scanned: culong
+    virname: cstring
 
   file_scanner.clam.options = scan_ctx.clam.options
   cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_cb_virus_found)
@@ -76,12 +37,12 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
       for dir_path in list_dirs:
         for path in walkDirRec(dir_path):
           file_scanner.scan_object = path
-          scanners_pre_scan_file(file_scanner)
+          discard cl_scanfile_callback(cstring(file_scanner.scan_object), addr(virname), addr(scanned), file_scanner.clam.engine, addr(file_scanner.clam.options), addr(file_scanner))
 
     if len(list_files) != 0:
       for path in list_files:
         file_scanner.scan_object = path
-        scanners_pre_scan_file(file_scanner)
+        discard cl_scanfile_callback(cstring(file_scanner.scan_object), addr(virname), addr(scanned), file_scanner.clam.engine, addr(file_scanner.clam.options), addr(file_scanner))
   except KeyboardInterrupt:
     return
   finally:
@@ -148,14 +109,15 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
 
   #[
     ClamAV scan phases
-    1. pre_cache: Access file (both inner and outer) before scan
+    1. pre_cache: Access file (both inner and outer) before scan. Use less RAM
+      question: Call this function scans archived files (inner) too?
     2. pre_scan: Before scan
     3. post_scan: after file scan complete
     4. virus_found: only when a virus is found
   ]#
   # Only use Yara's scan engine if the init process completed
   if ctx.yara.engine != nil:
-    cl_engine_set_clcb_pre_cache(ctx.clam.engine, fscanner_cb_pre_scan_cache)
+    cl_engine_set_clcb_file_inspection(ctx.clam.engine, fscanner_cb_file_inspection)
   elif loaded_clam_sigs == 0:
     raise newException(ValueError, "No valid signatures.")
   else:
