@@ -52,9 +52,6 @@ proc fscanner_cb_post_scan_file*(fd: cint, scan_result: cint, virname: cstring, 
   let
     ctx = cast[ptr FileScanCtx](context)
 
-  progress_bar_scan_file(ctx.scan_object)
-  ctx.file_scanned += 1
-
   if scan_result == CL_VIRUS:
     ctx.virname = virname
     #[
@@ -64,6 +61,8 @@ proc fscanner_cb_post_scan_file*(fd: cint, scan_result: cint, virname: cstring, 
     ]#
     return CL_CLEAN
   else:
+    progress_bar_scan_file(ctx.scan_object)
+    ctx.file_scanned += 1
     discard ctx.yara.engine.yr_rules_define_integer_variable("scan_block_type", 0)
     discard yr_rules_scan_fd(ctx.yara.engine, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
     return ctx.scan_result
@@ -94,7 +93,6 @@ proc fscanner_cb_inc_count*(fd: cint, scan_result: cint, virname: cstring, conte
 
   progress_bar_scan_file(ctx.scan_object)
   ctx.file_scanned += 1
-
 
 # proc fscanner_yr_scan_file_cb(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
 #   var
