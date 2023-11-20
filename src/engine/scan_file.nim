@@ -2,6 +2,8 @@ import libyara
 import libclamav
 import engine_cores
 import engine_utils
+import strutils
+import os
 import .. / cli / progress_bar
 
 
@@ -64,6 +66,7 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
     ClamAV doesn't scan CL_TYPE_TEXT_ASCII?
   ]#
   # TODO improve ram usage. Current function is using 54mb (compare to 46mb when use pre-cache) for same files
+  # TODO create a rule to combine text_ascii with the scan memory to prevent false positive
 
   if $file_type in [
     "CL_TYPE_TEXT_UTF8",
@@ -79,6 +82,12 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
 
     if ctx.scan_result == CL_VIRUS:
       return CL_VIRUS
+
+    if not isEmptyOrWhitespace($file_name):
+      let
+        inner_file_name = splitPath($file_name).tail
+      if inner_file_name != splitPath(ctx.scan_object).tail:
+        ctx.scan_object = ctx.scan_object & "//" & inner_file_name
 
     # progress_bar_scan_file(ctx.scan_object)
     ctx.file_scanned += 1
