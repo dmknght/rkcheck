@@ -87,7 +87,10 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
       let
         inner_file_name = splitPath($file_name).tail
       if inner_file_name != splitPath(ctx.scan_object).tail:
-        ctx.scan_object = ctx.scan_object & "//" & inner_file_name
+        if "//" in ctx.scan_object:
+          ctx.scan_object = ctx.scan_object & "/" & inner_file_name
+        else:
+          ctx.scan_object = ctx.scan_object & "//" & inner_file_name
 
     # progress_bar_scan_file(ctx.scan_object)
     ctx.file_scanned += 1
