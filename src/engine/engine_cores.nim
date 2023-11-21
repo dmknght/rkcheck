@@ -71,6 +71,7 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_cla
   if result != CL_SUCCESS:
     return result
 
+  echo "LibAV engine: ", cl_retver()
   clam_engine.engine = cl_engine_new()
 
   # ~0 (not 0) is to enable all flags.In this case, we disable flags by default
@@ -115,7 +116,6 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_cla
     loaded_sig_count = uint(sig_count)
 
     if result == CL_SUCCESS:
-      echo "Clam Engine: ", cl_retver()
       print_loaded_signatures(loaded_sig_count, false)
 
   return cl_engine_compile(clam_engine.engine)
@@ -136,6 +136,7 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
   if result != ERROR_SUCCESS:
     return result
 
+  # TODO show yara version if possible
   var
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
