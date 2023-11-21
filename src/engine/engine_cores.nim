@@ -136,7 +136,6 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
   if result != ERROR_SUCCESS:
     return result
 
-  # TODO show yara version if possible
   var
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
