@@ -24,7 +24,6 @@ proc yr_rules_compile_custom_rules*(rules: var ptr YR_RULES, path: string) =
     return
 
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(setting_max_string))
-  discard yr_compiler_define_integer_variable(compiler, "scan_block_type", 0)
   yr_compiler_set_callback(compiler, yr_rules_report_errors, addr(compiler_result))
 
   discard yr_compiler_add_file(compiler, open(path), "CustomRules", path)

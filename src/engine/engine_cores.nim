@@ -22,9 +22,10 @@ type
 
   ProcInfo* = object
     pid*: uint
-    tgid*: uint
-    ppid*: uint
-    cmdline*: string
+    # tgid*: uint
+    # ppid*: uint
+    procfs*: string
+    # cmdline*: string
     exec_name*: string
     exec_path*: string
     mapped_file*: string

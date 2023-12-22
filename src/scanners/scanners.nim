@@ -32,6 +32,7 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
   file_scanner.clam.options = scan_ctx.clam.options
   cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_cb_virus_found)
 
+  # TODO multi threading
   try:
     if len(list_dirs) != 0:
       for dir_path in list_dirs:
