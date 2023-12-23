@@ -139,7 +139,6 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 
       if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
         if not isEmptyOrWhitespace(binary_path):
-          # FIXME check the max scan size. Scan processes like vmware, firefox, ... will break the system
           if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
             break
         # Assign scan block to current block
