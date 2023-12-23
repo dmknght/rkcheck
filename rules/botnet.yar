@@ -178,6 +178,15 @@ rule Helios_Generic {
     elf_magic and all of them
 }
 
+
+rule Okami_Dwnlder {
+  strings:
+    $ = "rm -rf /var/www/html/* /var/lib/tftpboot/* /var/ftp/*"
+    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://"
+  condition:
+    all of them
+}
+
 // rule Mirai_Gen2 {
 //   meta:
 //     author = "Nong Hoang Tu"
