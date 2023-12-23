@@ -824,5 +824,24 @@ rule FDMgr_c75d2 {
     $str_1 = "0000000000000000DNSCACHEIP" fullword ascii
   condition:
     elf_magic and ($addr or $str_1 or any of ($path_*))
+}
 
+
+rule NeoLink_Generic {
+  strings:
+    $header = "<html>"
+    $email = "bamby002a@yahoo.com" base64
+    $irc = "irc.neolink.org" fullword
+    $title = "PHP SHELL" fullword
+  condition:
+    $header and 2 of them
+}
+
+
+rule Expl_2010_RLIMIT_NPROC {
+  strings:
+    $ = "CVE-2010-EASY Android local root exploit"
+    $ = "checking NPROC limit"
+  condition:
+    all of them
 }
