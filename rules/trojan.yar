@@ -850,6 +850,7 @@ rule Expl_2010_RLIMIT_NPROC {
 rule PythonRevShell_TESTING {
   strings:
     $ = {FF 64 75 70 [5] F0 [38] FF 66 69 6C 65 6E 6F [2] 58} // Find dup2 and fileno
+    $ = {FF 66 69 6C 65 6E 6F [2] B0 [15] 20 8B 95 [21] 73 74 64 65 72 72}
   condition:
-    all of them
+    any of them
 }
