@@ -8,7 +8,7 @@ include "rules/magics.yar"
 //     is_elf and elf.number_of_sections == 0
 // }
 
-rule Fileless_DeletedFile {
+rule Fileless_DeletedFile_TESTING {
   condition:
     proc_exe endswith " (deleted)"
 }
