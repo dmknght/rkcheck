@@ -21,6 +21,10 @@ proc compile_default_rules(dst: string) =
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(setting_max_string))
   yr_compiler_set_callback(compiler, yr_rules_report_errors, addr(compiler_result))
 
+  # Set variables
+  discard yr_compiler_define_string_variable(compiler, cstring("proc_exe"), cstring(""))
+  discard yr_compiler_define_string_variable(compiler, cstring("proc_name"), cstring(""))
+
   # Set scan block type for better memory scan's accuracy
   discard yr_compiler_add_file(compiler, open("rules/magics.yar"), "Magic", "magics.yar")
   discard yr_compiler_add_file(compiler, open("rules/ransomware.yar"), "Rans", "ransomware.yar")

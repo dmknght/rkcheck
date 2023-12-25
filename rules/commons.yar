@@ -8,6 +8,18 @@ include "rules/magics.yar"
 //     is_elf and elf.number_of_sections == 0
 // }
 
+rule Fileless_DeletedFile {
+  condition:
+    proc_exe endswith " (deleted)"
+}
+
+
+rule ProcCloak_ThreadMasquerading_TESTING {
+  condition:
+    proc_name startswith "[" and proc_name endswith "]" and proc_exe startswith "/"
+}
+
+
 rule Shellcode_Executor
 {
   // meta:

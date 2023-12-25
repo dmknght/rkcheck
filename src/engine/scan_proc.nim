@@ -1,7 +1,6 @@
 import libyara
 import libclamav
 import engine_cores
-import engine_utils
 import .. / cli / [progress_bar, print_utils]
 import strutils
 import os
@@ -19,10 +18,10 @@ import strformat
 
 
 type
-  ProcChunk* = object
-    binary_path*: string
-    chunk_start*: uint64
-    chunk_end*: uint64
+  ProcChunk = object
+    binary_path: string
+    chunk_start: uint64
+    chunk_end: uint64
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
@@ -105,6 +104,18 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
   return true
 
 
+proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
+  # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
+  var
+    empty_buffer: cstring = ""
+
+  # TODO test multiple cases to see if the value of variable cause false positive (variable life time)
+  # TODO handle cmdline and socket fd
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_exe"), cstring(ctx.pinfo.exec_path))
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_name"), cstring(ctx.pinfo.exec_name))
+  discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](empty_buffer[0].unsafeAddr), uint(len(empty_buffer)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+
+
 proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   #[
     Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
@@ -138,9 +149,9 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, mem_info)
 
       if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
-        if not isEmptyOrWhitespace(binary_path):
-          if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
-            break
+        # FIXME pipewire scan hangs (heap stuff)
+        if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
+          break
         # Assign scan block to current block
         scan_block.base = mem_block.base
         scan_block.size = mem_block.size
@@ -156,61 +167,24 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
     discard yr_rules_scan_proc(ctx.yara.engine, cint(ctx.pinfo.pid), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
 
-proc pscanner_heur_proc(pid_stat: var ProcInfo) =
-  # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
-  if pid_stat.exec_path.startsWith("[") and pid_stat.exec_path.endsWith("]"):
-    proc_scanner_on_proccess_masquerading(pid_stat.pid, pid_stat.exec_path, pid_stat.exec_name)
-  elif pid_stat.exec_path.endsWith("(deleted)"):
-    proc_scanner_on_binary_deleted(pid_stat.pid, pid_stat.exec_path, pid_stat.exec_name)
-
-
-proc pscanner_attach_process(procfs: string, pid_stat: var ProcInfo): bool =
-  try:
-    pid_stat.exec_path = expandSymlink(fmt"{procfs}exe")
-  except:
-    pid_stat.exec_path = ""
-
-  # TODO 
-  # try:
-  #   pid_stat.cmdline = readFile(fmt"{procfs}cmdline").replace("\x00", " ")
-  # except:
-  #   pid_stat.cmdline = ""
-
-  try:
-    for line in lines(fmt"{procfs}status"):
-      if line.startsWith("Name:"):
-        pid_stat.exec_name = line.split()[^1]
-      elif line.startsWith("Pid:"):
-        pid_stat.pid = parseUInt(line.split()[^1])
-        return true
-  except IOError:
-    return false
-
-
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   # TODO optimize here for less useless variables
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
   ctx.virname = ""
   ctx.pinfo.pid = pid
   ctx.scan_object = ctx.pinfo.procfs
+  ctx.pinfo.exec_name = readFile(fmt"/proc/{pid}/comm")
+  ctx.pinfo.exec_name.removeSuffix('\n')
 
-  #[
-    If the process is hidden by LKM / eBPF rootkits, dir stat can be hijacked
-    Check status file exists is a temp way to do "double check"
-    TODO find a better way to handle this, otherwise scanner can't scan hidden
-    proccesses
-  ]#
-  # TODO optimize the heuristic scan
-  if not dirExists(ctx.pinfo.procfs) and not fileExists(fmt"{ctx.pinfo.procfs}status"):
-    return
-
-  if not pscanner_attach_process(ctx.pinfo.procfs, ctx.pinfo):
-    print_process_infected(ctx.pinfo.pid, "Heur:InvalidProc.StatusDenied", ctx.pinfo.exec_path, fmt"{ctx.pinfo.procfs}status", ctx.pinfo.exec_name)
-  else:
-    pscanner_heur_proc(ctx.pinfo)
+  try:
+    ctx.pinfo.exec_path = expandSymlink(fmt"/proc/{pid}/exe")
+  except:
+    ctx.pinfo.exec_path = ""
 
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.exec_path)
-  discard pscanner_cb_scan_proc(ctx)
+  pscanner_heur_proc(ctx, ctx.pinfo)
+  if ctx.scan_result == CL_CLEAN:
+    discard pscanner_cb_scan_proc(ctx)
   ctx.proc_scanned += 1
 
 
