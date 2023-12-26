@@ -10,7 +10,19 @@ include "rules/magics.yar"
 
 rule Fileless_DeletedFile_TESTING {
   condition:
-    proc_exe endswith " (deleted)"
+    proc_exe endswith " (deleted)" and not proc_exec_exists
+}
+
+
+rule RevShell_ShellRedirect_TESTING {
+  // strings:
+  //   $s1 = "bash"
+  //   $s2 = "zsh"
+  //   $s3 = "sh"
+  //   $s4 = "ksh" // name more shell here
+  condition:
+    // any of ($s*) at 0// and fd_stdin startswith "socket:[" and fd_stdout startswith "socket:["
+    fd_stdin startswith "socket:[" and fd_stdout startswith "socket:["
 }
 
 

@@ -68,6 +68,15 @@ proc pscanner_mapped_addr_to_file_name(procfs: string, mem_start, mem_end: uint6
   return fmt"{procfs}map_files/{offset_start}-{offset_end}"
 
 
+proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
+  let
+    handler_path = fmt"{procfs}fd/{fd_id}"
+
+  if symlinkExists(handler_path):
+    return expandSymlink(handler_path)
+  return ""
+
+
 proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, mem_info: var ProcChunk) =
   # TODO Yara engine has code to parse and map memory blocks (which has file name too). Is it better to rewrite it in Nim?
   # Get the name of binary mapped to memory
@@ -107,8 +116,12 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
 proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
   # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
   # TODO test multiple cases to see if the value of variable cause false positive (variable life time)
-  # TODO handle cmdline and socket fd
-  # TODO check file exists (pinfo.exec_path) and pass it to yara rule
+  let proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
+
+  discard yr_rules_define_boolean_variable(ctx.yara.engine, cstring("proc_exec_exists"), proc_exe_exists)
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdin"), cstring(ctx.pinfo.fd_stdin))
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdout"), cstring(ctx.pinfo.fd_stdout))
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stderr"), cstring(ctx.pinfo.fd_stderr))
   discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_exe"), cstring(ctx.pinfo.proc_exe))
   discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_name"), cstring(ctx.pinfo.proc_name))
   discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
@@ -144,7 +157,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       #[
         In /proc/<pid>/maps, if mem blocks belong to a same file, the end of previous block is the start of next block
       ]#
-      pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, mem_info)
+      pscanner_get_mapped_bin(ctx.pinfo, ctx.pinfo.procfs, mem_info)
 
       if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
         # FIXME pipewire scan hangs (heap stuff). Spoiler alert: IT'S FUCKING SLOW
@@ -168,12 +181,17 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   # TODO optimize here for less useless variables
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
+  if not dirExists(ctx.pinfo.procfs):
+    return
+
   ctx.virname = ""
   ctx.pinfo.pid = pid
-  ctx.scan_object = ctx.pinfo.procfs
   ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
   ctx.pinfo.proc_name.removeSuffix('\n')
   ctx.pinfo.cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline").replace("\x00", " ")
+  ctx.pinfo.fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
+  ctx.pinfo.fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
+  ctx.pinfo.fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
 
   # Prevent out of bound error when cmdline is completely empty
   if isEmptyOrWhitespace(ctx.pinfo.cmdline):
@@ -185,7 +203,10 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   except:
     ctx.pinfo.proc_exe = ""
 
-  progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.proc_exe)
+  ctx.scan_object = ctx.pinfo.proc_exe
+  ctx.scan_object.removeSuffix(" (deleted)")
+
+  progress_bar_scan_proc(ctx.pinfo.pid, ctx.scan_object)
   pscanner_heur_proc(ctx, ctx.pinfo)
   if ctx.scan_result == CL_CLEAN:
     discard pscanner_cb_scan_proc(ctx)

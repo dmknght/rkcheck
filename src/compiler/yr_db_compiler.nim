@@ -22,8 +22,12 @@ proc compile_default_rules(dst: string) =
   yr_compiler_set_callback(compiler, yr_rules_report_errors, addr(compiler_result))
 
   # Set variables
+  discard yr_compiler_define_boolean_variable(compiler, cstring("proc_exec_exists"), cint(0))
   discard yr_compiler_define_string_variable(compiler, cstring("proc_exe"), cstring(""))
   discard yr_compiler_define_string_variable(compiler, cstring("proc_name"), cstring(""))
+  discard yr_compiler_define_string_variable(compiler, cstring("fd_stdin"), cstring(""))
+  discard yr_compiler_define_string_variable(compiler, cstring("fd_stdout"), cstring(""))
+  discard yr_compiler_define_string_variable(compiler, cstring("fd_stderr"), cstring(""))
 
   # Set scan block type for better memory scan's accuracy
   discard yr_compiler_add_file(compiler, open("rules/magics.yar"), "Magic", "magics.yar")

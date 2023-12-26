@@ -27,6 +27,9 @@ type
     proc_name*: string
     proc_exe*: string
     mapped_file*: string
+    fd_stdin*: string
+    fd_stdout*: string
+    fd_stderr*: string
 
   ClEngine* = object
     engine*: ptr cl_engine
