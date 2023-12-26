@@ -23,9 +23,9 @@ type
   ProcInfo* = object
     pid*: uint
     procfs*: string
-    # cmdline*: string
-    exec_name*: string
-    exec_path*: string
+    cmdline*: string
+    proc_name*: string
+    proc_exe*: string
     mapped_file*: string
 
   ClEngine* = object

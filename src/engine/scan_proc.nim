@@ -30,7 +30,7 @@ proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
 
   ctx.scan_result = CL_VIRUS
   ctx.proc_infected += 1
-  print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+  print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.proc_exe, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -41,12 +41,12 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
   if message == CALLBACK_MSG_RULE_MATCHING:
     # If iterator failed to map memblocks, the mapped_file is empty
     if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
-      ctx.pinfo.mapped_file = ctx.pinfo.exec_path
+      ctx.pinfo.mapped_file = ctx.pinfo.proc_exe
 
     ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
-    print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.exec_path, ctx.pinfo.mapped_file, ctx.pinfo.exec_name)
+    print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.proc_exe, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
     return CALLBACK_ABORT
   else:
     ctx.virname = ""
@@ -82,7 +82,7 @@ proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, mem_info: var 
       else:
         mem_info.binary_path = ""
     except:
-      pinfo.mapped_file = pinfo.exec_path
+      pinfo.mapped_file = pinfo.proc_exe
       mem_info.binary_path = ""
 
 
@@ -95,7 +95,7 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
     var
       cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(scan_block), base_size)
 
-    discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.exec_path), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+    discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.proc_exe), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
     cl_fmap_close(cl_map_file)
 
   # Stop scan if virus matches
@@ -106,14 +106,12 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
 
 proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
   # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
-  var
-    empty_buffer: cstring = ""
-
   # TODO test multiple cases to see if the value of variable cause false positive (variable life time)
   # TODO handle cmdline and socket fd
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_exe"), cstring(ctx.pinfo.exec_path))
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_name"), cstring(ctx.pinfo.exec_name))
-  discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](empty_buffer[0].unsafeAddr), uint(len(empty_buffer)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+  # TODO check file exists (pinfo.exec_path) and pass it to yara rule
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_exe"), cstring(ctx.pinfo.proc_exe))
+  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_name"), cstring(ctx.pinfo.proc_name))
+  discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
 
 proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
@@ -149,7 +147,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       pscanner_get_mapped_bin(ctx.pinfo, ctx.scan_object, mem_info)
 
       if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
-        # FIXME pipewire scan hangs (heap stuff)
+        # FIXME pipewire scan hangs (heap stuff). Spoiler alert: IT'S FUCKING SLOW
         if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
           break
         # Assign scan block to current block
@@ -173,15 +171,21 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.virname = ""
   ctx.pinfo.pid = pid
   ctx.scan_object = ctx.pinfo.procfs
-  ctx.pinfo.exec_name = readFile(fmt"/proc/{pid}/comm")
-  ctx.pinfo.exec_name.removeSuffix('\n')
+  ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
+  ctx.pinfo.proc_name.removeSuffix('\n')
+  ctx.pinfo.cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline").replace("\x00", " ")
+
+  # Prevent out of bound error when cmdline is completely empty
+  if isEmptyOrWhitespace(ctx.pinfo.cmdline):
+    ctx.pinfo.cmdline = " "
 
   try:
-    ctx.pinfo.exec_path = expandSymlink(fmt"/proc/{pid}/exe")
+    ctx.pinfo.proc_exe = expandSymlink(fmt"{ctx.pinfo.procfs}exe")
+    # TODO check if path exists here
   except:
-    ctx.pinfo.exec_path = ""
+    ctx.pinfo.proc_exe = ""
 
-  progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.exec_path)
+  progress_bar_scan_proc(ctx.pinfo.pid, ctx.pinfo.proc_exe)
   pscanner_heur_proc(ctx, ctx.pinfo)
   if ctx.scan_result == CL_CLEAN:
     discard pscanner_cb_scan_proc(ctx)
