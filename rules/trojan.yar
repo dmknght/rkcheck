@@ -838,13 +838,13 @@ rule FDMgr_c75d2 {
 // }
 
 
-rule Expl_2010_RLIMIT_NPROC {
-  strings:
-    $ = "CVE-2010-EASY Android local root exploit"
-    $ = "checking NPROC limit"
-  condition:
-    all of them
-}
+// rule Expl_2010_RLIMIT_NPROC {
+//   strings:
+//     $ = "CVE-2010-EASY Android local root exploit"
+//     $ = "checking NPROC limit"
+//   condition:
+//     all of them
+// }
 
 
 rule PythonRevShell_TESTING {
