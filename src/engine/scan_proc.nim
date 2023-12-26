@@ -73,9 +73,12 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
   let
     handler_path = fmt"{procfs}fd/{fd_id}"
 
-  if symlinkExists(handler_path):
-    return expandSymlink(handler_path)
-  return ""
+  try:
+    if symlinkExists(handler_path):
+      return expandSymlink(handler_path)
+    return ""
+  except:
+    return ""
 
 
 proc pscanner_get_mapped_bin(pinfo: var ProcInfo, mem_info: var ProcChunk) =
@@ -162,6 +165,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 
       if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
         # FIXME pipewire scan hangs (heap stuff). Spoiler alert: IT'S FUCKING SLOW
+        # TODO create more conditions to allow scan
         if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
           break
         # Assign scan block to current block
