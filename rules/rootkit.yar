@@ -154,11 +154,11 @@ rule Orbit_ba61 {
   //   hash = "ba61e17c5fbcd6288081b31210f6cae6"
   //   description = "Orbit library file"
   strings:
-    $1 = "load_hidden_ports" fullword ascii
-    $2 = "tcp_port_hidden"  fullword ascii
-    $3 = "sniff_ssh_session" fullword ascii
-    $4 = "ld.so.nohwcap" fullword ascii
-    $5 = "patch_ld" fullword ascii
+    $ = "load_hidden_ports" fullword ascii
+    $ = "tcp_port_hidden"  fullword ascii
+    $ = "sniff_ssh_session" fullword ascii
+    $ = "ld.so.nohwcap" fullword ascii
+    $ = "patch_ld" fullword ascii
   condition:
     elf_dyn and 3 of them
 }

@@ -179,13 +179,13 @@ rule Helios_Generic {
 }
 
 
-rule Okami_Dwnlder {
-  strings:
-    $ = "rm -rf /var/www/html/* /var/lib/tftpboot/* /var/ftp/*"
-    $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://"
-  condition:
-    all of them
-}
+// rule Okami_Dwnlder {
+//   strings:
+//     $ = "rm -rf /var/www/html/* /var/lib/tftpboot/* /var/ftp/*"
+//     $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /; wget http://"
+//   condition:
+//     all of them
+// }
 
 // rule Mirai_Gen2 {
 //   meta:
