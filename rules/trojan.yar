@@ -835,7 +835,7 @@ rule FDMgr_c75d2 {
 //     $title = "PHP SHELL" fullword
 //   condition:
 //     $header and 2 of them
-}
+// }
 
 
 rule Expl_2010_RLIMIT_NPROC {
