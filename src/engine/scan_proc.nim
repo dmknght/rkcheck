@@ -193,6 +193,7 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.pinfo.fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
   ctx.pinfo.fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
   ctx.pinfo.fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
+  ctx.pinfo.mapped_file = ""
 
   # Prevent out of bound error when cmdline is completely empty
   if isEmptyOrWhitespace(ctx.pinfo.cmdline):
