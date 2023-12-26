@@ -827,14 +827,14 @@ rule FDMgr_c75d2 {
 }
 
 
-rule NeoLink_Generic {
-  strings:
-    $header = "<html>"
-    $email = "bamby002a@yahoo.com" base64
-    $irc = "irc.neolink.org" fullword
-    $title = "PHP SHELL" fullword
-  condition:
-    $header and 2 of them
+// rule NeoLink_Generic {
+//   strings:
+//     $header = "<html>"
+//     $email = "bamby002a@yahoo.com" base64
+//     $irc = "irc.neolink.org" fullword
+//     $title = "PHP SHELL" fullword
+//   condition:
+//     $header and 2 of them
 }
 
 
