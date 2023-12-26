@@ -27,11 +27,11 @@ proc print_file_infected*(virname, scan_obj: string) =
 
 proc print_process_infected*(pid: uint, virname, exec_path, map_path, name: string) =
   progress_bar_flush()
-  echo "[\e[91m!\e[0m] \e[45m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
+  echo "[\e[91m!\e[0m] \e[41m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
   echo " Name: ", name
 
   if not isEmptyOrWhitespace(exec_path):
-    echo " Exec: \e[44m", exec_path, "\e[0m"
+    echo " Exec: \e[40m", exec_path, "\e[0m"
   else:
     echo " Exec: \e[93mUnknown\e[0m"
 
