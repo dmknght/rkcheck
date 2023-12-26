@@ -47,6 +47,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.proc_exe, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
+    ctx.pinfo.mapped_file = ""
     return CALLBACK_ABORT
   else:
     ctx.virname = ""
@@ -77,12 +78,12 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
   return ""
 
 
-proc pscanner_get_mapped_bin(pinfo: var ProcInfo, procfs: string, mem_info: var ProcChunk) =
+proc pscanner_get_mapped_bin(pinfo: var ProcInfo, mem_info: var ProcChunk) =
   # TODO Yara engine has code to parse and map memory blocks (which has file name too). Is it better to rewrite it in Nim?
   # Get the name of binary mapped to memory
   if isEmptyOrWhitespace(mem_info.binary_path):
     let
-      path_to_check = pscanner_mapped_addr_to_file_name(procfs, mem_info.chunk_start, mem_info.chunk_end, pinfo.pid)
+      path_to_check = pscanner_mapped_addr_to_file_name(pinfo.procfs, mem_info.chunk_start, mem_info.chunk_end, pinfo.pid)
 
     try:
       if symlinkExists(path_to_check):
@@ -157,7 +158,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
       #[
         In /proc/<pid>/maps, if mem blocks belong to a same file, the end of previous block is the start of next block
       ]#
-      pscanner_get_mapped_bin(ctx.pinfo, ctx.pinfo.procfs, mem_info)
+      pscanner_get_mapped_bin(ctx.pinfo, mem_info)
 
       if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
         # FIXME pipewire scan hangs (heap stuff). Spoiler alert: IT'S FUCKING SLOW
