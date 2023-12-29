@@ -25,6 +25,7 @@ type
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+  # TODO improve this function
   let
     ctx = cast[ptr ProcScanCtx](context)
 
@@ -196,7 +197,7 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.pinfo.pid = pid
   ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
   ctx.pinfo.proc_name.removeSuffix('\n')
-  ctx.pinfo.cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline").replace("\x00", " ")
+  ctx.pinfo.cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline")
   ctx.pinfo.fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
   ctx.pinfo.fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
   ctx.pinfo.fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
