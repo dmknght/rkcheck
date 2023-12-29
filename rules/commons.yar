@@ -26,6 +26,14 @@ rule RevShell_ShellRedirect_TESTING {
 }
 
 
+rule RevShell_Ncat_TESTING {
+  strings:
+    $ = "-e" fullword ascii
+  condition:
+    proc_name endswith "ncat" and all of them
+}
+
+
 rule ProcCloak_ThreadMasquerading_TESTING {
   condition:
     proc_name startswith "[" and proc_name endswith "]" and proc_exe startswith "/"
