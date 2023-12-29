@@ -46,7 +46,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
-    print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.pinfo.proc_exe, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
+    print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.scan_object, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
     ctx.pinfo.mapped_file = ""
     return CALLBACK_ABORT
   else:
@@ -183,6 +183,9 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
     discard yr_rules_scan_proc(ctx.yara.engine, cint(ctx.pinfo.pid), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
 
+#[
+  Get process's information
+]#
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   # TODO optimize here for less useless variables
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
@@ -219,11 +222,17 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.proc_scanned += 1
 
 
+#[
+  Walkthrough the list of pid
+]#
 proc pscanner_scan_procs*(ctx: var ProcScanCtx, list_procs: seq[uint]) =
   for pid in list_procs:
     pscanner_process_pid(ctx, pid)
 
 
+#[
+  Use procfs to get all pid in the system
+]#
 proc pscanner_scan_procs*(ctx: var ProcScanCtx) =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir:
