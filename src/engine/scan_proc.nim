@@ -57,13 +57,13 @@ type
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  # FIXME ClamAV call this 2 times
   let
     ctx = cast[ptr ProcScanCtx](context)
 
-  ctx.scan_result = CL_VIRUS
-  ctx.proc_infected += 1
-  print_process_infected(ctx.pinfo.pid, $virname, ctx.scan_object, ctx.pinfo.proc_exe, ctx.pinfo.proc_name)
+  if ctx.scan_result == CL_CLEAN:
+    ctx.scan_result = CL_VIRUS
+    ctx.proc_infected += 1
+    print_process_infected(ctx.pinfo.pid, $virname, ctx.scan_object, ctx.pinfo.proc_exe, ctx.pinfo.proc_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -101,7 +101,6 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
   if ctx.scan_result == CL_CLEAN:
     var
       cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(scan_block), base_size)
-
     discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
     cl_fmap_close(cl_map_file)
 
