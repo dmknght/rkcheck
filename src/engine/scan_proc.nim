@@ -63,7 +63,7 @@ proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
 
   ctx.scan_result = CL_VIRUS
   ctx.proc_infected += 1
-  print_process_infected(ctx.pinfo.pid, $virname, ctx.pinfo.proc_exe, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
+  print_process_infected(ctx.pinfo.pid, $virname, ctx.scan_object, ctx.pinfo.proc_exe, ctx.pinfo.proc_name)
 
 
 proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
@@ -72,15 +72,10 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     rule = cast[ptr YR_RULE](message_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
-    # If iterator failed to map memblocks, the mapped_file is empty
-    if isEmptyOrWhitespace(ctx.pinfo.mapped_file):
-      ctx.pinfo.mapped_file = ctx.pinfo.proc_exe
-
     ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
-    print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.scan_object, ctx.pinfo.mapped_file, ctx.pinfo.proc_name)
-    ctx.pinfo.mapped_file = ""
+    print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.scan_object, ctx.pinfo.proc_exe, ctx.pinfo.proc_name)
     return CALLBACK_ABORT
   else:
     ctx.virname = ""
@@ -157,10 +152,10 @@ proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
         scan_block.base = mem_block.base
         scan_block.size = mem_block.size
         scan_block.context = mem_block.context
-        ctx.pinfo.mapped_file = ctx.pinfo.proc_exe
+        ctx.scan_object = ctx.pinfo.proc_exe
       else:
         scan_block.size += mem_block.size
-        ctx.pinfo.mapped_file = $proc_info.map_path
+        ctx.scan_object = $proc_info.map_path
       mem_block = mem_blocks.next(mem_blocks.addr)
 
     discard yr_process_close_iterator(mem_blocks.addr)
@@ -173,6 +168,7 @@ proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
   Get process's information
 ]#
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
+  # FIXME crash when scan with sudo, proc 2
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
   if not dirExists(ctx.pinfo.procfs):
     return
@@ -185,7 +181,6 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.pinfo.fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
   ctx.pinfo.fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
   ctx.pinfo.fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
-  ctx.pinfo.mapped_file = ""
 
   # Prevent out of bound error when cmdline is completely empty
   if isEmptyOrWhitespace(ctx.pinfo.cmdline):
