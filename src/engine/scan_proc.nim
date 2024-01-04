@@ -42,18 +42,18 @@ import strformat
   """.}
 
 type
-  ProcChunkInfo* {.bycopy, importc: "struct _YR_PROC_INFO".} = object
-    pid*: cint
-    mem_fd*: cint
-    pagemap_fd*: cint
-    maps*: ptr FILE
-    map_offset*: uint64
-    next_block_end*: uint64
-    page_size*: cint
-    map_path*: cstring
-    map_dmaj*: uint64
-    map_dmin*: uint64
-    map_ino*: uint64
+  ProcChunkInfo {.bycopy, importc: "struct _YR_PROC_INFO".} = object
+    pid: cint
+    mem_fd: cint
+    pagemap_fd: cint
+    maps: ptr FILE
+    map_offset: uint64
+    next_block_end: uint64
+    page_size: cint
+    map_path: cstring
+    map_dmaj: uint64
+    map_dmin: uint64
+    map_ino: uint64
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
@@ -121,7 +121,8 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
 proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
   # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
   # TODO test multiple cases to see if the value of variable cause false positive (variable life time)
-  let proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
+  let
+    proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
 
   discard yr_rules_define_boolean_variable(ctx.yara.engine, cstring("proc_exec_exists"), proc_exe_exists)
   discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdin"), cstring(ctx.pinfo.fd_stdin))
@@ -172,7 +173,6 @@ proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
   Get process's information
 ]#
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
-  # TODO optimize here for less useless variables or reuse values from Yara instead
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
   if not dirExists(ctx.pinfo.procfs):
     return
@@ -193,7 +193,6 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
 
   try:
     ctx.pinfo.proc_exe = expandSymlink(fmt"{ctx.pinfo.procfs}exe")
-    # TODO check if path exists here
   except:
     ctx.pinfo.proc_exe = ""
 
