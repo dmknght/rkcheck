@@ -57,7 +57,7 @@ type
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  # TODO improve this function
+  # FIXME ClamAV call this 2 times
   let
     ctx = cast[ptr ProcScanCtx](context)
 
@@ -97,7 +97,6 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
 
 proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
   discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(scan_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
-  # Keep scanning if user sets match_all_rules
   # TODO skip if cl_engine is Nil?
   if ctx.scan_result == CL_CLEAN:
     var
@@ -130,13 +129,15 @@ proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
 proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
-    mem_block: ptr YR_MEMORY_BLOCK
 
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
+    if mem_blocks.first(mem_blocks.addr) == nil:
+      return
+
     var
+      mem_block: ptr YR_MEMORY_BLOCK = mem_blocks.first(mem_blocks.addr)
       scan_block: YR_MEMORY_BLOCK
 
-    mem_block = mem_blocks.first(mem_blocks.addr)
     scan_block.base = mem_block.base
     scan_block.size = mem_block.size
     scan_block.context = mem_block.context
@@ -167,7 +168,6 @@ proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
   Get process's information
 ]#
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
-  # FIXME crash when scan with sudo, proc 2
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
   if not dirExists(ctx.pinfo.procfs):
     return
@@ -180,7 +180,6 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.pinfo.fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
   ctx.pinfo.fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
   ctx.pinfo.fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
-
   # Prevent out of bound error when cmdline is completely empty
   if isEmptyOrWhitespace(ctx.pinfo.cmdline):
     ctx.pinfo.cmdline = " "
@@ -192,7 +191,6 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
 
   ctx.scan_object = ctx.pinfo.proc_exe
   ctx.scan_object.removeSuffix(" (deleted)")
-
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.scan_object)
   pscanner_heur_proc(ctx, ctx.pinfo)
   if ctx.scan_result == CL_CLEAN:
