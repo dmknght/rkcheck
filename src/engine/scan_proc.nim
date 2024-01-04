@@ -124,7 +124,7 @@ proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
   let
     proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
 
-  discard yr_rules_define_boolean_variable(ctx.yara.engine, cstring("proc_exec_exists"), proc_exe_exists)
+  discard yr_rules_define_boolean_variable(ctx.yara.engine, cstring("proc_exe_exists"), proc_exe_exists)
   discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdin"), cstring(ctx.pinfo.fd_stdin))
   discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdout"), cstring(ctx.pinfo.fd_stdout))
   discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stderr"), cstring(ctx.pinfo.fd_stderr))

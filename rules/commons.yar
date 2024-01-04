@@ -10,7 +10,7 @@ include "rules/magics.yar"
 
 rule Fileless_DeletedFile_TESTING {
   condition:
-    proc_exe endswith " (deleted)" and not proc_exec_exists
+    proc_exe endswith " (deleted)" and not proc_exe_exists
 }
 
 
