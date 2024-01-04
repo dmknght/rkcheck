@@ -16,12 +16,44 @@ import strformat
   The B. usually contains the data of a child process. Scanner should skip it to avoid false positive
 ]#
 
+{.emit: """
+  typedef struct _YR_PROC_ITERATOR_CTX
+  {
+    const uint8_t* buffer;
+    size_t buffer_size;
+    YR_MEMORY_BLOCK current_block;
+    void* proc_info;
+  } YR_PROC_ITERATOR_CTX;
+
+  typedef struct _YR_PROC_INFO
+  {
+    int pid;
+    int mem_fd;
+    int pagemap_fd;
+    FILE* maps;
+    uint64_t map_offset;
+    uint64_t next_block_end;
+    int page_size;
+    char map_path[PATH_MAX];
+    uint64_t map_dmaj;
+    uint64_t map_dmin;
+    uint64_t map_ino;
+  } YR_PROC_INFO;
+  """.}
 
 type
-  ProcChunk = object
-    binary_path: string
-    chunk_start: uint64
-    chunk_end: uint64
+  ProcChunkInfo* {.bycopy, importc: "struct _YR_PROC_INFO".} = object
+    pid*: cint
+    mem_fd*: cint
+    pagemap_fd*: cint
+    maps*: ptr FILE
+    map_offset*: uint64
+    next_block_end*: uint64
+    page_size*: cint
+    map_path*: cstring
+    map_dmaj*: uint64
+    map_dmin*: uint64
+    map_ino*: uint64
 
 
 proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
@@ -56,20 +88,6 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     return CALLBACK_CONTINUE
 
 
-proc pscanner_mapped_addr_to_file_name(procfs: string, mem_start, mem_end: uint64, proc_id: uint): string =
-  #[
-    The procFS has symlink at /proc/<pid>/map_files/<map block here>
-    This function crafts the memory chunk based on offset and size to map the file
-  ]#
-  var
-    offset_start = toHex(mem_start).toLowerAscii()
-    offset_end = toHex(mem_end).toLowerAscii()
-
-  offset_start.removePrefix('0')
-  offset_end.removePrefix('0')
-  return fmt"{procfs}map_files/{offset_start}-{offset_end}"
-
-
 proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
   let
     handler_path = fmt"{procfs}fd/{fd_id}"
@@ -80,24 +98,6 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
     return ""
   except:
     return ""
-
-
-proc pscanner_get_mapped_bin(pinfo: var ProcInfo, mem_info: var ProcChunk) =
-  # TODO Yara engine has code to parse and map memory blocks (which has file name too). Is it better to rewrite it in Nim?
-  # Get the name of binary mapped to memory
-  if isEmptyOrWhitespace(mem_info.binary_path):
-    let
-      path_to_check = pscanner_mapped_addr_to_file_name(pinfo.procfs, mem_info.chunk_start, mem_info.chunk_end, pinfo.pid)
-
-    try:
-      if symlinkExists(path_to_check):
-        mem_info.binary_path = expandSymlink(path_to_check)
-        pinfo.mapped_file = mem_info.binary_path
-      else:
-        mem_info.binary_path = ""
-    except:
-      pinfo.mapped_file = pinfo.proc_exe
-      mem_info.binary_path = ""
 
 
 proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
@@ -132,21 +132,14 @@ proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
   discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
 
 
-proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
-  #[
-    Simulate Linux's scan proc by accessing YR_MEMORY_BLOCK_ITERATOR
-    Keep expanding memory block if it mapped from the same file
-    Then call yr_rules_scan_mem to scan each memory block
-    # TODO: handle if either Yara or ClamAV failed to init
-  ]#
+proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
     mem_block: ptr YR_MEMORY_BLOCK
-    scan_block: YR_MEMORY_BLOCK
 
   if yr_process_open_iterator(cint(ctx.pinfo.pid), mem_blocks.addr) == ERROR_SUCCESS:
     var
-      binary_path: string
+      scan_block: YR_MEMORY_BLOCK
 
     mem_block = mem_blocks.first(mem_blocks.addr)
     scan_block.base = mem_block.base
@@ -155,29 +148,20 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
 
     while mem_block != nil:
       var
-        mem_info = ProcChunk(
-          chunk_start: mem_block[].base,
-          chunk_end: mem_block[].base + mem_block[].size
-        )
-      #[
-        In /proc/<pid>/maps, if mem blocks belong to a same file, the end of previous block is the start of next block
-      ]#
-      pscanner_get_mapped_bin(ctx.pinfo, mem_info)
-
-      if isEmptyOrWhitespace(binary_path) or isEmptyOrWhitespace(mem_info.binary_path):
-        # FIXME pipewire scan hangs (heap stuff). Spoiler alert: IT'S FUCKING SLOW
-        # TODO create more conditions to allow scan
+        context = cast[ptr YR_PROC_ITERATOR_CTX](mem_block.context)
+        proc_info = cast[ptr ProcChunkInfo](context.proc_info)
+      if isEmptyOrWhitespace($proc_info.map_path):
         if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
           break
-        # Assign scan block to current block
         scan_block.base = mem_block.base
         scan_block.size = mem_block.size
         scan_block.context = mem_block.context
-        binary_path = mem_info.binary_path
+        ctx.pinfo.mapped_file = ctx.pinfo.proc_exe
       else:
         scan_block.size += mem_block.size
-
+        ctx.pinfo.mapped_file = $proc_info.map_path
       mem_block = mem_blocks.next(mem_blocks.addr)
+
     discard yr_process_close_iterator(mem_blocks.addr)
   else:
     # Failed to Iterate memory blocks. Let Yara handles it?
@@ -188,7 +172,7 @@ proc pscanner_cb_scan_proc*(ctx: var ProcScanCtx): cint =
   Get process's information
 ]#
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
-  # TODO optimize here for less useless variables
+  # TODO optimize here for less useless variables or reuse values from Yara instead
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
   if not dirExists(ctx.pinfo.procfs):
     return
