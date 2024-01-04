@@ -15,7 +15,7 @@ type
     scan_all_procs*: bool
     is_clam_debug*: bool
     use_clam_db*: bool
-    match_all*: bool
+    # match_all*: bool
     scan_preload*: bool
     db_path_clamav*: string
     db_path_yara*: string
@@ -39,7 +39,7 @@ type
   YrEngine* = object
     engine*: ptr YR_RULES
     database*: string
-    match_all_rules*: bool
+    # match_all_rules*: bool
 
   ScanCtx* = object of RootObj
     yara*: YrEngine

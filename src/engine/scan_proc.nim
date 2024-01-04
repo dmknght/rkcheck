@@ -99,16 +99,15 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
   discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(scan_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
   # Keep scanning if user sets match_all_rules
   # TODO skip if cl_engine is Nil?
-  if ctx.scan_result == CL_CLEAN or ctx.yara.match_all_rules:
-    ctx.scan_result = CL_CLEAN
+  if ctx.scan_result == CL_CLEAN:
     var
       cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(scan_block), base_size)
 
-    discard cl_scanmap_callback(cl_map_file, cstring(ctx.pinfo.proc_exe), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+    discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
     cl_fmap_close(cl_map_file)
 
   # Stop scan if virus matches
-  if not ctx.yara.match_all_rules and ctx.scan_result == CL_VIRUS:
+  if ctx.scan_result == CL_VIRUS:
     return false
   return true
 
