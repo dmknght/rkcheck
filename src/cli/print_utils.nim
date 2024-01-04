@@ -25,7 +25,7 @@ proc print_file_infected*(virname, scan_obj: string) =
   echo "[\e[91m!\e[0m] \e[41m", virname, "\e[0m ", scan_obj
 
 
-proc print_process_infected*(pid: uint, virname, exec_path, map_path, name: string) =
+proc print_process_infected*(pid: uint, virname, scan_object, exec_path, name: string) =
   progress_bar_flush()
   echo "[\e[91m!\e[0m] \e[41m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
   echo " Name: ", name
@@ -35,7 +35,7 @@ proc print_process_infected*(pid: uint, virname, exec_path, map_path, name: stri
   else:
     echo " Exec: \e[93mUnknown\e[0m"
 
-  echo " Infected: \e[91m", map_path, "\e[0m"
+  echo " Infected: \e[91m", scan_object, "\e[0m"
 
 
 proc print_loaded_signatures*(num_loaded: uint, is_yara: bool) =
