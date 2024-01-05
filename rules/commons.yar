@@ -8,6 +8,7 @@ include "rules/magics.yar"
 //     is_elf and elf.number_of_sections == 0
 // }
 
+// https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
 rule Fileless_DeletedSelf_TESTING {
   condition:
     proc_exe endswith " (deleted)" and not proc_exe_exists

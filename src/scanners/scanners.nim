@@ -64,13 +64,13 @@ proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_pr
     )
 
   proc_scanner.clam.options = scan_ctx.clam.options
-  cl_engine_set_clcb_virus_found(proc_scanner.clam.engine, pscanner_on_virus_found)
+  cl_engine_set_clcb_virus_found(proc_scanner.clam.engine, pscanner_on_virus_found_clam)
 
   try:
     if all_procs:
-      pscanner_scan_procs(proc_scanner)
+      pscanner_scan_processes(proc_scanner)
     else:
-      pscanner_scan_procs(proc_scanner, list_procs)
+      pscanner_scan_processes(proc_scanner, list_procs)
   except KeyboardInterrupt:
     return
   finally:
@@ -117,7 +117,7 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
     4. virus_found: only when a virus is found
   ]#
   # Only use Yara's scan engine if the init process completed
-  if ctx.yara.engine != nil:
+  if ctx.yara.rules != nil:
     cl_engine_set_clcb_file_inspection(ctx.clam.engine, fscanner_cb_file_inspection)
   elif loaded_clam_sigs == 0:
     raise newException(ValueError, "No valid signatures.")

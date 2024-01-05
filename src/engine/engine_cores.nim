@@ -15,7 +15,6 @@ type
     scan_all_procs*: bool
     is_clam_debug*: bool
     use_clam_db*: bool
-    # match_all*: bool
     scan_preload*: bool
     db_path_clamav*: string
     db_path_yara*: string
@@ -23,12 +22,8 @@ type
   ProcInfo* = object
     pid*: uint
     procfs*: string
-    cmdline*: string
     proc_name*: string
     proc_exe*: string
-    fd_stdin*: string
-    fd_stdout*: string
-    fd_stderr*: string
 
   ClEngine* = object
     engine*: ptr cl_engine
@@ -37,9 +32,9 @@ type
     debug_mode*: bool
     use_clam*: bool
   YrEngine* = object
-    engine*: ptr YR_RULES
+    rules*: ptr YR_RULES
+    scanner*: ptr YR_SCANNER
     database*: string
-    # match_all_rules*: bool
 
   ScanCtx* = object of RootObj
     yara*: YrEngine
@@ -145,15 +140,15 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
     return ERROR_COULD_NOT_OPEN_FILE
   # If rule is compiled, we load it
   if yr_rule_file_is_compiled(yara_engine.database):
-    result = yr_rules_load(cstring(yara_engine.database), addr(yara_engine.engine))
+    result = yr_rules_load(cstring(yara_engine.database), addr(yara_engine.rules))
   else:
     # Need to compile rules
-    yr_rules_compile_custom_rules(yara_engine.engine, yara_engine.database)
+    yr_rules_compile_custom_rules(yara_engine.rules, yara_engine.database)
 
   if result != ERROR_SUCCESS:
     return result
 
-  loaded_sigs = uint(yara_engine.engine.num_rules)
+  loaded_sigs = uint(yara_engine.rules.num_rules)
 
   print_yara_version()
   print_loaded_signatures(loaded_sigs, true)
@@ -164,6 +159,7 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
 
 
 proc finit_yara*(engine: var YrEngine) =
-  if engine.engine != nil:
-    discard yr_rules_destroy(engine.engine)
+  # TODO scanner
+  if engine.rules != nil:
+    discard yr_rules_destroy(engine.rules)
   discard yr_finalize()

@@ -56,7 +56,11 @@ type
     map_ino: uint64
 
 
-proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
+#[
+  Callback function for ClamAV
+  Print information of infected process when malware is found
+]#
+proc pscanner_on_virus_found_clam*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   let
     ctx = cast[ptr ProcScanCtx](context)
 
@@ -64,9 +68,14 @@ proc pscanner_on_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
     ctx.scan_result = CL_VIRUS
     ctx.proc_infected += 1
     print_process_infected(ctx.pinfo.pid, $virname, ctx.scan_object, ctx.pinfo.proc_exe, ctx.pinfo.proc_name)
+    ctx.virname = ""
 
 
-proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
+#[
+  Callback function for Yara scanner
+  Print information of infected process when malware is found
+]#
+proc pscanner_on_virus_found_yara(context: ptr YR_SCAN_CONTEXT; message: cint; message_data: pointer; user_data: pointer): cint {.cdecl.} =
   let
     ctx = cast[ptr ProcScanCtx](user_data)
     rule = cast[ptr YR_RULE](message_data)
@@ -76,6 +85,7 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     ctx.proc_infected += 1
     ctx.scan_result = CL_VIRUS
     print_process_infected(ctx.pinfo.pid, $ctx.virname, ctx.scan_object, ctx.pinfo.proc_exe, ctx.pinfo.proc_name)
+    ctx.virname = ""
     return CALLBACK_ABORT
   else:
     ctx.virname = ""
@@ -83,6 +93,10 @@ proc pscanner_cb_scan_proc_result(context: ptr YR_SCAN_CONTEXT; message: cint; m
     return CALLBACK_CONTINUE
 
 
+#[
+  Get process's handler information
+  /proc/<pid>/fd/<int>
+]#
 proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
   let
     handler_path = fmt"{procfs}fd/{fd_id}"
@@ -95,8 +109,49 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
     return ""
 
 
-proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
-  discard yr_rules_scan_mem(ctx.yara.engine, mem_block[].fetch_data(scan_block), base_size, SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+#[
+  Gather process's information
+  Pass value to Yara's scanner using define variable
+  This function also scans the cmdline
+]#
+proc pscanner_scan_heuristic(ctx: var ProcScanCtx) =
+  ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
+  ctx.pinfo.proc_name.removeSuffix('\n')
+  let
+    fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
+    fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
+    fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
+  var
+    cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline")
+
+  # Prevent out of bound error when cmdline is completely empty
+  if isEmptyOrWhitespace(cmdline):
+    cmdline = " "
+
+  try:
+    ctx.pinfo.proc_exe = expandSymlink(fmt"{ctx.pinfo.procfs}exe")
+  except:
+    ctx.pinfo.proc_exe = ""
+
+  ctx.scan_object = ctx.pinfo.proc_exe
+  ctx.scan_object.removeSuffix(" (deleted)")
+  let
+    proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
+
+  discard yr_scanner_define_boolean_variable(ctx.yara.scanner, cstring("proc_exe_exists"), proc_exe_exists)
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stdin"), cstring(fd_stdin))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stdout"), cstring(fd_stdout))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stderr"), cstring(fd_stderr))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_exe"), cstring(ctx.pinfo.proc_exe))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_name"), cstring(ctx.pinfo.proc_name))
+  discard yr_scanner_scan_mem(ctx.yara.scanner, cast[ptr uint8](cmdline[0].unsafeAddr), uint(len(cmdline)))
+
+
+#[
+  Scan current memory block with Yara and ClamAV. Return false if malware is found
+]#
+proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
+  discard yr_scanner_scan_mem(ctx.yara.scanner, mem_block[].fetch_data(scan_block), base_size)
   # TODO skip if cl_engine is Nil?
   if ctx.scan_result == CL_CLEAN:
     var
@@ -104,28 +159,21 @@ proc pscanner_scan_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEM
     discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
     cl_fmap_close(cl_map_file)
 
-  # Stop scan if virus matches
   if ctx.scan_result == CL_VIRUS:
     return false
   return true
 
 
-proc pscanner_heur_proc(ctx: var ProcScanCtx, pid_stat: var ProcInfo) =
-  # https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
-  # TODO test multiple cases to see if the value of variable cause false positive (variable life time)
-  let
-    proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
+#[
+  Iterate over all memory blocks, call scan_mem_block
+  Instead of scan single blocks, this function merge blocks that belongs to a binary
+  then call scan the whole big block
+  If the current block doesn't belong to any file (heap, stack, ...), scan it
+]#
+proc pscanner_scan_memory(ctx: var ProcScanCtx) =
+  if ctx.scan_result == CL_VIRUS:
+    return
 
-  discard yr_rules_define_boolean_variable(ctx.yara.engine, cstring("proc_exe_exists"), proc_exe_exists)
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdin"), cstring(ctx.pinfo.fd_stdin))
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stdout"), cstring(ctx.pinfo.fd_stdout))
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("fd_stderr"), cstring(ctx.pinfo.fd_stderr))
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_exe"), cstring(ctx.pinfo.proc_exe))
-  discard yr_rules_define_string_variable(ctx.yara.engine, cstring("proc_name"), cstring(ctx.pinfo.proc_name))
-  discard yr_rules_scan_mem(ctx.yara.engine, cast[ptr uint8](ctx.pinfo.cmdline[0].unsafeAddr), uint(len(ctx.pinfo.cmdline)), SCAN_FLAGS_FAST_MODE, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
-
-
-proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
 
@@ -146,7 +194,7 @@ proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
         context = cast[ptr YR_PROC_ITERATOR_CTX](mem_block.context)
         proc_info = cast[ptr ProcChunkInfo](context.proc_info)
       if isEmptyOrWhitespace($proc_info.map_path):
-        if not pscanner_scan_block(ctx, mem_block, scan_block.addr, scan_block.size):
+        if not pscanner_scan_mem_block(ctx, mem_block, scan_block.addr, scan_block.size):
           break
         scan_block.base = mem_block.base
         scan_block.size = mem_block.size
@@ -160,47 +208,41 @@ proc pscanner_cb_scan_proc(ctx: var ProcScanCtx): cint =
     discard yr_process_close_iterator(mem_blocks.addr)
   else:
     # Failed to Iterate memory blocks. Let Yara handles it?
-    discard yr_rules_scan_proc(ctx.yara.engine, cint(ctx.pinfo.pid), SCAN_FLAGS_PROCESS_MEMORY, pscanner_cb_scan_proc_result, addr(ctx), YR_SCAN_TIMEOUT)
+    discard yr_scanner_scan_proc(ctx.yara.scanner, cint(ctx.pinfo.pid))
 
 
 #[
-  Get process's information
+  Create a new YR_SCANNER object
+  Set callback function
+  Set scan flags
 ]#
+proc pscanner_create_yr_scanner(ctx: var ProcScanCtx) =
+  discard yr_scanner_create(ctx.yara.rules, ctx.yara.scanner.addr)
+  ctx.yara.scanner.yr_scanner_set_callback(pscanner_on_virus_found_yara, addr(ctx))
+  ctx.yara.scanner.yr_scanner_set_timeout(YR_SCAN_TIMEOUT)
+  ctx.yara.scanner.yr_scanner_set_flags(SCAN_FLAGS_FAST_MODE)
+
+
 proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
+  ctx.pinfo.pid = pid
+
   if not dirExists(ctx.pinfo.procfs):
     return
 
-  ctx.virname = ""
-  ctx.pinfo.pid = pid
-  ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
-  ctx.pinfo.proc_name.removeSuffix('\n')
-  ctx.pinfo.cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline")
-  ctx.pinfo.fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
-  ctx.pinfo.fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
-  ctx.pinfo.fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
-  # Prevent out of bound error when cmdline is completely empty
-  if isEmptyOrWhitespace(ctx.pinfo.cmdline):
-    ctx.pinfo.cmdline = " "
-
-  try:
-    ctx.pinfo.proc_exe = expandSymlink(fmt"{ctx.pinfo.procfs}exe")
-  except:
-    ctx.pinfo.proc_exe = ""
-
-  ctx.scan_object = ctx.pinfo.proc_exe
-  ctx.scan_object.removeSuffix(" (deleted)")
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.scan_object)
-  pscanner_heur_proc(ctx, ctx.pinfo)
-  if ctx.scan_result == CL_CLEAN:
-    discard pscanner_cb_scan_proc(ctx)
+  pscanner_create_yr_scanner(ctx)
+  pscanner_scan_heuristic(ctx)
+  pscanner_scan_memory(ctx)
   ctx.proc_scanned += 1
+
+  yr_scanner_destroy(ctx.yara.scanner)
 
 
 #[
   Walkthrough the list of pid
 ]#
-proc pscanner_scan_procs*(ctx: var ProcScanCtx, list_procs: seq[uint]) =
+proc pscanner_scan_processes*(ctx: var ProcScanCtx, list_procs: seq[uint]) =
   for pid in list_procs:
     pscanner_process_pid(ctx, pid)
 
@@ -208,7 +250,7 @@ proc pscanner_scan_procs*(ctx: var ProcScanCtx, list_procs: seq[uint]) =
 #[
   Use procfs to get all pid in the system
 ]#
-proc pscanner_scan_procs*(ctx: var ProcScanCtx) =
+proc pscanner_scan_processes*(ctx: var ProcScanCtx) =
   for kind, path in walkDir("/proc/"):
     if kind == pcDir:
       try:
