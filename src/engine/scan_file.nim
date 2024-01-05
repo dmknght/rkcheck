@@ -5,16 +5,15 @@ import bindings/[libyara, libclamav]
 import .. /cli/[progress_bar, print_utils]
 
 
-proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
-  #[
-    Handle scan result from Yara engine
-  ]#
-
+#[
+  Print infected file for Yara
+]#
+proc fscanner_on_malware_found_yara(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
   var
     ctx = cast[ptr FileScanCtx](user_data)
 
   if message == CALLBACK_MSG_RULE_MATCHING:
-    var
+    let
       rule = cast[ptr YR_RULE](message_data)
 
     ctx.scan_result = CL_VIRUS
@@ -26,14 +25,10 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     return CALLBACK_CONTINUE
 
 
-proc fscanner_cb_msg_dummy*(severity: cl_msg, fullmsg: cstring, msg: cstring, context: pointer) {.cdecl.} =
-  discard
-
-
-proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
-  #[
-    Print virus found message with file path
-  ]#
+#[
+  Print infected file for ClamAV
+]#
+proc fscanner_on_malware_found_clam*(fd: cint, virname: cstring, context: pointer) {.cdecl.} =
   let
     ctx = cast[ptr FileScanCtx](context)
     # Show virname for heur detection
@@ -43,11 +38,19 @@ proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   print_file_infected($virus_name, ctx.scan_object)
 
 
+#[
+  Disable print message for ClamAV
+]#
+proc fscanner_slient_message_clam*(severity: cl_msg, fullmsg: cstring, msg: cstring, context: pointer) {.cdecl.} =
+  discard
+
+
+#[
+  When Yara engine is nil, and ClamAV is enabled,
+  Clam will scan anyway.
+  This function will count scanned files by ClamAV
+]#
 proc fscanner_cb_inc_count*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =
-  #[
-    When Yara failed to init, this function is called instead of fscanner_cb_scan_file
-    This function will count scanned files only
-  ]#
   let
     ctx = cast[ptr FileScanCtx](context)
 
@@ -55,6 +58,11 @@ proc fscanner_cb_inc_count*(fd: cint, scan_result: cint, virname: cstring, conte
   ctx.file_scanned += 1
 
 
+#[
+  Scan file descriptor with Yara
+  When ClamAV Engine is defined, it will be called later
+  # TODO use Yara scanner
+]#
 proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr cstring, parent_file_size: uint,
   file_name: cstring; file_size: uint, file_buffer: cstring, recursion_level: uint32, layer_attributes: uint32,
   context: pointer): cl_error_t {.cdecl.} =
@@ -97,9 +105,9 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
         else:
           ctx.scan_object = ctx.scan_object & "//" & inner_file_name
 
-    # progress_bar_scan_file(ctx.scan_object)
+    progress_bar_scan_file(ctx.scan_object)
     ctx.file_scanned += 1
-    discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_cb_yara_scan_result, context, YR_SCAN_TIMEOUT)
+    discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
     if ctx.scan_result == CL_VIRUS:
       # FIX multiple files marked as previous signature. However, it might raise error using multiple callbacks to detect malware
       ctx.scan_result = CL_CLEAN

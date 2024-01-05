@@ -30,7 +30,7 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
     virname: cstring
 
   file_scanner.clam.options = scan_ctx.clam.options
-  cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_cb_virus_found)
+  cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_on_malware_found_clam)
 
   # TODO multi threading
   try:
@@ -113,16 +113,16 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
   else:
     cl_engine_set_clcb_post_scan(ctx.clam.engine, fscanner_cb_inc_count)
 
-  cl_set_clcb_msg(fscanner_cb_msg_dummy)
+  cl_set_clcb_msg(fscanner_slient_message_clam)
 
 
-proc scanners_finit_engine(ctx: var ScanCtx, f_count, f_infect, p_count, p_infect: uint) =
+proc scanners_finish_scan(ctx: var ScanCtx, f_count, f_infect, p_count, p_infect: uint) =
   finit_yara(ctx.yara)
   finit_clamav(ctx.clam)
   print_sumary(f_count, f_infect, p_count, p_infect)
 
 
-proc scanners_create_scan_task*(options: var ScanOptions) =
+proc scanners_start_scan*(options: var ScanOptions) =
   #[
     Create a scan task
     Jobs:
@@ -144,4 +144,4 @@ proc scanners_create_scan_task*(options: var ScanOptions) =
   if len(options.list_procs) != 0 or options.scan_all_procs:
     scanners_yr_scan_procs(scan_engine, options.list_procs, options.scan_all_procs, p_count, p_infect)
 
-  scanners_finit_engine(scan_engine, f_count, f_infect, p_count, p_infect)
+  scanners_finish_scan(scan_engine, f_count, f_infect, p_count, p_infect)
