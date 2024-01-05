@@ -42,7 +42,7 @@ import strformat
   """.}
 
 type
-  ProcChunkInfo {.bycopy, importc: "struct _YR_PROC_INFO".} = object
+  MemBlockInfo {.bycopy, importc: "struct _YR_PROC_INFO".} = object
     pid: cint
     mem_fd: cint
     pagemap_fd: cint
@@ -192,7 +192,7 @@ proc pscanner_scan_memory(ctx: var ProcScanCtx) =
     while mem_block != nil:
       var
         context = cast[ptr YR_PROC_ITERATOR_CTX](mem_block.context)
-        proc_info = cast[ptr ProcChunkInfo](context.proc_info)
+        proc_info = cast[ptr MemBlockInfo](context.proc_info)
       if isEmptyOrWhitespace($proc_info.map_path):
         if not pscanner_scan_mem_block(ctx, mem_block, scan_block.addr, scan_block.size):
           break
