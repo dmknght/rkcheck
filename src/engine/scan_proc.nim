@@ -5,7 +5,6 @@ import engine_cores
 import bindings/[libyara, libclamav]
 import ../cli/[progress_bar, print_utils]
 
-
 #[
   Scan Linux's memory with ClamAV and Yara engine.
   1. Attach the process: Map all information from procfs
@@ -115,8 +114,6 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
   This function also scans the cmdline
 ]#
 proc pscanner_scan_heuristic(ctx: var ProcScanCtx) =
-  ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
-  ctx.pinfo.proc_name.removeSuffix('\n')
   let
     fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
     fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
@@ -128,13 +125,6 @@ proc pscanner_scan_heuristic(ctx: var ProcScanCtx) =
   if isEmptyOrWhitespace(cmdline):
     cmdline = " "
 
-  try:
-    ctx.pinfo.proc_exe = expandSymlink(fmt"{ctx.pinfo.procfs}exe")
-  except:
-    ctx.pinfo.proc_exe = ""
-
-  ctx.scan_object = ctx.pinfo.proc_exe
-  ctx.scan_object.removeSuffix(" (deleted)")
   let
     proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
 
@@ -151,8 +141,9 @@ proc pscanner_scan_heuristic(ctx: var ProcScanCtx) =
   Scan current memory block with Yara and ClamAV. Return false if malware is found
 ]#
 proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
-  discard yr_scanner_scan_mem(ctx.yara.scanner, mem_block[].fetch_data(scan_block), base_size)
-  # TODO skip if cl_engine is Nil?
+  if ctx.yara.scanner != nil:
+    discard yr_scanner_scan_mem(ctx.yara.scanner, mem_block[].fetch_data(scan_block), base_size)
+
   if ctx.scan_result == CL_VIRUS:
     return false
 
@@ -225,20 +216,36 @@ proc pscanner_create_yr_scanner(ctx: var ProcScanCtx) =
   ctx.yara.scanner.yr_scanner_set_flags(SCAN_FLAGS_FAST_MODE)
 
 
-proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
+proc pscanner_get_pid_info(ctx: var ProcScanCtx, pid: uint): bool =
   ctx.pinfo.procfs = fmt"/proc/{pid}/"
-  ctx.pinfo.pid = pid
-
   if not dirExists(ctx.pinfo.procfs):
+    return false
+  ctx.pinfo.pid = pid
+  ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
+  ctx.pinfo.proc_name.removeSuffix('\n')
+  try:
+    ctx.pinfo.proc_exe = expandSymlink(fmt"{ctx.pinfo.procfs}exe")
+  except:
+    ctx.pinfo.proc_exe = ""
+
+  ctx.scan_object = ctx.pinfo.proc_exe
+  ctx.scan_object.removeSuffix(" (deleted)")
+  return true
+
+
+proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
+  if not pscanner_get_pid_info(ctx, pid):
     return
 
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.scan_object)
-  pscanner_create_yr_scanner(ctx)
-  pscanner_scan_heuristic(ctx)
+  if ctx.yara.rules != nil:
+    pscanner_create_yr_scanner(ctx)
+    pscanner_scan_heuristic(ctx)
   pscanner_scan_memory(ctx)
   ctx.proc_scanned += 1
 
-  yr_scanner_destroy(ctx.yara.scanner)
+  if ctx.yara.scanner != nil:
+    yr_scanner_destroy(ctx.yara.scanner)
 
 
 #[
