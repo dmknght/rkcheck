@@ -116,15 +116,18 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_cla
   return cl_engine_compile(clam_engine.engine)
 
 
+#[
+  Give ClamAV Engine's freedom
+  https://docs.clamav.net/manual/Development/libclamav.html#initialization
+]#
 proc finit_clamav*(clam_engine: var ClEngine) =
-  #[
-    Give ClamAV Engine's freedom
-    https://docs.clamav.net/manual/Development/libclamav.html#initialization
-  ]#
   if clam_engine.engine != nil:
     discard cl_engine_free(clam_engine.engine)
 
 
+#[
+  Check if the database file of Yara is compiled or text-based
+]#
 proc yr_rules_is_compiled*(path: string, value: var bool): bool =
   try:
     let
@@ -161,7 +164,7 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
   if not yr_rules_is_compiled(yara_engine.database, is_compiled):
     raise newException(OSError, "Failed to read Yara's database")
 
-  if is_compiled:
+  if not is_compiled:
     result = yr_rules_load(cstring(yara_engine.database), addr(yara_engine.rules))
   else:
     # Need to compile rules
