@@ -1,4 +1,4 @@
-import .. / engine / libyara
+import ../engine/bindings/libyara
 import strformat
 
 type

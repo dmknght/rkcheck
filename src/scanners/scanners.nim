@@ -1,7 +1,7 @@
 import os
-# import sequtils
-import .. / engine / [libyara, libclamav, engine_cores, scan_file, scan_proc]
-import .. / cli / print_utils
+import ../engine/[engine_cores, scan_file, scan_proc]
+import ../engine/bindings/[libyara, libclamav]
+import ../cli/print_utils
 
 
 type
@@ -77,17 +77,6 @@ proc scanners_yr_scan_procs(scan_ctx: var ScanCtx, list_procs: seq[uint], all_pr
     result_count = proc_scanner.proc_scanned
     result_infected = proc_scanner.proc_infected
 
-
-# proc scanners_iterate_preload() =
-#   const
-#     ld_preload_path = "/etc/ld.so.preload"
-
-#   if options.scan_preload and fileExists(ld_preload_path):
-#     for line in lines(ld_preload_path):
-#       if fileExists(line):
-#         options.list_files.add(line)
-
-#   options.list_files = deduplicate(options.list_files)
 
 proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
   #[

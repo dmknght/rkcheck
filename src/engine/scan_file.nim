@@ -1,10 +1,8 @@
-import libyara
-import libclamav
-import engine_cores
-import engine_utils
 import strutils
 import os
-import .. / cli / progress_bar
+import engine_cores
+import bindings/[libyara, libclamav]
+import .. /cli/[progress_bar, print_utils]
 
 
 proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, message_data: pointer, user_data: pointer): cint {.cdecl.} =
@@ -19,9 +17,13 @@ proc fscanner_cb_yara_scan_result*(context: ptr YR_SCAN_CONTEXT, message: cint, 
     var
       rule = cast[ptr YR_RULE](message_data)
 
-    return file_scanner_on_matched(ctx.scan_result, ctx.virname, $rule.ns.name, $rule.identifier)
+    ctx.scan_result = CL_VIRUS
+    ctx.virname = cstring($rule.ns.name & ":" & replace($rule.identifier, "_", "."))
+    return CALLBACK_ABORT
   else:
-    return file_scanner_on_clean(ctx.scan_result, ctx.virname)
+    ctx.scan_result = CL_CLEAN
+    ctx.virname = ""
+    return CALLBACK_CONTINUE
 
 
 proc fscanner_cb_msg_dummy*(severity: cl_msg, fullmsg: cstring, msg: cstring, context: pointer) {.cdecl.} =
@@ -34,8 +36,11 @@ proc fscanner_cb_virus_found*(fd: cint, virname: cstring, context: pointer) {.cd
   ]#
   let
     ctx = cast[ptr FileScanCtx](context)
+    # Show virname for heur detection
+    virus_name = if isEmptyOrWhitespace($ctx.virname): virname else: ctx.virname
 
-  file_scanner_on_malware_found(virname, ctx.virname, ctx.scan_object, ctx.file_infected)
+  ctx.file_infected += 1
+  print_file_infected($virus_name, ctx.scan_object)
 
 
 proc fscanner_cb_inc_count*(fd: cint, scan_result: cint, virname: cstring, context: pointer): cl_error_t {.cdecl.} =

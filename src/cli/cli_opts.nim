@@ -1,7 +1,7 @@
 import os
 import strutils
 import sequtils
-import .. / engine / engine_cores
+import ../engine/engine_cores
 import helps
 
 

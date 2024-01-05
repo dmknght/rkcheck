@@ -2,7 +2,7 @@
   Compile rules using yr_compiler. Should be similar to yarac and user can use any (libyara must be the same)
 ]#
 
-import .. / engine / libyara
+import ../engine/bindings/libyara
 import compiler_utils
 
 

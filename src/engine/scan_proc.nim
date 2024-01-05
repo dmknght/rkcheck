@@ -1,10 +1,10 @@
-import libyara
-import libclamav
-import engine_cores
-import .. / cli / [progress_bar, print_utils]
 import strutils
 import os
 import strformat
+import engine_cores
+import bindings/[libyara, libclamav]
+import ../cli/[progress_bar, print_utils]
+
 
 #[
   Scan Linux's memory with ClamAV and Yara engine.
@@ -153,11 +153,13 @@ proc pscanner_scan_heuristic(ctx: var ProcScanCtx) =
 proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
   discard yr_scanner_scan_mem(ctx.yara.scanner, mem_block[].fetch_data(scan_block), base_size)
   # TODO skip if cl_engine is Nil?
-  if ctx.scan_result == CL_CLEAN:
-    var
-      cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(scan_block), base_size)
-    discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
-    cl_fmap_close(cl_map_file)
+  if ctx.scan_result == CL_VIRUS:
+    return false
+
+  var
+    cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(scan_block), base_size)
+  discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), addr(ctx.memblock_scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+  cl_fmap_close(cl_map_file)
 
   if ctx.scan_result == CL_VIRUS:
     return false

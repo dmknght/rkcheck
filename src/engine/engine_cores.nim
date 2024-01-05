@@ -1,10 +1,9 @@
-import libclamav
-import libyara
 import bitops
 import strutils
-import .. / cli / print_utils
-import engine_utils
-import .. / compiler / compiler_utils
+import streams
+import bindings/[libclamav, libyara]
+import ../cli/print_utils
+import ../compiler/compiler_utils
 
 
 type
@@ -126,6 +125,22 @@ proc finit_clamav*(clam_engine: var ClEngine) =
     discard cl_engine_free(clam_engine.engine)
 
 
+proc yr_rules_is_compiled*(path: string, value: var bool): bool =
+  try:
+    let
+      f = newFileStream(path)
+
+    if f.readStr(4) == "YARA":
+      result = true
+    else:
+      result = false
+    f.close()
+    return true
+  except:
+    echo getCurrentExceptionMsg()
+    return false
+
+
 proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
   result = yr_initialize()
 
@@ -138,8 +153,15 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
 
   if isEmptyOrWhitespace(yara_engine.database):
     return ERROR_COULD_NOT_OPEN_FILE
+
   # If rule is compiled, we load it
-  if yr_rule_file_is_compiled(yara_engine.database):
+  var
+    is_compiled: bool
+
+  if not yr_rules_is_compiled(yara_engine.database, is_compiled):
+    raise newException(OSError, "Failed to read Yara's database")
+
+  if is_compiled:
     result = yr_rules_load(cstring(yara_engine.database), addr(yara_engine.rules))
   else:
     # Need to compile rules
@@ -159,7 +181,6 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
 
 
 proc finit_yara*(engine: var YrEngine) =
-  # TODO scanner
   if engine.rules != nil:
     discard yr_rules_destroy(engine.rules)
   discard yr_finalize()
