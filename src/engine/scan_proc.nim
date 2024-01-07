@@ -216,11 +216,10 @@ proc pscanner_create_yr_scanner(ctx: var ProcScanCtx) =
   ctx.yara.scanner.yr_scanner_set_flags(SCAN_FLAGS_FAST_MODE)
 
 
-proc pscanner_get_pid_info(ctx: var ProcScanCtx, pid: uint): bool =
-  ctx.pinfo.procfs = fmt"/proc/{pid}/"
+proc pscanner_get_pid_info(ctx: var ProcScanCtx): bool =
+  ctx.pinfo.procfs = fmt"/proc/{ctx.pinfo.pid}/"
   if not dirExists(ctx.pinfo.procfs):
     return false
-  ctx.pinfo.pid = pid
   ctx.pinfo.proc_name = readFile(fmt"{ctx.pinfo.procfs}comm")
   ctx.pinfo.proc_name.removeSuffix('\n')
   try:
@@ -233,8 +232,8 @@ proc pscanner_get_pid_info(ctx: var ProcScanCtx, pid: uint): bool =
   return true
 
 
-proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
-  if not pscanner_get_pid_info(ctx, pid):
+proc pscanner_process_pid(ctx: var ProcScanCtx) =
+  if not pscanner_get_pid_info(ctx):
     return
 
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.scan_object)
@@ -253,7 +252,8 @@ proc pscanner_process_pid(ctx: var ProcScanCtx, pid: uint) =
 ]#
 proc pscanner_scan_processes*(ctx: var ProcScanCtx, list_procs: seq[uint]) =
   for pid in list_procs:
-    pscanner_process_pid(ctx, pid)
+    ctx.pinfo.pid = pid
+    pscanner_process_pid(ctx)
 
 
 #[
@@ -264,6 +264,7 @@ proc pscanner_scan_processes*(ctx: var ProcScanCtx) =
     if kind == pcDir:
       try:
         let pid = parseUint(splitPath(path).tail)
-        pscanner_process_pid(ctx, pid)
+        ctx.pinfo.pid = pid
+        pscanner_process_pid(ctx)
       except ValueError:
         discard
