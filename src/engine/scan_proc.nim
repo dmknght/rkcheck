@@ -116,7 +116,6 @@ proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR
     discard yr_scanner_scan_mem(ctx.yara.scanner, mem_block[].fetch_data(scan_block), base_size)
 
   if ctx.scan_result == CL_VIRUS:
-    ctx.scan_result = CL_CLEAN
     return false
 
   var
@@ -125,7 +124,6 @@ proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR
   cl_fmap_close(cl_map_file)
 
   if ctx.scan_result == CL_VIRUS:
-    ctx.scan_result = CL_CLEAN
     return false
   return true
 
@@ -137,9 +135,6 @@ proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR
   If the current block doesn't belong to any file (heap, stack, ...), scan it
 ]#
 proc pscanner_scan_memory(ctx: var ProcScanCtx) =
-  if ctx.scan_result == CL_VIRUS:
-    return
-
   var
     mem_blocks: YR_MEMORY_BLOCK_ITERATOR
 
