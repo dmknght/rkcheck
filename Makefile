@@ -14,7 +14,7 @@ mktmp:
 
 signatures: mktmp
 	# Compile Yara signatures
-	$(NIM_CC) $(YR_DEPS) --out:build/nimcache/rkcompiler src/compiler/yr_db_compiler.nim
+	$(NIM_CC) $(YR_DEPS) -r --out:build/nimcache/rkcompiler src/compiler/yr_db_compiler.nim
 
 build: clean signatures
 	# Compile main file
