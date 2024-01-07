@@ -19,9 +19,8 @@ proc cliopts_create_default*(options: var ScanOptions) =
   options.db_path_clamav = "/var/lib/clamav/"
   let
     db_path_normal = [
-      "/usr/share/rkcheck/database/signatures.ydb",
-      "/database/signatures.ydb",
-      "database/signatures.ydb"
+      "/usr/share/rkcheck/databases/signatures.ydb",
+      "databases/signatures.ydb"
     ]
 
   # Load bytecode signatures by default. Problems: if user pass only --use-clamdb,
