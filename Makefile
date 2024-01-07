@@ -1,21 +1,24 @@
-YRFLAGS = --passL:-lssl --passL:-lcrypto --passL:-lpthread --passL:-lyara
-# YRFLAGS_STATIC = --passL:-static --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-lm
-CLFLAGS = --passL:-lclamav
-NIMFLAGS = nim c --nimcache:/tmp -d:release --opt:speed --passL:-s
-NIMCPPFLAGS = nim cpp --nimcache:/tmp -d:release --opt:speed --passL:-s
-STAICLIBFLAGS = --passL:-static --app:staticlib
-
+YR_DEPS = --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-lm --passL:-llzma --passL:-lpthread
+CLAM_DEPS = --passL:-lclamav
+NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passL:-s
+# Add this when want to build static file. On Debian, ClamAV has no static lib so it's impossible to use
+BUILD_FLAGS = --passL:-static
 
 all:
 
-build:
-	# Generate "build" folder
-	mkdir -p build/database
-	# Compile and run signature compiler
-	$(NIMFLAGS) $(YRFLAGS) -r --out:build/rkcompiler src/compiler/yr_db_compiler.nim
+mktmp:
+	# Create build folder and db
+	mkdir -p build/release/databases
+	# Create tmp folder for cache
+	mkdir -p build/nimcache
 
+signatures: mktmp
+	# Compile Yara signatures
+	$(NIM_CC) $(YR_DEPS) --out:build/nimcache/rkcompiler src/compiler/yr_db_compiler.nim
+
+build: clean signatures
 	# Compile main file
-	$(NIMFLAGS) $(CLFLAGS) $(YRFLAGS) --out:build/rkscanmal src/rkscanmal.nim
+	$(NIM_CC) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
 
 install:
 	mkdir -p /usr/share/rkcheck/
