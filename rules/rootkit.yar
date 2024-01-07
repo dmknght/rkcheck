@@ -736,3 +736,26 @@ rule LDPreload_bc62 {
   condition:
     elf_dyn and 2 of them
 }
+
+
+rule LDPreload_ImpFuncs {
+  // meta:
+  //   description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
+  condition:
+    // The limitation of dynsym_entries number is to avoid false positive detecting libc
+    elf_dyn and elf.dynsym_entries < 300 and (
+      for 7 i in (0 .. elf.dynsym_entries):
+      (
+        elf.dynsym[i].type == elf.STT_FUNC and
+        (
+          elf.dynsym[i].name == "access" or
+          elf.dynsym[i].name == "dlsym" or
+          elf.dynsym[i].name == "fopen" or
+          elf.dynsym[i].name == "lstat" or
+          elf.dynsym[i].name == "strstr" or
+          elf.dynsym[i].name == "tmpfile" or
+          elf.dynsym[i].name == "unlink"
+        )
+      )
+    )
+}

@@ -33,10 +33,10 @@ rule Infector_849b {
   //   md5 = "849b45fee92762d2b6ec31a11e1bcd76"
   //   description = "A Nim infector malware"
   strings:
-    $1 = "akpcTVEZHXJe8ZbbQdHsSA" // Contains in strtab. Static binary only
+    $ = "akpcTVEZHXJe8ZbbQdHsSA" // Contains in strtab. Static binary only
     // 2 strings should show at runtime.
-    $2 = "/tmp/.host"
-    $3 = "The more you know... :)"
+    $ = "/tmp/.host"
+    $ = "The more you know... :)"
   condition:
     elf_exec and (
       for any i in (0 .. elf.number_of_sections):
@@ -845,12 +845,3 @@ rule FDMgr_c75d2 {
 //   condition:
 //     all of them
 // }
-
-
-rule PythonRevShell_TESTING {
-  strings:
-    $ = {FF 64 75 70 [5] F0 [38] FF 66 69 6C 65 6E 6F [2] 58} // Find dup2 and fileno
-    $ = {FF 66 69 6C 65 6E 6F [2] B0 [15] 20 8B 95 [21] 73 74 64 65 72 72}
-  condition:
-    any of them
-}

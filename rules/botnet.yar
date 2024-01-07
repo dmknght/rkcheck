@@ -117,7 +117,7 @@ rule VTFlooder_1d47 {
 
 rule Flooder_Generic {
   strings:
-    $ = "Flooding %s" fullword ascii nocase
+    $ = "Flooding %s" fullword ascii
     $ = "LOLNOGTFO" fullword ascii
     $ = "KILLATTK" fullword ascii
     $ = "[UDP] Failed to ddos" fullword ascii
@@ -131,13 +131,13 @@ rule Flooder_Generic {
     $ = "RANDOMFLOOD" fullword ascii
     $ = "ACKFLOOD" fullword ascii
     // TODO better strings
-    $ = "udp flooder" nocase ascii
-    $ = "SYNFLOOD" nocase ascii
-    $ = "SYN_Flood" nocase ascii
-    $ = "udp_flood" nocase ascii
-    $ = "udpflood" nocase ascii
-    $ = "HTTPFLOOD" nocase ascii
-    $ = "RANDOMFLOOD" nocase ascii
+    $ = "udp flooder" ascii
+    $ = "SYNFLOOD" ascii
+    $ = "SYN_Flood" ascii
+    $ = "udp_flood" ascii
+    $ = "udpflood" ascii
+    $ = "HTTPFLOOD" ascii
+    $ = "RANDOMFLOOD" ascii
   condition:
     elf_magic and 2 of them
 }
