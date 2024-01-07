@@ -116,6 +116,7 @@ proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR
     discard yr_scanner_scan_mem(ctx.yara.scanner, mem_block[].fetch_data(scan_block), base_size)
 
   if ctx.scan_result == CL_VIRUS:
+    ctx.scan_result = CL_CLEAN
     return false
 
   var
@@ -124,6 +125,7 @@ proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR
   cl_fmap_close(cl_map_file)
 
   if ctx.scan_result == CL_VIRUS:
+    ctx.scan_result = CL_CLEAN
     return false
   return true
 
