@@ -109,35 +109,6 @@ proc pscanner_get_fd_path(procfs: string, fd_id: int): string =
 
 
 #[
-  Gather process's information
-  Pass value to Yara's scanner using define variable
-  This function also scans the cmdline
-]#
-proc pscanner_scan_heuristic(ctx: var ProcScanCtx) =
-  let
-    fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
-    fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
-    fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
-  var
-    cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline")
-
-  # Prevent out of bound error when cmdline is completely empty
-  if isEmptyOrWhitespace(cmdline):
-    cmdline = " "
-
-  let
-    proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
-
-  discard yr_scanner_define_boolean_variable(ctx.yara.scanner, cstring("proc_exe_exists"), proc_exe_exists)
-  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stdin"), cstring(fd_stdin))
-  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stdout"), cstring(fd_stdout))
-  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stderr"), cstring(fd_stderr))
-  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_exe"), cstring(ctx.pinfo.proc_exe))
-  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_name"), cstring(ctx.pinfo.proc_name))
-  discard yr_scanner_scan_mem(ctx.yara.scanner, cast[ptr uint8](cmdline[0].unsafeAddr), uint(len(cmdline)))
-
-
-#[
   Scan current memory block with Yara and ClamAV. Return false if malware is found
 ]#
 proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR_MEMORY_BLOCK, base_size: uint): bool =
@@ -216,6 +187,38 @@ proc pscanner_create_yr_scanner(ctx: var ProcScanCtx) =
   ctx.yara.scanner.yr_scanner_set_flags(SCAN_FLAGS_FAST_MODE)
 
 
+#[
+  Gather process's information and pass to Yara
+  Pass value to Yara's scanner using define variable
+  This function also scans the cmdline
+]#
+proc pscanner_gather_proc_fingerprint(ctx: var ProcScanCtx) =
+  let
+    fd_stdin = pscanner_get_fd_path(ctx.pinfo.procfs, 0)
+    fd_stdout = pscanner_get_fd_path(ctx.pinfo.procfs, 1)
+    fd_stderr = pscanner_get_fd_path(ctx.pinfo.procfs, 2)
+  var
+    cmdline = readFile(fmt"{ctx.pinfo.procfs}cmdline").replace("\x00", " ")
+
+  # Prevent out of bound error when cmdline is completely empty
+  if isEmptyOrWhitespace(cmdline):
+    cmdline = " "
+
+  let
+    proc_exe_exists = if fileExists(ctx.scan_object): cint(1) else: cint(0)
+
+  discard yr_scanner_define_boolean_variable(ctx.yara.scanner, cstring("proc_exe_exists"), proc_exe_exists)
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stdin"), cstring(fd_stdin))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stdout"), cstring(fd_stdout))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("fd_stderr"), cstring(fd_stderr))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_exe"), cstring(ctx.pinfo.proc_exe))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_name"), cstring(ctx.pinfo.proc_name))
+  discard yr_scanner_define_string_variable(ctx.yara.scanner, cstring("proc_cmdline"), cstring(cmdline))
+
+
+#[
+  Get basic process's info like process id, name, exe file
+]#
 proc pscanner_get_pid_info(ctx: var ProcScanCtx): bool =
   ctx.pinfo.procfs = fmt"/proc/{ctx.pinfo.pid}/"
   if not dirExists(ctx.pinfo.procfs):
@@ -239,7 +242,7 @@ proc pscanner_process_pid(ctx: var ProcScanCtx) =
   progress_bar_scan_proc(ctx.pinfo.pid, ctx.scan_object)
   if ctx.yara.rules != nil:
     pscanner_create_yr_scanner(ctx)
-    pscanner_scan_heuristic(ctx)
+    pscanner_gather_proc_fingerprint(ctx)
   pscanner_scan_memory(ctx)
   ctx.proc_scanned += 1
 

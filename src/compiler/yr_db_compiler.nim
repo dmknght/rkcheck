@@ -28,6 +28,7 @@ proc compile_default_rules(dst: string) =
   discard yr_compiler_define_string_variable(compiler, cstring("fd_stdin"), cstring(""))
   discard yr_compiler_define_string_variable(compiler, cstring("fd_stdout"), cstring(""))
   discard yr_compiler_define_string_variable(compiler, cstring("fd_stderr"), cstring(""))
+  discard yr_compiler_define_string_variable(compiler, cstring("proc_cmdline"), cstring(""))
 
   # Set scan block type for better memory scan's accuracy
   discard yr_compiler_add_file(compiler, open("rules/magics.yar"), "Magic", "magics.yar")

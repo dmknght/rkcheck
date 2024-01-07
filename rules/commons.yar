@@ -2,7 +2,6 @@ import "elf"
 import "math"
 include "rules/magics.yar"
 
-
 // private rule elf_no_sections {
 //   condition:
 //     is_elf and elf.number_of_sections == 0
@@ -29,9 +28,16 @@ rule RevShell_ShellRedirect_TESTING {
 
 rule RevShell_Ncat_TESTING {
   strings:
-    $ = "-e" fullword ascii
+    $ = "Usage: ncat [options] [hostname] [port]" fullword ascii
+    $ = "Proxy-Authenticate: Basic realm=\"Ncat\"" fullword ascii
+    $ = "ncat_ssl.c: Invoking ssl_handshake" fullword ascii
+    $ = "%s/ncat.XXXXXX" fullword ascii
   condition:
-    proc_name endswith "ncat" and all of them
+    proc_cmdline contains "-e" and
+    (
+      (proc_name endswith "ncat" or proc_name endswith "ncat") or
+      2 of them
+    )
 }
 
 
