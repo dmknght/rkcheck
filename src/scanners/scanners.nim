@@ -86,8 +86,7 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
     loaded_yara_sigs: uint = 0
     loaded_clam_sigs: uint = 0
 
-  ctx.yara.database = options.db_path_yara
-  discard ctx.yara.init_yara(loaded_yara_sigs)
+  discard ctx.yara.init_yara(loaded_yara_sigs, options.db_path_yara)
 
   ctx.clam.debug_mode = options.is_clam_debug
   ctx.clam.database = options.db_path_clamav

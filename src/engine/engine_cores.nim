@@ -1,6 +1,7 @@
 import bitops
 import strutils
 import streams
+import os
 import bindings/[libclamav, libyara]
 import ../cli/print_utils
 import ../compiler/compiler_utils
@@ -27,13 +28,12 @@ type
   ClEngine* = object
     engine*: ptr cl_engine
     options*: cl_scan_options
-    database*: string
+    database*: string # TODO move this variable of of object
     debug_mode*: bool
     use_clam*: bool
   YrEngine* = object
     rules*: ptr YR_RULES
     scanner*: ptr YR_SCANNER
-    database*: string
 
   ScanCtx* = object of RootObj
     yara*: YrEngine
@@ -128,7 +128,7 @@ proc finit_clamav*(clam_engine: var ClEngine) =
 #[
   Check if the database file of Yara is compiled or text-based
 ]#
-proc yr_rules_is_compiled*(path: string, value: var bool): bool =
+proc yr_rules_is_compiled(path: string, value: var bool): bool =
   try:
     let
       f = newFileStream(path)
@@ -144,7 +144,57 @@ proc yr_rules_is_compiled*(path: string, value: var bool): bool =
     return false
 
 
-proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
+proc load_yara_rules_from_file(yara_engine: var YrEngine, db_path: string): bool =
+  var
+    is_compiled: bool
+
+  if not yr_rules_is_compiled(db_path, is_compiled):
+    raise newException(OSError, "Failed to read Yara's database")
+
+  if not is_compiled:
+    if yr_rules_load(cstring(db_path), addr(yara_engine.rules)) != ERROR_SUCCESS:
+      return false
+  else:
+    # Need to compile rules
+    return yr_rules_compile_custom_rules(yara_engine.rules, @[db_path])
+
+
+proc load_yara_rules_from_dir(yara_engine: var YrEngine, db_path: string): bool =
+  var
+    list_db: seq[string]
+
+  for kind, path in walkDir(db_path):
+    if kind == pcFile:
+      let
+        extension = splitFile(path).ext
+      if extension == ".yar" or extension == ".yara":
+        list_db.add(path)
+
+  if len(list_db) == 0:
+    raise newException(ValueError, "Unable to find Yara rules in directory")
+  return yr_rules_compile_custom_rules(yara_engine.rules, list_db)
+
+
+#[
+  Load Yara rules from a file or directory
+]#
+proc load_custom_yara_rules(yara_engine: var YrEngine, db_path: string): bool =
+  let
+    db_file_type = getFileInfo(db_path).kind # Should we follow symlink?
+
+  if db_file_type == pcFile:
+    return load_yara_rules_from_file(yara_engine, db_path)
+  elif db_file_type == pcDir:
+    return load_yara_rules_from_dir(yara_engine, db_path)
+  else:
+    # Unknown file kind?
+    return false
+
+
+#[
+  Initilize Yara's engine
+]#
+proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint, db_path: string): int =
   result = yr_initialize()
 
   if result != ERROR_SUCCESS:
@@ -154,24 +204,11 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint): int =
     stack_size = DEFAULT_STACK_SIZE
     max_strings_per_rule = DEFAULT_MAX_STRINGS_PER_RULE
 
-  if isEmptyOrWhitespace(yara_engine.database):
+  if isEmptyOrWhitespace(db_path):
     return ERROR_COULD_NOT_OPEN_FILE
 
-  # If rule is compiled, we load it
-  var
-    is_compiled: bool
-
-  if not yr_rules_is_compiled(yara_engine.database, is_compiled):
-    raise newException(OSError, "Failed to read Yara's database")
-
-  if not is_compiled:
-    result = yr_rules_load(cstring(yara_engine.database), addr(yara_engine.rules))
-  else:
-    # Need to compile rules
-    yr_rules_compile_custom_rules(yara_engine.rules, yara_engine.database)
-
-  if result != ERROR_SUCCESS:
-    return result
+  if not load_custom_yara_rules(yara_engine, db_path):
+    return ERROR_COULD_NOT_OPEN_FILE
 
   loaded_sigs = uint(yara_engine.rules.num_rules)
 

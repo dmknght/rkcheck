@@ -59,7 +59,7 @@ proc cliopts_set_db_path_yara(options: var ScanOptions, i: var int, total_param:
   let
     paramValue = paramStr(i + 1)
 
-  if not fileExists(paramValue):
+  if not fileExists(paramValue) and not dirExists(paramValue):
     # File doesn't exist
     raise newException(OSError, "Invalid Yara's database file path " & paramValue)
 

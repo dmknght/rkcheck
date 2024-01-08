@@ -12,23 +12,26 @@ proc yr_rules_report_errors*(error_level: cint; file_name: cstring; line_number:
     echo fmt"{message} at {file_name}:{line_number}"
 
 
-proc yr_rules_compile_custom_rules*(rules: var ptr YR_RULES, path: string) =
+proc yr_rules_compile_custom_rules*(rules: var ptr YR_RULES, path_list: seq[string]): bool =
   var
     compiler: ptr YR_COMPILER
     compiler_result: COMPILER_RESULT
     setting_max_string = DEFAULT_MAX_STRINGS_PER_RULE
 
   if yr_initialize() != ERROR_SUCCESS:
-    return
+    return false
   if yr_compiler_create(addr(compiler)) != ERROR_SUCCESS:
-    return
+    return false
 
   discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(setting_max_string))
   yr_compiler_set_callback(compiler, yr_rules_report_errors, addr(compiler_result))
 
-  discard yr_compiler_add_file(compiler, open(path), "CustomRules", path)
+  for path in path_list:
+    if yr_compiler_add_file(compiler, open(path), "ExtrRules", cstring(path)) != ERROR_SUCCESS:
+      return false
 
-  discard yr_compiler_get_rules(compiler, addr(rules))
+  if yr_compiler_get_rules(compiler, addr(rules)) != ERROR_SUCCESS:
+    return false
 
   # finityara
   if compiler != nil:
