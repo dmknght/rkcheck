@@ -151,9 +151,10 @@ proc load_yara_rules_from_file(yara_engine: var YrEngine, db_path: string): bool
   if not yr_rules_is_compiled(db_path, is_compiled):
     raise newException(OSError, "Failed to read Yara's database")
 
-  if not is_compiled:
+  if is_compiled:
     if yr_rules_load(cstring(db_path), addr(yara_engine.rules)) != ERROR_SUCCESS:
       return false
+    return true
   else:
     # Need to compile rules
     return yr_rules_compile_custom_rules(yara_engine.rules, @[db_path])
