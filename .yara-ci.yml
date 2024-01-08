@@ -1,0 +1,6 @@
+branches:
+  accept:
+  - "**"
+files:
+  accept:
+  - "rules/*.yar"
