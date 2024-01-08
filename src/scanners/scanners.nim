@@ -88,12 +88,7 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
 
   discard ctx.yara.init_yara(loaded_yara_sigs, options.db_path_yara)
 
-  ctx.clam.debug_mode = options.is_clam_debug
-  ctx.clam.database = options.db_path_clamav
-  ctx.clam.use_clam = options.use_clam_db
-  # ctx.yara.match_all_rules = options.match_all
-
-  if ctx.clam.init_clamav(loaded_clam_sigs, ctx.clam.use_clam) != ERROR_SUCCESS:
+  if ctx.clam.init_clamav(loaded_clam_sigs, options.db_path_clamav, options.use_clam_db, options.is_clam_debug) != ERROR_SUCCESS:
     raise newException(ValueError, "Failed to init ClamAV Engine")
 
   #[

@@ -28,9 +28,6 @@ type
   ClEngine* = object
     engine*: ptr cl_engine
     options*: cl_scan_options
-    database*: string # TODO move this variable of of object
-    debug_mode*: bool
-    use_clam*: bool
   YrEngine* = object
     rules*: ptr YR_RULES
     scanner*: ptr YR_SCANNER
@@ -56,7 +53,7 @@ const
   SCANNER_MAX_PROC_COUNT* = 4194304
 
 
-proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_clam: bool): cl_error_t =
+proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, path_clamdb: string, use_clam, clam_debug: bool): cl_error_t =
   #[
     Start ClamAV engine
     https://docs.clamav.net/manual/Development/libclamav.html#initialization
@@ -100,14 +97,14 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, use_cla
   discard clam_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
 
   # Did we set debug?
-  if clam_engine.debug_mode:
+  if clam_debug:
     cl_debug()
 
   # If database path is not empty, load ClamAV Signatures
-  if clam_engine.use_clam:
+  if use_clam:
     var
       sig_count: cuint = 0
-    result = cl_load(cstring(clam_engine.database), clam_engine.engine, addr(sig_count), bitor(CL_DB_STDOPT, CL_DB_BYTECODE_UNSIGNED))
+    result = cl_load(cstring(path_clamdb), clam_engine.engine, addr(sig_count), bitor(CL_DB_STDOPT, CL_DB_BYTECODE_UNSIGNED))
     loaded_sig_count = uint(sig_count)
 
     if result == CL_SUCCESS:

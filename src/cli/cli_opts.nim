@@ -15,7 +15,6 @@ proc cliopts_create_default*(options: var ScanOptions) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
-  # options.match_all = false
   options.db_path_clamav = "/var/lib/clamav/"
   let
     db_path_normal = [
@@ -154,8 +153,6 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         options.use_clam_db = true
       of "--clam-debug":
         options.is_clam_debug = true
-      # of "--match-all":
-      #   options.match_all = true
       of "--path-clamdb":
         cliopts_set_db_path_clamav(options, i, total_params_count):
       of "--path-yaradb":
