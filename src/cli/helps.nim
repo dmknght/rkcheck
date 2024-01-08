@@ -8,6 +8,6 @@ proc show_help_banner*(): bool =
   echo " --path-yaradb  <file or dir>  Set custom Yara's rules"
   echo "\nScan options:"
   echo " --scan-files  <file1 file2>  Scan files and dirs"
-  echo " --scan-procs  <pid1 pid2>    Scan processes. Skip if --all-procs is used"
-  echo " --scan-mem                   Scan all running proccesses"
+  echo " --scan-procs                 Scan all running processes"
+  echo " --scan-procs  <pid1 pid2>    Scan processes by given PIDs"
   return false

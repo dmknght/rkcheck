@@ -22,16 +22,6 @@ proc cliopts_create_default*(options: var ScanOptions) =
       "databases/signatures.ydb"
     ]
 
-  # Load bytecode signatures by default. Problems: if user pass only --use-clamdb,
-  # program must check multiple args to make sure the values are correct
-  # ignore it for now
-  # if fileExists("/var/lib/clamav/bytecode.cld"):
-  #   options.db_path_clamav = "/var/lib/clamav/bytecode.cld"
-  #   options.use_clam_db = true
-  # else:
-  #   options.db_path_clamav = "/var/lib/clamav/"
-  #   options.use_clam_db = false
-
   options.db_path_yara = cli_opt_find_default_ydb(db_path_normal)
 
 
@@ -97,11 +87,8 @@ proc cliopts_set_list_files_or_dirs(list_dirs, list_files: var seq[string], i: v
     i += 1
 
 
-proc cliopts_set_list_procs(list_procs: var seq[uint], i: var int, total_param: int) =
-  if i + 1 > total_param:
-    raise newException(ValueError, "Missing value for list processes")
-  else:
-    i += 1
+proc cliopts_set_list_procs(list_procs: var seq[uint], i: var int, total_param: int): int =
+  i += 1
 
   while i <= total_param:
     let
@@ -120,8 +107,7 @@ proc cliopts_set_list_procs(list_procs: var seq[uint], i: var int, total_param: 
         discard
     i += 1
 
-  if len(list_procs) == 0:
-    raise newException(ValueError, "Invalid pid values")
+  return len(list_procs)
 
 
 proc cliopts_get_options*(options: var ScanOptions): bool =
@@ -147,8 +133,6 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
         return show_help_banner()
       of "-help":
         return show_help_banner()
-      of "--scan-mem":
-        options.scan_all_procs = true
       of "--use-clamdb":
         options.use_clam_db = true
       of "--clam-debug":
@@ -160,7 +144,8 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
       of "--scan-files":
         cliopts_set_list_files_or_dirs(options.list_dirs, options.list_files, i, total_params_count)
       of "--scan-procs":
-        cliopts_set_list_procs(options.list_procs, i, total_params_count)
+        if cliopts_set_list_procs(options.list_procs, i, total_params_count) == 0:
+          options.scan_all_procs = true
       else:
         raise newException(ValueError, "Invalid option " & currentParam)
 
