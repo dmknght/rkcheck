@@ -4,3 +4,11 @@ branches:
 files:
   accept:
   - "rules/*.yar"
+variables:
+  proc_exe_exists: true
+  proc_exe: ""
+  proc_name: ""
+  fd_stdin: ""
+  fd_stdout: ""
+  fd_stderr: ""
+  proc_cmdline: ""
