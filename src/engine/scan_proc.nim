@@ -120,7 +120,9 @@ proc pscanner_scan_mem_block(ctx: var ProcScanCtx, mem_block, scan_block: ptr YR
 
   var
     cl_map_file = cl_fmap_open_memory(mem_block[].fetch_data(scan_block), base_size)
-  discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), unsafeAddr(base_size), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
+    scanned: culong
+
+  discard cl_scanmap_callback(cl_map_file, cstring(ctx.scan_object), addr(ctx.virname), addr(scanned), ctx.clam.engine, ctx.clam.options.addr, ctx.addr)
   cl_fmap_close(cl_map_file)
 
   if ctx.scan_result == CL_VIRUS:
