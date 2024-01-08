@@ -22,8 +22,8 @@ build: clean signatures
 
 install:
 	mkdir -p /usr/share/rkcheck/
-	cp -r build/database /usr/share/rkcheck/
-	cp build/rkscanmal /usr/bin/rkscanmal
+	cp -r build/release/databases /usr/share/rkcheck/
+	cp build/release/rkscanmal /usr/bin/rkscanmal
 
 	chmod +x /usr/bin/rkscanmal
 
