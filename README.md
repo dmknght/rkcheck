@@ -2,7 +2,7 @@
 This tool is a combination of Yara and ClamAV to do malware scanning on Linux system. It was made as the idea that rkhunter and chkrootkit need better replacement since both tools check absolute paths exist only.
 
 # More info about this tool
-I'm writing the github's wiki :'[]
+Wiki is at https://github.com/dmknght/rkcheck/wiki
 
 # Roadmaps
 - Update the tool with latest ClamAV and Yara engine. Support static build
