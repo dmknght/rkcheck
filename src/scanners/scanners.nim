@@ -103,7 +103,7 @@ proc scanners_init_engine(ctx: var ScanCtx, options: ScanOptions) =
   if ctx.yara.rules != nil:
     cl_engine_set_clcb_file_inspection(ctx.clam.engine, fscanner_cb_file_inspection)
   elif loaded_clam_sigs == 0:
-    raise newException(ValueError, "No valid signatures.")
+    raise newException(ValueError, "No valid signatures found")
   else:
     cl_engine_set_clcb_post_scan(ctx.clam.engine, fscanner_cb_inc_count)
 
