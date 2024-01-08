@@ -42,7 +42,6 @@ type
     file_scanned*: uint
     file_infected*: uint
   ProcScanCtx* = object of ScanCtx
-    memblock_scanned*: culong
     pinfo*: ProcInfo
     proc_scanned*: uint
     proc_infected*: uint
