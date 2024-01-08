@@ -4,7 +4,9 @@ NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passL:-s
 # Add this when want to build static file. On Debian, ClamAV has no static lib so it's impossible to use
 BUILD_FLAGS = --passL:-static
 
-all:
+.PHONY: build
+
+all: build install
 
 mktmp:
 	# Create build folder and db
@@ -16,7 +18,7 @@ signatures: mktmp
 	# Compile Yara signatures
 	$(NIM_CC) $(YR_DEPS) -r --out:build/nimcache/rkcompiler src/compiler/yr_db_compiler.nim
 
-build: clean signatures
+build: signatures
 	# Compile main file
 	$(NIM_CC) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
 
