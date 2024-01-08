@@ -22,12 +22,12 @@ proc print_file_infected*(virname, scan_obj: string) =
     is messed up. Call flush again to clear that
   ]#
   progress_bar_flush()
-  echo "[\e[91m!\e[0m] \e[41m", virname, "\e[0m ", scan_obj
+  echo "\e[91m", virname, "\e[0m ", scan_obj
 
 
 proc print_process_infected*(pid: uint, virname, scan_object, exec_path, name: string) =
   progress_bar_flush()
-  echo "[\e[91m!\e[0m] \e[41m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
+  echo "\e[91m", virname, "\e[0m Pid: \e[95m", pid, "\e[0m "
   echo " Name: ", name
 
   if not isEmptyOrWhitespace(exec_path):
