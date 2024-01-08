@@ -5,12 +5,18 @@ include "rules/magics.yar"
 
 // https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
 rule Fileless_DeletedSelf_Generic {
+  /*
+    This rule is to scan running processes only
+  */
   condition:
     proc_exe endswith " (deleted)" and not proc_exe_exists
 }
 
 
 rule RevShell_ShellRedirect_TESTING {
+  /*
+    This rule is to scan running processes only
+  */
   // TODO update strings of shells
   // strings:
   //   $s1 = "bash"
@@ -24,6 +30,9 @@ rule RevShell_ShellRedirect_TESTING {
 
 
 rule RevShell_Ncat_Generic {
+  /*
+    This rule is to scan running processes only
+  */
   strings:
     $ = "Usage: ncat [options] [hostname] [port]" fullword ascii
     $ = "Proxy-Authenticate: Basic realm=\"Ncat\"" fullword ascii
@@ -32,6 +41,7 @@ rule RevShell_Ncat_Generic {
   condition:
     proc_cmdline contains "-e" and
     (
+      // This name is useful in normal scenario, however, it's very easy to give false positives
       (proc_name endswith "ncat" or proc_name endswith "ncat") or
       2 of them
     )
