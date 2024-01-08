@@ -4,7 +4,7 @@ include "rules/magics.yar"
 
 
 // https://www.sandflysecurity.com/blog/detecting-linux-kernel-process-masquerading-with-command-line-forensics/
-rule Fileless_DeletedSelf_Generic {
+rule Fileless_DeletedSelf {
   /*
     This rule is to scan running processes only
   */
@@ -13,7 +13,7 @@ rule Fileless_DeletedSelf_Generic {
 }
 
 
-rule RevShell_ShellRedirect_TESTING {
+rule RevShell_SysShellRedirect {
   /*
     This rule is to scan running processes only
   */
@@ -29,7 +29,7 @@ rule RevShell_ShellRedirect_TESTING {
 }
 
 
-rule RevShell_Ncat_Generic {
+rule RevShell_Ncat {
   /*
     This rule is to scan running processes only
   */
@@ -48,7 +48,7 @@ rule RevShell_Ncat_Generic {
 }
 
 
-rule ProcCloak_ThreadMasquerading_TESTING {
+rule ProcCloak_ThreadMasquerading {
   condition:
     proc_name startswith "[" and proc_name endswith "]" and proc_exe startswith "/"
 }
