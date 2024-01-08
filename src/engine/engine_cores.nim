@@ -76,14 +76,16 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, path_cl
   clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_XMLDOCS)
   clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_MAIL)
   clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_HTML)
-  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_ELF)
-  clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_PE)
+  # clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_ELF)
+  # clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_PE)
 
   clam_engine.options.general = bitor(clam_engine.options.general, CL_SCAN_GENERAL_HEURISTICS)
 
   if use_clam:
     # Enable cache
     clam_engine.options.general = bitor(clam_engine.options.general, ENGINE_OPTIONS_DISABLE_CACHE)
+    clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_ELF)
+    clam_engine.options.parse = bitor(clam_engine.options.parse, CL_SCAN_PARSE_PE)
     # Maybe enable macho?
     # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_BROKEN)
     # clam_engine.options.heuristic = bitor(clam_engine.options.heuristic, CL_SCAN_HEURISTIC_ENCRYPTED_ARCHIVE)
@@ -92,6 +94,8 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, path_cl
   else:
     # Disable cache
     clam_engine.options.general = bitand(clam_engine.options.general, ENGINE_OPTIONS_DISABLE_CACHE)
+    clam_engine.options.parse = bitand(clam_engine.options.parse, CL_SCAN_PARSE_ELF)
+    clam_engine.options.parse = bitand(clam_engine.options.parse, CL_SCAN_PARSE_PE)
 
   discard clam_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
 
