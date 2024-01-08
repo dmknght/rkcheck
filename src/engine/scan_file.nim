@@ -81,29 +81,29 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
   # TODO improve ram usage. Current function is using 54mb (compare to 46mb when use pre-cache) for same files
   # TODO create a rule to combine text_ascii with the scan memory to prevent false positive
 
-  if $file_type in [
-    "CL_TYPE_TEXT_UTF8",
-    "CL_TYPE_MSEXE",
-    "CL_TYPE_ELF",
-    "CL_TYPE_MACHO_UNIBIN",
-    "CL_TYPE_BINARY_DATA",
-    "CL_TYPE_HTML",
-    "CL_TYPE_TEXT_ASCII"
-  ]:
+  # if $file_type in [
+  #   "CL_TYPE_TEXT_UTF8",
+  #   "CL_TYPE_MSEXE",
+  #   "CL_TYPE_ELF",
+  #   "CL_TYPE_MACHO_UNIBIN",
+  #   "CL_TYPE_BINARY_DATA",
+  #   "CL_TYPE_HTML",
+  #   "CL_TYPE_TEXT_ASCII"
+  # ]:
+  let
+    ctx = cast[ptr FileScanCtx](context)
+
+  if ctx.scan_result == CL_VIRUS:
+    return CL_VIRUS
+
+  if not isEmptyOrWhitespace($file_name):
     let
-      ctx = cast[ptr FileScanCtx](context)
-
-    if ctx.scan_result == CL_VIRUS:
-      return CL_VIRUS
-
-    if not isEmptyOrWhitespace($file_name):
-      let
-        inner_file_name = splitPath($file_name).tail
-      if inner_file_name != splitPath(ctx.scan_object).tail:
-        if "//" in ctx.scan_object:
-          ctx.scan_object = ctx.scan_object & "/" & inner_file_name
-        else:
-          ctx.scan_object = ctx.scan_object & "//" & inner_file_name
+      inner_file_name = splitPath($file_name).tail
+    if inner_file_name != splitPath(ctx.scan_object).tail:
+      if "//" in ctx.scan_object:
+        ctx.scan_object = ctx.scan_object & "/" & inner_file_name
+      else:
+        ctx.scan_object = ctx.scan_object & "//" & inner_file_name
 
     progress_bar_scan_file(ctx.scan_object)
     ctx.file_scanned += 1
