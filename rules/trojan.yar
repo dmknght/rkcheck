@@ -29,6 +29,7 @@ rule SSHD_95d7 {
 
 
 rule Infector_849b {
+  // TODO analysis this again
   // meta:
   //   md5 = "849b45fee92762d2b6ec31a11e1bcd76"
   //   description = "A Nim infector malware"
@@ -38,13 +39,7 @@ rule Infector_849b {
     $ = "/tmp/.host"
     $ = "The more you know... :)"
   condition:
-    elf_exec and (
-      for any i in (0 .. elf.number_of_sections):
-      (
-        $1 in (elf.sections[i].offset .. elf.sections[i].offset + elf.sections[i].size)
-      ) or
-      2 of them
-    )
+    elf_exec and any of them
 }
 
 
