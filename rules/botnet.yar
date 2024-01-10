@@ -48,6 +48,13 @@ rule Mirai_Gen2 {
     elf_magic and any of them
 }
 
+// rule Mirai_Gen3 {
+//   // Yara >= 4.4 only
+//   // File only
+//   condition:
+//     elf.import_hash() == "47d76101bc17b47ce131a04c274938a0"
+// }
+
 
 rule IRCBot_Generic
 {

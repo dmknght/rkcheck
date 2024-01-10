@@ -822,6 +822,13 @@ rule FDMgr_c75d2 {
 }
 
 
+// rule Elknot_Generic {
+//   // Yara >= 4.4 only
+//   // File only
+//   condition:
+//     elf.import_md5() == "93dbbcaed0a0c03b48bc6ca2c290d5b3"
+// }
+
 // rule NeoLink_Generic {
 //   strings:
 //     $header = "<html>"
