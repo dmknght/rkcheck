@@ -52,7 +52,7 @@ rule Mirai_Gen2 {
 //   // Yara >= 4.4 only
 //   // File only
 //   condition:
-//     elf.import_hash() == "47d76101bc17b47ce131a04c274938a0"
+//     elf.import_md5() == "47d76101bc17b47ce131a04c274938a0"
 // }
 
 
