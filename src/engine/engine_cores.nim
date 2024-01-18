@@ -128,15 +128,15 @@ proc finit_clamav*(clam_engine: var ClEngine) =
 #[
   Check if the database file of Yara is compiled or text-based
 ]#
-proc yr_rules_is_compiled(path: string, value: var bool): bool =
+proc yr_rules_is_compiled(path: string, is_compiled: var bool): bool =
   try:
     let
       f = newFileStream(path)
 
     if f.readStr(4) == "YARA":
-      result = true
+      is_compiled = true
     else:
-      result = false
+      is_compiled = false
     f.close()
     return true
   except:
