@@ -96,23 +96,25 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
   if ctx.scan_result == CL_VIRUS:
     return CL_VIRUS
 
+  ctx.virt_scan_object = ctx.scan_object
+
   if not isEmptyOrWhitespace($file_name):
     let
       inner_file_name = splitPath($file_name).tail
+
     if inner_file_name != splitPath(ctx.scan_object).tail:
       if "//" in ctx.scan_object:
         ctx.virt_scan_object = ctx.scan_object & "/" & inner_file_name
       else:
         ctx.virt_scan_object = ctx.scan_object & "//" & inner_file_name
-    else:
-      ctx.virt_scan_object = ctx.scan_object
 
-    progress_bar_scan_file(ctx.virt_scan_object)
-    ctx.file_scanned += 1
-    discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
-    if ctx.scan_result == CL_VIRUS:
-      # FIX multiple files marked as previous signature. However, it might raise error using multiple callbacks to detect malware
-      ctx.scan_result = CL_CLEAN
-      return CL_VIRUS
+  progress_bar_scan_file(ctx.virt_scan_object)
+  ctx.file_scanned += 1
+  discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
+
+  if ctx.scan_result == CL_VIRUS:
+    # FIX multiple files marked as previous signature. However, it might raise error using multiple callbacks to detect malware
+    ctx.scan_result = CL_CLEAN
+    return CL_VIRUS
 
   return CL_CLEAN
