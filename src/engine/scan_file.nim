@@ -35,7 +35,7 @@ proc fscanner_on_malware_found_clam*(fd: cint, virname: cstring, context: pointe
     virus_name = if isEmptyOrWhitespace($ctx.virname): virname else: ctx.virname
 
   ctx.file_infected += 1
-  print_file_infected($virus_name, ctx.scan_object)
+  print_file_infected($virus_name, ctx.virt_scan_object)
 
 
 #[
@@ -101,11 +101,13 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
       inner_file_name = splitPath($file_name).tail
     if inner_file_name != splitPath(ctx.scan_object).tail:
       if "//" in ctx.scan_object:
-        ctx.scan_object = ctx.scan_object & "/" & inner_file_name
+        ctx.virt_scan_object = ctx.scan_object & "/" & inner_file_name
       else:
-        ctx.scan_object = ctx.scan_object & "//" & inner_file_name
+        ctx.virt_scan_object = ctx.scan_object & "//" & inner_file_name
+    else:
+      ctx.virt_scan_object = ctx.scan_object
 
-    progress_bar_scan_file(ctx.scan_object)
+    progress_bar_scan_file(ctx.virt_scan_object)
     ctx.file_scanned += 1
     discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
     if ctx.scan_result == CL_VIRUS:

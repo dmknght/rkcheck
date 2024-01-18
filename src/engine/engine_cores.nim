@@ -36,6 +36,7 @@ type
     yara*: YrEngine
     clam*: ClEngine
     scan_object*: string
+    virt_scan_object*: string # Inner name
     scan_result*: cl_error_t
     virname*: cstring
   FileScanCtx* = object of ScanCtx
