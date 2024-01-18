@@ -11,7 +11,6 @@ Wiki is at https://github.com/dmknght/rkcheck/wiki
 # License, copyright
 - Reused Yara engine under BSD-3-Clause.
 - Reused ClamAV engine under GPL-2.0
-- Original version of "unhide_procs" is under MIT license from Sandfly security. Reused researches from Sandfly security about Linux's malware and rootkit
 - Reused some Yara rules from Tenable under BSD-3-Clause
 - Some rules are having no custom licenses from Lacework Labs, Trend Micro
 - Special thank to Nim lang community, ClamAV community, malware researcher Itay Cohen and everbody helped me this project
