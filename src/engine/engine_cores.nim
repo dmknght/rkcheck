@@ -97,7 +97,7 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, path_cl
     clam_engine.options.parse = bitand(clam_engine.options.parse, CL_SCAN_PARSE_ELF)
     clam_engine.options.parse = bitand(clam_engine.options.parse, CL_SCAN_PARSE_PE)
 
-  discard clam_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 60mb
+  discard clam_engine.engine.cl_engine_set_num(CL_ENGINE_MAX_FILESIZE, 75 * 1024 * 1024) # Max scan size 75mb
 
   # Did we set debug?
   if clam_debug:
