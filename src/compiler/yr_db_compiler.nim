@@ -40,6 +40,8 @@ proc compile_default_rules(dst: string) =
   discard yr_compiler_add_file(compiler, open("rules/botnet.yar"), "Botn", "botnet.yar")
 
   discard yr_compiler_get_rules(compiler, addr(rules))
+  let loaded_sigs = uint(rules.num_rules)
+  echo "Compiling ", loaded_sigs, " signatures from default ruleset"
   discard yr_rules_save(rules, dst)
 
   # finityara
