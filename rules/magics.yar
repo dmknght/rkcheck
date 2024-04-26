@@ -4,11 +4,8 @@
 */
 
 private rule elf_magic {
-  strings:
-    $magic = {7f 45 4c 46 [6] (00 | 01 | 02 | 03 | 04 )}
   condition:
-    // $magic and not defined uint8(@magic[0] - 1)
-    $magic at 0
+    uint32(0) == 0x464c457f
 }
 
 private rule elf_rel {
