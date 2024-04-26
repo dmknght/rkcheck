@@ -9,27 +9,18 @@ private rule elf_magic {
 }
 
 private rule elf_rel {
-  strings:
-    $magic = {7f 45 4c 46 [6] 01}
   condition:
-    // $magic and not defined uint8(@magic[0] - 1)
-    $magic at 0
+    elf_magic and uint16(16) == 0x01
 }
 
 private rule elf_exec {
-  strings:
-    $magic = {7f 45 4c 46 [6] 02}
   condition:
-    // $magic and not defined uint8(@magic[0] - 1)
-    $magic at 0
+    elf_magic and uint16(16) == 0x02
 }
 
 private rule elf_dyn {
-  strings:
-    $magic = {7f 45 4c 46 [6] 03}
   condition:
-    // $magic and not defined uint8(@magic[0] - 1)
-    $magic at 0
+    elf_magic and uint16(16) == 0x03
 }
 
 
