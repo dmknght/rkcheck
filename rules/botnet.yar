@@ -4,14 +4,14 @@ include "rules/magics.yar"
 
 
 /*
- Mirai rules based on section hashes. This is a new version that
- 1. Calculate hashes based on start string of section, and section's size
- 2. No loop to improve speed
- 3. Hashes removed some Nullbytes (prefix and suffix)
- Problem:
- 1. Some samples has no sections in memory. The other rule handled it
- 2. I haven't found any sample that changes its section data (changes instead of remove sections)
-   it's possibly some samples can bypass this
+  Mirai rules based on section hashes. This is a new version that
+  1. Calculate hashes based on start string of section, and section's size
+  2. No loop to improve speed
+  3. Hashes removed some Nullbytes (prefix and suffix)
+  Problem:
+  1. Some samples has no sections in memory. The other rule handled it
+  2. I haven't found any sample that changes its section data (changes instead of remove sections)
+    it's possibly some samples can bypass this
 */
 rule Mirai_Gen1 {
   strings:
@@ -21,13 +21,8 @@ rule Mirai_Gen1 {
   condition:
     elf_magic and
     (
-      $s1 and hash.md5(@s1[1], 0x64) == "cfea6ff0b826a05a3c24bd9b4da705c7"
-    ) or
-    (
-      $s2 and hash.md5(@s2[1], 0x3C) == "6de76eb8aa868bf6751c01b7d120e909"
-    ) or
-    (
-      $s3 and hash.md5(@s3[1], 0x74) == "5321a249df6dd47fabd3ca3dcc1ed7c9" or
+      hash.md5(@s1[1], 0x64) == "cfea6ff0b826a05a3c24bd9b4da705c7" or
+      hash.md5(@s2[1], 0x3C) == "6de76eb8aa868bf6751c01b7d120e909" or
       hash.md5(@s3[1], 0x74) == "5321a249df6dd47fabd3ca3dcc1ed7c9"
     )
 }
@@ -37,7 +32,7 @@ rule Mirai_Gen1 {
 rule Mirai_Gen2 {
   // meta:
   //   description = "Detect some Mirai's variants including Gafgyt and Tsunami variants (named by ClamAV) using section hash. File only"
-    // file fa9878*95ec37, compiled Py
+  // file fa9878*95ec37, compiled Py
   strings:
     $ = "cd /tmp || cd /var/run || cd /mnt || cd /root || cd /" fullword ascii
     $ = "makeIPPacket" fullword ascii
@@ -47,13 +42,6 @@ rule Mirai_Gen2 {
   condition:
     elf_magic and any of them
 }
-
-// rule Mirai_Gen3 {
-//   // Yara >= 4.4 only
-//   // File only
-//   condition:
-//     elf.import_md5() == "47d76101bc17b47ce131a04c274938a0"
-// }
 
 
 rule IRCBot_Generic
@@ -123,13 +111,13 @@ rule VTFlooder_1d47 {
 }
 
 rule Flooder_Generic {
+  // TODO better string detection for similar text
   strings:
     $ = "Flooding %s" fullword ascii
     $ = "LOLNOGTFO" fullword ascii
     $ = "KILLATTK" fullword ascii
     $ = "[UDP] Failed to ddos" fullword ascii
-    $ = "[HTTP] Flooding" fullword ascii
-    $ = "[UDP] Flooding Rooted Spoof" fullword ascii
+    $ = "] flood" ascii nocase
     $ = "[http flood]" fullword ascii
     $ = "Opening sockets" fullword ascii
     $ = "Sending attack" fullword ascii
@@ -137,7 +125,6 @@ rule Flooder_Generic {
     $ = "HACKPGK" fullword ascii
     $ = "RANDOMFLOOD" fullword ascii
     $ = "ACKFLOOD" fullword ascii
-    // TODO better strings
     $ = "udp flooder" ascii
     $ = "SYNFLOOD" ascii
     $ = "SYN_Flood" ascii

@@ -66,47 +66,6 @@ rule Kowai_f06a {
 }
 
 
-rule ShellCmd_UserAdd {
-  // meta:
-  //   description = "Bash commands to add new user to passwd"
-  strings:
-    $ = /echo[ "]+[\w\d_]+::0:0::\/:\/bin\/[\w"]+[ >]+\/etc\/passwd/
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
-
-rule Dropper_Wget {
-  // meta:
-  //   description = "Bash commands to download and execute binaries using wget"
-  //   reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
-  strings:
-    $ = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
-
-rule Dropper_Curl {
-  // meta:
-  //   description = "Bash commands to download and execute binaries using CURL"
-  //   refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
-  strings:
-    $ = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
-
-rule Dropper_WgetCurl {
-  // meta:
-  //   description = "Bash commands to download and execute binaries using CURL || Wget"
-  //   hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
-  //   hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
-  strings:
-    $ = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
-
-
 rule PortScan_Generic {
   // meta:
   //   hash = "946689ba1b22d457be06d95731fcbcac"
@@ -248,15 +207,15 @@ rule Backdoor_Generic {
 
 rule SSHDoor_Generic {
   strings:
-    // TODO need to test runtime
     $ = "backdoor.h" fullword ascii
     $ = "backdoor_active" fullword ascii
   condition:
     elf_magic and
     (
-      for 1 i in (0 .. elf.symtab_entries):
+      for 1 f_dynsym in elf.symtab:
       (
-        elf.symtab[i].name == "backdoor_active" and elf.symtab[i].type == elf.STT_OBJECT
+        f_dynsym.name == "backdoor_active" and
+        f_dynsym.type == elf.STT_OBJECT
       ) or
       all of them
     )
@@ -565,15 +524,12 @@ rule Exploit_DirtyCow {
   condition:
     elf.type == elf.ET_EXEC and
     (
-      for 6 i in (0 .. elf.dynsym_entries):
+      for 6 f_dynsym in elf.dynsym:
       (
-        elf.dynsym[i].type == elf.STT_FUNC and (
-          elf.dynsym[i].name == "crypt" or
-          elf.dynsym[i].name == "madvise" or
-          elf.dynsym[i].name == "ptrace" or
-          elf.dynsym[i].name == "waitpid" or
-          elf.dynsym[i].name == "getpass" or
-          elf.dynsym[i].name == "pthread_create"
+        for any f_name in ("crypt", "madvise", "ptrace", "waitpid", "getpass", "pthread_create"):
+        (
+          f_dynsym.type == elf.STT_FUNC and
+          f_dynsym.name == f_name
         )
       ) or
       all of them
@@ -767,7 +723,6 @@ rule Exploit_NsSploit {
 }
 
 rule Hacktool_LoginBrute {
-  // TODO need to verify memory scan
   // meta:
   //   descriptions = "Some uniq strings used in password dictionary"
   strings:

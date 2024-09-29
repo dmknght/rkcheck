@@ -45,16 +45,13 @@ rule BrokePkg_Generic {
   condition:
     elf_rel and
     (
-      for 3 i in (0 .. elf.dynsym_entries):
+      for 3 f_dynsym in elf.dynsym:
       (
-        elf.dynsym[i].type == elf.STT_FUNC and
+        for any f_name in ("fh_install_hooks", "port_hide", "hide_pid"):
         (
-          elf.dynsym[i].name == "fh_install_hooks" or
-          elf.dynsym[i].name == "port_hide" or
-          elf.dynsym[i].name == "hide_pid"
+          f_dynsym.type == elf.STT_FUNC and f_dynsym.name == f_name
         )
-      ) or
-      2 of them
+      ) or 2 of them
     )
 }
 
@@ -92,59 +89,49 @@ rule Symbiote_0c27 {
 }
 
 
-rule Boopkit_BoopExec {
+rule Boopkit_Generic {
   // meta:
   //   github = "https://github.com/krisnova/boopkit"
   //   description = "Exec file of the toolkit"
   //   md5 = "7a00da9408fb313c09bb2208f2745354"
   strings:
-    $ = "boopkit" fullword ascii
-    $ = "[RCE]" fullword ascii
+    $ = "boopkit." fullword ascii
+    $ = "Found RCE" fullword ascii
     $ = "X*x.HALT.x*X" fullword ascii
   condition:
-    elf_exec and all of them
+    elf_exec and
+    (
+      for any f_symtab in elf.symtab:
+      (
+        for any symbol_name in ("boopprintf", "rce_filter", "runtime__boopkit"):
+        (
+          f_symtab.name == symbol_name and
+          (
+            f_symtab.type == elf.STT_FUNC or
+            f_symtab.type == elf.STT_OBJECT
+          )
+        )
+      ) or 2 of them
+    )
 }
 
 
-rule Boopkit_bfdf {
-  // meta:
-  //   github = "https://github.com/krisnova/boopkit"
-  //   description = "Boopkit's object files and an other exe file"
-  //   md5 = "bfdfd5d8f11cbc262e5698e90a2b4f88"
-  //   md5 = "3408129bbb1de313d986dc3577f267cb"
-  //   md5 = "e1b4ef86cc780c40dad08d58d5bf6b99"
-  strings:
-    $ = "pr0be.boop.c" fullword ascii
-    $ = "pr0be.safe.c" fullword ascii
-    $ = "pr0be.xdp.c" fullword ascii
-    $ = "event_boop_t" fullword ascii
-    $ = "pid_to_hide" fullword ascii
-    // $ = "__packed" fullword ascii
-    $ = "boopkit.h" fullword ascii
-    $ = "Failed to hide PID" fullword ascii
-    $ = "U>Fc" fullword ascii
+rule Boopkit_Lib {
+  // Detect .so file of boopkit "https://github.com/krisnova/boopkit
+  // Export:
+  // __packed, LICENSE object (multiple files)
+  // pid_to_hide object, pr0be.safe.so
   condition:
-    (elf_rel or elf_exec or elf.type == elf.ET_EXEC) and
+    elf_magic and
     (
-      for 2 i in (0 .. elf.dynsym_entries):
+      for any f_symtab in elf.symtab:
       (
+        for any symbol_name in ("__packed", "pid_to_hide"):
         (
-          elf.dynsym[i].type == elf.STT_FUNC and
-          (
-            elf.dynsym[i].name == "pid_to_hide" or
-            elf.dynsym[i].name == "boopprintf"
-          )
-        ) or
-        (
-          elf.dynsym[i].type == elf.STT_OBJECT and
-          (
-            // elf.dynsym[i].name == "__packed" or
-            elf.dynsym[i].name == "LICENSE" or
-            elf.dynsym[i].name == "runtime__boopkit"
-          )
+          f_symtab.name == symbol_name and
+          f_symtab.type == elf.STT_OBJECT
         )
-      ) or
-      2 of them
+      )
     )
 }
 
@@ -622,16 +609,14 @@ rule Kinsing_ccef {
   condition:
     elf_dyn and
     (
-      for 2 i in (0 .. elf.dynsym_entries):
+      for 2 f_dynsym in elf.dynsym:
       (
-        elf.dynsym[i].type == elf.STT_FUNC and
+        for any f_name in ("is_hidden_file", "is_attacker", "hide_tcp_ports"):
         (
-          elf.dynsym[i].name == "is_hidden_file" or
-          elf.dynsym[i].name == "is_attacker" or
-          elf.dynsym[i].name == "hide_tcp_ports"
+          f_dynsym.type == elf.STT_FUNC and
+          f_dynsym.name == f_name
         )
-      ) or
-      all of them
+      ) or all of them
     )
 }
 
@@ -661,17 +646,14 @@ rule Winnti_1acb {
   condition:
     elf_dyn and
     (
-      for 2 i in (0 .. elf.dynsym_entries):
+      for 2 f_dynsym in elf.dynsym:
       (
-        elf.dynsym[i].type == elf.STT_FUNC and
+        for any f_name in ("is_invisible_with_pids", "get_our_pids", "get_our_sockets", "check_is_our_proc_dir"):
         (
-          elf.dynsym[i].name == "is_invisible_with_pids" or
-          elf.dynsym[i].name == "get_our_pids" or
-          elf.dynsym[i].name == "get_our_sockets" or
-          elf.dynsym[i].name == "check_is_our_proc_dir"
+          f_dynsym.type == elf.STT_FUNC and
+          f_dynsym.name == f_name
         )
-      ) or
-      2 of them
+      ) or 2 of them
     )
 }
 
@@ -744,17 +726,12 @@ rule LDPreload_ImpFuncs {
   condition:
     // The limitation of dynsym_entries number is to avoid false positive detecting libc
     elf_dyn and elf.dynsym_entries < 300 and (
-      for 7 i in (0 .. elf.dynsym_entries):
+      for 7 f_dynsym in elf.dynsym:
       (
-        elf.dynsym[i].type == elf.STT_FUNC and
+        for any f_name in ("access", "dlsym", "fopen", "lstat", "strstr", "tmpfile", "unlink"):
         (
-          elf.dynsym[i].name == "access" or
-          elf.dynsym[i].name == "dlsym" or
-          elf.dynsym[i].name == "fopen" or
-          elf.dynsym[i].name == "lstat" or
-          elf.dynsym[i].name == "strstr" or
-          elf.dynsym[i].name == "tmpfile" or
-          elf.dynsym[i].name == "unlink"
+          f_dynsym.type == elf.STT_FUNC and
+          f_dynsym.name == f_name
         )
       )
     )
