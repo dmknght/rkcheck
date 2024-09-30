@@ -66,17 +66,15 @@ proc rk_find_hook() =
     let check_result = rk_check_each_symbol(cstring(check_func))
     if check_result == cint(1):
       echo "Detect hooked: ", check_func
-    else:
-      echo check_result
 
 
 proc main() =
-  if fileExists(PATH_LD_PRELOAD):
-    # DO something with this
-    discard
-  else:
+  # if fileExists(PATH_LD_PRELOAD):
+  #   # DO something with this
+  #   discard
+  # else:
     # Find hooked functions
-    rk_find_hook()
+  rk_find_hook()
 
 
 main()
