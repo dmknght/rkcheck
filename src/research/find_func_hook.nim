@@ -73,3 +73,6 @@ proc main() =
   else:
     # Find hooked functions
     rk_find_hook()
+
+
+main()
