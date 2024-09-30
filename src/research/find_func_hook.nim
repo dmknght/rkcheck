@@ -4,7 +4,7 @@
 ]#
 
 import os
-import std/dynlib
+# import std/dynlib
 
 
 const
@@ -25,6 +25,7 @@ int rk_check_each_symbol(char *symb_name) {
   }
 
   void *symb_from_libc, *symb_from_curr;
+  // char COMMON_FUNCTIONS[][] = ["rename", "renameat", "stat", "stat64", "fstat", "fstat64", "lstat", "lstat64", "__lxstat", "__lxstat64", "__fxstat", "__fxstat64", "__xstat", "__xstat64"]
   int result;
 
   symb_from_libc = dlsym(libc_handler, symb_name);
@@ -42,7 +43,7 @@ int rk_check_each_symbol(char *symb_name) {
   // Missing info
 
   dlclose(libc_handler);
-  return result;
+  // return result;
 }
 
 """.}
@@ -62,8 +63,11 @@ proc rk_check_each_symbol(symb_name: cstring): cint {.importc: "rk_check_each_sy
 
 proc rk_find_hook() =
   for check_func in COMMON_FUNCTIONS:
-    if rk_check_each_symbol(check_func) == cint(1):
+    let check_result = rk_check_each_symbol(cstring(check_func))
+    if check_result == cint(1):
       echo "Detect hooked: ", check_func
+    else:
+      echo check_result
 
 
 proc main() =
