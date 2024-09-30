@@ -43,7 +43,12 @@ rule Proc_RevShellNetcat {
       proc_cmdline contains "-e" or Proc_StdRedirection
     ) and
     (
-      (proc_name endswith "ncat" or proc_name endswith "ncat") or // Use process name to detect netcat precisely. Usually inside the system
+      ( // Use process name to detect netcat precisely (either call absoulte path or execute by only name).
+        proc_name endswith "/nc" or
+        proc_name == "nc" or
+        proc_name endswith "/ncat" or
+        proc_name == "ncat"
+      ) or
       2 of them // What if binary's name was changed? Detect using common strings in nc or ncat
     )
 }
