@@ -62,7 +62,7 @@ proc rk_check_each_symbol(symb_name: cstring): cint {.importc: "rk_check_each_sy
 
 proc rk_find_hook() =
   for check_func in COMMON_FUNCTIONS:
-    if rk_check_each_symbol(check_func) == cint(0):
+    if rk_check_each_symbol(check_func) == cint(1):
       echo "Detect hooked: ", check_func
 
 
