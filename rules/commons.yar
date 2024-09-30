@@ -30,6 +30,20 @@ rule Proc_RevShellGeneric {
 }
 
 
+rule Proc_RevShellGen2_TEST {
+  /*
+    Detect reverse shell that uses DUP2 at runtime
+    Code:
+    	dup2(sockt, 0);
+      dup2(sockt, 1);
+      dup2(sockt, 2);
+    Source: https://github.com/izenynn/c-reverse-shell/blob/main/linux.c
+  */
+  condition:
+    fd_stdin == "/dev/pts/2" and fd_stdout == "/dev/pts/2" and fd_stderr == "/dev/pts/2"
+}
+
+
 rule Proc_RevShellNetcat {
   strings:
     $ = "Usage: ncat [options] [hostname] [port]" fullword ascii
