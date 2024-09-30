@@ -82,10 +82,11 @@ rule ELF_LoadSegmentRWE {
     License: No License detected
   */
   condition:
-    elf_magic and
-    elf.number_of_segments == 1 and
-    elf.segments[0].type == elf.PT_LOAD and
-    elf.segments[0].flags == elf.PF_R | elf.PF_W | elf.PF_X
+    elf_magic and for any f_segment in elf.segments:
+    (
+      f_segment.type == elf.PT_LOAD and
+      f_segment.flags == 7 // R+W+X. Sample of Meterpreter has only 1 segment. Need to check for False positive
+    )
 }
 
 
