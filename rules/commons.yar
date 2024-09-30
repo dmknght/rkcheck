@@ -121,38 +121,38 @@ rule ShellCmd_AddUser {
 }
 
 
-rule ShellCmd_DropByWget {
-  // meta:
-  //   description = "Bash commands to download and execute binaries using wget"
-  //   reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
-  strings:
-    $ = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
+// rule ShellCmd_DropByWget {
+//   // meta:
+//   //   description = "Bash commands to download and execute binaries using wget"
+//   //   reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
+//   strings:
+//     $ = /wget([ \S])+[; ]+chmod([ \S])+\+x([ \S])+[; ]+.\/(\S)+/
+//   condition:
+//     (elf_magic or shebang_magic) and all of them
+// }
 
 
-rule ShellCmd_DropByCurl {
-  // meta:
-  //   description = "Bash commands to download and execute binaries using CURL"
-  //   refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
-  strings:
-    $ = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
+// rule ShellCmd_DropByCurl {
+//   // meta:
+//   //   description = "Bash commands to download and execute binaries using CURL"
+//   //   refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
+//   strings:
+//     $ = /curl([ \S])+\-O([ \S])+[; ]+cat([ >\.\S])+[; ]+chmod([ \S])+\+x([ \S\*])+[; ]+.\/([\S ])+/
+//   condition:
+//     (elf_magic or shebang_magic) and all of them
+// }
 
 
-rule ShellCmd_WgetCurlAndChmod {
-  // meta:
-  //   description = "Bash commands to download and execute binaries using CURL || Wget"
-  //   hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
-  //   hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
-  strings:
-    $ = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
-  condition:
-    (elf_magic or shebang_magic) and all of them
-}
+// rule ShellCmd_WgetCurlAndChmod {
+//   // meta:
+//   //   description = "Bash commands to download and execute binaries using CURL || Wget"
+//   //   hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
+//   //   hash = "b34bb82ef2a0f3d02b93ed069fee717bd1f9ed9832e2d51b0b2642cb0b4f3891"
+//   strings:
+//     $ = /wget([ \S])+[; |]+curl([ \S]+)\-O([ \S])+[ |]+[&|; ]+chmod[&|; \d\w\.]+\//
+//   condition:
+//     (elf_magic or shebang_magic) and all of them
+// }
 
 // rule ELF_FakeDynSym {
 //   // meta:
