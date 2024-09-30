@@ -3,78 +3,48 @@
   Original idea: https://github.com/mempodippy/detect_preload/ (No LICENSE)
 ]#
 
-import os
-# import std/dynlib
-
-
-const
-  PATH_LD_PRELOAD = "/etc/ld.so.preload"
-  COMMON_FUNCTIONS = ["rename", "renameat", "stat", "stat64", "fstat", "fstat64", "lstat", "lstat64", "__lxstat", "__lxstat64", "__fxstat", "__fxstat64", "__xstat", "__xstat64"]
-
-
 {.emit: """
 
 #include <dlfcn.h>
+#include <stdio.h>
 
-int rk_check_each_symbol(char *symb_name) {
+void rk_check_each_symbol() {
   void *libc_handler;
   
   if (!(libc_handler = dlopen("libc.so.6", RTLD_LAZY)))
   {
-    return -1;
+    return;
   }
 
-  void *symb_from_libc, *symb_from_curr;
-  // char COMMON_FUNCTIONS[][] = ["rename", "renameat", "stat", "stat64", "fstat", "fstat64", "lstat", "lstat64", "__lxstat", "__lxstat64", "__fxstat", "__fxstat64", "__xstat", "__xstat64"]
-  int result;
+  char *symb_name;
+  char *COMMON_FUNCTIONS[] = {"rename", "renameat", "stat", "stat64", "fstat", "fstat64", "lstat", "lstat64", "__lxstat", "__lxstat64", "__fxstat", "__fxstat64", "__xstat", "__xstat64", NULL};
+  int i = 0;
 
-  symb_from_libc = dlsym(libc_handler, symb_name);
-  symb_from_curr = dlsym(RTLD_NEXT, symb_name);
-
-  if (symb_from_libc != symb_from_curr)
+  while (symb_name = COMMON_FUNCTIONS[i++])
   {
-    result == 1; // 1 == different
-  }
-  else
-  {
-    result == 0; // Same
-  }
+    void *symb_from_libc, *symb_from_curr;
 
-  // Missing info
+    symb_from_libc = dlsym(libc_handler, symb_name);
+    symb_from_curr = dlsym(RTLD_NEXT, symb_name);
+
+    if (symb_from_libc != symb_from_curr)
+    {
+      Dl_info real_nfo, curr_nfo;
+
+      dladdr(symb_from_libc, &real_nfo);
+      dladdr(symb_from_curr, &curr_nfo);
+
+      printf("[-] Hijacked \033[1;31m%s\033[0m: %s\n", symb_name, curr_nfo.dli_fname);
+    }
+  }
 
   dlclose(libc_handler);
-  // return result;
 }
 
 """.}
 
 
-proc rk_check_each_symbol(symb_name: cstring): cint {.importc: "rk_check_each_symbol".}
+proc rk_check_each_symbol() {.importc: "rk_check_each_symbol".}
 
 
-# proc rk_check_each_symbol(symb_name: string) =
-#   var libc_handler = loadLib("libc.so.6") # NOTICE open flag is RTLD_LAZY
-#   let
-#     sym_from_libc = libc_handler.symAddr(symb_name)
-#   # get sym and compare
-#   libc_handler.unloadLib()
-
-
-
-proc rk_find_hook() =
-  for check_func in COMMON_FUNCTIONS:
-    let check_result = rk_check_each_symbol(cstring(check_func))
-    if check_result == cint(1):
-      echo "Detect hooked: ", check_func
-
-
-proc main() =
-  # if fileExists(PATH_LD_PRELOAD):
-  #   # DO something with this
-  #   discard
-  # else:
-    # Find hooked functions
-  rk_find_hook()
-
-
-main()
+rk_check_each_symbol()
