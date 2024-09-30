@@ -32,7 +32,7 @@ private rule Proc_StdRedirection {
 }
 
 
-rule Proc_RevShellNetcat {
+rule RuntimeShell_Netcat {
   strings:
     $ = "Usage: ncat [options] [hostname] [port]" fullword ascii
     $ = "Proxy-Authenticate: Basic realm=\"Ncat\"" fullword ascii
@@ -54,12 +54,12 @@ rule Proc_RevShellNetcat {
 }
 
 
-rule Proc_ReverseShell {
+rule RuntimeShell_Cmd {
   // Detect Reverse shell that redirects file descriptor to socket
   // TODO need more name
   // FIXME: /proc/*/exe might not be absolute path
   condition:
-    for f_name in ("/bash", "/sh", "/zsh", "/dash", "/ash", "/ksh", "/busybox"):
+    for any f_name in ("/bash", "/sh", "/zsh", "/dash", "/ash", "/ksh", "/busybox"):
     (
       Proc_StdRedirection and proc_exe endswith f_name
     )
@@ -75,7 +75,7 @@ rule ELF_AddRootToCrontab {
 }
 
 
-rule ELF_ShellcodeExec {
+rule Shellcode_ObjName {
   /*
     Default shellcode loaders on internet will export keyword code or shellcode into symtab (global var only)
     There is a false positive from yara name matching. Condition elf.symtab[i].name == "buf" matched
@@ -95,7 +95,7 @@ rule ELF_ShellcodeExec {
 }
 
 
-rule ELF_LoadSegmentRWE {
+rule Shellcode_SegmentRWX {
   /*
     Detect binaries that has LOAD segment that has RWE permission
     reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L3"
@@ -111,7 +111,7 @@ rule ELF_LoadSegmentRWE {
 }
 
 
-rule PUA_AddUser {
+rule ShellCmd_AddUser {
   // meta:
   //   description = "Bash commands to add new user to passwd"
   strings:
@@ -121,7 +121,7 @@ rule PUA_AddUser {
 }
 
 
-rule PUA_WgetAndChmod {
+rule ShellCmd_DropByWget {
   // meta:
   //   description = "Bash commands to download and execute binaries using wget"
   //   reference = "https://www.trendmicro.com/en_us/research/19/d/bashlite-iot-malware-updated-with-mining-and-backdoor-commands-targets-wemo-devices.html"
@@ -132,7 +132,7 @@ rule PUA_WgetAndChmod {
 }
 
 
-rule PUA_CurlAndChmod {
+rule ShellCmd_DropByCurl {
   // meta:
   //   description = "Bash commands to download and execute binaries using CURL"
   //   refrence = "https://otx.alienvault.com/indicator/file/2557ee8217d6bc7a69956e563e0ed926e11eb9f78e6c0816f6c4bf435cab2c81"
@@ -143,7 +143,7 @@ rule PUA_CurlAndChmod {
 }
 
 
-rule PUA_WgetCurlAndChmod {
+rule ShellCmd_WgetCurlAndChmod {
   // meta:
   //   description = "Bash commands to download and execute binaries using CURL || Wget"
   //   hash = "16bbeec4e23c0dc04c2507ec0d257bf97cfdd025cd86f8faf912cea824b2a5ba"
