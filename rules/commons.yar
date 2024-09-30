@@ -17,30 +17,18 @@ rule Proc_ThreadMasquerading {
 }
 
 
-rule Proc_RevShellGeneric {
-  // TODO to detect reverse shells precisely, process name should be system's shell
-  // strings:
-  //   $s1 = "bash"
-  //   $s2 = "zsh"
-  //   $s3 = "sh"
-  //   $s4 = "ksh" // name more shell here
-  condition:
-    // any of ($s*) at 0// and fd_stdin startswith "socket:[" and fd_stdout startswith "socket:["
-    fd_stdin startswith "socket:[" and fd_stdout startswith "socket:["
-}
-
-
-rule Proc_RevShellGen2_TEST {
+private rule Proc_StdRedirection {
   /*
-    Detect reverse shell that uses DUP2 at runtime
-    Code:
-    	dup2(sockt, 0);
-      dup2(sockt, 1);
-      dup2(sockt, 2);
-    Source: https://github.com/izenynn/c-reverse-shell/blob/main/linux.c
+    Detect file descriptors of a running process that's redirected to a socket connection
+    C code could be like: dup2(sockt, 0); dup2(sockt, 1); dup2(sockt, 2);
   */
   condition:
-    fd_stdin == "/dev/pts/2" and fd_stdout == "/dev/pts/2" and fd_stderr == "/dev/pts/2"
+    (
+      fd_stdin startswith "socket:[" and fd_stdout startswith "socket:["
+    ) or
+    (
+      fd_stdin == "/dev/pts/2" and fd_stdout == "/dev/pts/2" and fd_stderr == "/dev/pts/2"
+    )
 }
 
 
@@ -51,10 +39,24 @@ rule Proc_RevShellNetcat {
     $ = "ncat_ssl.c: Invoking ssl_handshake" fullword ascii
     $ = "%s/ncat.XXXXXX" fullword ascii
   condition:
-    proc_cmdline contains "-e" and
+    (
+      proc_cmdline contains "-e" or Proc_StdRedirection
+    ) and
     (
       (proc_name endswith "ncat" or proc_name endswith "ncat") or // Use process name to detect netcat precisely. Usually inside the system
       2 of them // What if binary's name was changed? Detect using common strings in nc or ncat
+    )
+}
+
+
+rule Proc_ReverseShell {
+  // Detect Reverse shell that redirects file descriptor to socket
+  // TODO need more name
+  // FIXME: /proc/*/exe might not be absolute path
+  condition:
+    for f_name in ("/bash", "/sh", "/zsh", "/dash", "/ash", "/ksh", "/busybox"):
+    (
+      Proc_StdRedirection and proc_exe endswith f_name
     )
 }
 
