@@ -15,6 +15,7 @@ proc cliopts_create_default*(options: var ScanOptions) =
   options.is_clam_debug = false
   options.use_clam_db = false
   options.scan_all_procs = false
+  options.scan_function_hook = false
   options.db_path_clamav = "/var/lib/clamav/"
   let
     db_path_normal = [
@@ -111,15 +112,20 @@ proc cliopts_set_list_procs(list_procs: var seq[uint], i: var int, total_param: 
 
 
 proc cliopts_get_options*(options: var ScanOptions): bool =
+  let
+    total_params_count = paramCount()
+
+  if total_params_count == 0:
+    show_help_banner()
+    return false
+
   cliopts_create_default(options)
+  #[
+    Function param count uses argv from C and calculate: result = argv.len - 2
+    We use a variable so we can decrease calculation times
+  ]#
   var
     i = 0
-  let
-    #[
-      Function param count uses argv from C and calculate: result = argv.len - 2
-      We use a variable so we can decrease calculation times
-    ]#
-    total_params_count = paramCount()
 
   while i <= total_params_count:
     let
