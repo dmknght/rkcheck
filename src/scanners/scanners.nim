@@ -1,5 +1,5 @@
 import os
-import .. / engine / [engine_cores, scan_file, scan_proc]
+import .. / engine / [engine_cores, scan_file, scan_proc, scan_userland_hook]
 import ../ engine / bindings / [libyara, libclamav]
 import ../ cli / print_utils
 
