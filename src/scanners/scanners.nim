@@ -1,7 +1,7 @@
 import os
-import ../engine/[engine_cores, scan_file, scan_proc]
-import ../engine/bindings/[libyara, libclamav]
-import ../cli/print_utils
+import .. / engine / [engine_cores, scan_file, scan_proc]
+import ../ engine / bindings / [libyara, libclamav]
+import ../ cli / print_utils
 
 
 type
@@ -131,6 +131,9 @@ proc scanners_start_scan*(options: var ScanOptions) =
 
   setControlCHook(handle_keyboard_interrupt)
   scanners_init_engine(scan_engine, options)
+
+  if options.scan_function_hook:
+    rk_hook_scan_userland()
 
   if len(options.list_files) != 0 or len(options.list_dirs) != 0:
     scanners_cl_scan_files(scan_engine, options.list_files, options.list_dirs, f_count, f_infect)

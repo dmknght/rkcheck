@@ -13,6 +13,7 @@ type
     list_files*: seq[string]
     list_procs*: seq[uint]
     scan_all_procs*: bool
+    scan_function_hook*: bool
     is_clam_debug*: bool
     use_clam_db*: bool
     scan_preload*: bool

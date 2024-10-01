@@ -1,7 +1,7 @@
 import os
 import strutils
 import sequtils
-import ../engine/engine_cores
+import .. / engine / engine_cores
 import helps
 
 
@@ -146,6 +146,8 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
       of "--scan-procs":
         if cliopts_set_list_procs(options.list_procs, i, total_params_count) == 0:
           options.scan_all_procs = true
+      of "--scan-fhook":
+        options.scan_function_hook = true
       else:
         raise newException(ValueError, "Invalid option " & currentParam)
 
