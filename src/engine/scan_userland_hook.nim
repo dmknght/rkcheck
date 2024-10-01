@@ -55,4 +55,4 @@ proc rk_hook_scan_userland*() =
     path_hooked_lib = $rk_hook_find_hijack_func()
 
   if not isEmptyOrWhitespace(path_hooked_lib):
-    print_file_infected("Heur:Rootkit.LDPreload", path_hooked_lib)
+    print_file_infected("Heur:Rootkit.FuncHook", path_hooked_lib)
