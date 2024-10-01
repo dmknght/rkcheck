@@ -14,3 +14,4 @@ Wiki is at https://github.com/dmknght/rkcheck/wiki
 - Reused some Yara rules from Tenable under BSD-3-Clause
 - Some rules are having no custom licenses from Lacework Labs, Trend Micro
 - Special thank to Nim lang community, ClamAV community, malware researcher Itay Cohen and everbody helped me this project
+- Reuse code from https://github.com/mempodippy/detect_preload/ to detect user-land rootkit's hijacked functions
