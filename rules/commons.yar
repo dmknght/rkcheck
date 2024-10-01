@@ -286,30 +286,6 @@ rule ShellCmd_AddUser {
 //     )
 // }
 
-/* Some common imports used by ld preload by comparing some samples (the -- is the extra functions in the function's family)
-access
-dlsym
-fclose
-fgets
-fopen
--- fopen64
-fputs
-lstat
-__lxstat
-__lxstat64
-open
-opendir
--- opendir64
-readdir
--- readdir64
-strcmp
-strstr
-tmpfile
-unlink
-unlinkat
-*/
-
-
 // rule OSCommand_Syslog_Removal {
 //   meta:
 //     author = "Nong Hoang Tu"
