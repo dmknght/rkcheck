@@ -3,7 +3,7 @@
   Original idea: https://github.com/mempodippy/detect_preload/ (No LICENSE)
 ]#
 
-import cli / print_utils
+import .. / cli / print_utils
 import strutils
 
 {.emit: """
