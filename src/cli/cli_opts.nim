@@ -116,8 +116,7 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
     total_params_count = paramCount()
 
   if total_params_count == 0:
-    show_help_banner()
-    return false
+    return show_help_banner()
 
   cliopts_create_default(options)
   #[
