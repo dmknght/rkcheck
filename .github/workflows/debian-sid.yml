@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:sid
     steps:
-    - name: Check Update
-      run: apt update
     - name: Install packages
-      run: apt install -y git gcc make nim libclamav-dev libyara-dev liblzma-dev libzstd-dev
+      run: |
+        apt update
+        apt install -y git gcc make nim libclamav-dev libyara-dev liblzma-dev libzstd-dev
     - name: Get RkCheck
       run: git clone https://github.com/dmknght/rkcheck
     - name: build
