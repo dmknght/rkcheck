@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Check Update
-      run: dnf check-update
+      run: dnf check-update || true
     - name: Install packages
       run: dnf install -y git gcc make nim libclamav-static-devel libyara-devel
     - name: Get RkCheck
