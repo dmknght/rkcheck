@@ -24,5 +24,5 @@ jobs:
       with:
         name: rkcheck-release
         path: |
-          rkscanmal
-          databases/signatures.ydb
+          rkcheck/build/release/rkscanmal
+          rkcheck/build/release/databases/signatures.ydb
