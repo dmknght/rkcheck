@@ -16,7 +16,7 @@ jobs:
     - name: Check Update
       run: apt update
     - name: Install packages
-      run: apt install -y git gcc make nim libclamav-dev libyara-dev
+      run: apt install -y git gcc-13 make nim libclamav-dev libyara-dev
     - name: Get RkCheck
       run: git clone https://github.com/dmknght/rkcheck
     - name: build
