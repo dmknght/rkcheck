@@ -1,0 +1,22 @@
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+    container: debian:sid
+    steps:
+    - name: Check Update
+      run: apt update
+    - name: Install packages
+      run: apt install -y git gcc make nim libclamav-dev libyara-dev liblzma-dev libzstd-dev
+    - name: Get RkCheck
+      run: git clone https://github.com/dmknght/rkcheck
+    - name: build
+      run: make build
+      working-directory: rkcheck
+    - name: Upload compiled files
+      uses: actions/upload-artifact@v4
+      path: build/release/*
