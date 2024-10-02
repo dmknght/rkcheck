@@ -1,6 +1,7 @@
-YR_DEPS = --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-Wl,-Bdynamic --passL:-lm
+YR_DEPS = --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-lm
+YR_DEPS_STATIC = --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-Wl,-Bdynamic --passL:-lm
 CLAM_DEPS = --passL:-lclamav
-NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passL:-s --passC:-fpermissive
+NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passC:-fpermissive --passL:-s --passL:-Wl,-rpath=./libs
 
 .PHONY: build
 
@@ -11,6 +12,8 @@ mktmp:
 	mkdir -p build/release/databases
 	# Create tmp folder for cache
 	mkdir -p build/nimcache
+	# Create bundles for libs
+	# mkdir -p build/libs
 
 signatures: mktmp
 	# Compile Yara signatures
