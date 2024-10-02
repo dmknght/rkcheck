@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Debian SID
 
 on:
   push:
@@ -10,13 +10,13 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: mageia:9
+    container: debian:sid
 
     steps:
     - name: Check Update
-      run: dnf check-update || true
+      run: sudo apt update
     - name: Install packages
-      run: dnf install -y git gcc make nim libclamav-static-devel libyara-devel
+      run: sudo apt install -y git gcc make nim libclamav-dev libyara-dev
     - name: Get RkCheck
       run: |
         git clone https://github.com/dmknght/rkcheck
