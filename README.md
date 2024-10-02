@@ -5,8 +5,9 @@ This tool is a combination of Yara and ClamAV to do malware scanning on Linux sy
 Wiki is at https://github.com/dmknght/rkcheck/wiki
 
 # Roadmaps
-- Update the tool with latest ClamAV and Yara engine. Support static build
-- Research eBPF so this project can have proper way to detect kernel-land and user-land rootkits
+- Be able to scan on any Linux system (architecture compatible) without installing dependencies
+- Improve detection of user-land rootkit
+- Research kernel-land rootkit detection
 
 # License, copyright
 - Reused Yara engine under BSD-3-Clause.
