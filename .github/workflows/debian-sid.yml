@@ -14,9 +14,9 @@ jobs:
 
     steps:
     - name: Check Update
-      run: sudo apt update
+      run: apt update
     - name: Install packages
-      run: sudo apt install -y git gcc make nim libclamav-dev libyara-dev
+      run: apt install -y git gcc make nim libclamav-dev libyara-dev
     - name: Get RkCheck
       run: |
         git clone https://github.com/dmknght/rkcheck
