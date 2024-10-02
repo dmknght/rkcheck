@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install packages
-      run: yum install -y git gcc make nim libclamav-static-devel libyara-devel
+      run: rpm install -y git gcc make nim libclamav-static-devel libyara-devel
     - name: Get RkCheck
       run: |
         git clone https://github.com/dmknght/rkcheck
