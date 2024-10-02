@@ -1,8 +1,6 @@
-YR_DEPS = --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-lm --passL:-llzma --passL:-lpthread --passL:-lzstd
+YR_DEPS = --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-Wl,-Bdynamic --passL:-lm
 CLAM_DEPS = --passL:-lclamav
 NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passL:-s
-# Add this when want to build static file. On Debian, ClamAV has no static lib so it's impossible to use
-BUILD_FLAGS = --passL:-static
 
 .PHONY: build
 
