@@ -19,5 +19,9 @@ jobs:
         sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
     - name: Install packages
       run: yum install -y git gcc make nim libclamav-static-devel libyara-devel
+    - name: Get RkCheck
+      run: |
+        git clone https://github.com/dmknght/rkcheck
+        cd rkcheck
     - name: build
       run: make build
