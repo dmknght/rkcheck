@@ -7,7 +7,7 @@ type
     warnings*: int
 
 
-proc yr_rules_report_errors*(error_level: cint; file_name: cstring; line_number: cint; rule: ptr YR_RULE; message: cstring; user_data: pointer) {.cdecl.} =
+proc yr_rules_report_errors*(error_level: cint; file_name: var cstring; line_number: cint; rule: var ptr YR_RULE; message: var cstring; user_data: pointer) {.cdecl.} =
   if rule != nil:
     echo fmt"{message} at {file_name}:{line_number}"
 
