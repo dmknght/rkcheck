@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: apt install -y make gcc nim libclamav-dev libyara-dev
+      run: sudo apt install -y make gcc nim libclamav-dev libyara-dev
     - name: build
       run: make build
