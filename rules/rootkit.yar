@@ -711,12 +711,23 @@ rule VnQE6mk_Generic {
 rule LDPreload_bc62 {
   // meta:
   //   url = "https://www.hybrid-analysis.com/sample/bc62adb9d444542a2206c4fc88f54f032228c480cd35d0be624923e168987a1c/5f5ac948b7b024659c4d9ca8"
+  /*
+    dynsym:
+    - fake_map
+    - is_file_hidden
+  */
   strings:
     $ = "LD_PRELOH" fullword ascii
     $ = "lib0pus.so" fullword ascii
-    $ = "is_file_hidden" fullword ascii
   condition:
-    elf_dyn and 2 of them
+    elf_dyn and (
+      for 2 f_dyn in elf.dynsym: (
+        for any f_name in ("is_file_hidden", "fake_map"):
+        (
+          f_dyn.name == f_name and f_dyn.type == elf.STT_FUNC
+        )
+      ) or 2 of them
+    )
 }
 
 
