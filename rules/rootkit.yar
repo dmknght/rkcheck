@@ -708,7 +708,7 @@ rule VnQE6mk_Generic {
 }
 
 
-rule LDPreload_bc62 {
+rule Userland_bc62 {
   // meta:
   //   url = "https://www.hybrid-analysis.com/sample/bc62adb9d444542a2206c4fc88f54f032228c480cd35d0be624923e168987a1c/5f5ac948b7b024659c4d9ca8"
   /*
