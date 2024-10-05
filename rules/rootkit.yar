@@ -720,19 +720,26 @@ rule LDPreload_bc62 {
 }
 
 
-rule LDPreload_ImpFuncs {
-  // meta:
-  //   description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
-  condition:
-    // The limitation of dynsym_entries number is to avoid false positive detecting libc
-    elf_dyn and elf.dynsym_entries < 300 and (
-      for 7 f_dynsym in elf.dynsym:
-      (
-        for any f_name in ("access", "dlsym", "fopen", "lstat", "strstr", "tmpfile", "unlink"):
-        (
-          f_dynsym.type == elf.STT_FUNC and
-          f_dynsym.name == f_name
-        )
-      )
-    )
-}
+// rule LDPreload_ImpFuncs {
+/*
+  False positives
+  Rkit:LDPreload.ImpFuncs /usr/bin/i686-w64-mingw32-ld
+  Rkit:LDPreload.ImpFuncs /usr/bin/i686-w64-mingw32-objdump
+  Rkit:LDPreload.ImpFuncs /usr/bin/x86_64-w64-mingw32-ld
+  Rkit:LDPreload.ImpFuncs /usr/bin/x86_64-w64-mingw32-objdump
+*/
+//   // meta:
+//   //   description = "Find DYN ELF bins that imports common function LD_PRELOAD rootkits hook"
+//   condition:
+//     // The limitation of dynsym_entries number is to avoid false positive detecting libc
+//     elf_dyn and elf.dynsym_entries < 300 and (
+//       for 7 f_dynsym in elf.dynsym:
+//       (
+//         for any f_name in ("access", "dlsym", "fopen", "lstat", "strstr", "tmpfile", "unlink"):
+//         (
+//           f_dynsym.type == elf.STT_FUNC and
+//           f_dynsym.name == f_name
+//         )
+//       )
+//     )
+// }
