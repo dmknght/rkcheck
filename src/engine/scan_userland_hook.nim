@@ -22,8 +22,8 @@ char *rk_hook_find_hijack_func() {
 
   char *symb_name;
   char *COMMON_FUNCTIONS[] = {"rename", "renameat", "stat", "stat64", "fstat", "fstat64", "lstat", "lstat64",
-   "__lxstat", "__lxstat64", "__fxstat", "__fxstat64", "__xstat", "__xstat64", "access", "unlink", "strstr" ,
-   "fgets", "fopen", "fopen64", "open", "opendir", "opendir64", "readdir", "readdir64", "unlinkat", NULL};
+    "__lxstat", "__lxstat64", "__fxstat", "__fxstat64", "__xstat", "__xstat64", "access", "unlink", "strstr" ,
+    "fgets", "fopen", "fopen64", "open", "opendir", "opendir64", "readdir", "readdir64", "unlinkat", NULL};
   int i = 0;
 
   while (symb_name = COMMON_FUNCTIONS[i++])
