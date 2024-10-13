@@ -16,13 +16,14 @@ proc find_hidden_files(find_dir: string) =
   var
     f_dir = opendir(cstring(find_dir))
     save_node_name: string
+    wrong_reclen = false
 
   while true:
     var
       r_dir: ptr Dirent = readdir(f_dir)
 
     if r_dir == nil:
-      if not isEmptyOrWhiteSpace(save_node_name):
+      if not isEmptyOrWhiteSpace(save_node_name) and not wrong_reclen:
         echo "Malware (last): ", save_node_name
       break
 
@@ -37,7 +38,11 @@ proc find_hidden_files(find_dir: string) =
     else:
       # Parse name of next node using location
       save_node_name = $cast[cstring](addr(r_dir.d_name[r_dir.d_reclen]))
+      # From output of d_name, last node in folder that has so many nodes will has d_reclen > actual value
+      # This is a fast method to check this logic happen.
+      # Need to check carefully with multiple systems because input value is unpredictable
+      wrong_reclen = ($cast[cstring](addr(r_dir.d_name[r_dir.d_reclen - 1]))).endswith(save_node_name)
 
   discard f_dir.closedir()
 
-find_hidden_files("/usr/lib/x86_64-linux-gnu/")
+find_hidden_files("/usr/bin/")
