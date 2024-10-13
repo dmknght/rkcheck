@@ -119,10 +119,7 @@ proc yr_rules_is_compiled(path: string, is_compiled: var bool): bool =
     let
       f = newFileStream(path)
 
-    if f.readStr(4) == "YARA":
-      is_compiled = true
-    else:
-      is_compiled = false
+    is_compiled = f.readStr(4) == "YARA"
     f.close()
     return true
   except:
