@@ -41,7 +41,8 @@ proc find_hidden_files(find_dir: string) =
       # From output of d_name, last node in folder that has so many nodes will has d_reclen > actual value
       # This is a fast method to check this logic happen.
       # Need to check carefully with multiple systems because input value is unpredictable
-      wrong_reclen = ($cast[cstring](addr(r_dir.d_name[r_dir.d_reclen - 1]))).endswith(save_node_name)
+      let tmp_string_from_chunk = $cast[cstring](addr(r_dir.d_name[r_dir.d_reclen - 1]))
+      wrong_reclen = tmp_string_from_chunk.endswith(save_node_name) and tmp_string_from_chunk != save_node_name
 
   discard f_dir.closedir()
 
