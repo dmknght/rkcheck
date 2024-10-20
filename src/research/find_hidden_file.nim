@@ -2,6 +2,26 @@ import posix
 import strutils
 
 
+# {.emit: """
+
+# #include <dirent.h>
+
+
+# unsigned short calculate_reclen(char *filename) {
+#     // Calculate normal size
+#     size_t reclen = offsetof(struct dirent, d_name) + strlen(filename) + 1;
+
+#     // Calculate the real size based on system's arch
+#     reclen = (reclen + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+
+#     return (unsigned short)reclen;
+# }
+# """.}
+
+
+# proc calculate_reclen(file_name: cstring): cushort {.importc: "calculate_reclen".}
+
+
 proc find_hidden_files(find_dir: string) =
   #[
     Find hidden file / folder by node's d_name comparsion
@@ -16,18 +36,22 @@ proc find_hidden_files(find_dir: string) =
   var
     f_dir = opendir(cstring(find_dir))
     save_node_name: string
-    wrong_reclen = false
+    # wrong_reclen = false
+    # actual_reclen: cushort
 
   while true:
     var
       r_dir: ptr Dirent = readdir(f_dir)
 
     if r_dir == nil:
-      if not isEmptyOrWhiteSpace(save_node_name) and not wrong_reclen:
-        echo "Malware (last): ", save_node_name
+      # if not isEmptyOrWhiteSpace(save_node_name): # and not wrong_reclen:
+      #   echo "Malware (last): ", save_node_name
       break
 
     # Compare name of current node with save name from previous loop (which suppose to be name of this node if no function hooking)
+    # let str_file_name = $cast[cstring](addr(r_dir.d_name))
+
+    # if save_node_name != "" and save_node_name != str_file_name:
     if save_node_name != "" and save_node_name != $cast[cstring](addr(r_dir.d_name)):
       echo "Malware: ", save_node_name
 
@@ -36,13 +60,11 @@ proc find_hidden_files(find_dir: string) =
     if r_dir.d_reclen >= 256:
       save_node_name = ""
     else:
-      # Parse name of next node using location
       save_node_name = $cast[cstring](addr(r_dir.d_name[r_dir.d_reclen]))
-      # From output of d_name, last node in folder that has so many nodes will has d_reclen > actual value
-      # This is a fast method to check this logic happen.
-      # Need to check carefully with multiple systems because input value is unpredictable
-      wrong_reclen = ($cast[cstring](addr(r_dir.d_name[r_dir.d_reclen - 1]))).endswith(save_node_name)
+      # actual_reclen = calculate_reclen(cstring(str_file_name))
+      # wrong_reclen = actual_reclen != r_dir.d_reclen
+      # save_node_name = if wrong_reclen: $cast[cstring](addr(r_dir.d_name[actual_reclen])) else: $cast[cstring](addr(r_dir.d_name[r_dir.d_reclen]))
 
   discard f_dir.closedir()
 
-find_hidden_files("/usr/bin/")
+find_hidden_files("/dev/shm")
