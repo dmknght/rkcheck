@@ -129,6 +129,8 @@ proc fscanner_walk_dir_rec*(scan_dir: string) =
     1. If node is a file or symlink of a file, call file scan
     2. If node is a folder or symlink of a folder, call walk_dir rec
     3. Do heuristic scan for hidden nodes (via d_name)
+
+    Linux's node types: https://www.gnu.org/software/libc/manual/html_node/Directory-Entries.html
   ]#
   discard
 
@@ -146,15 +148,34 @@ proc fscanner_walk_dir_rec*(scan_dir: string) =
       break
 
     current_node_name = $cast[cstring](addr(ptr_dir.d_name))
+    # Full path = scan_dir + "/" + current_node_name (if scan_dir doesn't end with "/")
 
     if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
       discard # TODO show this is a hidden node
 
     if ptr_dir.d_reclen >= 256:
-      next_node_name = "" # Name of current node is too long. We can't parse next_node_name, or we might have a crash
+      # Name of current node is too long. We can't parse next_node_name, or we might have a crash
+      next_node_name = ""
     else:
       # d_reclen = len(current_node_name) + sizeof(chunk_bytes). casting a string at next position can get the name of next node
       next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
+
+    case ptr_dir.d_type
+      of DT_DIR:
+        # call fscanner_walk_dir_rec here
+        discard
+      of DT_REG:
+        # Regular file, call scan file
+        discard
+      of DT_LNK:
+        # Either link of file or link of dir. Must handle this
+        discard
+      of DT_UNKNOWN:
+        # The type is unknown. Only some filesystems have full support to return the type of the file, others might always return this value. Debug first
+        discard
+      else:
+        # DT_FIFO, DT_SOCK, DT_CHR (A character device), DT_BLK (A block device). Research first
+        discard
 
     # TODO check node's type to do either walk dir or scan file
 
