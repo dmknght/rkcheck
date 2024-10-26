@@ -3,6 +3,7 @@ import os
 import engine_cores
 import bindings/[libyara, libclamav]
 import .. /cli/[progress_bar, print_utils]
+import posix
 
 
 #[
@@ -118,3 +119,43 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
     return CL_VIRUS
 
   return CL_CLEAN
+
+
+proc fscanner_walk_dir_rec*(scan_dir: string) =
+  #[
+    Replacement of os.walkDirRec using posix's readdir.
+    Input: dir (a list of dir should be handled by a function above)
+    Job: Do read every nodes of current dir
+    1. If node is a file or symlink of a file, call file scan
+    2. If node is a folder or symlink of a folder, call walk_dir rec
+    3. Do heuristic scan for hidden nodes (via d_name)
+  ]#
+  discard
+
+  var
+    p_dir = opendir(cstring(scan_dir))
+    ptr_dir: ptr Dirent
+    next_node_name: string
+    current_node_name: string
+
+  while true:
+    ptr_dir = readdir(p_dir)
+
+    if ptr_dir == nil:
+      # FIXME hidden file in last node will not be detected because of this break
+      break
+
+    current_node_name = $cast[cstring](addr(ptr_dir.d_name))
+
+    if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
+      discard # TODO show this is a hidden node
+
+    if ptr_dir.d_reclen >= 256:
+      next_node_name = "" # Name of current node is too long. We can't parse next_node_name, or we might have a crash
+    else:
+      # d_reclen = len(current_node_name) + sizeof(chunk_bytes). casting a string at next position can get the name of next node
+      next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
+
+    # TODO check node's type to do either walk dir or scan file
+
+  discard p_dir.closedir()
