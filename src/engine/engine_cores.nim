@@ -63,7 +63,7 @@ proc init_clamav*(clam_engine: var ClEngine, loaded_sig_count: var uint, path_cl
   if result != CL_SUCCESS:
     return result
 
-  echo "LibAV engine: ", cl_retver()
+  echo "LibClam engine: ", cl_retver()
   clam_engine.engine = cl_engine_new()
 
   # ~0 (not 0) is to enable all flags.In this case, we disable flags by default
