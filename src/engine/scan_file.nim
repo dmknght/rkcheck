@@ -142,7 +142,7 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
 
   Linux's node types: https://www.gnu.org/software/libc/manual/html_node/Directory-Entries.html
 ]#
-proc fscanner_walk_dir_rec*(scan_dir: string) =
+proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname: var cstring, scanned: var uint) =
   var
     p_dir = opendir(cstring(scan_dir))
     ptr_dir: ptr Dirent
@@ -158,7 +158,10 @@ proc fscanner_walk_dir_rec*(scan_dir: string) =
       break
 
     current_node_name = $cast[cstring](addr(ptr_dir.d_name))
-    full_node_path = if full_node_path.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
+    if current_node_name == "." or current_node_name == "..":
+      continue
+
+    full_node_path = if scan_dir.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
 
     if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
       discard # TODO show this is a hidden node
@@ -173,11 +176,10 @@ proc fscanner_walk_dir_rec*(scan_dir: string) =
     case ptr_dir.d_type
       of DT_DIR:
         # Recursive walk. Current node is a folder so it should ends with "/"
-        fscanner_walk_dir_rec(full_node_path & "/")
+        fscanner_walk_dir_rec(scan_ctx, full_node_path & "/", virname, scanned)
       of DT_REG:
         # Regular file, call scan file
-        # fscanner_scan_file()
-        discard
+        fscanner_scan_file(scan_ctx, full_node_path, virname, scanned)
       of DT_LNK:
         # Either link of file or link of dir. Must handle this
         # if getSymlinkFileKind(full_node_path) == pcLinkToDir:
@@ -185,9 +187,9 @@ proc fscanner_walk_dir_rec*(scan_dir: string) =
         discard
       of DT_UNKNOWN:
         # The type is unknown. Only some filesystems have full support to return the type of the file, others might always return this value. Debug first
-        discard
+        fscanner_scan_file(scan_ctx, full_node_path, virname, scanned)
       else:
-        # DT_UNKNOWN, DT_FIFO, DT_SOCK, DT_CHR (A character device), DT_BLK (A block device). Research first
+        # DT_FIFO, DT_SOCK, DT_CHR (A character device), DT_BLK (A block device). Research first
         discard
 
   discard p_dir.closedir()
