@@ -1,7 +1,7 @@
 YR_DEPS = --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-lm
 YR_DEPS_STATIC = --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-Wl,-Bdynamic --passL:-lm
 CLAM_DEPS = --passL:-lclamav
-NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passC:-fpermissive --passL:-s --passL:-Wl,-rpath=./libs
+NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passC:-fpermissive --passL:-s # --passL:-Wl,-rpath=./libs
 
 .PHONY: build
 
