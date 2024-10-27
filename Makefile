@@ -2,7 +2,7 @@ YR_DEPS = --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL
 YR_DEPS_STATIC = --passL:-Wl,-Bstatic --passL:-lyara --passL:-pthread --passL:-lcrypto --passL:-lssl --passL:-lmagic --passL:-lbz2 --passL:-lz --passL:-ljansson --passL:-llzma --passL:-lpthread --passL:-lzstd --passL:-Wl,-Bdynamic --passL:-lm
 CLAM_DEPS = --passL:-lclamav
 NIM_CC = nim c --nimcache:build/nimcache/ -d:release --opt:speed --passC:-fpermissive --passL:-s # --passL:-Wl,-rpath=./libs
-DEBUG_FLAGS = --passL:-fsanitize=address --passL:-static-libasan --passL:-fno-omit-frame-pointer
+DEBUG_FLAGS = --passL:-fsanitize=address --passL:-static-libasan --passL:-O1 --passL:-fno-omit-frame-pointer
 
 .PHONY: build
 
@@ -22,7 +22,7 @@ signatures: mktmp
 
 build: signatures
 	# Compile main file
-	$(NIM_CC) $(DEBUG_FLAGS) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
+	$(NIM_CC) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
 
 install:
 	mkdir -p /usr/share/rkcheck/
