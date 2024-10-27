@@ -7,14 +7,12 @@ import .. / cli / print_utils
 import strutils
 
 {.emit: """
-
 #include <dlfcn.h>
-#include <stdio.h>
 
 
 char *rk_hook_find_hijack_func() {
   void *libc_handler;
-  
+
   if (!(libc_handler = dlopen("libc.so.6", RTLD_LAZY)))
   {
     return;
