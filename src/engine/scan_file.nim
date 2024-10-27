@@ -135,19 +135,19 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
     1. If file name is too long, we can't parse the name of next node
     2. If 2 hidden nodes are next to each other, 1 node is not going to be detected
 ]#
-proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, current_node_name, full_node_path: string, next_node_name: var string) =
-  if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
-    scan_ctx.file_infected += 1
-    print_file_infected("Heur:Rootkit.HiddenOnDisk", full_node_path)
+# proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, current_node_name, full_node_path: string, next_node_name: var string) =
+#   if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
+#     scan_ctx.file_infected += 1
+#     print_file_infected("Heur:Rootkit.HiddenOnDisk", full_node_path)
 
-  # Get name of the next node
-  if ptr_dir.d_reclen >= 256:
-    # Name of current node is too long. We can't parse next_node_name, or we might have a crash
-    next_node_name = ""
-  else:
-    # d_reclen = len(current_node_name) + sizeof(chunk_bytes)
-    # Casting a string at next position can get the name of next node
-    next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
+#   # Get name of the next node
+#   if ptr_dir.d_reclen >= 256:
+#     # Name of current node is too long. We can't parse next_node_name, or we might have a crash
+#     next_node_name = ""
+#   else:
+#     # d_reclen = len(current_node_name) + sizeof(chunk_bytes)
+#     # Casting a string at next position can get the name of next node
+#     next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
 
 
 #[
@@ -164,7 +164,7 @@ proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname
   var
     p_dir = opendir(cstring(scan_dir))
     ptr_dir: ptr Dirent
-    next_node_name: string
+    # next_node_name: string
     current_node_name: string
     full_node_path: string
 
@@ -183,7 +183,7 @@ proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname
 
     full_node_path = if scan_dir.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
 
-    fscanner_check_hidden_node(scan_ctx, ptr_dir, current_node_name, full_node_path, next_node_name)
+    # fscanner_check_hidden_node(scan_ctx, ptr_dir, current_node_name, full_node_path, next_node_name)
 
     case ptr_dir.d_type
       of DT_DIR:
