@@ -129,6 +129,25 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
   progress_bar_scan_file(scan_ctx.virt_scan_object)
   discard cl_scanfile_callback(cstring(scan_ctx.scan_object), addr(virname), addr(scanned), scan_ctx.clam.engine, addr(scan_ctx.clam.options), addr(scan_ctx))
 
+#[
+  Check hidden node by d_name's comparison.
+  Limitations:
+    1. If file name is too long, we can't parse the name of next node
+    2. If 2 hidden nodes are next to each other, 1 node is not going to be detected
+]#
+proc fscanner_check_hidden_node(ptr_dir: ptr Dirent, current_node_name: string, next_node_name: var string) =
+  if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
+    discard # TODO show this is a hidden node
+
+  # Get name of the next node
+  if ptr_dir.d_reclen >= 256:
+    # Name of current node is too long. We can't parse next_node_name, or we might have a crash
+    next_node_name = ""
+  else:
+    # d_reclen = len(current_node_name) + sizeof(chunk_bytes)
+    # Casting a string at next position can get the name of next node
+    next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
+
 
 #[
   Replacement of os.walkDirRec using posix's readdir.
@@ -136,8 +155,6 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
   Job: Do read every nodes of current dir
   1. If node is a file or symlink of a file, call file scan
   2. If node is a folder or symlink of a folder, call walk_dir rec
-  3. Do heuristic scan for hidden nodes (via d_name)
-
   TODO improve logic to handle process in procfs too
 
   Linux's node types: https://www.gnu.org/software/libc/manual/html_node/Directory-Entries.html
@@ -158,20 +175,14 @@ proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname
       break
 
     current_node_name = $cast[cstring](addr(ptr_dir.d_name))
+
+    # Linux's dir always have "." as current dir and ".." as parent DIR. Skip checking these 2 nodes
     if current_node_name == "." or current_node_name == "..":
       continue
 
+    fscanner_check_hidden_node(ptr_dir, current_node_name, next_node_name)
+
     full_node_path = if scan_dir.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
-
-    if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
-      discard # TODO show this is a hidden node
-
-    if ptr_dir.d_reclen >= 256:
-      # Name of current node is too long. We can't parse next_node_name, or we might have a crash
-      next_node_name = ""
-    else:
-      # d_reclen = len(current_node_name) + sizeof(chunk_bytes). casting a string at next position can get the name of next node
-      next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
 
     case ptr_dir.d_type
       of DT_DIR:
