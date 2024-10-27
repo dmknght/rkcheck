@@ -184,6 +184,8 @@ proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname
     current_node_name = $cast[cstring](addr(ptr_dir.d_name))
 
     # Linux's dir always have "." as current dir and ".." as parent DIR. Skip checking these 2 nodes
+    # TODO better handing with "..": in folders that has only 1 node (beside . and ..), it might be hidden by malware.
+    # Using ".." might be able to detect them (if d_reclen's logic can be fixed for the last node)
     if current_node_name == "." or current_node_name == "..":
       continue
 
