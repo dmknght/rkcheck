@@ -148,6 +148,7 @@ proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, 
     # d_reclen = len(current_node_name) + sizeof(chunk_bytes)
     # Casting a string at next position can get the name of next node
     if ptr_dir.d_name[ptr_dir.d_reclen] != '\x00':
+      # Fix heap overflow that cause false positive
       next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
     else:
       next_node_name = ""
