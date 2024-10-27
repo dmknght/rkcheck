@@ -43,6 +43,8 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_path_objects: seq[strin
         fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
   except KeyboardInterrupt:
     return
+  except:
+    discard
   finally:
     result_count = file_scanner.file_scanned
     result_infect = file_scanner.file_infected
