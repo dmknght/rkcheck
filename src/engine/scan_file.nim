@@ -109,8 +109,6 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
       else:
         ctx.virt_scan_object = ctx.scan_object & "//" & inner_file_name
 
-  progress_bar_scan_file(ctx.virt_scan_object)
-  ctx.file_scanned += 1
   discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
 
   if ctx.scan_result == CL_VIRUS:
@@ -124,11 +122,12 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
 #[
   Call ClamAV's scan file callback.
 ]#
-proc fscanner_scan_file*() =
-  # progress_bar_scan_file(ctx.virt_scan_object)
-  # ctx.file_scanned += 1
-  # discard cl_scanfile_callback(cstring(file_scanner.scan_object), addr(virname), addr(scanned), file_scanner.clam.engine, addr(file_scanner.clam.options), addr(file_scanner))
-  discard
+proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: var cstring, scanned: var uint) =
+  scan_ctx.file_scanned += 1
+  scan_ctx.scan_object = scan_path
+
+  progress_bar_scan_file(scan_ctx.virt_scan_object)
+  discard cl_scanfile_callback(cstring(scan_ctx.scan_object), addr(virname), addr(scanned), scan_ctx.clam.engine, addr(scan_ctx.clam.options), addr(scan_ctx))
 
 
 #[
