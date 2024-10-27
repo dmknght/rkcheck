@@ -22,7 +22,7 @@ signatures: mktmp
 
 build: signatures
 	# Compile main file
-	$(NIM_CC) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
+	$(NIM_CC) $(DEBUG_FLAGS) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
 
 install:
 	mkdir -p /usr/share/rkcheck/
