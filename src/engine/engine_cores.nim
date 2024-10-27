@@ -9,8 +9,7 @@ import ../compiler/compiler_utils
 
 type
   ScanOptions* = object
-    list_dirs*: seq[string]
-    list_files*: seq[string]
+    list_path_objects*: seq[string]
     list_procs*: seq[uint]
     scan_all_procs*: bool
     scan_function_hook*: bool

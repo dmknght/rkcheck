@@ -12,7 +12,7 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
-proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[string], result_count, result_infect: var uint) =
+proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_path_objects: seq[string], result_count, result_infect: var uint) =
   #[
     Job: walkDir and call scan
   ]#
@@ -32,18 +32,17 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_files, list_dirs: seq[s
   file_scanner.clam.options = scan_ctx.clam.options
   cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_on_malware_found_clam)
 
-  # TODO multi threading
   try:
-    if len(list_dirs) != 0:
-      for dir_path in list_dirs:
-        for path in walkDirRec(dir_path):
-          file_scanner.scan_object = path
-          discard cl_scanfile_callback(cstring(file_scanner.scan_object), addr(virname), addr(scanned), file_scanner.clam.engine, addr(file_scanner.clam.options), addr(file_scanner))
-
-    if len(list_files) != 0:
-      for path in list_files:
-        file_scanner.scan_object = path
-        discard cl_scanfile_callback(cstring(file_scanner.scan_object), addr(virname), addr(scanned), file_scanner.clam.engine, addr(file_scanner.clam.options), addr(file_scanner))
+    for each_scan_object in list_path_objects:
+      case getFileInfo(each_scan_object).kind
+      of pcDir:
+        for path in walkDirRec(each_scan_object):
+          fscanner_scan_file(file_scanner, path, virname, scanned)
+      of pcLinkToDir:
+        for path in walkDirRec(each_scan_object):
+          fscanner_scan_file(file_scanner, path, virname, scanned)
+      else:
+        fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
   except KeyboardInterrupt:
     return
   finally:
@@ -135,10 +134,10 @@ proc scanners_start_scan*(options: var ScanOptions) =
   if options.scan_function_hook:
     rk_hook_scan_userland()
 
-  if len(options.list_files) != 0 or len(options.list_dirs) != 0:
-    scanners_cl_scan_files(scan_engine, options.list_files, options.list_dirs, f_count, f_infect)
+  if len(options.list_path_objects) > 0:
+    scanners_cl_scan_files(scan_engine, options.list_path_objects, f_count, f_infect)
 
-  if len(options.list_procs) != 0 or options.scan_all_procs:
+  if len(options.list_procs) > 0 or options.scan_all_procs:
     scanners_yr_scan_procs(scan_engine, options.list_procs, options.scan_all_procs, p_count, p_infect)
 
   scanners_finish_scan(scan_engine, f_count, f_infect, p_count, p_infect)
