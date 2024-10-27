@@ -129,6 +129,7 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
   progress_bar_scan_file(scan_ctx.virt_scan_object)
   discard cl_scanfile_callback(cstring(scan_ctx.scan_object), addr(virname), addr(scanned), scan_ctx.clam.engine, addr(scan_ctx.clam.options), addr(scan_ctx))
 
+
 #[
   Check hidden node by d_name's comparison.
   Limitations:
@@ -137,7 +138,7 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
 ]#
 proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, scan_dir, current_node_name: string, next_node_name: var string) =
   if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
-    let full_node_path = if scan_dir.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
+    let full_node_path = if scan_dir.endsWith("/"): scan_dir & next_node_name else: scan_dir & "/" & next_node_name
     scan_ctx.file_infected += 1
     print_file_infected("Heur:Rootkit.HiddenOnDisk", full_node_path)
 
