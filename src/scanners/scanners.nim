@@ -34,13 +34,21 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_path_objects: seq[strin
 
   try:
     for each_scan_object in list_path_objects:
-      case getFileInfo(each_scan_object).kind
-      of pcDir:
-        fscanner_walk_dir_rec(file_scanner, each_scan_object, virname, scanned)
-      of pcLinkToDir:
-        fscanner_walk_dir_rec(file_scanner, each_scan_object, virname, scanned)
+      let current_type = getFileInfo(each_scan_object).kind
+      if current_type == pcDir or current_type == pcLinkToDir:
+        for each_path in walkDirRec(each_scan_object):
+          let path_type = getFileInfo(each_path).kind
+          if path_type == pcFile or path_type == pcLinkToFile:
+            fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
       else:
         fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
+      # case getFileInfo(each_scan_object).kind
+      # of pcDir:
+      #   fscanner_walk_dir_rec(file_scanner, each_scan_object, virname, scanned)
+      # of pcLinkToDir:
+      #   fscanner_walk_dir_rec(file_scanner, each_scan_object, virname, scanned)
+      # else:
+      #   fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
   except KeyboardInterrupt:
     return
   except:
