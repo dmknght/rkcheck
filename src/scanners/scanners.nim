@@ -12,6 +12,13 @@ proc handle_keyboard_interrupt() {.noconv.} =
   raise newException(KeyboardInterrupt, "Keyboard Interrupt")
 
 
+proc scanners_scan_dir(scan_ctx: var FileScanCtx, path_dir: string, virname: var cstring, scanned: var uint) =
+  for each_path in walkDirRec(path_dir):
+    let path_kind = getFileInfo(each_path).kind
+    if path_kind == pcFile or path_kind == pcLinkToFile:
+      fscanner_scan_file(scan_ctx, each_path, virname, scanned)
+
+
 proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_path_objects: seq[string], result_count, result_infect: var uint) =
   #[
     Job: walkDir and call scan
@@ -33,13 +40,12 @@ proc scanners_cl_scan_files*(scan_ctx: var ScanCtx, list_path_objects: seq[strin
   cl_engine_set_clcb_virus_found(file_scanner.clam.engine, fscanner_on_malware_found_clam)
 
   try:
+    # If provided target is a file or symlink to file, call file scan
+    # Else do walkDir
     for each_scan_object in list_path_objects:
       let current_type = getFileInfo(each_scan_object).kind
       if current_type == pcDir or current_type == pcLinkToDir:
-        for each_path in walkDirRec(each_scan_object):
-          let path_type = getFileInfo(each_path).kind
-          if path_type == pcFile or path_type == pcLinkToFile:
-            fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
+        scanners_scan_dir(file_scanner, each_scan_object, virname, scanned)
       else:
         fscanner_scan_file(file_scanner, each_scan_object, virname, scanned)
       # case getFileInfo(each_scan_object).kind

@@ -3,7 +3,7 @@ import os
 import engine_cores
 import bindings/[libyara, libclamav]
 import .. /cli/[progress_bar, print_utils]
-import posix
+# import posix
 
 
 #[
@@ -136,24 +136,24 @@ proc fscanner_scan_file*(scan_ctx: var FileScanCtx, scan_path: string, virname: 
     1. If file name is too long, we can't parse the name of next node
     2. If 2 hidden nodes are next to each other, 1 node is not going to be detected
 ]#
-proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, scan_dir, current_node_name: string, next_node_name: var string) =
-  if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
-    let full_node_path = if scan_dir.endsWith("/"): scan_dir & next_node_name else: scan_dir & "/" & next_node_name
-    scan_ctx.file_infected += 1
-    print_file_infected("Heur:Rootkit.HiddenOnDisk", full_node_path)
+# proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, scan_dir, current_node_name: string, next_node_name: var string) =
+#   if not isEmptyOrWhiteSpace(next_node_name) and next_node_name != current_node_name:
+#     let full_node_path = if scan_dir.endsWith("/"): scan_dir & next_node_name else: scan_dir & "/" & next_node_name
+#     scan_ctx.file_infected += 1
+#     print_file_infected("Heur:Rootkit.HiddenOnDisk", full_node_path)
 
-  # Get name of the next node
-  if ptr_dir.d_reclen >= 256:
-    # Name of current node is too long. We can't parse next_node_name, or we might have a crash
-    next_node_name = ""
-  else:
-    # d_reclen = len(current_node_name) + sizeof(chunk_bytes)
-    # Casting a string at next position can get the name of next node
-    if ptr_dir.d_name[ptr_dir.d_reclen] != '\x00':
-      # Fix heap overflow that cause false positive
-      next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
-    else:
-      next_node_name = ""
+#   # Get name of the next node
+#   if ptr_dir.d_reclen >= 256:
+#     # Name of current node is too long. We can't parse next_node_name, or we might have a crash
+#     next_node_name = ""
+#   else:
+#     # d_reclen = len(current_node_name) + sizeof(chunk_bytes)
+#     # Casting a string at next position can get the name of next node
+#     if ptr_dir.d_name[ptr_dir.d_reclen] != '\x00':
+#       # Fix heap overflow that cause false positive
+#       next_node_name = $cast[cstring](addr(ptr_dir.d_name[ptr_dir.d_reclen]))
+#     else:
+#       next_node_name = ""
 
 
 #[
@@ -166,50 +166,50 @@ proc fscanner_check_hidden_node(scan_ctx: var FileScanCtx, ptr_dir: ptr Dirent, 
 
   Linux's node types: https://www.gnu.org/software/libc/manual/html_node/Directory-Entries.html
 ]#
-proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname: var cstring, scanned: var uint) =
-  var
-    p_dir = opendir(cstring(scan_dir))
-    ptr_dir: ptr Dirent
-    next_node_name: string
-    current_node_name: string
-    full_node_path: string
+# proc fscanner_walk_dir_rec*(scan_ctx: var FileScanCtx, scan_dir: string, virname: var cstring, scanned: var uint) =
+#   var
+#     p_dir = opendir(cstring(scan_dir))
+#     ptr_dir: ptr Dirent
+#     next_node_name: string
+#     current_node_name: string
+#     full_node_path: string
 
-  while true:
-    ptr_dir = readdir(p_dir)
+#   while true:
+#     ptr_dir = readdir(p_dir)
 
-    if ptr_dir == nil:
-      # FIXME hidden file in last node will not be detected because of this break
-      break
+#     if ptr_dir == nil:
+#       # FIXME hidden file in last node will not be detected because of this break
+#       break
 
-    current_node_name = $cast[cstring](addr(ptr_dir.d_name))
+#     current_node_name = $cast[cstring](addr(ptr_dir.d_name))
 
-    # Linux's dir always have "." as current dir and ".." as parent DIR. Skip checking these 2 nodes
-    # TODO better handing with "..": in folders that has only 1 node (beside . and ..), it might be hidden by malware.
-    # Using ".." might be able to detect them (if d_reclen's logic can be fixed for the last node)
-    if current_node_name == "." or current_node_name == "..":
-      continue
+#     # Linux's dir always have "." as current dir and ".." as parent DIR. Skip checking these 2 nodes
+#     # TODO better handing with "..": in folders that has only 1 node (beside . and ..), it might be hidden by malware.
+#     # Using ".." might be able to detect them (if d_reclen's logic can be fixed for the last node)
+#     if current_node_name == "." or current_node_name == "..":
+#       continue
 
-    full_node_path = if scan_dir.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
+#     full_node_path = if scan_dir.endsWith("/"): scan_dir & current_node_name else: scan_dir & "/" & current_node_name
 
-    fscanner_check_hidden_node(scan_ctx, ptr_dir, scan_dir, current_node_name, next_node_name)
+#     fscanner_check_hidden_node(scan_ctx, ptr_dir, scan_dir, current_node_name, next_node_name)
 
-    case ptr_dir.d_type
-      of DT_DIR:
-        # Recursive walk. Current node is a folder so it should ends with "/"
-        fscanner_walk_dir_rec(scan_ctx, full_node_path & "/", virname, scanned)
-      of DT_REG:
-        # Regular file, call scan file
-        fscanner_scan_file(scan_ctx, full_node_path, virname, scanned)
-      of DT_LNK:
-        # Either link of file or link of dir. Must handle this
-        # if getSymlinkFileKind(full_node_path) == pcLinkToDir:
-        #   fscanner_walk_dir_rec(full_node_path & "/")
-        discard
-      of DT_UNKNOWN:
-        # The type is unknown. Only some filesystems have full support to return the type of the file, others might always return this value. Debug first
-        fscanner_scan_file(scan_ctx, full_node_path, virname, scanned)
-      else:
-        # DT_FIFO, DT_SOCK, DT_CHR (A character device), DT_BLK (A block device). Research first
-        discard
+#     case ptr_dir.d_type
+#       of DT_DIR:
+#         # Recursive walk. Current node is a folder so it should ends with "/"
+#         fscanner_walk_dir_rec(scan_ctx, full_node_path & "/", virname, scanned)
+#       of DT_REG:
+#         # Regular file, call scan file
+#         fscanner_scan_file(scan_ctx, full_node_path, virname, scanned)
+#       of DT_LNK:
+#         # Either link of file or link of dir. Must handle this
+#         # if getSymlinkFileKind(full_node_path) == pcLinkToDir:
+#         #   fscanner_walk_dir_rec(full_node_path & "/")
+#         discard
+#       of DT_UNKNOWN:
+#         # The type is unknown. Only some filesystems have full support to return the type of the file, others might always return this value. Debug first
+#         fscanner_scan_file(scan_ctx, full_node_path, virname, scanned)
+#       else:
+#         # DT_FIFO, DT_SOCK, DT_CHR (A character device), DT_BLK (A block device). Research first
+#         discard
 
-  discard p_dir.closedir()
+#   discard p_dir.closedir()
