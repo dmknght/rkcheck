@@ -109,7 +109,12 @@ proc fscanner_cb_file_inspection*(fd: cint, file_type: cstring, ancestors: ptr c
       else:
         ctx.virt_scan_object = ctx.scan_object & "//" & inner_file_name
 
-  discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
+  if file_size <= 1048576: # 1024 * 1024
+    # If object is small, use scan mem instead. This avoids remapping again. However, this could also break the metadata mapping
+    # discard yr_rules_scan_mem(ctx.yara.rules, file_buffer[0].unsafeAddr(), file_size, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
+    discard yr_rules_scan_mem(ctx.yara.rules, cast[ptr uint8](file_buffer[0].unsafeAddr()), file_size, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
+  else:
+    discard yr_rules_scan_fd(ctx.yara.rules, fd, SCAN_FLAGS_FAST_MODE, fscanner_on_malware_found_yara, context, YR_SCAN_TIMEOUT)
 
   if ctx.scan_result == CL_VIRUS:
     # FIX multiple files marked as previous signature. However, it might raise error using multiple callbacks to detect malware
