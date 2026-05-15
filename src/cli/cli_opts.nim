@@ -135,13 +135,13 @@ proc cliopts_get_options*(options: var ScanOptions): bool =
       of "--clam-debug":
         options.is_clam_debug = true
       of "--path-clamdb":
-        cliopts_set_db_path_clamav(options, i, total_params_count):
+        cliopts_set_db_path_clamav(options, i, total_params_count)
       of "--cldb": # Short alias of --path-clamdb
-        cliopts_set_db_path_clamav(options, i, total_params_count):
+        cliopts_set_db_path_clamav(options, i, total_params_count)
       of "--path-yaradb":
-        cliopts_set_db_path_yara(options, i, total_params_count):
+        cliopts_set_db_path_yara(options, i, total_params_count)
       of "--yrdb": # Short alias of --path-yaradb
-        cliopts_set_db_path_yara(options, i, total_params_count):
+        cliopts_set_db_path_yara(options, i, total_params_count)
       of "--scan-files":
         cliopts_set_list_files_or_dirs(options.list_path_objects, i, total_params_count)
       of "--scan-procs":
