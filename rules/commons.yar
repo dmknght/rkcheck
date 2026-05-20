@@ -75,21 +75,35 @@ rule ELF_AddRootToCrontab {
 }
 
 
-rule Shellcode_ObjName {
-  /*
-    Default shellcode loaders on internet will export keyword code or shellcode into symtab (global var only)
-    There is a false positive from yara name matching. Condition elf.symtab[i].name == "buf" matched
-    any object name contains "buf" like "xxxbuf"
-    False positive: /usr/lib/debug/.build-id/2e/5abcee94f3bcbed7bba094f341070a2585a2ba.debug
-    False positive /usr/lib/modules/5.16.0-12parrot1-amd64/kernel/drivers/accessibility/speakup/speakup.ko
-    */
+// rule Shellcode_ObjName {
+//   /*
+//     Default shellcode loaders on internet will export keyword code or shellcode into symtab (global var only)
+//     There is a false positive from yara name matching. Condition elf.symtab[i].name == "buf" matched
+//     any object name contains "buf" like "xxxbuf"
+//     False positive: /usr/lib/debug/.build-id/2e/5abcee94f3bcbed7bba094f341070a2585a2ba.debug
+//     False positive /usr/lib/modules/5.16.0-12parrot1-amd64/kernel/drivers/accessibility/speakup/speakup.ko
+//     */
+//   condition:
+//     elf_exec and for any f_sym in elf.symtab:
+//     (
+//       for any f_name in ("shellcode", "code"):
+//       (
+//         f_sym.type == elf.STT_OBJECT and
+//         f_sym.name == f_name
+//       )
+//     )
+// }
+
+
+rule Rootkit_Symbols {
+  // Merge dynsym detection from different rules for better performance
   condition:
-    elf_exec and for any f_sym in elf.symtab:
+    elf_magic and for 2 f_dynsym in elf.dynsym:
     (
-      for any f_name in ("shellcode", "code"):
+      f_dynsym.type == elf.STT_FUNC and
+      for any f_name in ("is_invisible_with_pids", "get_our_pids", "get_our_sockets", "check_is_our_proc_dir", "is_hidden_file", "is_attacker", "hide_tcp_ports", "fh_install_hooks", "port_hide", "hide_pid", "fake_map"):
       (
-        f_sym.type == elf.STT_OBJECT and
-        f_sym.name == f_name
+        f_dynsym.name == f_name
       )
     )
 }
@@ -125,12 +139,13 @@ rule ELF_SuspiciousSegment {
     (
       s.type == elf.PT_LOAD and
       (
-        s.flags == 5 and // PF_R | PF_X
-        math.entropy(s.offset, s.file_size) >= 7.6
-      ) or
-      (
+        s.flags == 7 and
         not defined elf.dynsym_entries and
         not defined elf.symtab_entries
+      ) or
+      (
+        s.flags == 5 and // PF_R | PF_X
+        math.entropy(s.offset, s.file_size) >= 7.6
       )
     )
 }

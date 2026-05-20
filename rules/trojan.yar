@@ -210,15 +210,7 @@ rule SSHDoor_Generic {
     $ = "backdoor.h" fullword ascii
     $ = "backdoor_active" fullword ascii
   condition:
-    elf_magic and
-    (
-      for 1 f_dynsym in elf.symtab:
-      (
-        f_dynsym.name == "backdoor_active" and
-        f_dynsym.type == elf.STT_OBJECT
-      ) or
-      all of them
-    )
+    elf_magic and all of them
 }
 
 
@@ -522,18 +514,7 @@ rule Exploit_DirtyCow {
     $ = "ptrace %d" fullword ascii
     $ = "DON'T FORGET TO RESTORE!" ascii
   condition:
-    elf.type == elf.ET_EXEC and
-    (
-      for 6 f_dynsym in elf.dynsym:
-      (
-        for any f_name in ("crypt", "madvise", "ptrace", "waitpid", "getpass", "pthread_create"):
-        (
-          f_dynsym.type == elf.STT_FUNC and
-          f_dynsym.name == f_name
-        )
-      ) or
-      all of them
-    )
+    elf.type == elf.ET_EXEC and all of them
 }
 
 // TODO 1384790107a5f200cab9593a39d1c80136762b58d22d9b3f081c91d99e5d0376 (upx)
