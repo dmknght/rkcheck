@@ -121,6 +121,18 @@ rule ShellCmd_AddUser {
 }
 
 
+rule ELF_NoMetadata {
+  condition:
+    (elf_exec or elf_dyn) and
+     not defined elf.dynsym_entries and
+     not defined elf.dynamic_section_entries and
+     not defined elf.symtab_entries and
+     (
+         elf.number_of_sections == 0 or not defined elf.entry_point
+     )
+}
+
+
 // rule ShellCmd_DropByWget {
 //   // meta:
 //   //   description = "Bash commands to download and execute binaries using wget"
