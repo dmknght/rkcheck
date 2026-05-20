@@ -132,6 +132,16 @@ rule ELF_NoMetadata {
      )
 }
 
+rule ELF_SegmentEntropy {
+  condition:
+    elf_magic and for any s in elf.segments:
+    (
+      s.type == elf.PT_LOAD and
+      s.flags == 5 and // PF_R | PF_X
+      math.entropy(s.offset, s.offset + s.file_size) >= 7.6
+    )
+}
+
 
 // rule ShellCmd_DropByWget {
 //   // meta:
