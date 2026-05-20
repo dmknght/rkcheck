@@ -193,13 +193,13 @@ proc init_yara*(yara_engine: var YrEngine, loaded_sigs: var uint, db_path: strin
   if not load_custom_yara_rules(yara_engine, db_path):
     return ERROR_COULD_NOT_OPEN_FILE
 
+  discard yr_set_configuration(YR_CONFIG_STACK_SIZE, addr(stack_size))
+  discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(max_strings_per_rule))
   loaded_sigs = uint(yara_engine.rules.num_rules)
 
   print_yara_version()
   print_loaded_signatures(loaded_sigs, true)
 
-  discard yr_set_configuration(YR_CONFIG_STACK_SIZE, addr(stack_size))
-  discard yr_set_configuration(YR_CONFIG_MAX_STRINGS_PER_RULE, addr(max_strings_per_rule))
   return result
 
 
