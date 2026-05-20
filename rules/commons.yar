@@ -95,22 +95,6 @@ rule Shellcode_ObjName {
 }
 
 
-rule Shellcode_SegmentRWX {
-  /*
-    Detect binaries that has LOAD segment that has RWE permission
-    reference = "https://github.com/tenable/yara-rules/blob/master/generic/elf_format.yar#L3"
-    reference = "https://www.tenable.com/blog/hunting-linux-malware-with-yara"
-    License: No License detected
-  */
-  condition:
-    elf_magic and for any f_segment in elf.segments:
-    (
-      f_segment.type == elf.PT_LOAD and
-      f_segment.flags == 7 // R+W+X. Sample of Meterpreter has only 1 segment. Need to check for False positive
-    )
-}
-
-
 rule ShellCmd_AddUser {
   // meta:
   //   description = "Bash commands to add new user to passwd"
@@ -128,17 +112,42 @@ rule ELF_NoMetadata {
      not defined elf.dynamic_section_entries and
      not defined elf.symtab_entries and
      (
-         elf.number_of_sections == 0 or not defined elf.entry_point
+        elf.number_of_sections == 0 or
+        not defined elf.number_of_sections or
+        not defined elf.entry_point
      )
 }
 
-rule ELF_SegmentEntropy {
+
+rule ELF_SuspiciousSegment {
   condition:
     elf_magic and for any s in elf.segments:
     (
       s.type == elf.PT_LOAD and
-      s.flags == 5 and // PF_R | PF_X
-      math.entropy(s.offset, s.offset + s.file_size) >= 7.6
+      (
+        s.flags == 5 and // PF_R | PF_X
+        math.entropy(s.offset, s.file_size) >= 7.6
+      ) or
+      (
+        not defined elf.dynsym_entries and
+        not defined elf.symtab_entries
+      )
+    )
+}
+
+
+rule Packer_Ezuri {
+  strings:
+    $s = {5a 4c 49 42}
+  condition:
+    // Yara has a bug invalid field name "size" when compile with first syntax
+    // elf_magic and for any s in elf.sections (
+    //   $s at s.offset and math.entropy(s.offset, s.size) >= 7.6
+    // )
+    elf_magic and for any i in (0 .. elf.number_of_sections - 1):
+    (
+      $s at elf.sections[i].offset and
+      math.entropy(elf.sections[i].offset, elf.sections[i].size) >= 7.6
     )
 }
 
