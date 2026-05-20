@@ -13,8 +13,6 @@ mktmp:
 	mkdir -p build/release/databases
 	# Create tmp folder for cache
 	mkdir -p build/nimcache
-	# Create bundles for libs
-	# mkdir -p build/libs
 
 signatures: mktmp
 	# Compile Yara signatures
@@ -23,6 +21,14 @@ signatures: mktmp
 build: signatures
 	# Compile main file
 	$(NIM_CC) $(CLAM_DEPS) $(YR_DEPS) --out:build/release/rkscanmal src/rkscanmal.nim
+
+build-bundle: build
+	# Copy runtime libs to build folder.
+	# Possibly re-use library can cause license violation due to re-use binary. This is testing only
+	mkdir -p build/release/libs/
+	# Use export LD_LIBRARY_PATH="./libs:$LD_LIBRARY_PATH"
+	# Then run ./rkscanmal
+	ldd build/release/rkscanmal | grep -oP '(?<=> )/[^ ]+' | xargs -I{} cp -L {} build/release/libs/.
 
 install:
 	mkdir -p /usr/share/rkcheck/
