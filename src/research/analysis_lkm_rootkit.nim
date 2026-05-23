@@ -39,7 +39,7 @@ iterator read_single_lines(log_path: string): string =
       break
 
 
-proc is_in_module_order(module_name: string): bool =
+proc is_in_kernel_symbols(module_name: string): bool =
   # Cmp with many symbols and aliases in kernel
   # Possibly a little bottleneck because of how the function works.
   # However, if it works, it works. This is the only method so far
@@ -52,18 +52,23 @@ proc is_in_module_order(module_name: string): bool =
   let kernel_path = "/lib/modules/" & $cast[cstring](addr(kernel_name.release[0]))
 
   # Check /lib/modules/$(uname -r)/modules.order
-  for line in lines(kernel_uname & "/modules.order"):
+  for line in lines(kernel_path & "/modules.order"):
     if line.endsWith("/" & module_name & ".ko"):
       return true
 
   # Check /lib/modules/$(uname -r)/modules.alias
-  for line in lines(kernel_uname & "/modules.alias"):
+  for line in lines(kernel_path & "/modules.alias"):
     if line.endsWith(" " & module_name):
       return true
 
   # Check /lib/modules/$(uname -r)/modules.symbols
-  for line in lines(kernel_uname & "/modules.symbols"):
+  for line in lines(kernel_path & "/modules.symbols"):
     if line.endsWith(":" & module_name) or line.endsWith(" " & module_name):
+      return true
+
+  # Check in /proc/modules
+  for line in lines("/proc/modules"):
+    if line.startsWith(module_name & " "):
       return true
 
   return false
@@ -102,7 +107,7 @@ proc read_kernel_tracing_funcs(sus_modules: var seq[string]) =
       module_name.removePrefix('[')
       module_name.removeSuffix(']')
 
-      if not is_in_module_order(module_name):
+      if not is_in_kernel_symbols(module_name):
         fast_show = module_name
         echo line
         if module_name notin sus_modules:
