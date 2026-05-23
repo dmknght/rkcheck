@@ -40,16 +40,30 @@ iterator read_single_lines(log_path: string): string =
 
 
 proc is_in_module_order(module_name: string): bool =
-  # Fixme: still having false positives of nf_reject_ipv6, kvm, ...
+  # Cmp with many symbols and aliases in kernel
+  # Possibly a little bottleneck because of how the function works.
+  # However, if it works, it works. This is the only method so far
+  # False postive (?) dm_mirror
   var
     kernel_name: Utsname
 
-  discard uname(kernel_name) # If return != 0 -> # Error! Maybe handle this by reading /proc/sys/kernel/osrelease?
-  let module_path = "/lib/modules/" & $cast[cstring](addr(kernel_name.release[0])) & "/modules.alias"
+  # If return != 0 -> # Error! Maybe handle this by reading /proc/sys/kernel/osrelease?
+  discard uname(kernel_name)
+  let kernel_path = "/lib/modules/" & $cast[cstring](addr(kernel_name.release[0]))
 
-  for line in lines(module_path):
-    # if line.endsWith("/" & module_name & ".ko"): # This one checks /lib/modules/$(uname -r)/modules.order
-    if line.endsWith(" " & module_name): # /lib/modules/$(uname -r)/modules.alias
+  # Check /lib/modules/$(uname -r)/modules.order
+  for line in lines(kernel_uname & "/modules.order"):
+    if line.endsWith("/" & module_name & ".ko"):
+      return true
+
+  # Check /lib/modules/$(uname -r)/modules.alias
+  for line in lines(kernel_uname & "/modules.alias"):
+    if line.endsWith(" " & module_name):
+      return true
+
+  # Check /lib/modules/$(uname -r)/modules.symbols
+  for line in lines(kernel_uname & "/modules.symbols"):
+    if line.endsWith(":" & module_name) or line.endsWith(" " & module_name):
       return true
 
   return false
