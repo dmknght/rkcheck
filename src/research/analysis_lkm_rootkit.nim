@@ -2,6 +2,14 @@ import strutils
 import posix
 
 
+var
+  kernel_name: Utsname
+
+# If return != 0 -> # Error! Maybe handle this by reading /proc/sys/kernel/osrelease?
+discard uname(kernel_name)
+let kernel_path = "/lib/modules/" & $cast[cstring](addr(kernel_name.release[0]))
+
+
 proc fileno(f: File): cint {.importc, header: "<stdio.h>".}
 
 
@@ -44,12 +52,6 @@ proc is_in_kernel_symbols(module_name: string): bool =
   # Possibly a little bottleneck because of how the function works.
   # However, if it works, it works. This is the only method so far
   # False postive (?) dm_mirror
-  var
-    kernel_name: Utsname
-
-  # If return != 0 -> # Error! Maybe handle this by reading /proc/sys/kernel/osrelease?
-  discard uname(kernel_name)
-  let kernel_path = "/lib/modules/" & $cast[cstring](addr(kernel_name.release[0]))
 
   # Check /lib/modules/$(uname -r)/modules.order
   for line in lines(kernel_path & "/modules.order"):
@@ -74,6 +76,19 @@ proc is_in_kernel_symbols(module_name: string): bool =
   return false
 
 
+proc find_module_loc(sus_modules: seq[string]) =
+  #[
+    Find in /lib/modules/$(uname -r)/modules.dep
+    FIXME: looks like this one contains relative path only
+  ]#
+  echo "[*] Finding locations of suspicious modules"
+
+  for line in lines(kernel_path & "/modules.dep"):
+    for sus_name in sus_modules:
+      if line.contains("/" & sus_name & ".ko"):
+        echo line
+
+
 proc read_kernel_tracing_funcs(sus_modules: var seq[string]) =
   #[
     Read and get functions from /sys/kernel/tracing/available_filter_functions
@@ -82,8 +97,13 @@ proc read_kernel_tracing_funcs(sus_modules: var seq[string]) =
     trustable source to analysis later
     Todo: count module and count function?
   ]#
+  echo "[*] Finding suspicious modules from kernel tracing"
 
   let path = "/sys/kernel/tracing/available_filter_functions"
+
+  if access(cstring(path), R_OK) != 0:
+    echo "[x] Failed to read from kernel FS"
+
   var
     fast_skip = ""
     fast_show = ""
@@ -120,6 +140,8 @@ proc analysis_syslog(): seq[string] =
   # Instead of static log file, this tool tries to read from kmsg "channel"
   # which should work globally with other distro.
   # Template code. Should be changed later with more case to cover
+  echo "[*] Finding suspicious modules from syslog"
+
   let log_path = "/dev/kmsg"
 
   if access(cstring(log_path), R_OK) != 0:
@@ -136,3 +158,4 @@ proc analysis_syslog(): seq[string] =
 
 var sus_modules = analysis_syslog()
 read_kernel_tracing_funcs(sus_modules)
+find_module_loc(sus_modules)
