@@ -39,16 +39,8 @@ iterator read_single_lines(log_path: string): string =
       break
 
 
-proc is_module_in_sus(log: string, sus_modules: seq[string], fast_show: var string): bool =
-  for each_module in sus_modules:
-    if log.endsWith(each_module & "]"):
-      fast_show = each_module
-      return true
-
-  return false
-
-
 proc is_in_module_order(module_name: string): bool =
+  # Fixme: still having false positives of nf_reject_ipv6, kvm, ...
   var
     kernel_name: Utsname
 
@@ -57,7 +49,7 @@ proc is_in_module_order(module_name: string): bool =
 
   for line in lines(module_path):
     # if line.endsWith("/" & module_name & ".ko"): # This one checks /lib/modules/$(uname -r)/modules.order
-    if line.endsWith(" " & module_name & " "): # /lib/modules/$(uname -r)/modules.alias
+    if line.endsWith(" " & module_name): # /lib/modules/$(uname -r)/modules.alias
       return true
 
   return false
@@ -92,14 +84,11 @@ proc read_kernel_tracing_funcs(sus_modules: var seq[string]) =
       fast_skip = ""
       fast_show = ""
       # Analysis module in sus
-      if sus_modules.len > 0 and is_module_in_sus(line, sus_modules, fast_show):
-        echo line
-        continue # Fix duplicate output line
-      # Analysis hidden module.
       var module_name = line.split(" ")[1]
       module_name.removePrefix('[')
       module_name.removeSuffix(']')
-      if is_in_module_order(module_name):
+
+      if not is_in_module_order(module_name):
         fast_show = module_name
         echo line
         if module_name notin sus_modules:
